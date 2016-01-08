@@ -1,0 +1,7 @@
+1. Ability.assignVariables(): add the cost/duration to the switch-case;
+2. If it's a passive ability: add the corresponding effect to Person.affect();
+3. Add the 60x60 power/effect icon to /resources/images/icons/<Ability Name>.png;
+4. Add the ability to Main.useAbility();
+5. If needed, add the ability to Main.updateTargeting();
+6. If needed, add the targeting type to Main.drawTarget();
+7. If needed, add the visual effect to VisualEffect.draw() and VisualEffect.update();

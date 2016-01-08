@@ -1,0 +1,41 @@
+MOVEMENT
+
+A - move left
+D - move right
+W - move up
+S - move down
+
+POWERS
+
+Tab - pause game + open hotkey switching menu
+Mid-click, Shift, Q, E, R, F, V, C, X, Z - hotkeys
+Right-click - stop aiming/using currently aimed/used power
+Left-click - stop rotating with a maintained power (this is a 95% useless key)
+<Scroll> - select a power for which you can see the range
+
+CAMERA CONTROL
+
+Ctrl+<Scroll> - zoom in/out
+O+<Scroll> - rotate clockwise/anti-clockwise
+Alt+<Scroll> - rescale UI
+
+DEV TOOLS
+
+F1 - enable dev-mode vision (See hitboxes, etc.)
+K - randomize all peoples' looks
+1 - create earth wall
+2 - create ice wall
+3 - create spike pit
+4 - create lava pool
+5 - create acid pool
+6 - create ice puddle
+0 - remove wall/pool
+
+OTHER
+
+F2 - disable/enable damage numbers
+F12 - take screenshot*
+Backspace - restart
+Escape - exit
+
+*NOTE: screenshots will be saved (if possible) in the game file's directory, with the name "screenshot yyyy-MM-dd HH-mm-ss" with the appropriate date and time.
