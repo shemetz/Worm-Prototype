@@ -1,0 +1,1418 @@
+﻿Punch (Activated)
+offensive damaging pushing cost
+Thrust your curled palm forward towards a hostile object, with the intent of colliding with it and applying a strong force to the targeted area.
+Punch. The range of the punch is 1.4 * your width (0.5 meters for almost all people). Enemies hit by the punch are dealt STR*1 Blunt damage, and STR*1.5 pushback.
+Cooldown (time between punches): 0.55 seconds, minus 0.02*FIT (maximum -0.15).
+Cost: 1 Stamina.
+
+
+Sprint (On/Off)
+on-off escape continuous-cost
+Run twice as fast, consuming thrice as much mana.
+While on, your run speed and run acceleration are multiplied by 2, but the stamina consumption for running (usually 0.6 S/s) is multiplied by 3 (1.8 S/s)
+
+
+Elemental Combat I (Passive) <Element>
+passive extra-abilities
+Attack with <e>.
+You can use Ball, Beam, and Shield with your element. 
+Note: Effects such as freezing, burning, extra damage or slipping have a 15% chance of occurring with any attack, and 75% of occurring when in contact with a pool and 95% of occurring when using Strike.
+
+
+Elemental Combat II (Passive) <Element>
+passive extra-abilities
+Attack with <e> in many different ways.
+You can use Ball, Beam, Shield, Wall, Spray, Strike, and Pool with your element. 
+
+
+Charged Elemental Combat (Passive) <Element>
+passive extra-abilities
+Use charged <e> attacks.
+Have Charge Ball <Element> and Charge Beam <Element>.
+
+
+Ball (Activated) <Element>
+offensive damaging pushing projectile cooldown aim cost
+Create a ball of <e> and throw it with force towards a target.
+Deals normal damage with an extra 1 pushback. 
+Costs 1 M/s, while attacking.
+
+
+Beam (Maintained) <Element>
+offensive damaging pushing beam aim continuous-cost
+Shoot a continuous beam of <e>.
+Deals the same amount of damage but continuously (every 0.2 seconds, damage is damage*attackRate*0.04), instead of every X seconds. Hits immediately.
+Costs 1 M/s while attacking.
+NOTE:  Plant-Beams are completely different. Vines are shot, like an infinitely increasing line, until the person can't shoot anymore (lack of \mana) and they are destroyed, or when they latch onto a person. If the vine reaches its full range, it will retract.
+When vines hit an enemy with their end they're "grabbling" it. While grabbling an enemy, there is a fixed-length vine stretching between the vine creator and the grabbled person.
+Grabbled enemies are damaged by the vine at 0.5*points damage every 0.5 seconds. The vine now acts as a one-sided spring: When one of the people tries to move away from the vine, it stretches and draws them back, more strongly the more it stretches. The creator of the vine has increased control over the vine - they functionally have double the mass, in regards to pulling it. They are also able to move the vine sideways, virtually rotating the grabbled enemy around them (more easily the closer they are).
+When a vine is dealt enough damage or the creator stops using it, it drops to the floor. 
+
+
+Shield (Maintained) <Element>
+defensive shield cost continuous-cost cooldown
+Create a temporary <e> shield to block ranged attacks.
+Maintain a force-field-like shield suspended in the air in front of you, blocking 90 degrees. While maintaining a shield you cannot attack, and attacks that hit the shield damage it until it breaks. The shield takes 1.5 seconds to deploy from 0 to 10*Level health (and grow in size).
+Cooldown of 2 seconds.
+Costs 3 mana to deploy, and then 0.2 M/s to maintain.
+
+
+Spray (Attack mode) <Element>
+offensive damaging pushing continuous-cost range
+Spray <e> in a wide arc in front of you, hitting many targets at once.
+Deals half damage and half pushback on average, to every target in short range and a 120 degree arc. It acts like many short beams, randomly fluctuating and rotating in the field. Since the beams randomly rotate, it isn’t accurate and is not very useful against less than 3 targets.
+Costs 1 M/s while attacking.
+
+
+Strike (Activated) <Element>
+offensive damaging pushing cost
+Strike with <an e> fist.
+A melee-attack that deals regular melee-attack damage, plus the elemental damage of a ball attack, and same pushback. Strikes will usually cause the element’s effects, if it has any. The cooldown for strikes is 1.5 seconds.
+Costs 2 mana in addition to a normal Punch’s stamina cost.
+
+
+Elemental Resistance (Passive) <Element>
+passive
+You are resistant to <e>.
+Can only be granted if the Element is Fire, Lava, Acid, Electricity or Energy. 
+<e>’s damage type dealt to you is multiplied by 0.75^Level. Armor is still affected by the element.
+
+
+Absorb Element (Passive) <Element>
+passive steal
+You can absorb <e> to rejuvenate yourself.
+Can only be granted if the Element is Fire, Lava, Acid, Electricity or Energy.
+Damage dealt to you by element sources of your element, instead of damaging you, restores 10*Level percentage mana and 10*Level percentage life. These percentages are from the damage not-dealt by the attack. Armor is still affected by the damage.
+
+
+Charge Ball (Activated) <Element>
+charge offensive damaging pushing projectile cooldown aim cost
+Charge to create a ball of <e> and throw it with force towards a target.
+Charge for 4 seconds, and then switch to Ball attack mode and gain triple damage for the next ball.
+Costs 2 Mana.
+
+
+Charge Beam (Maintained) <Element>
+charge offensive damaging pushing beam aim continuous-cost
+Shoot a weak beam that grows stronger the more you use it continuously.
+Same as Beam, but the beam you shoot deals 50% damage which increases by 20% every second, to a maximum of 150% damage (same goes for pushback)
+Costs just like a beam.
+
+
+Exploding Ball (Activated) <Element>
+explosion offensive damaging pushing projectile cooldown aim cost
+Create an explosive ball of <e> and throw it with force towards a target.
+Deals normal damage, and explodes immediately, creating an elemental explosion with r = 5, d = twice the ball’s normal damage, p = twice the ball’s normal pushback.
+Costs 2 M/s, while attacking.
+
+
+Sense Parahumans (Passive)
+passive sense range
+Know where there are parahumans.
+See marks where other Parahumans are, to a long range of 0.5 * 3^Level meters.
+
+
+Sense Life (Passive)
+passive sense range
+Know how injured creatures are.
+See health bars on living creatures within a range of 0.5 * 2^Level meters.
+
+
+Sense Structure (Passive)
+passive sense range
+Feel how the world is shaped around you.
+See silhouettes of walls within a range of 0.5 * 2^Level meters.
+
+
+Sense Mana and Stamina (Passive)
+passive sense range
+Know how tired creatures are.
+See mana and stamina bars on living creatures within a range of 0.5 * 2^Level meters.
+
+
+Danger Sense (Passive)
+passive sense
+Feel when you’re in danger.
+Get a bonus to evasion, which becomes greater when you’re not in combat (remember, combat starts after the first attack). Also, be able to sense “abstract danger” when there is a very strong cape or a Class S threat within 1 Km.
+
+
+Sense Powers (On/Off)
+on-off sense range
+Sense the powers of parahumans.
+See a vague representation of the element distribution of the sum of capes around you. The graph that you see has a degree of variation (gaussian) and is updated every 5 seconds. Your range is 0.5 * 2^Level.
+
+
+Sense Element (Passive) <Element>
+passive sense range
+Sense where <e> exists, and people with <e> powers.
+See silhouettes of capes with your elemental power, walls/pools of your element or creatures under your element’s effect, and know how hurt they are. The range is 0.5 * 3^Level. Sense Element <Earth> allows you to also have Sense Structure! Yup!
+
+
+Clairvoyance (Maintained)
+todo sense range continuous-cost
+See EVERYTHING (in your range).
+Combine Sense Parahumans, Sense Life, Sense Mana and Stamina, Sense Powers, Danger Sense, Sense Structure. Your range is 3^Level.
+Costs 2 M/s to maintain, and cannot be activated with less than 90% mana or deactivated with more than 60% mana. If it is not deactivated before you run out of mana, it will start using HP, draining 5 HP/s.
+
+
+Sense Movement (Passive)
+passive sense range
+Sense movements.
+See hidden or out-of-view creatures, as long as they are moving, to a long range of 3^Level meters.
+
+
+Sensibility (Passive)
+passive extra-abilities
+Your extra senses keep changing.
+You have two random Sense powers, which are randomized every 5 minutes. Their Level is equal to this power’s Level.
+
+
+Strength I (Passive)
+passive stat-boost
+You are strong.
+Gain a bonus to your Strength stat equal to Level, and to your Fitness stat a bonus of 1.
+
+
+Strength II (Passive)
+passive stat-boost
+You are very strong.
+Gain a bonus to your Strength stat equal to 2*Level, and to your Fitness stat a bonus of 2.
+
+
+Strength III (Passive)
+passive stat-boost
+You are really, REALLY strong. Nobody needs that much strength, but you have it.
+Gain a bonus to your Strength stat equal to 2^Level, and to your Fitness stat a bonus of 0.5*Level (rounded up). Strongest cape, a cape who’s got Strength III Level 10, has ~1027 STR and can lift about 25 cars at once. This cape can easily kill an average person with a punch, and can jump...500 meters up?. Basically, any cape with Strength III has >100 STR and will have a very interesting life.
+
+
+Critical Thinking (Passive)
+passive sub-stat-boost
+You can see the enemy’s weak spots and target them for increased damage.
+Multiply your (1-critical chance) by 0.9^(Level).
+
+
+Exploding Fists (Passive)
+passive explosion extra-abilities
+Each of your punches creates an explosion, to which you are immune.
+You have Explosion Resistance. Melee hits with your punches create an explosion that deals 4*Level damage and 4*Level pushback force to the target and anything in a 1 meter radius from you.
+
+
+Elemental Fists (Passive) <Element>
+passive damage
+Your punches are infused with <e>.
+Each of your punches deals an additional Level damage, and has a 15% chance to cause an additional (elemental) effect.
+
+
+Pushy Fists (Passive)
+passive level-up
+Your fists push enemies harder, and you can’t be pushed easily.
+Your fists’ pushback is multiplied by 2 and pushback you receive is divided by 2.
+You also get +0.5*Level Strength.
+
+
+Shattering Fists (Passive)
+passive level-up
+Your punches have a chance to shatter force fields.
+Each of your punches that hit a force field has a 25%*Level chance to deal x10 damage to the field.
+
+
+Sapping Fists (Passive)
+passive duration level-up
+Your punches sometimes disable enemy powers.
+Each of your punches has a 10%*Level chance to disable the enemy’s powers for 1 second.
+
+
+Vampiric Fists (Passive)
+passive steal
+Your punches steal the enemy’s life force.
+Each of your punches, if it damages the enemy, will give you 20%*Level of the life removed from them.
+
+
+Wound Regeneration I (Passive)
+passive sub-stat-boost
+Your regenerate your wounds.
+Your life regeneration gains a bonus of Level life/sec.
+
+
+Wound Regeneration II (Passive)
+passive sub-stat boost
+Your regenerate your wounds quickly.
+Your life regeneration gains a bonus of 2*Level life/sec.
+
+
+Energy Regeneration I (Passive)
+passive sub-stat-boost
+Your regenerate your mana and stamina.
+Your mana and stamina regenerations gain a bonus of 0.5*Level M/sec or S/sec.
+
+
+Energy Regeneration II (Passive)
+passive sub-stat-boost
+Your regenerate your mana and stamina quickly.
+Your mana and stamina regenerations gain a bonus of 1.5*Level M/sec or S/sec.
+
+
+Body Regeneration (Passive)
+passive sub-stat-boost
+Your regenerate your body very quickly.
+Your life regeneration gains a bonus of 4*Level life/sec, and your mana and stamina regenerations gain a bonus of 2*Level M/sec or S/sec.
+
+
+Armor Regeneration (Passive)
+passive level-up
+Your armor slowly builds itself.
+Your armor regenerates until it is 100% again, at the rate of 0.3%*Level/s.
+
+
+Kinetic Regeneration (Passive)
+passive level-up
+You regenerate your wounds any time you move.
+Gain the effect of Wound Regeneration, except the rate of regeneration is multiplied by your current velocity relative to the ground divided by your maximum running speed, so that while moving normally you regenerate at x(1 + 0.05*Level) times the rate of regular regeneration. Regenerate faster if speed is more than maximum running speed, to a max of x(2+0.1*Level) times.
+
+
+Extradimensional Body (Passive)
+passive level-up
+Your body exists in another dimension, and you can regenerate wounds by drawing from the other dimension’s body, but only so much before it disappears.
+Your max life is doubled, and you gain a bonus of 2*Level life regeneration but only until you regenerate an amount equal to your max life limit. Afterwards your rate of regeneration is twice the default one (=0.2 HP/s, out of battle). (In the code, you have two life bars that each regenerate at default speed, but the “fake” one also automatically moves health to the “real” one at a rate of default+2*Level.)
+
+
+Flight I (On/Off)
+on-off flight continuous-cost
+You can fly!
+Be able to fly at your regular speed*Level.
+Flying costs 5-Level S/s. 
+
+
+Flight II (On/Off)
+on-off flight
+You can fly fast!
+Be able to fly at your regular speed*3*Level.
+Flying costs 0.4 S/s.
+
+
+Telekinetic Flight (On/Off + Passive)
+on-off flight
+You are a master of flight!
+Be able to fly at your regular speed*9*Level. In addition, you gain 50% immunity to pushback, +20% evasion chance and +2 to Strength.
+
+
+Chemtrail (On/Off)
+on-off level-up cooldown cost
+Leave <an e> trail behind you.
+While flying, drop an elemental Ball with level=Level+2 underneath you every 1 second, in the direction you are flying but with half your speed.
+While this is active, it costs 1 Mana per ball.
+
+
+Precision I (Passive)
+passive level-up
+Your shots and strikes are pretty spot-on.
+Your (1-accuracy) is multiplied by 0.9^Level. You also gain +Level Dexterity.
+
+
+Precision II (Passive)
+passive level-up
+Your shots and strikes are very accurate.
+Your (1-accuracy) is multiplied by 0.8^Level. You also gain +2*Level Dexterity.
+
+
+Precision III (Passive)
+passive level-up
+Your aim is perfect.
+passive stat-boost
+Your accuracy is 1. You also gain +3*Level Dexterity. Can hit anything in range except for targets with evasion = 1.
+
+
+Evasion I (Passive)
+passive level-up
+You can evade attacks easily.
+Your (1-evasion) is multiplied by 0.9^Level. You also gain +Level Dexterity.
+
+
+Evasion II (Passive)
+passive level-up
+Your evasion is phenomenal.
+Your (1-evasion) is multiplied by 0.8^Level. You also gain +2*Level Dexterity.
+
+
+Evasion III (Passive)
+passive level-up
+Every single attack seems to miss you.
+Your evasion is 1. You also gain +3*Level Dexterity. Can only be hit by unavoidable attacks.
+
+
+Dexterousness (Passive)
+passive stat-boost
+You are...dextrous. Your dexterity levels are...high.
+Gain +5*Level Dexterity.
+
+
+Toughness I (Passive)
+passive sub-stat-boost
+You are tougher than normal humans; you have more HP than them.
+Gain a bonus to life max equal to 20*Level.
+
+
+Toughness II (Passive)
+passive sub-stat-boost
+You are really tough.
+Gain a bonus to life max equal to 40*Level.
+
+
+Toughness III (Passive)
+passive sub-stat-boost
+You have so much HP that it’s probably unhealthy.
+Gain a bonus to life max equal to 100*Level.
+
+
+Elemental Armor I (Activated) <Element>
+armor cost
+Create <an e> armor surrounding most of your body and protecting you from attacks.
+Create a temporary armor which lasts for 60 seconds. The armor has an Armor Rating of 3*Level and deals elemental damage to anything that touches it, with 5*Level% chance for effect.
+Costs Level Mana to create.
+
+
+Elemental Armor II (Activated) <Element>
+armor cost
+Create a tough <e> armor surrounding most of your body and protecting you from attacks.
+Create a temporary armor which lasts for 60 seconds. The armor has an Armor Rating of 4*Level and deals elemental damage to anything that touches it, with 7*Level% chance for effect.
+Costs Level Mana to create.
+
+
+Elemental Armor III (Activated) <Element>
+armor
+Create a very tough <e> armor surrounding your body and protecting you from attacks.
+Create a temporary armor which lasts for 60 seconds. The armor has an Armor Rating of 6*Level and deals elemental damage to anything that touches it, with 9*Level% chance for effect.
+Also, while the armor is active you gain 50% critical damage reduction.
+Costs Level Mana to create.
+
+
+Absorb Armor (Maintained)
+offensive steal continuous-cost
+Touch an enemy’s armor to absorb it and add it to your own.
+As long as an enemy in a range of 1 meter has non-natural armor, every second you steal 3*Level percent (of that armor’s maximum armor rating) or the armor’s armor rating and add it to your own armor’s armor rating. Note that this armor rating can’t be added to temporary armor - only permanent, physical armor.
+If your Level is 7 or more, you can also use this power on natural armor; you steal skin and add it to your own skin, thereby permanently increasing your natural armor and damaging the enemy’s. If your enemy has no more natural armor (skin) left, they will instead lose 3*Level percent of their current health every second.
+Costs 0.5*Level M/s while absorbing.
+
+
+Exploding Aura (Passive)
+passive explosion cooldown extra-abilities
+Whenever you are damaged, you explosively retreat.
+You have Explosion Resistance, and whenever you suffer damage, immediately activate Self-Bomb-like explosion.
+Cooldown (between explosions): 5/Level seconds
+
+
+Leg Muscles (Passive)
+passive sub-stat-boost
+You can run fast and jump high.
+Your maximum speed is increased by 0.5*Level m/s, and your acceleration by 10*Level m/s/s. Your jump height is increased by 1*Level meters.
+
+
+Speedrun (Passive)
+passive sub-stat-boost
+You can run really fast and jump really high.
+Your speed is increased by 1.5*Level m/s. Your acceleration is increased by 10*Level m/s/s. Your jump height is increased by 2*Level meters.
+
+
+Charge (Passive)
+passive level-up
+Push people aside while running, to damage them and make them fall.
+Gain a permanent +Level Strength. While running, every person you touch with less strength than you will be pushed perpendicular to your direction of movement 1+0.2*Level meters away, suffering 2*Level damage and falling to the ground. If you hit a person stronger than you, instead you will bounce backwards and lose your speed, in addition to falling and suffering 5 damage.
+
+
+Elastic (Passive)
+passive level-up
+Bounce off of walls and people.
+Gain a permanent +Level Strength. While trying to move (holding movement buttons), friction affects you much less but so do your feet while trying to change direction. While running, every person you touch with less strength than you will be pushed in your direction of movement 0.1*speed meter away, suffering 0.1*speed damage and falling to the ground. You yourself will bounce away, gaining an extra 2.5*Level% to your speed. If you hit a person stronger than you, You simply bounce away.
+You also bounce when hitting walls, again gaining an extra 2.5*Level% speed.
+
+
+Trail (On/Off)
+cost
+Leave <an e> trail behind you.
+While running, leave an elemental trail behind you every time you leave a grid square (maximum 1 per frame). The trail is made of 1x1 pools if the element is Water, Acid, Lava, Blood; made of 1x1 walls if the element is Metal, Ice, Earth; or made of level 1 elemental balls thrown backwards if the element is Fire, Wind, Electricity, Energy.
+While this is active, it costs 0.7-0.1*Level mana per wall/pool/ball (minimum 0).
+
+
+Blink (Activated)
+escape cost teleport cooldown
+Teleport a few meters ahead.
+Teleport Level meters forward, instantly. If anything blocks your way, you can’t Blink and no mana will be spent.
+Note: If Level is 1, you can’t Blink through walls, so the power is much weaker.
+Cooldown of Level/3 seconds.
+Costs 1+0.333*Level mana. (minimum 1)
+
+
+Teleport I (Activated)
+escape cost teleport cooldown
+Teleport somewhere in your line of sight.
+Teleport up to 3*Level meters to a place you can see and target.
+Cooldown of 8 seconds.
+Costs X/Level Mana, where X is the distance you traveled.
+
+
+Teleport II (Activated)
+escape cost teleport cooldown
+Teleport somewhere in your line of sight.
+Teleport up to 10*Level meters to a place you can see and target.
+Cooldown of 4 seconds.
+Costs X/Level^2 Mana (minimum 1M), where X is the distance you traveled.
+
+
+Teleport III (Activated)
+escape teleport cooldown
+Teleport somewhere in your line of sight.
+Teleport up to 100*Level meters to a place you can see and target. +can fast-travel.
+Cooldown of 2 seconds.
+Costs 0.5 Mana.
+
+
+Teleport Other (Activated)
+escape cost teleport cooldown
+Teleport someone or something somewhere else in your line of sight.
+Teleport a wall or a creature up to 10 Level meters away from their previous spot, to a place you can see and target.
+Cooldown of 13-Level seconds.
+Costs 11-Level Mana (minimum 1M).
+
+
+Portals (Activated)
+escape cost cooldown range
+Create two portals between two walls you can see and target.
+Create two portals on two walls. Every Portal’s size is 2x0 m (it’s on the side of two walls). Anything that passes through one portal exits the other, and momentum is conserved (from the POV of the portal-passer). IF anything destroys any of the walls, both portals disappear.
+Cooldown of 10-Level seconds.
+Costs 11-Level Mana.
+
+
+Teletrail (Passive) <Element>
+passive level-up
+Whenever you teleport, you leave <an e> blast behind you.
+Whenever you teleport, a (r = 3, d = 0.5*Level, p = 0.5*Level) explosion is created in the place you left. Whenever you go through a portal, an elemental spray will come out of the side you just entered from. These effects apply both when you teleport somebody else, and when you’re teleported by somebody else.
+
+
+Elemental Teleport (Activated) <Element>
+escape cost cooldown
+Teleport through <e>.
+Teleport up to 100 meters to an elemental ball, pool or wall you can see and target, replacing it. 
+Cooldown of 5-level/2 seconds (minimum 0).
+Costs 4-Level Mana. (Minimum 0)
+
+
+Trickst (Activated)
+escape cost cooldown
+Switch the positions of two creatures/objects.
+Target two creatures, balls or walls (lone walls) and switch their positions. You can target yourself.
+Cooldown of 10.5-Level seconds.
+Costs 11-Level Mana.
+
+
+Teleclone (Activated)
+escape teleport duration cooldown cost summon-many
+Teleport, and leave behind you a clone that remains for a few seconds.
+Teleport up to 10*Level meters to a place you can see and target. Create a Clone I effect with level = this power’s Level, and duration (lifetime) of 0.8*Level seconds.
+Cooldown of 4-0.3*Level seconds.
+Costs 8 - 0.5*Level M (minimum 1M).
+
+
+Ghost Mode I (Activated)
+escape cost duration
+You can temporarily become ethereal, and phase through most physical things.
+Become ethereal for as long as this is active. While ethereal, you cannot affect or be affected by physical objects or creatures, except for Shock and Burn damage. These deal x4 damage to you (That’s a lot of damage). Any ability you use while ethereal will be forever ethereal and will therefore only affect ethereal beings. You can’t use any of the Fire, Electricity etc. powers while ethereal.
+You can stay in Ghost Mode for Level seconds.
+Costs: 2*Level Mana.
+
+
+Ghost Mode II (Activated)
+escape cost duration
+You can temporarily become ethereal, and phase through most physical things.
+Become ethereal for as long as this is active. While ethereal, you cannot affect or be affected by physical objects or creatures, except for Shock and Burn damage. These deal x2 damage to you. Any ability you use while ethereal will be forever ethereal and will therefore only affect ethereal beings. You can’t use any of the Fire, Electricity etc. powers while ethereal.
+You can stay in Ghost Mode for 2*Level seconds.
+Costs: Level Mana.
+
+
+Ghost Weapons I (On/Off)
+on-off cost
+You can turn your weapons ethereal for a short duration, enough to help them pierce through armor.
+While this is active, every weapon attack you make with a non-fist weapon (knife, sword, axe, arrows, guns) will be ethereal until it hits a target or moves more than 50 m (weapons will be ethereal from the moment you use them to the moment after they hit).
+Costs 2 Mana per attack with the weapon.
+
+
+Ghost Weapons II (On/Off)
+on-off cost
+You can turn your weapons ethereal for a short duration, enough to help them pierce through armor, skin and bone, even through multiple enemies.
+While this is active, every weapon attack you make with a non-fist weapon (knife, sword, axe, arrows, guns) will get 100% armor piercing, its (1-critical chance) will be multiplied by 1/Level, and be ethereal until it moves more than 50 m. The weapon does not stop after hitting one enemy. AKA deadly piercing ethereal critical shot of misery.
+Costs 2-0.1*Level Mana per attack with the weapon.
+
+
+Ghost Evasion (Passive)
+passive level-up
+Sometimes your body randomly fluctuates through ethereal spacetime in order to evade attacks.
+Whenever you’re being attacked, there’s a 50% chance that your (1-evasion) will be temporarily multiplied by 0.95/Level.
+
+
+Ethereal Poison (Passive)
+passive damaging
+You damage creatures (and yourself) when you phase through organic matter.
+While ethereal (in ghost mode), as long as you’re in the same spot as another creature, that creature loses Level life per second and you lose Level life per second. Armor cannot protect creatures from this loss of life. TODO make this include Ghost Mode too, so that Instability works with this.
+
+
+Force Shield (Activated)
+defensive force-field cost cooldown
+Create a strong temporary force field in front of you.
+Create a rectangular force field in front of you that lasts for a few seconds. The FF’s dimensions are: length 1+Level/3, height 1, width 0.1+0.1*Level (meters). The FF has 30*Level HP and loses 20% of its current life every second (minimum 1).
+Cooldown: 6-Level seconds (minimum 0.3).
+Costs 3 Mana.
+
+
+Protective Bubble I (Activated)
+defensive force-field cost cooldown
+Create a spherical force field that surrounds you and follows you.
+Create a spherical force field around you, that moves to always stay the same distance from you. The FF’s radius/”length” is 1 meter, and its width is 0.05 + 0.05*Level meters. The FF’s life is 10*Level.
+Cooldown: 6-Level seconds (minimum 0.3).
+Costs 3 Mana.
+
+
+Protective Bubble II (Activated)
+defensive force-field cost cooldown
+Create a strong spherical force field that surrounds you and follows you.
+Create a spherical force field around you. The FF’s radius is 1 meter, and its width is 0.05 + 0.2*Level meters. The FF’s life is 30*Level.
+Cooldown: 7-Level seconds (minimum 0.3).
+Costs 4 Mana.
+
+
+Wide Force Field (Activated)
+defensive force-field cost cooldown range
+Create a wide force field in front of you.
+Create a rectangular force field in front of you. The FF’s dimensions are: length 3+Level, height 1, width 0.1+0.1*Level (meters). The FF has 50*Level HP and loses 5% of its current life every second (minimum 1).
+Cooldown: 7-Level seconds (minimum 0.3).
+Costs 4 Mana.
+
+
+Strong Force Field (Activated)
+defensive force-field cost cooldown range
+Create a very strong force field in front of you.
+Create a rectangular force field in front of you. The FF’s dimensions are: length 1+0.5*Level, height 1, width 0.05+0.07*Level (meters). The FF has 80*Level HP and loses 5% of its current life every second (minimum 1).
+Cooldown: 7-Level seconds (minimum 0.3).
+Costs 4 Mana.
+
+
+Mobile Force Field (Activated)
+defensive force-field cost cooldown range
+Create a mobile force field in front of you.
+Create a rectangular force field in front of you. The FF’s dimensions are: length 3+Level, height 1, width 0.1+0.1*Level (meters). The FF has 50*Level HP and loses 5% of its current life every second (minimum 1). The FF follows you just like a Protective Bubble does.
+Cooldown: 7-Level seconds (minimum 0.3).
+Costs 4 Mana.
+
+
+Force Field Fanatic (Activated)
+defensive force-field cost cooldown range
+All of your force fields share the same health, and you can have as many as you wish.
+You have a personal “Force Field Health Limit” number, which is equal to 100*Level.
+Activating this power creates a rectangular force field in front of you. The FF’s dimensions are: length 3, height 1, width 0.5 (meters).
+Whenever you create a force field, the health of every single force field you created is decreased until it is equal to or lower than (FF health limit) / (number of FFs).
+Cooldown: 0.5 seconds.
+Costs 1 Mana.
+
+
+Force Field Kinesis (passive)
+passive todo
+You can telekinetically move force fields.
+You can move force fields.
+Cost: 0.5 M/s while moving a force field?
+
+
+Bubble (Activated) Needs a rename, because of Protective Bubble
+defensive force-field cost cooldown range
+Create a weak spherical force field that surrounds somebody.
+Create a spherical force field around a targeted creature. The FF’s radius is 1 meter, and its width is 0.05 + 0.05*Level meters. The FF’s life is 20*Level.
+Notice: This bubble is stationary, and it can be used on enemies (to trap them).
+Cooldown: 6-Level seconds (minimum 0.3).
+Costs 3 Mana.
+
+
+Chronostability (Passive)
+passive
+You are immune to time-altering effects.
+You can’t be affected by time effects, or loop effects. When one of them is used on you, gain Level mana points instead. There’s a small chance you get this ability while having a main Time/Loop power. If that happens, you’re either seriously fucked (if you had Chronobiology, a type 1 or 2 Loop ability or Slow Motion) or seriously lucky (if you had Slow World, Pause, or a type 3 Loop ability). Slow World becomes Slow Motion and vice versa.
+
+
+Slow World (Activated)
+cost cooldown duration
+Slow down the entire earth...or perhaps just make your brain think faster.
+For a period of 2*Level seconds, the entire world slows down to 1/10 of what it was before. This includes you, although in the slowed world you can still “think” normally and use your abilities/feet/mind. This ability might be objectively weaker than Pause? not sure.
+Cooldown: 4*Level seconds.
+Costs 2 Mana.
+
+
+Pause (Activated)
+cost cooldown duration
+Pause everything in the universe (or just do the opposite of pause with your brain?).
+For a period of 2*Level seconds, the entire world stops. During this period the only possible actions are thinking (obviously) and starting actions/commands which will all actually start when the pause is ended.
+Cooldown: 4*Level seconds.
+Costs 1 Mana.
+
+
+Slow Target (Activated)
+debuff offensive defensive cost cooldown duration point
+Slow somebody down by 90%, while making them tougher.
+For a period of 2*Level seconds, a target slows down to 1/10 of what it was before. While it is slow, the target receives 10% less damage and pushback with the exception of the Sting shard, AKA Ghost Weapons II, which can damage it.It  is affected by gravity and movement, times 0.1. When the effect ends the target’s speed is multiplied by 10 again.
+Cooldown: 3*Level seconds.
+Costs 5 Mana.
+
+
+Time-Freeze Target I (Activated)
+debuff offensive defensive cost cooldown duration point
+Chronically freeze a target, while making them immovable and invulnerable.
+For a period of 2*Level seconds, a target is frozen in time. It cannot be damaged, it can’t move, it isn’t affected by gravity and it is resistant to any effect (including control, sound…) with the exception of the Sting shard, AKA Ghost Weapons II, which can damage it.
+Cooldown: 3*Level seconds.
+Costs 5 Mana.
+
+
+Time-Freeze Target II (Activated)
+debuff offensive defensive cost cooldown duration point
+Chronically freeze targets more easily.
+For a period of 2*Level seconds, a target is frozen in time. It cannot be damaged, it can’t move, it isn’t affected by gravity and it is resistant to any effect (including control, sound…) with the exception of the Sting shard, AKA Ghost Weapons II, which can damage it. Possibly make the effect a random number between 1*Level and 3*Level?
+Costs 3 Mana.
+
+
+Chronobiological Control (Passive, On/Off)
+on-off buff level-up cost
+Your body’s organs move faster or slower through time.
+Everything your body does related to time is slower faster, either multiplied by 1.0+0.3*Level or divided by that same amount. This includes regeneration, effects that apply to you such as buffs or debuffs, and aging (if anyone cares about that).
+You switch between fast and slow (can’t choose anything inbetween) by off/on-ing this power. Each switch costs 5 Mana.
+
+
+Slow-Motion (Activated)
+buff cost cooldown duration
+Time moves faster for you than it does for everyone else.
+For a period of 2*Level seconds, the entire world slows down to 1/10 of what it was before, not including you. You can move and react to everything normally, although damage and pushback you cause are multiplied by 0.1.
+Cooldown: 4*Level seconds.
+Costs 6 Mana.
+
+
+Repeat I (Passive + Activated)
+cooldown cost todo
+Loop yourself back to the position and state you were in a few seconds ago.
+Set your position and state to what they were Level seconds ago.
+Cooldown: Level seconds.
+Cost: 4-0.5*Level (minimum 0).
+
+
+Repeat II (Passive + Activated)
+point cooldown cost todo
+Loop someone back to the position and state they were in a few seconds ago.
+Set a target’s position and state to what they were Level seconds ago.
+Cooldown: Level seconds.
+Cost: 6-0.5*Level (minimum 0).
+
+
+Repeat III (Passive + Activated)
+point range cooldown cost todo
+Loop people back to the position and state they were in a few seconds ago.
+Within a circle with a range of Level meters, set every person’s position and state to what they were Level seconds ago.
+Cooldown: Level seconds.
+Cost: 8-0.5*Level (minimum 0).
+
+
+Retrace I (Passive + Activated)
+cooldown cost todo
+Loop yourself back to the position you were in a few seconds ago.
+Set your position to what it was Level seconds ago.
+Cooldown: Level seconds.
+Cost: 4-0.5*Level (minimum 0).
+
+
+Retrace II (Passive + Activated)
+point cooldown cost todo
+Loop someone back to the position it was in a few seconds ago.
+Set a target’s position to what it was Level seconds ago.
+Cooldown: Level seconds.
+Cost: 6-0.5*Level (minimum 0).
+
+
+Retrace III (Passive + Activated)
+point range cooldown cost todo
+Loop people back to the position it was in a few seconds ago.
+Within a circle with a range of Level meters, set every person’s position to what it was Level seconds ago.
+Cooldown: Level seconds.
+Cost: 8-0.5*Level (minimum 0).
+
+
+Undo I (Passive + Activated)
+cooldown cost todo
+Loop yourself back to the state you were in a few seconds ago.
+Set your state to what it was Level seconds ago.
+Cooldown: Level seconds.
+Cost: 4-0.5*Level (minimum 0).
+
+
+Undo II (Passive + Activated)
+point cooldown cost todo
+Loop someone back to the state it was in a few seconds ago.
+Set a target’s state to what it was Level seconds ago.
+Cooldown: Level seconds.
+Cost: 6-0.5*Level (minimum 0).
+
+
+Undo III (Passive + Activated)
+point range cooldown cost todo
+Loop people back to the state it was in a few seconds ago.
+Within a circle with a range of Level meters, set every person’s state to what it was Level seconds ago.
+Cooldown: Level seconds.
+Cost: 8-0.5*Level (minimum 0).
+
+
+Nullify (Activated)
+offensive cost duration debuff
+Cause a target to lose all powers it has or is affected by.
+A targeted creature loses the ability to use powers they have, and loses any passive abilities or effects caused by a power. The effect continues for 2*Level seconds.
+Cost: 3 Mana.
+
+
+Nullification Aura I (Passive)
+passive range debuff
+You have an anti-powers aura.
+There’s a constant anti-power aura around you with a radius of 0.3*Level meters. Capes within the aura lose the ability to use their powers, and any passive abilities they grant themselves.
+
+
+Nullification Aura II (On/Off)
+on-off range cost debuff
+You have a strong anti-powers aura.
+There’s an anti-power aura around you with a radius of 0.5*Level meters. Capes within the aura lose the ability to use their powers, and any passive abilities or effects they have that were granted by powers.
+Cost to enable/disable: 5 Mana.
+
+
+Wild Power (Activated)
+wild cost level-up cooldown
+This power’s effects are always changing.
+This power can be used on yourself, an ally, an enemy, the floor, a wall or an object.
+Self / Ally: Heal 3*Level life, or remove Level/2 (rounded up) negative passive effects, or restore all Mana and Stamina.
+Enemy: Enemy loses Level life immediately, or remove Level/2 (rounded up) positive passive effects and disable all on/off abilities, or enemy armor loses Level AR.
+Floor: Create a Level/3 by Level/3 (minimum 1 by 1) earth wall, or create a lava pool of that same size, or create a blood pool of that same size.
+Wall: Destroy Level/3 by Level/3 (minimum 1 by 1) of the wall, or transform that size of wall into a spike pit, or transform that size of wall into a metal wall.
+Object: Remove all momentum of the object, or make the object Level/2 (minimum 2) times as fast, or flip object’s direction of movement.  
+Cooldown: 8-0.5*Level seconds.
+Cost: 4 Mana.
+
+
+Power Resistance (On/Off)
+on-off level-up
+You can resist the effects of powers.
+While this is on, whenever you are the target of a power or are inside an aura power (Explosions, shots, pools etc. don’t count) you have a chance of 8% * Level to completely resist the power.
+Cost to switch: 0.
+
+
+Instability (Passive + Activated)
+todo
+You power is randomized every few seconds.
+Every 12 seconds, you gain a random ability of the highest rank possible from the ability list, with a number of Levels equal to this power’s Level and the element (if any) equal to a random element. You also lose the previous power you had. Note that this is a random ability, not a random power decided from a power element combination, and therefore there is an equal chance of getting every power. If the random power you get is Instability, uh, oh wow. You get….hmmm…..you get a new temporary power called “Uberpower” that gives you ten (!) temporary powers for the next 12 seconds. yeah, that would be impressive! 
+You can also force the power change, for 6 Mana.
+
+
+Copy State (Activated)
+cost duration
+Copy from a target to all powers it has or is affected by.
+A targeted creature’s passive abilities and effects caused by powers are copied to you. The effect continues for 2*Level seconds.
+Cost: 3 Mana.
+
+
+Steal Power (On/Off + Passive)
+continuous-cost offensive debuff extra-abilities
+Temporarily steal the power of a target, and gain a stronger version.
+A targeted cape loses their highest-points power, and you gain the same power with Steal Power’s Level plus 1 (maximum 10!!!). You keep the power as long as the effect is on, and the target keeps missing it.
+Cost: 0.5 M/s.
+
+
+Elemental Theft (Passive) <Element>
+passive range extra-abilities
+You can steal the powers of other capes who use <e> powers.
+All capes within a range of 2*Level meters around you lose all elemental powers they have, and you gain these powers, until they leave your range or you become unconscious. This power is extremely powerful but also extremely conditional.
+
+
+Copy Power (On/Off + Passive)
+continuous-cost extra-abilities
+Temporarily copy the power of a target.
+Gain a copy of a targeted cape’s highest-points power. You keep the power as long as the effect is maintained.
+Cost: 0.3 M/s.
+
+
+Energy Theft Aura (On/Off)
+steal range on-off offensive
+Steal health, charge, mana and stamina from nearby creatures.
+Steal 0.1*Level Life, Charge, Mana and Stamina, per second, from every creature in a range of 5 meters from you. This ability is really strong - you can basically disable enemy mana powers if you got enough Levels.
+
+
+Distraction (Activated)
+range cooldown cost point
+Create a sound coming from the air, to distract enemies.
+A sound is emitted from a targeted point. Enemies in a Level meter radius will turn to look at the distraction, stopping what they were about to do (move, attack). This usually distract them for 5 seconds or until they are hit, but it doesn’t work on the same enemy again for the next 20 seconds.
+Cooldown: 2 second.
+Cost: 2 Mana.
+
+
+Blind (Activated)
+auto-aim cooldown cost duration
+Create a strong flash in front of somebody’s eyes, blinding them temporarily.
+A targeted enemy is blind for the next 3*Level seconds. You can only target enemies that are looking at your general direction.
+Cooldown: 13 seconds.
+Cost: 4 Mana.
+
+
+Stunning Shout (Activated)
+range offensive duration cooldown cost
+Roar a stunning shout from your mouth.
+Enemies in a radius of 20 meters and line of sight will be stunned. The duration of the stun is equal to 5 + Level - 0.5*distance.
+Cooldown: 12 seconds.
+Cost: 4 Mana.
+
+
+Scream (On/Off)
+on-off offensive range level-up debuff continuous-cost
+Constantly scream, weakening and damaging enemies who hear you.
+Every second, all creatures except for you within a 20 meter radius and line of sight get *0.95^Level accuracy and lose 0.25*Level life (rounded down).
+Costs 0.3 M/s while on.
+
+
+Flashbang (Activated)
+offensive damaging range duration debuff point
+Create a very loud, very bright explosion that damages creatures, stuns them and blinds them.
+Target a point, and creatures within range of Level meters and line of sight from that point are blinded, stunned and damaged.
+Creatures in outer 25% of range are blinded for 3 seconds and stunned for 1 second.
+Creatures in outer 50%-25% are blinded for 5, stunned for 2 and damaged for 5.
+Creatures in inner 25%-50% are blinded for 8, stunned for 4, and damaged for 10.
+Creatures in inner 25% are blinded for 12, stunned for 6, and damaged for 20.
+Cooldown: 22-Level seconds.
+Costs 7 Mana.
+
+
+Force Shout (Activated)
+offensive aim pushing range cooldown cost
+Roar a super-shout  forward that pushes enemies back.
+Enemies within 2*Level meters of you in a 70 degree cone are pushed away from you, a pushback force of 10*Level.
+Cooldown: 1 second.
+Cost: 3 Mana.
+
+
+Clone I (Activated)
+summon-one
+Create a clone of your body, that can do basic actions.
+Create an unpowered clone within a range of 3 meters from you. The clone’s stats all have 2, the clone’s life is 20*Level, and it disappears at the end of combat. The clone will attack the closest enemy to it within 8 meters, and if it can’t find one it will just follow you.
+Cooldown: up to 10-Level seconds after the clone died.
+Cost: 5 Mana.
+
+
+Clone II (Activated)
+summon-many
+Create up to two clones of your body.
+Create an unpowered clone within a range of 3 meters from you. The clone’s stats all have Level points, the clone’s life is 25*Level, and it disappears at the end of combat. The clones will attack the closest enemy to them within 8 meters, and if they can’t find one they will just follow you.
+Cooldown: 5 seconds. You can have a max of 2 clones.
+Cost: 5 Mana.
+
+
+Clone III (Activated)
+summon-many
+Create two powered clones of your body.
+Create a powered clone within a range of 3 meters from you. The clone’s stats all have Level points, the clone’s life is 30*Level, and it disappears at the end of combat. The clones will attack the closest enemy to them within 8 meters, and if they can’t find one they will just follow you. The clones have all of your powers except for Summon powers. The clones have all positive effects you had while using the ability.
+Cooldown: 5 seconds. You can have a max of 2 clones.
+Cost: 5 Mana.
+
+
+Mini-Clones I (Activated)
+summon-many
+Create many weak clones of your body.
+Create three unpowered clones within a range of 3 meters from you. The clones’ stats all have 1 point, the clones’ HP is 30, and they disappear at the end of combat. The clones will attack the closest enemy to them within 8 meters, and if they can’t find one they will just follow you.
+Cooldown: 2 seconds. You can have a max of 2*Level clones.
+Cost: 4 Mana.
+
+
+Mini-Clones II (Activated)
+summon-many
+Create many, many weak clones of your body.
+Create four unpowered clones within a range of 3 meters from you. The clones’ stats all have 1 point, the clones’ HP is 30, and they disappear at the end of combat. The clones will attack the closest enemy to them within 8 meters, and if they can’t find one they will just follow you.
+Cooldown: 2 seconds. You can have a max of 3*Level clones.
+Cost: 4 Mana.
+
+
+Avatar I (Activated)
+summon-one
+Create a strong, powerful creature and remote-control it.
+Create an avatar-clone of yourself. The avatar has everything you have, including stats but not including powers. The avatar has 3+Level strength, 3+Level dexterity and 3+Level fitness, but has no life regeneration.
+You control the avatar the moment it is created (control passes from your body to its body). While controlling it your original body is stunned, indefinitely. You may cancel the avatar any time you want, and when it dies or is cancelled, or when your original body is dealt damage or pushback greater than Level% of its maximum life within a second, the avatar “blinks out” and you return to your body. 
+Cooldown: 10 seconds after the Avatar has died.
+Cost: 5 Mana.
+
+
+Avatar II (Activated)
+summon-one
+Create a special powered creature and remote-control it.
+Like Avatar I, but the avatar has one of these random attributes:
+1. Elemental Armor <Fire> (1), Leg Muscles (1), Trail <Fire> (1).
+2. Elemental Armor <Water> (1), Blink (1), Shield <Water> (1).
+3. Elemental Armor <Earth> (1), Toughness I (1), Wall <Earth> (1).
+4. Elemental Armor <Wind> (1), Flight I (1), Force Shout (1).
+
+
+Elemental Summoning (Passive) <Element>
+passive level-up
+Creatures you summon have <an e> armor around them.
+Creatures summoned by Clone or Avatar abilities have Elemental Armor <Element> with Level points.
+
+
+Strong Summoning (Passive)
+passive level-up
+Creatures you summon are stronger.
+Creatures summoned by Clone or Avatar abilities have +Level strength.
+
+
+Absorb Summons (Passive)
+passive
+You can absorb creatures you summoned to heal yourself.
+If a creature you summoned touches you, it disappears and you gain an amount of life equal to the creature’s life*creature’s remaining life percentage.
+
+
+Summon Swap (Activated)
+escape cooldown cost
+You can switch places with your summons.
+Switch the positions of yourself and a creature you summoned within 30 meters that you can see.
+Cooldown: 2 seconds.
+Cost: 1 Mana.
+
+
+Explosion Resistance (Passive)
+passive
+You are immune to explosion damage.
+You can’t be damaged by normal explosion damage. However, your armor can be, and pushback still affects you. You can still be damaged by elemental explosion damage.
+
+
+Implode Defenses (Activated)
+damaging offensive cost cooldown
+Cause an enemy’s protections to implode and damage them.
+Target an enemy. The enemy’s non-natural armors, mobile/bubble-forcefield and shield (if they have any) all shatter and damage them. The damage they do is equal to 0.2*Level * the armor’s AR, the forcefield’s HP*0.15 or the shield’s 0.5*HP. (All are ~30 damage for a Level 5 enemy power). Armors cannot implode if they have more than 95% of their max AR. (You need to slightly damage the armor before you can break it).
+Cost: 5 Mana.
+Cooldown: 3 seconds.
+
+
+Self-Bomb (Passive + Activated)
+offensive extra-abilities damaging explosion cost cooldown
+Create an explosion centered around you that deals a lot of damage and pushback to others around you.
+You have Explosion Resistance. Create an explosion where you stand, with a radius of 4 meters, a damage of 5*Level and a pushback of 5*Level. The explosion doesn’t affect you in any way.
+Cost: 3 Mana.
+Cooldown: 1 second.
+
+
+Ranged Explosion (Activated)
+point offensive damaging explosion cost cooldown
+Create an explosion from range.
+Create an explosion centered around a point, r = Level, d = 3*Level, p = 3*Level.
+Cost: 3 Mana.
+
+
+Spontaneous Explosions Aura (On/Off)
+on-off offensive continuous-cost explosion range damaging
+Explosions randomly appear around you.
+Explosions appear around you, at a rate of Level explosions per 5 seconds. The rate is twice as fast if you have less than 50% health. The explosions’ centers are less than 15 meters away from you, more than 5 meters away from you, at a random angle. The explosions have r = 5, d = 5*Level, p = 3*Level.
+You can turn this power on/off at no cost, without any cooldown.
+Cost: 1 M/s while on.
+
+
+Recurring Explosion (Activated)
+offensive point damaging explosion duration cost cooldown
+Create a looped explosion in an area.
+Create an “Explosion Loop” somewhere, which is a point that creates an explosion around it every 0.8-1.2 seconds. The explosion has r = 4, d = 4*Level, p = 5*Level. The explosion loop disappears at the end of combat, or 3 minutes after it was created, or when the middle of it is affected by a nullifying power. You can make “super-walls” like this. Walls that can’t be destroyed and harm anyone who is close to them.
+Cooldown: 1 second.
+Cost: 3 Mana.
+
+
+Elemental Explosions (Passive) <Element>
+passive
+All explosions you create are made of <e>.
+Whenever you create an explosion, it is an <Element> explosion, and it has +0.5*Level effective level.
+
+
+Unstable Explosions (Passive)
+passive
+Your explosions keep changing.
+Whenever you create an explosion, it is a random element’s explosion (Fire, acid, ice, etc.), and it has +0.5*level effective level.
+
+
+Twitch (Activated)
+offensive cost range
+Force somebody to randomly use their weapon, stumble, or momentarily stop using their power.
+Target an enemy with the power. If that enemy is using a ranged weapon they immediately throw it towards a random angle. If that enemy is using a melee weapon, they immediately stab with it towards a random direction. If that enemy is maintaining a power, they immediately stop maintaining it, and punch in a random direction. If that enemy is unable to do any of these, they just fall to the ground.
+Costs 4-Level (minimum 1).
+
+
+Divert Attention (Activated)
+buff cost
+Make somebody become the lowest threat to everyone, temporarily.
+Target a creature. For 6*Level seconds, that creature can’t be targeted unless their enemy has no other targets in the area to attack, or that creature attacks somebody.
+Cost: 3 Mana.
+
+
+Mind Twitch (Activated)
+offensive cost range
+Force somebody to use their power if they can, randomly.
+Target an enemy with the power. That enemy immediately uses a random Activated or  On/Off  non-natural power they have in a random direction or at the closest target they can find.
+Cost: 4-Level (minimum 1).
+
+
+Possess (Activated)
+offensive cost cooldown duration
+Take control of a creature for a short while.
+Target an enemy. You have a 10%*Level chance of succeeding in possessing them. If you do, you become their controller for the next 15 seconds or until they are reduced to less than 20% of their maximum health. Your original body remains inactive.
+Cooldown: 18-Level seconds, whether or not you succeeded in Possessing.
+Cost: 7 Mana.
+
+
+Command (Activated)
+offensive cost cooldown duration
+Command an enemy to become your ally for a short while.
+Target an enemy. You have a 10%*Level chance of succeeding in commanding them. If you do, they become an ally for the next 15 seconds or until they are reduced to less than 20% of their maximum health.
+Cooldown: 18-Level seconds, whether or not you succeeded in Commanding. Command’ pros over Possess are that your original body can still fight, and that you can sometimes Command two enemies at once. The cons, however, are that you can’t choose what your ally will do and can’t be as versatile.
+Cost: 7 Mana.
+
+
+Chaos Circle (Activated)
+offensive point level-up cost cooldown
+Create an area of paranoia, where creatures believe anyone to be their enemies.
+Create a circle with a radius of Level. Any creatures within the circle consider anyone else inside as enemies, and anyone else outside as neutral. The circle disappears after 3*Level seconds, or if there are less than two conscious creatures within it. This is to prevent using the circle just for the neutrality bonus awarded to creatures outside it, in order to sneak past guards for example. Creatures within the circle will not try to move outside of it, mainly because their only enemies are within it.
+Cooldown: 5 seconds.
+Cost: 9 Mana.
+
+
+Friendly Aura (On/Off)
+on-off defensive range
+Creatures near you think of you as their ally.
+Creatures within a range of Level/2 meters from you treat you as an ally. They will not attack your enemies, as they are still their allies. They will generally not do anything except for not attacking you and using positive powers such as buffs or heals on you. As allies, if they have no enemies to fight they will follow you and thus stay in your range. This ability switches off if you use any activated ability on any of them or attack them.
+Cooldown: 5 seconds after ability turned off.
+Cost to switch: 8 Mana.
+
+
+Traitor Illusion (Activated)
+offensive range duration
+Make a creature look like an enemy to their allies.
+All creatures within a range of 30 meters (from a targeted creature) treat a targeted creature as their enemy, for Level seconds. During this time the targeted creature treats the allies as frenemies.
+Cooldown: 5 seconds.
+Cost: 4 Mana.
+
+
+Control Specialty (Passive) <Element>
+passive todo
+It’s easier for you to control people that can control <e>.
+When trying to use a control ability, targets that have at least one <Element> EP always get controlled, are controlled for x1.5 the time, and the mana cost (for Twitch and Mind Twitch) is reduced to 0. Also, gain +0.5*Level to maximum Mana. Needs to include level somehow!
+
+
+Reshape I (Passive) <Element>
+passive extra-abilities
+You can reshape <e>; creating walls and pools or destroying them.
+Gain Wall, Pool, Destroy Wall and Destroy Pool, all of <Element>.
+
+
+Reshape II (Passive) <Element>
+passive extra-abilities
+You can reshape <e>, shaping either walls or pools.
+Gain Wall, Move Walls, Destroy Wall, Pool, Melt and Destroy Pool, all of <Element>.
+
+
+Reshape III (Passive) <Element>
+passive extra-abilities
+You are a master of reshaping <e>, and you can also attack using walls and pools.
+Gain Wall, Move Walls, Destroy Wall, Pool, Destroy Pool, Launch Wall, Wall Prison, Splash Pool and Melt, all of <Element>.
+
+
+Wall (Activated) <Element>
+defensive build cost
+Create <an e> wall.
+Create a human-high square <Element> wall. Walls take 3-Level*0.3 seconds to deploy.
+Ability can also be used to fix damaged <Element> walls.
+Cost: 6-0.5*EP Mana.
+
+
+Move Walls (Maintained) <Element>
+point level-up
+Slowly move <an e> wall.
+Target a point, move the cursor in a direction, and all walls within a range of Level meters from it start moving (in a grid) in that direction. The walls move at a speed of 0.3*Level m/s. The walls can’t move into other walls, pools or creatures.
+Cost: 0.2 M/s.
+
+
+Destroy Wall (Activated) <Element>
+cooldown
+Destroy <an e> wall.
+Target an <Element> wall. That wall’s life becomes 0.
+Cooldown: 6-0.5*Level seconds.
+Cost: 5-Level mana (minimum -1). Yes, you can gain mana from destroyed walls.
+
+
+Pool (Activated) <Element>
+defensive build cost
+Create <an e> pool or pit.
+Create a 1x1 m pool of the element. When creating pools adjacent to existing pools of the same material, the mana cost is greatly decreased.
+Cost: 7-0.5*Level(minimum 1) Mana, or 3-0.5*Level (minimum 0) Mana next to another pool.
+
+
+Destroy Pool (Activated) <Element>
+cooldown
+Destroy <an e> pool.
+Target an <Element> pool. That pool life becomes 0.
+Cooldown: 6-0.5*Level seconds.
+Cost: 5-Level Mana (minimum 0).
+
+
+Melt (Activated) <Element>
+cooldown
+Melt <an e> wall into a pool.
+Target an <Element> wall. Destroy it and create an <Element> pool instead.
+Cost: 0 Mana.
+Cooldown: 1-0.1*Level seconds (minimum 0).
+
+
+Splash Pool (Activated) <Element>
+offensive cost
+Gather the <e> of <an e> pool and launch it at a target.
+Target a pool and then a creature. The pool starts to continuously shoot an <Element> Beam at the target with level=Level+1, for 5 seconds, during which the pool loses life at the rate of 20 life per second. Maybe instead you only target a point/person, and all pools within range will shoot at them?
+Cost: 2 Mana.
+
+
+Launch Wall (Activated) <Element>
+offensive cost
+Throw <an e> wall at a target.
+Target a wall and then a creature. The wall immediately becomes an <Element> Ball and is thrown towards the target. Again, maybe instead you only target a point/person and all walls within range will shoot at them?
+Cost: 2 Mana.
+
+
+Wall Prison (Activated) <Element>
+offensive defensive build cost
+Create a circle of <e> walls around a target.
+Target a creature or a point on the ground. A square of <Element> walls are created around the target within the next 4 seconds. If the target is inside a single grid square, it’s 3x3. If they intersect one line, it’s 3x4. Etc. When used on extremely large targets, it WILL create fitting wall-prisons.
+Cost: 15-Level Mana.
+
+
+Earth Weapon (Activated)
+cooldown cost todo
+Carve stone weapons out of the floor.
+If you are currently holding nothing, create a Stone mace. If you’re holding a bow, create five Stone arrows. If you’re holding a different weapon, create a Stone mace on the ground.
+Cooldown: 8 seconds.
+Cost: 9-Level Mana.
+
+
+Elemental Void (Passive)
+passive range
+You have an aura that destroys elemental pools and walls.
+Pools and walls that are not earth pools and walls are damaged at 20 HP/sec if they are within Level meters from you and are not Earth walls or pits.
+
+
+Heal I (Maintained)
+defensive buff sub-stat-boost
+Heal somebody by making them regenerate life quicker.
+While active, the nearest ally in range of Level/2 meters gains a life regeneration bonus of 2*Level life/sec. If there is no nearby ally, you will heal yourself.
+Costs 1 M/s.
+
+
+Heal II (Maintained)
+defensive buff sub-stat-boost continuous-cost
+Heal people around you, quickly and efficiently.
+While active, all allies in range of Level meters including yourself gain a life regeneration bonus of 4*Level life/sec.
+Costs 3 M/s.
+
+
+Friendly Fire (Passive)
+passive todo
+You can’t hurt allies with your powers.
+Allies gain immunity to damage and negative effects dealt to them by your powers.
+In addition, gain +5*Level HP. ...To make this ability better in levels greater than 1.
+
+
+Buff Strength (Activated)
+buff stat-boost cost cooldown duration
+Enhance the strength of people around you.
+The nearest ally in range of Level/2 meters gains +2*Level Strength for 5 seconds. If there’s no ally, the ability affects you instead.
+Cooldown of 5 seconds.
+Costs 3 Mana.
+
+
+Buff Evasion (Activated)
+buff sub-stat-boost cost cooldown duration
+Enhance the evasion of people around you.
+The nearest ally in range of Level/2 meters gains (1-evasion) *= 0.3/Level for 5 seconds. If there’s no ally, the ability affects you instead.
+Cooldown of 5 seconds.
+Costs 3 Mana.
+
+
+Buff Armor (Activated)
+defensive buff sub-stat-boost cost cooldown duration
+Enhance the armor of people around you.
+The nearest ally in range of Level/2 meters gains +2*Level to their natural armor AR for 5 seconds. If there’s no ally, the ability affects you instead.
+Cooldown of 5 seconds.
+Costs 3 Mana.
+
+
+Buff Power (Activated)
+buff cost cooldown duration
+Enhance the powers of people around you.
+The nearest ally in range of Level/2 meters gains +0.2*Level to their strongest power’s Level (rounded up) for 5 seconds. If there’s no ally, the ability affects you instead.
+Cooldown of 5 seconds. If this is your highest level power and you have perks/effects that increase its duration or decrease its cooldown, then, uh, I think you might break the game?
+Costs 3 Mana.
+
+
+Resist Element (Activated) <Element>
+defensive cost duration buff
+Protect your allies and yourself from <e>.
+You and allies within a range of Level meters gain Elemental Resistance <Element> for 50 seconds. Note that this ability can only be granted with the Fire, Lava, Acid, Energy and Electricity elements!
+Cost: 8 Mana.
+
+
+Restoration Blast (Activated)
+defensive cooldown range
+You and all of your allies are completely cured.
+You and allies within 20 meters restore 500 HP, 50 Mana, 50 Stamina and 50 Charge.
+Cooldown: 40-3*Level seconds.
+Cost: 0 Mana.
+
+
+Muscle Charge (Charge + On/Off)
+charge on-off stat-boost
+Charge while in combat. Release to make yourself stronger.
+Charge while in a fight. While on: Gain +3*Level Strength.
+Cost while on: 20 C/s.
+
+
+Clairvoyance Charge (Charge, Maintained)
+todo sense range charge continuous-cost
+Charge by seeing enemies. Release to see everything nearby.
+Charge while in a fight. Release: Combine Sense Parahumans, Sense Life, Sense Mana and Stamina, Sense Powers, Danger Sense, Sense Structure. Your range is 3^Level.
+Costs 25 C/s.
+
+
+Charged Regeneration (Charge + Passive)
+charge passive
+Regenerate quicker while you’re injured.
+Charge whenever you get hurt, by 0.1*Level*the amount of damage you suffered. Charge is slowly removed at the rate of 0.1*Level*(current charge+4) C/s. Your HP is restored by exactly the amount of charge removed.  That means that your charge meter depletes much faster when it’s much fuller, I.E. when you’re more injured.
+
+
+Divebomb (Charge + Activated)
+charge explosion offensive damaging
+Charge while flying. Release while flying to dive-bomb downwards.
+Charge while flying. Release while flying above ground to very quickly descend and create an explosion (r = 0.1*X, d = 0.04*X*Level, p = 0.04*X*Level) where you land.
+Cost: X Charge. Should have an innate extra flying ability!!! for Instability compatibility!
+
+
+Dexterity Charge (Charge + On/Off)
+charge stat-boost on-off
+Charge while in combat. Release to make yourself more evasive and precise.
+Charge while in combat. While on: Gain 3*Level Dexterity.
+Cost while on: 20 C/s.
+
+
+Charged Armor (Charge + Activated)
+charge level-up defensive
+Charge while in combat. Release to create a strong energy armor.
+Charge while in combat. Release to create an Elemental Armor III <Energy>.
+Cost: 100 Charge.
+
+
+Kinetic Charge (Charge + On/Off)
+charge on-off sub-stat-boost
+Charge while moving. Release to move incredibly quickly and ram into opponents.
+Charge while moving faster than 0.5 m/s. While on: Gain a bonus to running speed equal to Level*5 m/s.
+Cost: 20 C/s while on.
+
+
+Slash Dash (Charge + Activated) This is Black Kaze levels of coolness
+charge offensive defensive extra-abilities
+Charge while in combat. Release to rapidly teleport through enemies, slashing anyone in the teleportation path.
+Charge while in combat. Release to stop time for the entire world for 6 seconds, and gain Teleslash for that many seconds. Max amount of slashes is twice the time limit. You can use only teleslash during the time-stop.
+Cost: 100 Charge.
+
+
+Teleslash (Activated)
+offensive damaging range cooldown
+Teleport and slash anyone within the teleportation path.
+Teleport to a targeted place within 10m. Any objects or creatures between the enter point and the exit point are dealt 2.5*Level damage.
+Cost: 1 Mana.
+Cooldown: 0.5 seconds.
+
+
+Ghost Mode Charge (Charge + Activated)
+defensive charge duration
+Charge while not in ghost mode. Release to temporarily become ethereal, and phase through most physical things.
+Charge while not in ghost mode. Release to become ethereal for as long as this is active. While ethereal, you cannot affect or be affected by physical objects or creatures, except for Elemental damage attacks. These deal x2 damage to you. Any ability you use while ethereal will be forever ethereal and will therefore only affect ethereal beings. You can’t use elemental powers while ethereal.
+You can stay in Ghost Mode for 2*Level seconds.
+Costs: 70 Charge. This ability is possibly too weak! Maybe add an explosion?
+
+
+Charged Force Field (Charge + Activated)
+defensive charge force-field
+Charge whenever making normal force fields. Release to create a super-strong force field.
+Gain 20 Charge per Force Field you create. Release to create a forcefield with height 2, width 1 and length of 10 meters (or until it hits a wall?). The FF has 70*Level HP.
+Cost: 100 Charge.
+
+
+Time-Freeze Blast (Charge + Activated)
+defensive charge cost range
+Charge while in combat. Chronically freeze targets more easily.
+Charge while in combat. Release to time-freeze all creatures and objects within a 30 m range for a period of between 3 seconds and 30 seconds.
+Costs 100-5*Level Mana.
+
+
+Deja Vu (Charge + Activated)
+defensive charge cost range
+Charge while in combat. Release to loop everyone nearby 10 seconds backwards.
+Charge while in combat. Release to return everyone within 30 m to the position and state they were in 10 seconds ago.
+Cost: 100-5*Level Charge. When you’re level 10, you can actually keep looping everyone to the same point without advancing time.
+
+
+Null Blast (Charge + On/Off)
+defensive charge on-off range
+Charge while in combat. Release to disable all powers nearby for some time.
+Charge while in combat. While on: There’s an anti-power aura around you with a radius of 30 meters. Capes within the aura lose the ability to use their powers, and any passive abilities or effects they have that were granted by powers.
+Can only be turned on at 100 Charge and turned off at less than 10 Charge.
+Costs 12-0.5*Level C/s.
+
+
+Charge Too Much (Charge + Passive) Because it’s a STEAL! Get it?!?!
+charge passive extra-abilities
+Steal charge powers and charged energy from nearby capes and use them on your own.
+All capes within a range of 15 m from you lose their Charge at a rate of Level C/s, and you gain as much as they lose. You also get all of their Charge powers. = You charge ~twice as fast. They still have their powers, but they can’t use them unless they have enough charge, of course.
+This power only works on 10% of the capes, that’s why it needs buffs.
+
+
+Escalating Scream (Charge + Maintained)
+offensive charge range damaging
+Start a scream that slowly increases in power, and damages enemies.
+Charge while this power is maintained. As long as this is maintained, all enemies within a range of 15 meters lose percentages of life every second depending on the amount of charge. They lose 0.0005*Level*Charge of their health (0.05%*Level*Charge) per second.
+Cost: lose 100% of current Charge when you stop maintaining the power.
+
+
+Clone Party (Charge + Activated)
+charge summon-many
+Charge while in combat, release to create a LOT of weak clones.
+Charge while in combat. Release: Create 3*Level clones with 30 HP in random location within a range of 15 m from you. The clones disappear at the end of combat.
+Cost: 100 Charge.
+
+
+Explosion Charge (Charge + Maintained)
+offensive charge explosion range damaging
+Stand in place and charge an explosion around you.
+While maintaining this power, Charge. As long as your Charge level is above 80, explosions appear randomly around you, at a rate of 0.2*Level explosions per 5 seconds. The explosions’ centers are less than 15 meters away from you, more than 5 meters away from you, at a random angle. The explosions have r = 3, d = 3*Level, p = 1.5*Level.
+The moment this power stops being maintained, create an explosion centered around you with r = 0.15*Charge, d = 0.15*Level*Charge, p = 0.15*Level*Charge.
+Cost: lose 100% of current Charge when you stop maintaining the power.
+
+
+Stun Blast (Charge + Activated)
+charge range duration
+Charge while in combat. Release to stun enemies around you.
+Charge while in combat. Release: enemies within a range of 15 m are stunned for 0.02*Charge*Level seconds. Uhhh does that mean you can infini-stun while at level 10? TODO CHECK THIS
+Cost: 50 Charge.
+
+
+Earthrise (Charge + Activated)
+defensive charge range extra-abilities
+Charge by destroying walls. Release to raise the earth around enemies and yourself.
+You have Demolish. Charge by 0.5*Level whenever you use Demolish. Release to create an earth wall in every single grid space within a range of 30 m that is currently empty.
+Cost: 100 Charge.
+
+
+Demolish (Activated)
+cost cooldown range
+Destroy any type of wall.
+Target a wall. That wall’s HP becomes 0.
+Cooldown: 0.3 seconds.
+Cost: 7-Level (minimum 0).

@@ -116,7 +116,7 @@ public class Methods
 	}
 
 	// Compute the dot product AB . AC
-	static double realDotProduct(Point a, Point b, Point c)
+	public static double realDotProduct(Point a, Point b, Point c)
 	{
 		return (b.x - a.x) * (c.x - a.x) + (b.y - a.y) * (c.y - a.y);
 	}

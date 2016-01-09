@@ -1,4 +1,5 @@
 package mainClasses;
+
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -7,6 +8,7 @@ import java.awt.Frame;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,50 +20,50 @@ import mainResourcesPackage.SoundEffect;
 
 public class Environment
 {
-	final int				numOfClouds			= 0;
-	final int				minCloudHeight		= 60,
-									maxCloudHeight = 400;
-	final static double[]	floorFriction		= new double[]
-													{ 0.6 };													// depending on floor type
-	final static double[]	poolFriction		= new double[]
-													{ -1, 0.3, -1, -1, 0.8, 0.2, -1, 0.6, 0.7, 0.3, 0.8, 0.6 };	// depending on pool type
-	final static double[]	wallFriction		= new double[]
-													{ -1, 0.3, -1, -1, 0.8, 0.2, -1, 0.6, 0.7, 0.3, 0.8, 0.6 };	// depending on wall type
-	boolean					devMode				= false;
-	boolean					showDamageNumbers	= true;
-	Point					windDirection;
-	double					shadowX, shadowY;
+	public final int				numOfClouds			= 0;
+	public final int				minCloudHeight		= 60,
+											maxCloudHeight = 400;
+	public final static double[]	floorFriction		= new double[]
+															{ 0.6 };													// depending on floor type
+	public final static double[]	poolFriction		= new double[]
+															{ -1, 0.3, -1, -1, 0.8, 0.2, -1, 0.6, 0.7, 0.3, 0.8, 0.6 };	// depending on pool type
+	public final static double[]	wallFriction		= new double[]
+															{ -1, 0.3, -1, -1, 0.8, 0.2, -1, 0.6, 0.7, 0.3, 0.8, 0.6 };	// depending on wall type
+	public boolean					devMode				= false;
+	public boolean					showDamageNumbers	= true;
+	public Point					windDirection;
+	public double					shadowX, shadowY;
 
-	final static int		squareWidth			= 96;
-	final int				elementalNum;
+	public final static int			squareSize			= 96;
+	public final int				elementalNum;
 	// All of these shouldn't be ints, they range from -1 to 12. :/
-	int[][]					wallHealths;																		// 2D array of wall healths. -1 = no wall. 100 = full health wall.
-	int[][]					wallTypes;																			// 2D array of wall types. Types are equal to the wall's element. -1 = no wall.
-	int[][]					poolHealths;
-	int[][]					poolTypes;
-	BufferedImage[][]		poolImages;																			// cropped images, to join the pool corners
-	int[][]					cornerCracks;
-	int[][][]				wCornerStyles;																		// x, y, element; corners on the *UP-LEFT* corner of the corresponding square. +1 = +90 degrees clockwise
-	int[][][]				pCornerStyles;																		// x, y, element; the int means both the shape and its rotation
-	int[][][]				pCornerTransparencies;
-	int[][]					floorTypes;																			// -1 = no floor. 0 = ground.
-	int						width, height, widthPixels, heightPixels;											// used for camera-blocking purposes
+	public int[][]					wallHealths;																		// 2D array of wall healths. -1 = no wall. 100 = full health wall.
+	public int[][]					wallTypes;																			// 2D array of wall types. Types are equal to the wall's element. -1 = no wall.
+	public int[][]					poolHealths;
+	public int[][]					poolTypes;
+	public BufferedImage[][]		poolImages;																			// cropped images, to join the pool corners
+	public int[][]					cornerCracks;
+	public int[][][]				wCornerStyles;																		// x, y, element; corners on the *UP-LEFT* corner of the corresponding square. +1 = +90 degrees clockwise
+	public int[][][]				pCornerStyles;																		// x, y, element; the int means both the shape and its rotation
+	public int[][][]				pCornerTransparencies;
+	public int[][]					floorTypes;																			// -1 = no floor. 0 = ground.
+	public int						width, height, widthPixels, heightPixels;											// used for camera-blocking purposes
 	// 0 1 2 3 4 5 6 7 8 9 10 11
 	// "Fire", "Water", "Wind", "Electricity", "Metal", "Ice", "Energy", "Acid", "Lava", "Flesh", "Earth", "Plant"
 
-	List<VisualEffect>		effects;
-	List<ArcForceField>		arcFFs;
-	List<Person>			people;
-	List<Ball>				balls;
-	List<Debris>			debris;
-	List<UIText>			uitexts;
-	List<ForceField>		FFs;
-	List<Cloud>				clouds;
-	List<Beam>				beams;
-	List<Vine>				vines;
+	public List<VisualEffect>		effects;
+	public List<ArcForceField>		arcFFs;
+	public List<Person>				people;
+	public List<Ball>				balls;
+	public List<Debris>				debris;
+	public List<UIText>				uitexts;
+	public List<ForceField>			FFs;
+	public List<Cloud>				clouds;
+	public List<Beam>				beams;
+	public List<Vine>				vines;
 
 	// Sounds
-	List<SoundEffect>		ongoingSounds		= new ArrayList<SoundEffect>();
+	public List<SoundEffect>		ongoingSounds		= new ArrayList<SoundEffect>();
 
 	public Environment(int width1, int height1)
 	{
@@ -78,8 +80,8 @@ public class Environment
 		wCornerStyles = new int[width][height][elementalNum];
 		pCornerStyles = new int[width][height][elementalNum];
 		pCornerTransparencies = new int[width][height][elementalNum];
-		this.widthPixels = width * squareWidth;
-		this.heightPixels = height * squareWidth;
+		this.widthPixels = width * squareSize;
+		this.heightPixels = height * squareSize;
 		// default shadow position is directly below.
 		shadowX = 0;
 		shadowY = 0;
@@ -126,6 +128,306 @@ public class Environment
 	private int			healthSum		= 0,
 								poolNum = 0;
 	private boolean[][]	checkedSquares	= new boolean[width][height];
+
+	public void ballDebris(Ball b, String type)
+	{
+		ballDebris(b, type, 0); // when the angle doesn't matter, use this method
+	}
+
+	public void ballDebris(Ball b, String type, double angle)
+	{
+		// "angle" is not always necessary
+		switch (type)
+		{
+		case "wall":
+			for (int k = 0; k < 3; k++)
+			{
+				// 3 pieces of debris on every side, spread angle is 20*3 degrees (180/9) on every side
+				debris.add(new Debris(b.x, b.y, b.z, b.angle() - 0.5 * Math.PI + k * Math.PI / 9, b.elementNum, b.velocity() * 0.9));
+				debris.add(new Debris(b.x, b.y, b.z, b.angle() + 0.5 * Math.PI - k * Math.PI / 9, b.elementNum, b.velocity() * 0.9));
+				playSound("Rock Smash");
+			}
+			break;
+		case "shatter":
+			for (int i = 0; i < 7; i++)
+			{
+				// I'm not sure what I did here with the angles but it looks OK
+				debris.add(new Debris(b.x, b.y, b.z, b.angle() + 4 + i * (4) / 6, b.elementNum, 500));
+			}
+			break;
+		case "arc force field":
+			for (int i = 0; i < 3; i++)
+			{
+				// 3 pieces of debris on every side, spread angle is 20*3 degrees (180/9) on every side
+				debris.add(new Debris(b.x, b.y, b.z, angle + 0.5 * Math.PI + i * Math.PI / 9, b.elementNum, b.velocity() * 0.9));
+				debris.add(new Debris(b.x, b.y, b.z, angle - 0.5 * Math.PI - i * Math.PI / 9, b.elementNum, b.velocity() * 0.9));
+			}
+			break;
+		case "punch":
+			// effects
+			for (int k = 0; k < 7; k++) // epicness
+				debris.add(new Debris(b.x, b.y, b.z, b.angle() - 3 * 0.3 + k * 0.3, b.elementNum, 600));
+			break;
+		case "Beam hit":
+			debris.add(new Debris(b.x, b.y, b.z, Math.random() * 2 * Math.PI, b.elementNum, 500));
+			break;
+		default:
+			Main.errorMessage("I'm sorry, I couldn't find any results for \"debris\". Perhaps you meant \"Deborah Peters\"?");
+			break;
+		}
+	}
+
+	public void damageWall(int i, int j, double damage, int damageType)
+	{
+		// fire can't hurt lava, acid can't hurt acid, electricity can't hurt energy, etc.
+		if (damageType > 1 && EP.damageType(wallTypes[i][j]) == damageType)
+			return;
+		// TODO elemental bonuses against some walls.
+		// note: because there are so many walls, destroying the wall occurs here and not in a frame check like other objects.
+		int wallArmor = 10;
+		if (damage - wallArmor < 1)
+		{
+			return;
+		}
+		wallHealths[i][j] -= (int) (damage - wallArmor);
+		if (showDamageNumbers)
+			uitexts.add(new UIText(i * squareSize + squareSize / 2 - 10, j * squareSize + squareSize / 2 - 10, "" + (int) (damage - wallArmor), 5));
+		if (wallHealths[i][j] <= 0)
+		{
+			destroyWall(i, j);
+		}
+		connectWall(i, j); // update cracks
+	}
+
+	public void damageFF(ForceField ff, double damage, Point point)
+	{
+		damage -= ff.armor;
+		ff.life -= damage;
+
+		// TODO some visual effect?
+		if (showDamageNumbers)
+			uitexts.add(new UIText(point.x - 10, point.y - 10, "" + (int) damage, 3));
+	}
+
+	public void damageArcForceField(ArcForceField aff, double damage, Point point, int damageType)
+	{
+		if (damageType > 1 && EP.damageType(aff.elementNum) == damageType) // resistance
+			damage *= 0.5;
+
+		double prevLife = aff.life;
+		aff.life -= damage;
+
+		if (aff.extraLife > damage)
+			aff.extraLife -= damage; // damaging shield while they're being built deals them more damage, sorta
+		else if (aff.extraLife > 0)
+			aff.extraLife = 0;
+
+		if ((prevLife >= 15 && aff.life < 15) || (prevLife >= 50 && aff.life < 50) || (prevLife >= 75 && aff.life < 75)) // TODO make it happen for every layer (more than once if two layers are broken
+																															// at once), and also make it more random?
+			shieldDebris(aff, "shield layer removed");
+
+		if (showDamageNumbers)
+			uitexts.add(new UIText(point.x - 10, point.y - 10, "" + (int) damage, 3));
+	}
+
+	public void createExplosion(double x, double y, double z, double radius, double damage, double pushback, int type)
+	{
+		// NOTE!!!!!!!
+		// The damage and pushback of explosions is calculated like this:
+		// dmg = damage*(radius - distance)/radius
+		// where "distance" = distance between explosion origin point (x, y) and victim's center.
+		// This type of damage calculation makes it LINEAR.
+
+		// type -1 = regular explosion
+		double explosionHeight = radius * 2 / 100;
+		// Adding the visual effect
+		VisualEffect explosionEffect = new VisualEffect();
+		explosionEffect.p1.x = (int) x;
+		explosionEffect.p1.y = (int) y;
+		explosionEffect.z = z;
+		explosionEffect.type = 4;
+		if (type == -1)
+			explosionEffect.subtype = 2;
+		else
+			explosionEffect.subtype = type; // TODO uh, you know, fix this
+		explosionEffect.angle = Math.random() * 2 * Math.PI;
+		explosionEffect.timeLeft = Resources.explosions.get(explosionEffect.subtype).size() * 0.02 * 4; // deltaTime = 0.02 right?
+		explosionEffect.p2.x = (int) (0.5 * Resources.explosions.get(explosionEffect.subtype).get(0).getWidth());
+		explosionEffect.p2.y = (int) (0.5 * Resources.explosions.get(explosionEffect.subtype).get(0).getHeight());
+		explosionEffect.size = radius * 2;
+		effects.add(explosionEffect);
+		for (Person p : people)
+			if (p.z < z + explosionHeight / 2 && p.z + p.height > z - explosionHeight / 2)
+				if (Methods.DistancePow2(p.x, p.y, x, y) < radius * radius)
+				{
+					double distance = Math.sqrt(Methods.DistancePow2(p.x, p.y, x, y));
+					hitPerson(p, damage * (radius - distance) / radius, pushback * (radius - distance) / radius, Math.atan2(p.y - y, p.x - x), type == -1 ? 0 : EP.damageType(type));
+				}
+		for (ForceField ff : FFs)
+			if (ff.z < z + explosionHeight / 2 && ff.z + ff.height > z - explosionHeight / 2)
+			{
+				boolean withinRange = false;
+				for (Point p : ff.p)
+					if (Methods.DistancePow2(p.x, p.y, x, y) < radius * radius)
+						withinRange = true;
+				if (withinRange)
+					damageFF(ff, (damage + pushback) * (radius - Math.sqrt(Methods.DistancePow2(ff.x, ff.y, x, y))), new Point((int) ff.x, (int) ff.y));
+			}
+		for (ArcForceField aff : arcFFs)
+			if (aff.z < z + explosionHeight / 2 && aff.z + aff.height > z - explosionHeight / 2)
+			{
+				List<Point2D> affCorners = new ArrayList<Point2D>();
+				affCorners.add(new Point2D.Double(aff.x + aff.minRadius * Math.cos(aff.rotation - aff.arc / 2), aff.y + aff.minRadius * Math.sin(aff.rotation - aff.arc / 2)));
+				affCorners.add(new Point2D.Double(aff.x + aff.maxRadius * Math.cos(aff.rotation - aff.arc / 2), aff.y + aff.maxRadius * Math.sin(aff.rotation - aff.arc / 2)));
+				affCorners.add(new Point2D.Double(aff.x + aff.minRadius * Math.cos(aff.rotation + aff.arc / 2), aff.y + aff.minRadius * Math.sin(aff.rotation + aff.arc / 2)));
+				affCorners.add(new Point2D.Double(aff.x + aff.maxRadius * Math.cos(aff.rotation + aff.arc / 2), aff.y + aff.maxRadius * Math.sin(aff.rotation + aff.arc / 2)));
+				boolean withinRange = false;
+				for (Point2D p : affCorners)
+					if (Methods.DistancePow2(p.getX(), p.getY(), x, y) < radius * radius)
+						withinRange = true;
+				if (withinRange)
+				{
+					Point affMiddle = new Point((int) (aff.x + (aff.minRadius + aff.maxRadius) / 2 * Math.cos(aff.rotation)),
+							(int) (aff.y + (aff.minRadius + aff.maxRadius) / 2 * Math.sin(aff.rotation)));
+					damageArcForceField(aff, (damage + pushback) * (radius - Math.sqrt(Methods.DistancePow2(affMiddle.x, affMiddle.y, x, y))) / radius, affMiddle,
+							type == -1 ? 0 : EP.damageType(type));
+				}
+			}
+		if (z - explosionHeight / 2 < 1)
+			for (int gridX = (int) (x - radius) / squareSize; gridX <= (int) (x + radius) / squareSize; gridX++)
+				for (int gridY = (int) (y - radius) / squareSize; gridY <= (int) (y + radius) / squareSize; gridY++)
+					if (gridX > 0 && gridY > 0 && gridX < width && gridY < height) // to avoid checking beyond array size
+						if (wallHealths[gridX][gridY] > 0
+								&& Methods.DistancePow2(x, y, gridX * squareSize + squareSize / 2, gridY * squareSize + squareSize / 2) < Math.pow(radius - squareSize / 2, 2))
+							damageWall(gridX, gridY,
+									(damage + pushback) * (radius - Math.sqrt(Methods.DistancePow2(gridX * squareSize + squareSize / 2, gridY * squareSize + squareSize / 2, x, y))) / radius,
+									type == -1 ? 0 : EP.damageType(type));
+
+	}
+
+	public void shieldDebris(ArcForceField aff, String type)
+	{
+		switch (type)
+		{
+		case "shield layer removed":
+			for (int i = 0; i < 3; i++)
+				// 86 is avg of minradius and maxradius
+				debris.add(new Debris((int) (aff.target.x + 86 * Math.cos(aff.rotation)), (int) (aff.target.y + 86 * Math.sin(aff.rotation)), aff.z, aff.rotation + 0.5 * Math.PI + 0.3 * i,
+						aff.elementNum, 150));
+			break;
+		case "deactivate":
+			for (int i = 0; i < 3; i++)
+			{
+				// 86 is avg of minradius and maxradius
+				debris.add(new Debris((int) (aff.target.x + 86 * Math.cos(aff.rotation)), (int) (aff.target.y + 86 * Math.sin(aff.rotation)), aff.z, aff.rotation + 0.5 * Math.PI + 0.3 * i,
+						aff.elementNum, 200));
+				debris.add(new Debris((int) (aff.target.x + 86 * Math.cos(aff.rotation)), (int) (aff.target.y + 86 * Math.sin(aff.rotation)), aff.z, aff.rotation + 0.5 * Math.PI + 0.3 * i,
+						aff.elementNum, 200));
+			}
+			break;
+		default:
+			Main.errorMessage("\"Shit's wrecked!\" Yamana shouts. He points at the wrecked shit.");
+			break;
+		}
+	}
+
+	public void otherDebris(double x, double y, int n, String type, int frameNum)
+	{
+		switch (type)
+		{
+		case "pool heal":
+		case "wall heal":
+			if (frameNum % 20 == 0)
+				for (double i = Math.random(); i < 7; i++)
+					debris.add(new Debris(x, y, 0, i, n, 300));
+			break;
+		default:
+			Main.errorMessage("Error message 7: BEBHMAXBRI0903 T");
+			break;
+		}
+	}
+
+	/**
+	 * 
+	 * @param p
+	 * @param damage
+	 * @param pushback
+	 * @param angle
+	 * @param damageType
+	 * @param percentageOfTheDamage
+	 */
+	public void hitPerson(Person p, double damage, double pushback, double angle, int damageType, double percentageOfTheDamage)
+	{
+		damage *= percentageOfTheDamage;
+		pushback *= percentageOfTheDamage;
+		if (damage > 0)
+		{
+			// multiplied by 0.9 to 1.1
+			damage *= 0.9 + Math.random() * 0.2;
+
+			// TODO all damage-related powers
+			damage = p.damageAfterHittingArmor(damage, damageType, percentageOfTheDamage);
+			if (p.ghostMode && damageType != 9) // damageType 9 is ghost wall-clipping
+				if (damageType != 2 && damageType != 4)
+				{
+					damage = 0;
+					pushback = 0;
+				} else // burn or shock damage
+				{
+					damage *= 3;
+					pushback = 0;
+				}
+			// Elemental resistance
+			for (Effect e : p.effects)
+				if (e.name.equals("Elemental Resistance <" + EP.nameOfDamageType(damageType) + ">"))
+				{
+					if (e.strength >= 5)
+						damage = 0;
+					else
+						damage *= Math.pow(0.75, e.strength); // maybe change it to 1-0.15*e.strength ?
+				}
+
+			if (p instanceof NPC && damage >= 1) // beams don't trigger this. If they did it would have made NPCs stop and change direction every single frame.
+				((NPC) p).justGotHit = true;
+
+			// dealing the actual damage!
+			p.damage(damage);
+			// whoa! That was so awesome.
+
+			if (showDamageNumbers)
+				p.waitingDamage += damage;
+			if (p.timeBetweenDamageTexts > 0.5)
+			{
+				if (showDamageNumbers)
+				{
+					if (p.waitingDamage > 1)
+					{
+						p.uitexts.add(new UIText(-10, 0 - p.radius / 2 - 10, "" + (int) p.waitingDamage, 1));
+						p.waitingDamage -= (int) p.waitingDamage;
+					}
+				}
+				p.timeBetweenDamageTexts = 0;
+			}
+		}
+		// PUSHBACK
+		double velocityPush = pushback * 3000 / (p.mass + 10 * p.STRENGTH); // the 3000 is subject to change
+		p.xVel += velocityPush * Math.cos(angle);
+		p.yVel += velocityPush * Math.sin(angle);
+	}
+
+	/**
+	 * Single-time damage.
+	 * 
+	 * @param p
+	 * @param damage
+	 * @param pushback
+	 * @param angle
+	 * @param damageType
+	 */
+	public void hitPerson(Person p, double damage, double pushback, double angle, int damageType)
+	{
+		hitPerson(p, damage, pushback, angle, damageType, 1);
+	}
 
 	public void updatePools()
 	{
@@ -263,18 +565,18 @@ public class Environment
 	{
 		// Pools (and floors)
 		for (int x = 0; x < width; x++)
-			if (x * squareWidth > bounds.getMinX() - squareWidth && x * squareWidth < bounds.getMaxX())
+			if (x * squareSize > bounds.getMinX() - squareSize && x * squareSize < bounds.getMaxX())
 				for (int y = 0; y < height; y++)
-					if (y * squareWidth > bounds.getMinY() - squareWidth && y * squareWidth < bounds.getMaxY())
+					if (y * squareSize > bounds.getMinY() - squareSize && y * squareSize < bounds.getMaxY())
 					{
 						// floor
 						if (floorTypes[x][y] != -1)
-							buffer.drawImage(Resources.floor[floorTypes[x][y]], x * squareWidth, y * squareWidth, that);
+							buffer.drawImage(Resources.floor[floorTypes[x][y]], x * squareSize, y * squareSize, that);
 						// pools
 						if (poolTypes[x][y] != -1)
 						{
 							buffer.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.1f + 0.009f * poolHealths[x][y]));
-							buffer.drawImage(poolImages[x][y], x * squareWidth, y * squareWidth, that);
+							buffer.drawImage(poolImages[x][y], x * squareSize, y * squareSize, that);
 							buffer.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
 						}
 						// pool corners
@@ -285,7 +587,7 @@ public class Environment
 								BufferedImage cornerImg = Resources.pCorner[i][getStyle(pCornerStyles[x][y][i])];
 								cornerImg = Methods.rotate(cornerImg, 0.5 * Math.PI * Environment.getAngle(pCornerStyles[x][y][i]), that);
 								buffer.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.1f + 0.009f * pCornerTransparencies[x][y][i]));
-								buffer.drawImage(cornerImg, x * squareWidth - squareWidth / 2, y * squareWidth - squareWidth / 2, that);
+								buffer.drawImage(cornerImg, x * squareSize - squareSize / 2, y * squareSize - squareSize / 2, that);
 								buffer.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
 							}
 					}
@@ -353,24 +655,24 @@ public class Environment
 	public void drawWalls(Graphics2D buffer, Rectangle bounds, Frame that)
 	{
 		for (int x = 0; x < width; x++)
-			if (x * squareWidth > bounds.getMinX() - squareWidth && x * squareWidth < bounds.getMaxX())
+			if (x * squareSize > bounds.getMinX() - squareSize && x * squareSize < bounds.getMaxX())
 				for (int y = 0; y < height; y++)
-					if (y * squareWidth > bounds.getMinY() - squareWidth && y * squareWidth < bounds.getMaxY())
+					if (y * squareSize > bounds.getMinY() - squareSize && y * squareSize < bounds.getMaxY())
 					{
 						// walls
 						if (wallTypes[x][y] == -2)
 						{
 							buffer.setColor(new Color(165, 165, 165));
-							buffer.fillRect(x * squareWidth, y * squareWidth, squareWidth, squareWidth);
+							buffer.fillRect(x * squareSize, y * squareSize, squareSize, squareSize);
 						} else if (wallTypes[x][y] != -1)
 						{
-							buffer.drawImage(Resources.wall[wallTypes[x][y]], x * squareWidth, y * squareWidth, null);
+							buffer.drawImage(Resources.wall[wallTypes[x][y]], x * squareSize, y * squareSize, null);
 							if (wallHealths[x][y] <= 25)
-								buffer.drawImage(Resources.cracks[2][11], x * squareWidth, y * squareWidth, null);
+								buffer.drawImage(Resources.cracks[2][11], x * squareSize, y * squareSize, null);
 							else if (wallHealths[x][y] <= 50)
-								buffer.drawImage(Resources.cracks[1][11], x * squareWidth, y * squareWidth, null);
+								buffer.drawImage(Resources.cracks[1][11], x * squareSize, y * squareSize, null);
 							else if (wallHealths[x][y] <= 75)
-								buffer.drawImage(Resources.cracks[0][11], x * squareWidth, y * squareWidth, null);
+								buffer.drawImage(Resources.cracks[0][11], x * squareSize, y * squareSize, null);
 						}
 						// wall corners
 						for (int i = elementalNum - 1; i >= 0; i--)
@@ -378,14 +680,14 @@ public class Environment
 							{
 								BufferedImage cornerImg = Resources.wCorner[i][getStyle(wCornerStyles[x][y][i])];
 								cornerImg = Methods.rotate(cornerImg, 0.5 * Math.PI * Environment.getAngle(wCornerStyles[x][y][i]), that);
-								buffer.drawImage(cornerImg, x * squareWidth - squareWidth / 2, y * squareWidth - squareWidth / 2, null);
+								buffer.drawImage(cornerImg, x * squareSize - squareSize / 2, y * squareSize - squareSize / 2, null);
 
 								// cracks
 								if (cornerCracks[x][y] != -1) // 0 = <75, 1 = <50, 2 = <25
 								{
 									cornerImg = Resources.cracks[cornerCracks[x][y]][wCornerStyles[x][y][i]];
 									// no rotation
-									buffer.drawImage(cornerImg, x * squareWidth - squareWidth / 2, y * squareWidth - squareWidth / 2, null);
+									buffer.drawImage(cornerImg, x * squareSize - squareSize / 2, y * squareSize - squareSize / 2, null);
 								}
 							}
 					}
@@ -628,7 +930,7 @@ public class Environment
 	{
 		int elementNum = wallTypes[x][y];
 		for (int i = 0; i < 5; i++)
-			debris.add(new Debris(x * squareWidth + 0.5 * squareWidth, y * squareWidth + 0.5 * squareWidth, 0, Math.PI * 2 / 5 * i, elementNum, 200));
+			debris.add(new Debris(x * squareSize + 0.5 * squareSize, y * squareSize + 0.5 * squareSize, 0, Math.PI * 2 / 5 * i, elementNum, 200));
 		remove(x, y);
 	}
 

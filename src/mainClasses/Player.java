@@ -2,9 +2,17 @@ package mainClasses;
 
 public class Player extends Person
 {
-	int[]	hotkeys;								// Mid-Click, Shift, Q, E, R, F, V, C, X, Z
-	int		numOfHotkeys					= -1;
-	String targetType = "";
+	public int[]	hotkeys;								// Mid-Click, Shift, Q, E, R, F, V, C, X, Z
+	public int		numOfHotkeys					= -1;
+	public String targetType = "";
+	
+	public boolean leftMousePressed;
+	public boolean						rightMousePressed		= false;
+	public boolean						leftPressed, rightPressed, upPressed, downPressed;
+	public boolean						ctrlPressed				= false;
+	public boolean						resizeUIButtonPressed	= false;
+	public boolean						spacePressed			= false;
+	public boolean						rotateButtonPressed		= false;
 	
 	// maybe hotkeys shouldn't belong to the player?
 

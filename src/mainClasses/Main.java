@@ -1,4 +1,5 @@
 package mainClasses;
+
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
@@ -96,15 +97,8 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 	int							screenmx				= 0;																											// Mouse X coordinate relative to FRAME
 	int							screenmy				= 0;																											//
 	int							mx						= 0;																											// Mouse X coordinate relative to in-game world
-	int							my						= 0;																											//
-	// somehow buttons got into this camera section
-	boolean						leftMousePressed		= false,
-										rightMousePressed = false;
-	boolean						leftPressed, rightPressed, upPressed, downPressed;
-	boolean						ctrlPressed				= false;
-	boolean						resizeUIButtonPressed	= false;
-	boolean						spacePressed			= false;
-	boolean						rotateButtonPressed		= false;
+	int							my						= 0;
+
 	Point3D						camera					= new Point3D(0, 0, 25);
 	double						zoomLevel				= 1;
 	double						UIzoomLevel				= 1;
@@ -184,7 +178,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 			if (user.mana >= ability.cost && !user.maintaining && ability.cooldownLeft == 0 && !user.prone)
 			{
 				// TODO make it not only in the user'z Z but in the one the user tried to do (most likely 0, unless cursor is above another object)
-				createExplosion(target.x, target.y, user.z, ability.areaRadius, ability.points * 3, ability.points * 3, -1);
+				env.createExplosion(target.x, target.y, user.z, ability.areaRadius, ability.points * 3, ability.points * 3, -1);
 				user.mana -= ability.cost;
 				ability.cooldownLeft = ability.cooldown;
 			}
@@ -593,7 +587,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 					if (env.arcFFs.get(i).target.equals(user))
 					{
 						remainingFFhealth = env.arcFFs.get(i).life + env.arcFFs.get(i).extraLife;
-						shieldDebris(env.arcFFs.get(i), "deactivate");
+						env.shieldDebris(env.arcFFs.get(i), "deactivate");
 						env.arcFFs.remove(i);
 						i--;
 					}
@@ -826,12 +820,12 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 								ballCreationSuccess = false;
 								// damage FF
 								double damage = (b.getDamage() + b.getPushback()) * 0.5; // half damage, because the ball "bounces"
-								damageFF(ff, damage, ballCenter);
+								env.damageFF(ff, damage, ballCenter);
 							}
 					if (ballCreationSuccess)
 						env.balls.add(b);
 					else
-						ballDebris(b, "shatter");
+						env.ballDebris(b, "shatter");
 					user.mana -= ability.cost;
 					user.rotate(angle, deltaTime);
 				}
@@ -842,7 +836,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 			else
 			{
 				// effects
-				otherDebris((ability.targetEffect1 + 0.5) * squareSize, (ability.targetEffect2 + 0.5) * squareSize, ability.getElementNum(), "pool heal");
+				env.otherDebris((ability.targetEffect1 + 0.5) * squareSize, (ability.targetEffect2 + 0.5) * squareSize, ability.getElementNum(), "pool heal", frameNum);
 				env.poolHealths[(int) ability.targetEffect1][(int) ability.targetEffect2] += ability.points;
 				if (env.poolHealths[(int) ability.targetEffect1][(int) ability.targetEffect2] >= 100)
 					env.poolHealths[(int) ability.targetEffect1][(int) ability.targetEffect2] = 100;
@@ -858,7 +852,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 			else
 			{
 				// effects
-				otherDebris((ability.targetEffect1 + 0.5) * squareSize, (ability.targetEffect2 + 0.5) * squareSize, ability.getElementNum(), "wall heal");
+				env.otherDebris((ability.targetEffect1 + 0.5) * squareSize, (ability.targetEffect2 + 0.5) * squareSize, ability.getElementNum(), "wall heal", frameNum);
 				env.wallHealths[(int) ability.targetEffect1][(int) ability.targetEffect2] = (int) Math.max(Math.max((1 - ability.cooldownLeft / ability.cooldown) * 100, 1),
 						env.wallHealths[(int) ability.targetEffect1][(int) ability.targetEffect2]); // make sure you aren't decreasing current health
 				user.mana -= ability.costPerSecond * deltaTime;
@@ -874,7 +868,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 				} else
 				{
 					user.mana -= 1.5 * deltaTime; // punish
-					hitPerson(user, 15 * deltaTime, 0, 0, 9, deltaTime); // punish
+					env.hitPerson(user, 15 * deltaTime, 0, 0, 9, deltaTime); // punish
 					user.stamina -= 1.5 * deltaTime; // punish
 					ability.timeLeft = 0;
 					user.panic = true;
@@ -1070,16 +1064,16 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 						}
 						break;
 					case 7: // acid
-						hitPerson(p, 25, 0, 0, 3, deltaTime); // acid damage
+						env.hitPerson(p, 25, 0, 0, 3, deltaTime); // acid damage
 						break;
 					case 8: // lava
-						hitPerson(p, 20, 0, 0, 2, deltaTime); // burn damage
+						env.hitPerson(p, 20, 0, 0, 2, deltaTime); // burn damage
 						if (frameNum % 50 == 0 && random.nextDouble() < 0.7) // burn chance is 70% in lava
 							p.affect(new Effect("Burning", 5), true);
 						break;
 					case 10: // earth spikes
 						// TEMP spikes deal 30 damage per second
-						hitPerson(p, 25, 0, 0, 1, deltaTime);
+						env.hitPerson(p, 25, 0, 0, 1, deltaTime);
 						break;
 					default:
 						errorMessage("Unknown pool type: " + type);
@@ -1095,7 +1089,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 					Effect e = p.effects.get(i);
 					if (e.name.equals("Burning"))
 					{
-						hitPerson(p, e.strength, 0, 0, 2);
+						env.hitPerson(p, e.strength, 0, 0, 2);
 						if (random.nextDouble() < 0.25) // 25% chance to stop burning, per second
 							p.affect(e, false);
 					}
@@ -1608,7 +1602,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 				b.endAngle = Math.PI;
 			if (roundedIntersectionPoint.y == collidedWall.y * squareSize + squareSize) // down
 				b.endAngle = -Math.PI / 2;
-			damageWall(collidedWall.x, collidedWall.y, b.getDamage() + b.getPushback(), EP.damageType(b.elementNum));
+			env.damageWall(collidedWall.x, collidedWall.y, b.getDamage() + b.getPushback(), EP.damageType(b.elementNum));
 			break;
 		case 1: // Force Field
 			b.end.x = roundedIntersectionPoint.x;
@@ -1656,7 +1650,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 						moveBeam(b2, true); // Recursion!!!
 					}
 				} else
-					damageArcForceField(collidedAFF, b.getDamage() + b.getPushback(), roundedIntersectionPoint, EP.damageType(b.elementNum));
+					env.damageArcForceField(collidedAFF, b.getDamage() + b.getPushback(), roundedIntersectionPoint, EP.damageType(b.elementNum));
 			break;
 		case 3: // Person
 			b.end.x = roundedIntersectionPoint.x;
@@ -1664,7 +1658,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 			b.endType = 0;
 
 			// damaging the person
-			hitPerson(collidedPerson, b.getDamage(), b.getPushback(), angle, EP.damageType(b.elementNum), globalDeltaTime);
+			env.hitPerson(collidedPerson, b.getDamage(), b.getPushback(), angle, EP.damageType(b.elementNum), globalDeltaTime);
 			// sound effect (scorched flesh)
 			if (!collidedPerson.sounds.get(0).active)
 				collidedPerson.sounds.get(0).loop();
@@ -1679,7 +1673,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 			collidedBall.mass -= 0.2 * b.getDamage() * globalDeltaTime; // TODO what the shit? Damaging the ball's mass? Whaaa?
 			// I'm not sure what I did here with the angles but it looks OK
 			if (frameNum % 2 == 0)
-				ballDebris(collidedBall, "beam hit");
+				env.ballDebris(collidedBall, "beam hit");
 			break;
 		default:
 			errorMessage("Dragon and Defiant, sitting in a tree, K-I-S-S-I-S-S-I-P-P-I");
@@ -1702,6 +1696,13 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 
 		if (v.state == 1) // grabbling
 		{
+			//TODO this entire thing....
+			/*
+			 * It might need to incorporate deltaTime somehow, although that's not very important
+			 * It looks *okay* when grabbling people, but seriously buggy when grabbling a ball
+			 * Why does the ball just constantly become faster and faster and stretches more and more???
+			 */
+			
 			double maxSpringiness = 40; // If it's too high (or doesn't exist), repeated rotation of vine will constantly escalate the delta length for some reason, and physics will wackify.
 			double springiness = v.deltaLength;
 			if (springiness < -maxSpringiness)
@@ -1726,6 +1727,10 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 				circularAccel *= -1;
 			v.grabbledThing.xVel += circularAccel * Math.cos(v.rotation + TAU / 4);
 			v.grabbledThing.yVel += circularAccel * Math.sin(v.rotation + TAU / 4);
+
+			if (v.grabbledThing instanceof Ball)
+				if (v.grabbledThing.velocity() > 500)
+					v.grabbledThing.zVel = 0;
 		}
 		if (v.state == 0 || v.state == 2)
 		{
@@ -2087,21 +2092,21 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 			v.end.y = roundedIntersectionPoint.y;
 			v.retract();
 			v.fixPosition();
-			damageWall(collidedWall.x, collidedWall.y, v.getDamage() + v.getPushback(), EP.damageType(EP.toInt("Plant")));
+			env.damageWall(collidedWall.x, collidedWall.y, v.getDamage() + v.getPushback(), EP.damageType(EP.toInt("Plant")));
 			break;
 		case 1: // force field
 			v.end.x = roundedIntersectionPoint.x;
 			v.end.y = roundedIntersectionPoint.y;
 			v.retract();
 			v.fixPosition();
-			damageFF(collidedFF, v.getDamage() + v.getPushback(), roundedIntersectionPoint);
+			env.damageFF(collidedFF, v.getDamage() + v.getPushback(), roundedIntersectionPoint);
 			break;
 		case 2: // arc force field
 			v.end.x = roundedIntersectionPoint.x;
 			v.end.y = roundedIntersectionPoint.y;
 			v.retract();
 			v.fixPosition();
-			damageArcForceField(collidedAFF, v.getDamage() + v.getPushback(), roundedIntersectionPoint, EP.damageType("Plant"));
+			env.damageArcForceField(collidedAFF, v.getDamage() + v.getPushback(), roundedIntersectionPoint, EP.damageType("Plant"));
 			break;
 		case 3: // person (grabbled)
 			v.end = new Point3D((int) collidedPerson.x, (int) collidedPerson.y, (int) collidedPerson.z);
@@ -2121,7 +2126,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 				double hitAngle = v.rotation + (difference > 0 ? TAU / 4 : -TAU / 4);
 				double vineCollisionPercentage = 0.01;
 				double push = Math.min(Math.sqrt(Math.pow(v.grabbledThing.xVel, 2) + Math.pow(v.grabbledThing.yVel, 2)) * vineCollisionPercentage, v.getCollisionPushback());
-				hitPerson(collidedPerson, v.getCollisionDamage(), push, hitAngle, 0);
+				env.hitPerson(collidedPerson, v.getCollisionDamage(), push, hitAngle, 0);
 				collidedPerson.rotation = hitAngle;
 				collidedPerson.slippedTimeLeft = 3;
 				collidedPerson.prone = true;
@@ -2162,171 +2167,6 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 		b2.frameNum = b.frameNum;
 		b2.isChild = true;
 		return b2;
-	}
-
-	void createExplosion(double x, double y, double z, double radius, double damage, double pushback, int type)
-	{
-		// NOTE!!!!!!!
-		// The damage and pushback of explosions is calculated like this:
-		// dmg = damage*(radius - distance)/radius
-		// where "distance" = distance between explosion origin point (x, y) and victim's center.
-		// This type of damage calculation makes it LINEAR.
-
-		// type -1 = regular explosion
-		double explosionHeight = radius * 2 / 100;
-		// Adding the visual effect
-		VisualEffect explosionEffect = new VisualEffect();
-		explosionEffect.p1.x = (int) x;
-		explosionEffect.p1.y = (int) y;
-		explosionEffect.z = z;
-		explosionEffect.type = 4;
-		if (type == -1)
-			explosionEffect.subtype = 2;
-		else
-			explosionEffect.subtype = type; // TODO uh, you know, fix this
-		explosionEffect.angle = Math.random() * 2 * Math.PI;
-		explosionEffect.timeLeft = Resources.explosions.get(explosionEffect.subtype).size() * globalDeltaTime * 4;
-		explosionEffect.p2.x = (int) (0.5 * Resources.explosions.get(explosionEffect.subtype).get(0).getWidth());
-		explosionEffect.p2.y = (int) (0.5 * Resources.explosions.get(explosionEffect.subtype).get(0).getHeight());
-		explosionEffect.size = radius * 2;
-		env.effects.add(explosionEffect);
-		for (Person p : env.people)
-			if (p.z < z + explosionHeight / 2 && p.z + p.height > z - explosionHeight / 2)
-				if (Methods.DistancePow2(p.x, p.y, x, y) < radius * radius)
-				{
-					double distance = Math.sqrt(Methods.DistancePow2(p.x, p.y, x, y));
-					hitPerson(p, damage * (radius - distance) / radius, pushback * (radius - distance) / radius, Math.atan2(p.y - y, p.x - x), type == -1 ? 0 : EP.damageType(type));
-				}
-		for (ForceField ff : env.FFs)
-			if (ff.z < z + explosionHeight / 2 && ff.z + ff.height > z - explosionHeight / 2)
-			{
-				boolean withinRange = false;
-				for (Point p : ff.p)
-					if (Methods.DistancePow2(p.x, p.y, x, y) < radius * radius)
-						withinRange = true;
-				if (withinRange)
-					damageFF(ff, (damage + pushback) * (radius - Math.sqrt(Methods.DistancePow2(ff.x, ff.y, x, y))), new Point((int) ff.x, (int) ff.y));
-			}
-		for (ArcForceField aff : env.arcFFs)
-			if (aff.z < z + explosionHeight / 2 && aff.z + aff.height > z - explosionHeight / 2)
-			{
-				List<Point2D> affCorners = new ArrayList<Point2D>();
-				affCorners.add(new Point2D.Double(aff.x + aff.minRadius * Math.cos(aff.rotation - aff.arc / 2), aff.y + aff.minRadius * Math.sin(aff.rotation - aff.arc / 2)));
-				affCorners.add(new Point2D.Double(aff.x + aff.maxRadius * Math.cos(aff.rotation - aff.arc / 2), aff.y + aff.maxRadius * Math.sin(aff.rotation - aff.arc / 2)));
-				affCorners.add(new Point2D.Double(aff.x + aff.minRadius * Math.cos(aff.rotation + aff.arc / 2), aff.y + aff.minRadius * Math.sin(aff.rotation + aff.arc / 2)));
-				affCorners.add(new Point2D.Double(aff.x + aff.maxRadius * Math.cos(aff.rotation + aff.arc / 2), aff.y + aff.maxRadius * Math.sin(aff.rotation + aff.arc / 2)));
-				boolean withinRange = false;
-				for (Point2D p : affCorners)
-					if (Methods.DistancePow2(p.getX(), p.getY(), x, y) < radius * radius)
-						withinRange = true;
-				if (withinRange)
-				{
-					Point affMiddle = new Point((int) (aff.x + (aff.minRadius + aff.maxRadius) / 2 * Math.cos(aff.rotation)),
-							(int) (aff.y + (aff.minRadius + aff.maxRadius) / 2 * Math.sin(aff.rotation)));
-					damageArcForceField(aff, (damage + pushback) * (radius - Math.sqrt(Methods.DistancePow2(affMiddle.x, affMiddle.y, x, y))) / radius, affMiddle,
-							type == -1 ? 0 : EP.damageType(type));
-				}
-			}
-		if (z - explosionHeight / 2 < 1)
-			for (int gridX = (int) (x - radius) / squareSize; gridX <= (int) (x + radius) / squareSize; gridX++)
-				for (int gridY = (int) (y - radius) / squareSize; gridY <= (int) (y + radius) / squareSize; gridY++)
-					if (gridX > 0 && gridY > 0 && gridX < env.width && gridY < env.height) // to avoid checking beyond array size
-						if (env.wallHealths[gridX][gridY] > 0
-								&& Methods.DistancePow2(x, y, gridX * squareSize + squareSize / 2, gridY * squareSize + squareSize / 2) < Math.pow(radius - squareSize / 2, 2))
-							damageWall(gridX, gridY,
-									(damage + pushback) * (radius - Math.sqrt(Methods.DistancePow2(gridX * squareSize + squareSize / 2, gridY * squareSize + squareSize / 2, x, y))) / radius,
-									type == -1 ? 0 : EP.damageType(type));
-
-	}
-
-	void ballDebris(Ball b, String type)
-	{
-		ballDebris(b, type, 0); // when the angle doesn't matter, use this method
-	}
-
-	void ballDebris(Ball b, String type, double angle)
-	{
-		// "angle" is not always necessary
-		switch (type)
-		{
-		case "wall":
-			for (int k = 0; k < 3; k++)
-			{
-				// 3 pieces of debris on every side, spread angle is 20*3 degrees (180/9) on every side
-				env.debris.add(new Debris(b.x, b.y, b.z, b.angle() - 0.5 * Math.PI + k * Math.PI / 9, b.elementNum, b.velocity() * 0.9));
-				env.debris.add(new Debris(b.x, b.y, b.z, b.angle() + 0.5 * Math.PI - k * Math.PI / 9, b.elementNum, b.velocity() * 0.9));
-				env.playSound("Rock Smash");
-			}
-			break;
-		case "shatter":
-			for (int i = 0; i < 7; i++)
-			{
-				// I'm not sure what I did here with the angles but it looks OK
-				env.debris.add(new Debris(b.x, b.y, b.z, b.angle() + 4 + i * (4) / 6, b.elementNum, 500));
-			}
-			break;
-		case "arc force field":
-			for (int i = 0; i < 3; i++)
-			{
-				// 3 pieces of debris on every side, spread angle is 20*3 degrees (180/9) on every side
-				env.debris.add(new Debris(b.x, b.y, b.z, angle + 0.5 * Math.PI + i * Math.PI / 9, b.elementNum, b.velocity() * 0.9));
-				env.debris.add(new Debris(b.x, b.y, b.z, angle - 0.5 * Math.PI - i * Math.PI / 9, b.elementNum, b.velocity() * 0.9));
-			}
-			break;
-		case "punch":
-			// effects
-			for (int k = 0; k < 7; k++) // epicness
-				env.debris.add(new Debris(b.x, b.y, b.z, b.angle() - 3 * 0.3 + k * 0.3, b.elementNum, 600));
-			break;
-		case "Beam hit":
-			env.debris.add(new Debris(b.x, b.y, b.z, Math.random() * 2 * Math.PI, b.elementNum, 500));
-			break;
-		default:
-			errorMessage("I'm sorry, I couldn't find any results for \"debris\". Perhaps you meant \"Deborah Peters\"?");
-			break;
-		}
-	}
-
-	void shieldDebris(ArcForceField aff, String type)
-	{
-		switch (type)
-		{
-		case "shield layer removed":
-			for (int i = 0; i < 3; i++)
-				// 86 is avg of minradius and maxradius
-				env.debris.add(new Debris((int) (aff.target.x + 86 * Math.cos(aff.rotation)), (int) (aff.target.y + 86 * Math.sin(aff.rotation)), aff.z, aff.rotation + 0.5 * Math.PI + 0.3 * i,
-						aff.elementNum, 150));
-			break;
-		case "deactivate":
-			for (int i = 0; i < 3; i++)
-			{
-				// 86 is avg of minradius and maxradius
-				env.debris.add(new Debris((int) (aff.target.x + 86 * Math.cos(aff.rotation)), (int) (aff.target.y + 86 * Math.sin(aff.rotation)), aff.z, aff.rotation + 0.5 * Math.PI + 0.3 * i,
-						aff.elementNum, 200));
-				env.debris.add(new Debris((int) (aff.target.x + 86 * Math.cos(aff.rotation)), (int) (aff.target.y + 86 * Math.sin(aff.rotation)), aff.z, aff.rotation + 0.5 * Math.PI + 0.3 * i,
-						aff.elementNum, 200));
-			}
-			break;
-		default:
-			errorMessage("\"Shit's wrecked!\" Yamana shouts. He points at the wrecked shit.");
-			break;
-		}
-	}
-
-	void otherDebris(double x, double y, int n, String type)
-	{
-		switch (type)
-		{
-		case "pool heal":
-		case "wall heal":
-			if (frameNum % 20 == 0)
-				for (double i = Math.random(); i < 7; i++)
-					env.debris.add(new Debris(x, y, 0, i, n, 300));
-			break;
-		default:
-			errorMessage("Error message 7: BEBHMAXBRI0903 T");
-			break;
-		}
 	}
 
 	void updateFF(ForceField ff, double deltaTime)
@@ -2713,18 +2553,18 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 		case "Shield":
 			player.targetType = "look";
 			player.target = new Point(-1, -1);
-			if (!leftMousePressed) // stops aiming shield while pressing mouse, to blink for example
+			if (!player.leftMousePressed) // stops aiming shield while pressing mouse, to blink for example
 				player.rotate(angle, globalDeltaTime);
 			break;
 		case "Ball":
 			player.targetType = "look";
 			player.target = new Point((int) (player.x + ability.range * Math.cos(angle)), (int) (player.y + ability.range * Math.sin(angle)));
-			if (!leftMousePressed)
+			if (!player.leftMousePressed)
 				player.rotate(angle, 3.0 * globalDeltaTime);
 			break;
 		case "Beam":
 			player.targetType = "look";
-			if (!leftMousePressed && !player.holdingVine)
+			if (!player.leftMousePressed && !player.holdingVine)
 				player.rotate(angle, 3.0 * globalDeltaTime);
 			// if it's a vine and it's holding onto something, the person's rotation is hard-changed to the vine's angle in frame()
 			break;
@@ -2736,7 +2576,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 			// width
 			ability.targetEffect3 = 5 + 7 * ability.points;
 
-			if (!leftMousePressed)
+			if (!player.leftMousePressed)
 				player.rotate(angle, 3.0 * globalDeltaTime);
 			break;
 		case "Force Shield":
@@ -2747,7 +2587,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 			// width
 			ability.targetEffect3 = 10 + (int) ability.points * 1;
 
-			if (!leftMousePressed)
+			if (!player.leftMousePressed)
 				player.rotate(angle, 3.0 * globalDeltaTime);
 			break;
 		case "Ghost Mode I":
@@ -2944,11 +2784,6 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 	void restart()
 	{
 		System.setProperty("sun.java2d.opengl", "True");
-		leftMousePressed = false;
-		leftPressed = false;
-		rightPressed = false;
-		upPressed = false;
-		downPressed = false;
 
 		EPgenerator.initializeFHRE();
 		PowerGenerator.initializeTables();
@@ -3235,7 +3070,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 							p.yVel = -p.yVel;
 							p.x += deltaTime * p.xVel;
 							p.y += deltaTime * p.yVel;
-							hitPerson(p, 5 * deltaTime, 0, 0, 4);
+							env.hitPerson(p, 5 * deltaTime, 0, 0, 4);
 							if (p instanceof NPC)
 								((NPC) p).justCollided = true;
 						}
@@ -3285,7 +3120,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 							p.x += 80 * moveQuantumX;
 							p.y += 80 * moveQuantumY;
 							// zap
-							hitPerson(p, 5 * deltaTime, 0, 0, 4);
+							env.hitPerson(p, 5 * deltaTime, 0, 0, 4);
 							if (p instanceof NPC)
 								((NPC) p).justCollided = true;
 						}
@@ -3316,7 +3151,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 	boolean moveBall(Ball b, double deltaTime)
 	{
 		// return false if ball was destroyed
-		
+
 		double velocityLeft = Math.sqrt(b.xVel * b.xVel + b.yVel * b.yVel) * deltaTime;
 		double moveQuantumX = b.xVel / velocityLeft * deltaTime;
 		double moveQuantumY = b.yVel / velocityLeft * deltaTime; // vector combination of moveQuantumX and moveQuantumY is equal to 1 pixel per frame.
@@ -3387,9 +3222,9 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 									}
 								} else
 								{
-									damageWall(i / squareSize, j / squareSize, b.getDamage() + b.getPushback(), EP.damageType(b.elementNum));
+									env.damageWall(i / squareSize, j / squareSize, b.getDamage() + b.getPushback(), EP.damageType(b.elementNum));
 									// debris
-									ballDebris(b, "wall");
+									env.ballDebris(b, "wall");
 									// ball was destroyed
 									return false;
 								}
@@ -3420,10 +3255,10 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 							} else
 							{
 								// damage person
-								hitPerson(p, b.getDamage(), b.getPushback(), b.angle(), EP.damageType(b.elementNum));
+								env.hitPerson(p, b.getDamage(), b.getPushback(), b.angle(), EP.damageType(b.elementNum));
 								if (p instanceof NPC)
 									((NPC) p).justCollided = true;
-								ballDebris(b, "shatter");
+								env.ballDebris(b, "shatter");
 								// destroy ball
 								return false;
 							}
@@ -3465,9 +3300,10 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 							if (aff.elementNum == 6 && EP.damageType(b.elementNum) == 4) // electricity and energy balls bounce off of energy
 							{
 								double damage = (b.getDamage() + b.getPushback()) * 0.5; // half damage, because the ball bounces
-								damageArcForceField(aff, damage, new Point((int) (aff.target.x + aff.maxRadius * Math.cos(angleToBall)), (int) (aff.target.y + aff.maxRadius * Math.sin(angleToBall))),
+								env.damageArcForceField(aff, damage,
+										new Point((int) (aff.target.x + aff.maxRadius * Math.cos(angleToBall)), (int) (aff.target.y + aff.maxRadius * Math.sin(angleToBall))),
 										EP.damageType(b.elementNum));
-								hitPerson(aff.target, 0, 0.5 * b.getPushback(), b.angle(), 0);
+								env.hitPerson(aff.target, 0, 0.5 * b.getPushback(), b.angle(), 0);
 								// TODO cool sparks
 								// PHYSICS
 								double angle = 2 * angleToBall - b.angle() + Math.PI;
@@ -3475,8 +3311,8 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 								moveQuantumX = Math.cos(angle);
 								moveQuantumY = Math.sin(angle);
 								double velocity = b.velocity();
-								b.xVel = velocity*moveQuantumX;
-								b.yVel = velocity*moveQuantumY;
+								b.xVel = velocity * moveQuantumX;
+								b.yVel = velocity * moveQuantumY;
 								// avoiding it some more
 								b.x += moveQuantumX;
 								b.y += moveQuantumY;
@@ -3488,12 +3324,13 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 								// TODO damage depends on ball speed maybe?a
 								// TODO water strong against fire, electricity unblockable by some and entirely blockable by others, , bouncing from metal, etc.
 								double damage = b.getDamage() + b.getPushback();
-								damageArcForceField(aff, damage, new Point((int) (aff.target.x + aff.maxRadius * Math.cos(angleToBall)), (int) (aff.target.y + aff.maxRadius * Math.sin(angleToBall))),
+								env.damageArcForceField(aff, damage,
+										new Point((int) (aff.target.x + aff.maxRadius * Math.cos(angleToBall)), (int) (aff.target.y + aff.maxRadius * Math.sin(angleToBall))),
 										EP.damageType(b.elementNum));
-								hitPerson(aff.target, 0, 0.5 * b.getPushback(), b.angle(), 0);
+								env.hitPerson(aff.target, 0, 0.5 * b.getPushback(), b.angle(), 0);
 
 								// Special effects! debris!
-								ballDebris(b, "arc force field", angleToBall);
+								env.ballDebris(b, "arc force field", angleToBall);
 								return false;
 							}
 						}
@@ -3526,7 +3363,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 								&& 0 <= Methods.realDotProduct(ff.p[0], ballCenter, ff.p[3]) && Methods.realDotProduct(ff.p[0], ballCenter, ff.p[3]) <= ff.length * ff.length)
 						// circle center is within FF. This basically never ever should happen.
 						{
-							damageFF(ff, b.getDamage() + b.getPushback(), ballCenter);
+							env.damageFF(ff, b.getDamage() + b.getPushback(), ballCenter);
 
 							// FX
 							for (int i = 0; i < 7; i++)
@@ -3541,15 +3378,15 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 								{
 									// PHYSICS
 									double angle = 2 * ff.rotation - b.angle() + Math.PI;
-								// avoiding repeat-bounce immediately afterwards
-								moveQuantumX = Math.cos(angle);
-								moveQuantumY = Math.sin(angle);
-								double velocity = b.velocity();
-								b.xVel = velocity*moveQuantumX;
-								b.yVel = velocity*moveQuantumY;
-								// avoiding it some more
-								b.x += moveQuantumX;
-								b.y += moveQuantumY;
+									// avoiding repeat-bounce immediately afterwards
+									moveQuantumX = Math.cos(angle);
+									moveQuantumY = Math.sin(angle);
+									double velocity = b.velocity();
+									b.xVel = velocity * moveQuantumX;
+									b.yVel = velocity * moveQuantumY;
+									// avoiding it some more
+									b.x += moveQuantumX;
+									b.y += moveQuantumY;
 								}
 							} else if (Methods.LineToPointDistancePow2(ff.p[2], ff.p[3], ballCenter) < ballRadiusPow2)
 							{
@@ -3558,15 +3395,15 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 								{
 									// PHYSICS
 									double angle = 2 * ff.rotation - b.angle() + Math.PI;
-								// avoiding repeat-bounce immediately afterwards
-								moveQuantumX = Math.cos(angle);
-								moveQuantumY = Math.sin(angle);
-								double velocity = b.velocity();
-								b.xVel = velocity*moveQuantumX;
-								b.yVel = velocity*moveQuantumY;
-								// avoiding it some more
-								b.x += moveQuantumX;
-								b.y += moveQuantumY;
+									// avoiding repeat-bounce immediately afterwards
+									moveQuantumX = Math.cos(angle);
+									moveQuantumY = Math.sin(angle);
+									double velocity = b.velocity();
+									b.xVel = velocity * moveQuantumX;
+									b.yVel = velocity * moveQuantumY;
+									// avoiding it some more
+									b.x += moveQuantumX;
+									b.y += moveQuantumY;
 								}
 							}
 							if (Methods.LineToPointDistancePow2(ff.p[1], ff.p[2], ballCenter) < ballRadiusPow2)
@@ -3576,15 +3413,15 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 								{
 									// PHYSICS
 									double angle = 2 * ff.rotation - b.angle() + Math.PI;
-								// avoiding repeat-bounce immediately afterwards
-								moveQuantumX = Math.cos(angle);
-								moveQuantumY = Math.sin(angle);
-								double velocity = b.velocity();
-								b.xVel = velocity*moveQuantumX;
-								b.yVel = velocity*moveQuantumY;
-								// avoiding it some more
-								b.x += moveQuantumX;
-								b.y += moveQuantumY;
+									// avoiding repeat-bounce immediately afterwards
+									moveQuantumX = Math.cos(angle);
+									moveQuantumY = Math.sin(angle);
+									double velocity = b.velocity();
+									b.xVel = velocity * moveQuantumX;
+									b.yVel = velocity * moveQuantumY;
+									// avoiding it some more
+									b.x += moveQuantumX;
+									b.y += moveQuantumY;
 								}
 							} else if (Methods.LineToPointDistancePow2(ff.p[3], ff.p[0], ballCenter) < ballRadiusPow2)
 							{
@@ -3593,15 +3430,15 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 								{
 									// PHYSICS
 									double angle = 2 * ff.rotation - b.angle() + Math.PI;
-								// avoiding repeat-bounce immediately afterwards
-								moveQuantumX = Math.cos(angle);
-								moveQuantumY = Math.sin(angle);
-								double velocity = b.velocity();
-								b.xVel = velocity*moveQuantumX;
-								b.yVel = velocity*moveQuantumY;
-								// avoiding it some more
-								b.x += moveQuantumX;
-								b.y += moveQuantumY;
+									// avoiding repeat-bounce immediately afterwards
+									moveQuantumX = Math.cos(angle);
+									moveQuantumY = Math.sin(angle);
+									double velocity = b.velocity();
+									b.xVel = velocity * moveQuantumX;
+									b.yVel = velocity * moveQuantumY;
+									// avoiding it some more
+									b.x += moveQuantumX;
+									b.y += moveQuantumY;
 								}
 							}
 						}
@@ -3623,7 +3460,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 						{
 							if (b.mass > b2.mass)
 							{
-								ballDebris(b2, "shatter");
+								env.ballDebris(b2, "shatter");
 								// collisions reduce mass from the stronger ball
 								b.mass -= b2.mass;
 								b2.xVel = 0;
@@ -3631,13 +3468,13 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 								b2.mass = 0;
 							} else if (b2.mass > b.mass)
 							{
-								ballDebris(b, "shatter");
+								env.ballDebris(b, "shatter");
 								b2.mass -= b.mass;
 								return false;
 							} else // equal masses
 							{
-								ballDebris(b2, "shatter");
-								ballDebris(b, "shatter");
+								env.ballDebris(b2, "shatter");
+								env.ballDebris(b, "shatter");
 								b2.xVel = 0;
 								b2.yVel = 0;
 								b2.mass = 0;
@@ -3653,7 +3490,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 		if (b.z < 0)
 		{
 			// debris
-			ballDebris(b, "shatter");
+			env.ballDebris(b, "shatter");
 			return false;
 		}
 
@@ -3696,141 +3533,6 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 
 		b.xVel *= bounceEfficiency;
 		b.yVel *= bounceEfficiency;
-	}
-
-	void damageWall(int i, int j, double damage, int damageType)
-	{
-		// fire can't hurt lava, acid can't hurt acid, electricity can't hurt energy, etc.
-		if (damageType > 1 && EP.damageType(env.wallTypes[i][j]) == damageType)
-			return;
-		// TODO elemental bonuses against some walls.
-		// note: because there are so many walls, destroying the wall occurs here and not in a frame check like other objects.
-		int wallArmor = 10;
-		if (damage - wallArmor < 1)
-		{
-			return;
-		}
-		env.wallHealths[i][j] -= (int) (damage - wallArmor);
-		if (env.showDamageNumbers)
-			env.uitexts.add(new UIText(i * squareSize + squareSize / 2 - 10, j * squareSize + squareSize / 2 - 10, "" + (int) (damage - wallArmor), 5));
-		if (env.wallHealths[i][j] <= 0)
-		{
-			env.destroyWall(i, j);
-		}
-		env.connectWall(i, j); // update cracks
-	}
-
-	void damageFF(ForceField ff, double damage, Point point)
-	{
-		damage -= ff.armor;
-		ff.life -= damage;
-
-		// TODO some visual effect?
-		if (env.showDamageNumbers)
-			env.uitexts.add(new UIText(point.x - 10, point.y - 10, "" + (int) damage, 3));
-	}
-
-	void damageArcForceField(ArcForceField aff, double damage, Point point, int damageType)
-	{
-		if (damageType > 1 && EP.damageType(aff.elementNum) == damageType) // resistance
-			damage *= 0.5;
-
-		double prevLife = aff.life;
-		aff.life -= damage;
-
-		if (aff.extraLife > damage)
-			aff.extraLife -= damage; // damaging shield while they're being built deals them more damage, sorta
-		else if (aff.extraLife > 0)
-			aff.extraLife = 0;
-
-		if ((prevLife >= 15 && aff.life < 15) || (prevLife >= 50 && aff.life < 50) || (prevLife >= 75 && aff.life < 75)) // TODO make it happen for every layer (more than once if two layers are broken
-																															// at once), and also make it more random?
-			shieldDebris(aff, "shield layer removed");
-
-		if (env.showDamageNumbers)
-			env.uitexts.add(new UIText(point.x - 10, point.y - 10, "" + (int) damage, 3));
-	}
-
-	/**
-	 * 
-	 * @param p
-	 * @param damage
-	 * @param pushback
-	 * @param angle
-	 * @param damageType
-	 * @param percentageOfTheDamage
-	 */
-	void hitPerson(Person p, double damage, double pushback, double angle, int damageType, double percentageOfTheDamage)
-	{
-		damage *= percentageOfTheDamage;
-		pushback *= percentageOfTheDamage;
-		if (damage > 0)
-		{
-			// multiplied by 0.9 to 1.1
-			damage *= 0.9 + Math.random() * 0.2;
-
-			// TODO all damage-related powers
-			damage = p.damageAfterHittingArmor(damage, damageType, percentageOfTheDamage);
-			if (p.ghostMode && damageType != 9) // damageType 9 is ghost wall-clipping
-				if (damageType != 2 && damageType != 4)
-				{
-					damage = 0;
-					pushback = 0;
-				} else // burn or shock damage
-				{
-					damage *= 3;
-					pushback = 0;
-				}
-			// Elemental resistance
-			for (Effect e : p.effects)
-				if (e.name.equals("Elemental Resistance <" + EP.nameOfDamageType(damageType) + ">"))
-				{
-					if (e.strength >= 5)
-						damage = 0;
-					else
-						damage *= Math.pow(0.75, e.strength); // maybe change it to 1-0.15*e.strength ?
-				}
-
-			if (p instanceof NPC && damage >= 1) // beams don't trigger this. If they did it would have made NPCs stop and change direction every single frame.
-				((NPC) p).justGotHit = true;
-
-			// dealing the actual damage!
-			p.damage(damage);
-			// whoa! That was so awesome.
-
-			if (env.showDamageNumbers)
-				p.waitingDamage += damage;
-			if (p.timeBetweenDamageTexts > 0.5)
-			{
-				if (env.showDamageNumbers)
-				{
-					if (p.waitingDamage > 1)
-					{
-						p.uitexts.add(new UIText(-10, 0 - p.radius / 2 - 10, "" + (int) p.waitingDamage, 1));
-						p.waitingDamage -= (int) p.waitingDamage;
-					}
-				}
-				p.timeBetweenDamageTexts = 0;
-			}
-		}
-		// PUSHBACK
-		double velocityPush = pushback * 3000 / (p.mass + 10 * p.STRENGTH); // the 3000 is subject to change
-		p.xVel += velocityPush * Math.cos(angle);
-		p.yVel += velocityPush * Math.sin(angle);
-	}
-
-	/**
-	 * Single-time damage.
-	 * 
-	 * @param p
-	 * @param damage
-	 * @param pushback
-	 * @param angle
-	 * @param damageType
-	 */
-	void hitPerson(Person p, double damage, double pushback, double angle, int damageType)
-	{
-		hitPerson(p, damage, pushback, angle, damageType, 1);
 	}
 
 	double applyGravityAndFrictionAndReturnFriction(Person p, double deltaTime)
@@ -3942,8 +3644,8 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 						if (env.wallTypes[i][j] != -1)
 						{
 							double leftoverPushback = env.wallHealths[i][j] > damage + pushback ? pushback : Math.min(env.wallHealths[i][j], pushback);
-							damageWall(i, j, damage + pushback, damageType);
-							hitPerson(user, damage, leftoverPushback, user.rotation - Math.PI, damageType);
+							env.damageWall(i, j, damage + pushback, damageType);
+							env.hitPerson(user, damage, leftoverPushback, user.rotation - Math.PI, damageType);
 							user.punchedSomebody = true;
 							break collisionCheck;
 						}
@@ -3961,8 +3663,8 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 									if (forcefieldArea.contains(user.target))
 									{
 										double leftoverPushback = ff.life > damage + pushback ? pushback : Math.min(env.wallHealths[i][j], pushback);
-										damageFF(ff, damage + pushback, user.target);
-										hitPerson(user, damage, leftoverPushback, user.rotation - Math.PI, 4); // Shock damage
+										env.damageFF(ff, damage + pushback, user.target);
+										env.hitPerson(user, damage, leftoverPushback, user.rotation - Math.PI, 4); // Shock damage
 										user.punchedSomebody = true;
 										break collisionCheck;
 									}
@@ -3975,10 +3677,10 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 									// Shatters the ball
 									// TODO add ball reflecting using fists (so epic!)
 									b.xVel = 0; // destroys ball
-									b.yVel = 0; // 
-									hitPerson(user, b.getDamage(), pushback, user.rotation - Math.PI, EP.damageType(b.elementNum));
+									b.yVel = 0; //
+									env.hitPerson(user, b.getDamage(), pushback, user.rotation - Math.PI, EP.damageType(b.elementNum));
 									// epicness
-									ballDebris(b, "punch");
+									env.ballDebris(b, "punch");
 									user.punchedSomebody = true;
 									break collisionCheck;
 								}
@@ -3990,7 +3692,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 							if (!p.equals(user)) // TODO find a better way (not two double-number comparisons) to make sure they aren't the same. Maybe with person.equals()?
 								if (p.x - p.radius / 2 < user.target.x && p.y - p.radius / 2 < user.target.y && p.x + p.radius / 2 > user.target.x && p.y + p.radius / 2 > user.target.y)
 								{
-									hitPerson(p, damage, pushback, user.rotation, damageType); // This is such an elegant line of code :3
+									env.hitPerson(p, damage, pushback, user.rotation, damageType); // This is such an elegant line of code :3
 									user.punchedSomebody = true;
 									break collisionCheck;
 								}
@@ -4000,7 +3702,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 		if (user.punchedSomebody)
 		{
 			// backwards pushback
-			hitPerson(user, 0, pushback * 0.6, user.rotation + Math.PI, 0);
+			env.hitPerson(user, 0, pushback * 0.6, user.rotation + Math.PI, 0);
 			// Sound effect of hit
 			punchAbility.playSound("Punch hit");
 			return true;
@@ -4529,13 +4231,13 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 	void checkPlayerMovementKeys()
 	{
 		double horiAccel = 0, vertAccel = 0;
-		if (upPressed)
+		if (player.upPressed)
 			vertAccel--;
-		if (leftPressed)
+		if (player.leftPressed)
 			horiAccel--;
-		if (downPressed)
+		if (player.downPressed)
 			vertAccel++;
-		if (rightPressed)
+		if (player.rightPressed)
 			horiAccel++;
 		if (horiAccel == 0 && vertAccel == 0)
 		{
@@ -4546,9 +4248,9 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 			player.strengthOfAttemptedMovement = 1;
 			player.directionOfAttemptedMovement = Math.atan2(vertAccel, horiAccel) + cameraRotation;
 
-			if (spacePressed && !ctrlPressed)
+			if (player.spacePressed && !player.ctrlPressed)
 				player.flyDirection = 1;
-			else if (!spacePressed && ctrlPressed)
+			else if (!player.spacePressed && player.ctrlPressed)
 				player.flyDirection = -1;
 			else
 				player.flyDirection = 0;
@@ -4651,16 +4353,16 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 							p.yVel += Math.sin(p.directionOfAttemptedMovement) * deltaTime * 100 * p.strengthOfAttemptedMovement * p.runAccel / 100;
 						}
 						// ascend
-						if (spacePressed && !ctrlPressed)
+						if (player.spacePressed && !player.ctrlPressed)
 							if (p.z < (double) (p.flySpeed * 0.1)) // max limit
 								p.zVel = p.flySpeed * 5 * deltaTime;
 							else
 								p.zVel = 0;
-						if (!spacePressed && ctrlPressed)
+						if (!player.spacePressed && player.ctrlPressed)
 							p.zVel = -p.flySpeed * 5 * deltaTime;
-						if (spacePressed == ctrlPressed) // stay floating at max height
+						if (player.spacePressed == player.ctrlPressed) // stay floating at max height
 							p.zVel = 0;
-						if (rightMousePressed) // slower ascent/descent
+						if (player.rightMousePressed) // slower ascent/descent
 							p.zVel *= 0.25;
 						p.switchAnimation(7);
 					} else if (p.z == 0 || p.z == 1) // walking on ground or walking on walls
@@ -4794,16 +4496,16 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 			System.exit(0);
 			break;
 		case KeyEvent.VK_A:
-			leftPressed = true;
+			player.leftPressed = true;
 			break;
 		case KeyEvent.VK_D:
-			rightPressed = true;
+			player.rightPressed = true;
 			break;
 		case KeyEvent.VK_W:
-			upPressed = true;
+			player.upPressed = true;
 			break;
 		case KeyEvent.VK_S:
-			downPressed = true;
+			player.downPressed = true;
 			break;
 		case KeyEvent.VK_1:
 			env.addWall((mx) / 96, (my) / 96, 10, true);
@@ -4824,11 +4526,11 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 			env.addPool((mx) / 96, (my) / 96, 5, true);
 			break;
 		case KeyEvent.VK_0:
-			if (ctrlPressed)
+			if (player.ctrlPressed)
 				zoomLevel = 1;
-			else if (rotateButtonPressed)
+			else if (player.rotateButtonPressed)
 				cameraRotation = 0;
-			else if (resizeUIButtonPressed)
+			else if (player.resizeUIButtonPressed)
 				UIzoomLevel = 1;
 			else
 				env.remove((mx) / 96, (my) / 96);
@@ -4838,16 +4540,16 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 				p.initAnimation();
 			break;
 		case KeyEvent.VK_CONTROL:
-			ctrlPressed = true;
+			player.ctrlPressed = true;
 			break;
 		case KeyEvent.VK_ALT:
-			resizeUIButtonPressed = true;
+			player.resizeUIButtonPressed = true;
 			break;
 		case KeyEvent.VK_SPACE:
-			spacePressed = true;
+			player.spacePressed = true;
 			break;
 		case KeyEvent.VK_O:
-			rotateButtonPressed = true;
+			player.rotateButtonPressed = true;
 			break;
 		case KeyEvent.VK_TAB:
 			tab = true;
@@ -4916,28 +4618,28 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 		switch (e.getKeyCode())
 		{
 		case KeyEvent.VK_A:
-			leftPressed = false;
+			player.leftPressed = false;
 			break;
 		case KeyEvent.VK_D:
-			rightPressed = false;
+			player.rightPressed = false;
 			break;
 		case KeyEvent.VK_W:
-			upPressed = false;
+			player.upPressed = false;
 			break;
 		case KeyEvent.VK_S:
-			downPressed = false;
+			player.downPressed = false;
 			break;
 		case KeyEvent.VK_CONTROL:
-			ctrlPressed = false;
+			player.ctrlPressed = false;
 			break;
 		case KeyEvent.VK_ALT:
-			resizeUIButtonPressed = false;
+			player.resizeUIButtonPressed = false;
 			break;
 		case KeyEvent.VK_SPACE:
-			spacePressed = false;
+			player.spacePressed = false;
 			break;
 		case KeyEvent.VK_O:
-			rotateButtonPressed = false;
+			player.rotateButtonPressed = false;
 			break;
 		case KeyEvent.VK_TAB:
 			tab2 = !tab2;
@@ -5123,21 +4825,21 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 	public void mouseWheelMoved(MouseWheelEvent mwe)
 	{
 		boolean direction = mwe.getWheelRotation() == 1 ? true : false;
-		if (ctrlPressed)
+		if (player.ctrlPressed)
 		{
 			// zoom
 			if (direction)
 				zoomLevel *= 0.9;
 			else
 				zoomLevel *= 1.1;
-		} else if (rotateButtonPressed)
+		} else if (player.rotateButtonPressed)
 		{
 			// rotate
 			if (direction)
 				cameraRotation += 0.04;
 			else
 				cameraRotation -= 0.04;
-		} else if (resizeUIButtonPressed)
+		} else if (player.resizeUIButtonPressed)
 		{
 			// UI-zoom
 			if (direction)
@@ -5217,7 +4919,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 		// Unlike the keys it won't repeatedly "click" the mouse again
 		if (me.getButton() == MouseEvent.BUTTON1) // Left Click
 		{
-			leftMousePressed = true;
+			player.leftMousePressed = true;
 		}
 		if (me.getButton() == MouseEvent.BUTTON2) // Mid Click
 		{
@@ -5225,7 +4927,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 		}
 		if (me.getButton() == MouseEvent.BUTTON3) // Right Click
 		{
-			rightMousePressed = true;
+			player.rightMousePressed = true;
 			// view extended hotkey tooltips
 			checkDisplayHotkeyPowers();
 
@@ -5257,7 +4959,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 	{
 		if (me.getButton() == MouseEvent.BUTTON1) // Left Click
 		{
-			leftMousePressed = false;
+			player.leftMousePressed = false;
 		}
 		if (me.getButton() == MouseEvent.BUTTON2) // Mid Click
 		{
@@ -5265,7 +4967,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 		}
 		if (me.getButton() == MouseEvent.BUTTON3) // right Click
 		{
-			rightMousePressed = false;
+			player.rightMousePressed = false;
 			checkDisplayHotkeyPowers();
 		}
 	}
@@ -5284,7 +4986,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 					hotkeyHovered = i;
 					tooltipPoint = new Point(38 + i * 80, frameHeight - 100);
 					tooltip = player.abilities.get(player.hotkeys[i]).niceName();
-					if (rightMousePressed)
+					if (player.rightMousePressed)
 					{
 						tooltip += " " + player.abilities.get(player.hotkeys[i]).points + "\n" + player.abilities.get(player.hotkeys[i]).getFluff();
 						tooltipPoint.y -= 30;
@@ -5325,7 +5027,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 					tooltipPoint = new Point((int) (frameWidth / 2 - player.abilities.size() * 80 / 2 * UIzoomLevel + i * 80 * UIzoomLevel + 8 * UIzoomLevel),
 							(int) (frameHeight * 3 / 4 - 10 * UIzoomLevel));
 					tooltip = player.abilities.get(i).niceName();
-					if (rightMousePressed)
+					if (player.rightMousePressed)
 					{
 						tooltip += " " + player.abilities.get(i).points + "\n" + player.abilities.get(i).getFluff();
 						tooltipPoint.y -= 30;

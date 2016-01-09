@@ -14,90 +14,90 @@ import mainResourcesPackage.SoundEffect;
 
 public class Person extends RndPhysObj
 {
-	int							id;
+	public int							id;
 
-	double						height;
+	public double						height;
 
-	int							animState;
-	int							animFrame;
+	public int							animState;
+	public int							animFrame;
 
-	List<EP>					DNA;
-	List<Ability>				abilities;
-	List<Effect>				effects;
-	List<UIText>				uitexts;
+	public List<EP>					DNA;
+	public List<Ability>				abilities;
+	public List<Effect>				effects;
+	public List<UIText>				uitexts;
 
 	// STATS
-	int							STRENGTH;
-	int							FITNESS;
-	int							DEXTERITY;
-	int							WITS;
-	int							KNOWLEDGE;
-	int							SOCIAL;
+	public int							STRENGTH;
+	public int							FITNESS;
+	public int							DEXTERITY;
+	public int							WITS;
+	public int							KNOWLEDGE;
+	public int							SOCIAL;
 
 	// SUB-STATS
-	int							maxLife;
-	int							maxMana;
-	int							maxStamina;
-	double						lifeRegen;															// per second. during combat.
-	double						manaRegen;															// ^
-	double						staminaRegen;														// ^
-	double						runSpeed;															// maximum speed in pixel/sec in a single direction while running on dry earth.
-	double						runAccel;
-	int							naturalArmor;
-	double						punchSpeed;
-	double						accuracy;															// from 0 to 1. 0 = 90 degree miss, 1 = 0 degree miss, 0.5 = 45 degree miss.
-	double						missAngle;
-	double						runningStaminaCost;													// per second
-	double						sprintingStaminaCost;												// ^
+	public int							maxLife;
+	public int							maxMana;
+	public int							maxStamina;
+	public double						lifeRegen;															// per second. during combat.
+	public double						manaRegen;															// ^
+	public double						staminaRegen;														// ^
+	public double						runSpeed;															// maximum speed in pixel/sec in a single direction while running on dry earth.
+	public double						runAccel;
+	public int							naturalArmor;
+	public double						punchSpeed;
+	public double						accuracy;															// from 0 to 1. 0 = 90 degree miss, 1 = 0 degree miss, 0.5 = 45 degree miss.
+	public double						missAngle;
+	public double						runningStaminaCost;													// per second
+	public double						sprintingStaminaCost;												// ^
 
 	// Rest of the variables
-	double						life;
-	double						mana;
-	double						stamina;
-	double						charge;
-	boolean						insideWall;
-	boolean						ghostMode;
-	boolean						panic;																// used for panic purposes
-	boolean						prone;																// while ducking or slipping
-	double						slippedTimeLeft;
-	int							imgW, imgH;															// For drawing purposes only
-	boolean						inCombat;
-	boolean						maintaining;														// whether or not the person is using a maintained ability like Shield or Escalating Scream
-	double						timeSinceLastHit;
-	double						timeBetweenDamageTexts;
-	double						waitingDamage;
-	Point						target;
-	Area						rangeArea;
-	boolean						lastHandUsedIsRight					= false;
-	boolean						punchedSomebody						= false;
-	boolean						notMoving							= false;
-	boolean						notAnimating						= false;
-	double						directionOfAttemptedMovement		= 0;
-	double						strengthOfAttemptedMovement			= 0;							// between 0 and 1
-	double						flyDirection						= 0;							// 1 = up, -1 = down.
-	int							abilityTryingToRepetitivelyUse		= -1;
-	int							abilityAiming						= -1;
-	int							abilityMaintaining					= -1;
-	int							commanderID;														// ID of the person's group's leader. If individual, commanderID is the same as id.
-	double						lastSpeed							= 0;							// used for ease of calculation sometimes.
-	boolean						holdingVine							= false;						// true if the person is using a Plant Beam (vine) and grabbling an enemy.
-	double						flySpeed							= -1;
+	public double						life;
+	public double						mana;
+	public double						stamina;
+	public double						charge;
+	public boolean						insideWall;
+	public boolean						ghostMode;
+	public boolean						panic;																// used for panic purposes
+	public boolean						prone;																// while ducking or slipping
+	public double						slippedTimeLeft;
+	public int							imgW, imgH;															// For drawing purposes only
+	public boolean						inCombat;
+	public boolean						maintaining;														// whether or not the person is using a maintained ability like Shield or Escalating Scream
+	public double						timeSinceLastHit;
+	public double						timeBetweenDamageTexts;
+	public double						waitingDamage;
+	public Point						target;
+	public Area						rangeArea;
+	public boolean						lastHandUsedIsRight					= false;
+	public boolean						punchedSomebody						= false;
+	public boolean						notMoving							= false;
+	public boolean						notAnimating						= false;
+	public double						directionOfAttemptedMovement		= 0;
+	public double						strengthOfAttemptedMovement			= 0;							// between 0 and 1
+	public double						flyDirection						= 0;							// 1 = up, -1 = down.
+	public int							abilityTryingToRepetitivelyUse		= -1;
+	public int							abilityAiming						= -1;
+	public int							abilityMaintaining					= -1;
+	public int							commanderID;														// ID of the person's group's leader. If individual, commanderID is the same as id.
+	public double						lastSpeed							= 0;							// used for ease of calculation sometimes.
+	public boolean						holdingVine							= false;						// true if the person is using a Plant Beam (vine) and grabbling an enemy.
+	public double						flySpeed							= -1;
 
 	// for continuous inaccuracy stuff like beams
-	double						inaccuracyAngle						= 0;
-	double						inaccuracyAngleTarget				= 0;
-	double						timeUntilNextInaccuracyAngleChange	= 0;
+	public double						inaccuracyAngle						= 0;
+	public double						inaccuracyAngleTarget				= 0;
+	public double						timeUntilNextInaccuracyAngleChange	= 0;
 
 	// Inventory and stuff?
-	List<Item>					inventory;
-	Armor[]						body;																// head, chest, arms, legs
-	Armor[]						armorParts;															// head, chest, arms, legs
+	public List<Item>					inventory;
+	public Armor[]						body;																// head, chest, arms, legs
+	public Armor[]						armorParts;															// head, chest, arms, legs
 
 	// Animation
-	List<List<BufferedImage>>	animation;
+	public List<List<BufferedImage>>	animation;
 
 	// Sounds
-	List<SoundEffect>			sounds								= new ArrayList<SoundEffect>();
+	public List<SoundEffect>			sounds								= new ArrayList<SoundEffect>();
 
 	public Person(double x1, double y1)
 	{
@@ -703,7 +703,7 @@ public class Person extends RndPhysObj
 		for (int i = 0; i < abilities.size(); i++) // for (Ability a: abilities) is not possible, because usePassive adds abilities to the run-upon list.
 		{
 			Ability a = abilities.get(i);
-			if (a.cooldown != -1) // check if ability isn't passive
+			if (!a.hasTag("passive")) // check if ability isn't passive
 			{
 				if (a.cooldownLeft > 0)
 					a.cooldownLeft -= 1 * deltaTime;

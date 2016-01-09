@@ -6,9 +6,9 @@ import java.awt.image.BufferedImage;
 
 public class Drawable
 {
-	double x, y, z; //x and y are of the center of the image (and object). z is in "meters". //TODO make z be "centimeters" / "pixels" (multiply or divide lots of things by 100)
-	double rotation = 0;
-	BufferedImage image, shadow;
+	public double x, y, z; //x and y are of the center of the image (and object). z is in "meters". //TODO make z be "centimeters" / "pixels" (multiply or divide lots of things by 100)
+	public double rotation = 0;
+	public BufferedImage image, shadow;
 	public Drawable(){}
 	public void drawShadow(Graphics2D buffer, double shadowX, double shadowY)
 	{

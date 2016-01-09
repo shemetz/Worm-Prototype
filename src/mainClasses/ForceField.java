@@ -11,15 +11,14 @@ import mainResourcesPackage.SoundEffect;
 
 public class ForceField extends Drawable
 {
-	int		length, width;
-	double	height;
-	double	life;
-	int		maxLife;
-	int		armor;
-	Point[]	p;
-	int		type;
-	List<SoundEffect> sounds = new ArrayList<SoundEffect>();
-
+	public int		length, width;
+	public double	height;
+	public double	life;
+	public int		maxLife;
+	public int		armor;
+	public Point[]	p;
+	public int		type;
+	public List<SoundEffect> sounds = new ArrayList<SoundEffect>();
 	// TODO type
 	public ForceField(double x1, double y1, double z1, int l1, int w1, double rotation1, int life1, int t1)
 	{

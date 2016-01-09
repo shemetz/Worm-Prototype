@@ -441,7 +441,7 @@ public class PowerGenerator
 		try
 		{
 			// combinations
-			BufferedReader in = new BufferedReader(new InputStreamReader(Ability.class.getClassLoader().getResourceAsStream("combinations.csv"), "UTF-8"));
+			BufferedReader in = new BufferedReader(new InputStreamReader(PowerGenerator.class.getResourceAsStream("combinations.csv"), "UTF-8"));
 			if (!in.ready())
 			{
 				Main.errorMessage("EMPTY FILE - COMBINATIONS");
@@ -455,7 +455,7 @@ public class PowerGenerator
 					n++;
 			combos = new String[n][n];
 			in.close();
-			in = new BufferedReader(new InputStreamReader(Ability.class.getClassLoader().getResourceAsStream("combinations.csv"), "UTF-8"));
+			in = new BufferedReader(new InputStreamReader(Ability.class.getResourceAsStream("combinations.csv"), "UTF-8"));
 			String cell = "";
 			for (int i = 0; i < n; i++) // alternatively: while (in.ready())
 			{
@@ -475,7 +475,7 @@ public class PowerGenerator
 
 			// standalones
 			in.close();
-			in = new BufferedReader(new InputStreamReader(Ability.class.getClassLoader().getResourceAsStream("standalones.csv"), "UTF-8"));
+			in = new BufferedReader(new InputStreamReader(Ability.class.getResourceAsStream("standalones.csv"), "UTF-8"));
 			if (!in.ready())
 			{
 				Main.errorMessage("EMPTY FILE - STANDALONES");

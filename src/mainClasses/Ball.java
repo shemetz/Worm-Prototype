@@ -18,7 +18,7 @@ public class Ball extends RndPhysObj
 		// TODO make mass, radius and velocity depend on element
 		radius = 30;
 		height = 1;
-		mass = 1+Math.random();
+		mass = 40;
 		double velocity = Ball.giveVelocity(en, p1); // pixels per second. Below 330 and the character would probably accidentally touch them while running
 		xVel = Math.cos(angle)*velocity;
 		yVel = Math.sin(angle)*velocity;

@@ -1,4 +1,5 @@
 package mainClasses;
+import java.awt.Point;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -10,31 +11,31 @@ import mainResourcesPackage.SoundEffect;
 
 public class Ability
 {
-	static List<String>	descriptions				= new ArrayList<String>();
-	static boolean[][]	elementalAttacksPossible	= new boolean[12][7];												// [element][ability]
-	static int[][]		elementalAttackNumbers		= new int[12][3];
-	static String[]		elementalAttacks			= new String[]
+	protected static List<String>	descriptions				= new ArrayList<String>();
+	protected static boolean[][]	elementalAttacksPossible	= new boolean[12][7];												// [element][ability]
+	protected static int[][]		elementalAttackNumbers		= new int[12][3];
+	protected static String[]		elementalAttacks			= new String[]
 														{ "Ball", "Beam", "Shield", "Wall", "Spray", "Strike", "Pool" };
 
 	// permanent variables of the ability
-	String				name;																							// name of the ability
-	int					points;																							// 1-10. AKA "level". Measures how powerful the ability is.
-	double				cooldown;																						// Duration in which power doesn't work after using it. -1 = passive, 0 = no cooldown
-	double				cost;																							// -1 = passive. Is a cost in mana, stamina or charge...depending on the power.
-	double				costPerSecond;																					// applies to some abilities. Is a cost in mana, stamina or charge...depending on the power.
-	int					range;																							// distance from user in which ability can be used. For some abilities - how far they go before stopping. -1 = not ranged, or only
+	protected String				name;																							// name of the ability
+	protected int					points;																							// 1-10. AKA "level". Measures how powerful the ability is.
+	protected double				cooldown;																						// Duration in which power doesn't work after using it. -1 = passive, 0 = no cooldown
+	protected double				cost;																							// -1 = passive. Is a cost in mana, stamina or charge...depending on the power.
+	protected double				costPerSecond;																					// applies to some abilities. Is a cost in mana, stamina or charge...depending on the power.
+	protected int					range;																							// distance from user in which ability can be used. For some abilities - how far they go before stopping. -1 = not ranged, or only
 																														// direction-aiming.
-	double				areaRadius;																						// radius of area of effect of ability.
-	boolean				instant;																						// Instant abilities don't aim, they immediately activate after a single click. Maintained abilities are always instant.
-	boolean				maintainable;																					// Maintained abilities are instant, and require you to continue holding the button to use them (they're continuous abilities).
-	boolean				stopsMovement;																					// Does the power stop the person from moving?
-	boolean				onOff;																							// Is it an on/off ability.
-	String				costType;																						// "none", "mana", "stamina", "charge" or "life". Abilities that use multiple don't exist, I think.
+	protected double				areaRadius;																						// radius of area of effect of ability.
+	protected boolean				instant;																						// Instant abilities don't aim, they immediately activate after a single click. Maintained abilities are always instant.
+	protected boolean				maintainable;																					// Maintained abilities are instant, and require you to continue holding the button to use them (they're continuous abilities).
+	protected boolean				stopsMovement;																					// Does the power stop the person from moving?
+	protected boolean				onOff;																							// Is it an on/off ability.
+	protected String				costType;																						// "none", "mana", "stamina", "charge" or "life". Abilities that use multiple don't exist, I think.
 
 	// changing variables of the ability
-	double				timeLeft;																						// how much time the ability has been on.
-	double				cooldownLeft;																					// if cooldown is -1 (passive), then a cooldownLeft of 0 means the ability hasn't been initialized yet
-	boolean				on;																								// For maintained and on/off abilities - whether or not the power is active.
+	protected double				timeLeft;																						// how much time the ability has been on.
+	protected double				cooldownLeft;																					// if cooldown is -1 (passive), then a cooldownLeft of 0 means the ability hasn't been initialized yet
+	protected boolean				on;																								// For maintained and on/off abilities - whether or not the power is active.
 
 	String[]			tags;																							// list of tags.
 	// possible tags are:
@@ -52,6 +53,22 @@ public class Ability
 
 	List<SoundEffect>	sounds						= new ArrayList<SoundEffect>();
 
+	@SuppressWarnings("unused")
+	public void use(Environment env, Person user, Point target)
+	{
+		//to be written in child classes
+	}
+
+	@SuppressWarnings("unused")
+	public void maintain(Environment env, Person user, Point target, double deltaTime)
+	{
+		//to be written in child classes
+	}
+	@SuppressWarnings("unused")
+	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
+	{
+		//to be written in child classes
+	}
 	public Ability(String n, int p)
 	{
 		name = n;
@@ -356,6 +373,14 @@ public class Ability
 		return false;
 	}
 
+	public String getTags()
+	{
+		String s = "";
+		for (int i = 0; i < tags.length; i++)
+			s += " "+tags[i];
+		return s.substring(1);
+	}
+	
 	public void stopAllSounds()
 	{
 		for (int i = 0; i < sounds.size(); i++)
@@ -614,7 +639,7 @@ public class Ability
 		try
 		{
 			// combinations
-			BufferedReader in = new BufferedReader(new InputStreamReader(Ability.class.getClassLoader().getResourceAsStream("abilities.txt"), "UTF-8"));
+			BufferedReader in = new BufferedReader(new InputStreamReader(Ability.class.getResourceAsStream("abilities.txt"), "UTF-8"));
 			if (!in.ready())
 			{
 				Main.errorMessage("EMPTY FILE - ABILITIES");
@@ -637,7 +662,7 @@ public class Ability
 			}
 
 			// elemental attacks possible
-			in = new BufferedReader(new InputStreamReader(Ability.class.getClassLoader().getResourceAsStream("elementalCombatPossibilities.csv"), "UTF-8"));
+			in = new BufferedReader(new InputStreamReader(Ability.class.getResourceAsStream("elementalCombatPossibilities.csv"), "UTF-8"));
 			if (!in.ready())
 			{
 				Main.errorMessage("EMPTY FILE - ELEMENTAL COMBAT ATTACKS");
