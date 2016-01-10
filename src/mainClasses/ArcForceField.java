@@ -1,17 +1,18 @@
 package mainClasses;
+
 import java.awt.Graphics2D;
 
 public class ArcForceField extends Drawable
 {
-	double	height;
-	Person	target;
-	double	arc;
-	double	minRadius;
-	double	maxRadius;
-	double	life;
-	double	extraLife;	// the extralife is for force fields that are not immediately created with full health, but instead gain the health during the first 1.5 seconds of their creation. Alternatively, for
-						// force fields that are created with full health but slowly lose it every second.
-	int		elementNum;
+	public double	height;
+	public Person	target;
+	public double	arc;
+	public double	minRadius;
+	public double	maxRadius;
+	public double	life;
+	public double	extraLife;	// the extralife is for force fields that are not immediately created with full health, but instead gain the health during the first 1.5 seconds of their creation. Alternatively, for
+	// force fields that are created with full health but slowly lose it every second.
+	public int		elementNum;
 
 	public ArcForceField(Person target1, double angle1, double arc1, double minRadius1, double maxRadius1, double life1, int elementNum1)
 	{

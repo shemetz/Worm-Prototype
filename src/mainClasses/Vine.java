@@ -2,27 +2,25 @@ package mainClasses;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
-import shouldBeDefault.Point3D;
-
 public class Vine extends Drawable // Vines are plant beams, sort of
 {
-	final static int	lengthOfVineImg	= 200,
+	public final static int	lengthOfVineImg	= 200,
 								heightOfVineImg = 40;
-	final static int	grabblingRange	= 45;
-	Person				creator;
-	RndPhysObj				grabbledThing;
-	Point3D				start, end;
-	int					state;							// -1 = none, 0 = flying in the air, 1 = grabbing onto something, 2 = retracting (like 0 but backwards)
-	int					points;
-	double				range;							// The maximum range of this vine. Measured from the PERSON to the END.
-	double				size;							// currently unused; TODO
-	double				height;							// z is in center of beam, like balls
-	double				startDistance, endDistance;		// distance from creator to start, and from creator to end
-	double				length;							// only relevant, and fixed in size, when vine is grabbling something
-	double				deltaLength;					// like a spring! the extra length a vine is pulled/pushed.
-	double				rigidity;						// self-explanatory
-	double				spinStrength;					// how strong can this be pulled sideways
-	double				endPauseTimeLeft;
+	public final static int	grabblingRange	= 45;
+	public Person				creator;
+	public RndPhysObj				grabbledThing;
+	public Point3D				start, end;
+	public int					state;							// -1 = none, 0 = flying in the air, 1 = grabbing onto something, 2 = retracting (like 0 but backwards)
+	public int					points;
+	public double				range;							// The maximum range of this vine. Measured from the PERSON to the END.
+	public double				size;							// currently unused; TODO
+	public double				height;							// z is in center of beam, like balls
+	public double				startDistance, endDistance;		// distance from creator to start, and from creator to end
+	public double				length;							// only relevant, and fixed in size, when vine is grabbling something
+	public double				deltaLength;					// like a spring! the extra length a vine is pulled/pushed.
+	public double				rigidity;						// self-explanatory
+	public double				spinStrength;					// how strong can this be pulled sideways
+	public double				endPauseTimeLeft;
 
 	public Vine(Person creator, Point3D start, Point3D end, int points, double range)
 	{

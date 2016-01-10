@@ -386,7 +386,7 @@ public class PowerGenerator
 		}
 		if (!alreadyExists)
 		{
-			abilities.add(new Ability(s, points));
+			abilities.add(Ability.ability(s, points));
 		} else
 		{
 			addAbility(abilities, "noob", points);

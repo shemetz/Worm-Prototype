@@ -1,4 +1,5 @@
 package mainClasses;
+
 import java.awt.Point;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -7,6 +8,33 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import mainClasses.abilities.Ball_E;
+import mainClasses.abilities.Beam_E;
+import mainClasses.abilities.Blink;
+import mainClasses.abilities.Elemental_Combat_II_E;
+import mainClasses.abilities.Elemental_Combat_I_E;
+import mainClasses.abilities.Flight_I;
+import mainClasses.abilities.Flight_II;
+import mainClasses.abilities.Force_Shield;
+import mainClasses.abilities.Ghost_Mode_I;
+import mainClasses.abilities.Heal_I;
+import mainClasses.abilities.Heal_II;
+import mainClasses.abilities.Pool_E;
+import mainClasses.abilities.Punch;
+import mainClasses.abilities.Ranged_Explosion;
+import mainClasses.abilities.Sense_Element_E;
+import mainClasses.abilities.Sense_Life;
+import mainClasses.abilities.Sense_Mana_and_Stamina;
+import mainClasses.abilities.Sense_Movement;
+import mainClasses.abilities.Sense_Parahumans;
+import mainClasses.abilities.Sense_Powers;
+import mainClasses.abilities.Sense_Structure;
+import mainClasses.abilities.Shield_E;
+import mainClasses.abilities.Spray_E;
+import mainClasses.abilities.Strike_E;
+import mainClasses.abilities.Strong_Force_Field;
+import mainClasses.abilities.Toughness_III;
+import mainClasses.abilities.Wall_E;
 import mainResourcesPackage.SoundEffect;
 
 public class Ability
@@ -15,7 +43,7 @@ public class Ability
 	protected static boolean[][]	elementalAttacksPossible	= new boolean[12][7];												// [element][ability]
 	protected static int[][]		elementalAttackNumbers		= new int[12][3];
 	protected static String[]		elementalAttacks			= new String[]
-														{ "Ball", "Beam", "Shield", "Wall", "Spray", "Strike", "Pool" };
+																	{ "Ball", "Beam", "Shield", "Wall", "Spray", "Strike", "Pool" };
 
 	// permanent variables of the ability
 	protected String				name;																							// name of the ability
@@ -23,21 +51,24 @@ public class Ability
 	protected double				cooldown;																						// Duration in which power doesn't work after using it. -1 = passive, 0 = no cooldown
 	protected double				cost;																							// -1 = passive. Is a cost in mana, stamina or charge...depending on the power.
 	protected double				costPerSecond;																					// applies to some abilities. Is a cost in mana, stamina or charge...depending on the power.
-	protected int					range;																							// distance from user in which ability can be used. For some abilities - how far they go before stopping. -1 = not ranged, or only
-																														// direction-aiming.
+	protected int					range;																							// distance from user in which ability can be used. For some abilities - how far they go before stopping. -1 = not
+																																	// ranged, or only
+	// direction-aiming.
 	protected double				areaRadius;																						// radius of area of effect of ability.
-	protected boolean				instant;																						// Instant abilities don't aim, they immediately activate after a single click. Maintained abilities are always instant.
-	protected boolean				maintainable;																					// Maintained abilities are instant, and require you to continue holding the button to use them (they're continuous abilities).
+	protected boolean				instant;																						// Instant abilities don't aim, they immediately activate after a single click. Maintained abilities are always
+																																	// instant.
+	protected boolean				maintainable;																					// Maintained abilities are instant, and require you to continue holding the button to use them (they're continuous
+																																	// abilities).
 	protected boolean				stopsMovement;																					// Does the power stop the person from moving?
-	protected boolean				onOff;																							// Is it an on/off ability.
 	protected String				costType;																						// "none", "mana", "stamina", "charge" or "life". Abilities that use multiple don't exist, I think.
 
 	// changing variables of the ability
 	protected double				timeLeft;																						// how much time the ability has been on.
 	protected double				cooldownLeft;																					// if cooldown is -1 (passive), then a cooldownLeft of 0 means the ability hasn't been initialized yet
 	protected boolean				on;																								// For maintained and on/off abilities - whether or not the power is active.
+	protected int					elementNum;
 
-	String[]			tags;																							// list of tags.
+	protected String[]				tags;																							// list of tags.
 	// possible tags are:
 	// offensive, projectile
 
@@ -46,29 +77,34 @@ public class Ability
 	// Fire Beam 7: name = "Beam <Fire>"; points = 7; cooldown = 0.5; cost = 0; costPerSecond = 5 / <fire damage>; range = 500*points; areaRadius = -1; instant = true; maintainable = true; stopsMovement = false; onOff = false; costType = "mana";
 
 	// for special effects:
-	double				targetEffect1				= -1,
-								targetEffect2 = -1, targetEffect3 = -1;
-	String				rangeType					= "";
-	int					frameNum					= 0;
+	protected double				targetEffect1				= -1,
+											targetEffect2 = -1, targetEffect3 = -1;
+	protected String				rangeType					= "";
+	protected int					frameNum					= 0;																// used in child classes
 
-	List<SoundEffect>	sounds						= new ArrayList<SoundEffect>();
+	protected List<SoundEffect>		sounds						= new ArrayList<SoundEffect>();
 
 	@SuppressWarnings("unused")
 	public void use(Environment env, Person user, Point target)
 	{
-		//to be written in child classes
+		// to be written in child classes
+		Main.errorMessage("DANGER WARNING LEVEL - DEMON. NO USE METHOD FOUND FOR THIS ABILITY: " + name);
 	}
 
 	@SuppressWarnings("unused")
 	public void maintain(Environment env, Person user, Point target, double deltaTime)
 	{
-		//to be written in child classes
+		// to be written in child classes
+		Main.errorMessage("A man, a plan, a canal, Panama. no maintain for this ability. " + name);
 	}
+
 	@SuppressWarnings("unused")
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
 	{
-		//to be written in child classes
+		// to be written in child classes
+		Main.errorMessage("Time Wroth Lime Broth Crime Froth Grime Sloth.. no updatePlayerTargeting for this ability. " + name);
 	}
+
 	public Ability(String n, int p)
 	{
 		name = n;
@@ -84,13 +120,13 @@ public class Ability
 		instant = false;
 		maintainable = false;
 		stopsMovement = false;
-		onOff = false;
 		costType = "";
 
 		assignVariables();
 		addSounds();
 		cooldownLeft = 0;
 		timeLeft = 0;
+		elementNum = getElementNum();
 	}
 
 	void assignVariables()
@@ -237,7 +273,7 @@ public class Ability
 			cost = 1;
 			costType = "stamina";
 			cooldown = 0.55; // is actually 0.55 - Math.min(0.02*FITNESS, 0.15);
-			range = 70; // is actually 1.15 * puncher's width? TODO
+			range = 1; // is actually 1.15 * puncher's radius.
 			rangeType = "Look";
 			break;
 
@@ -273,7 +309,13 @@ public class Ability
 		// StopsMovement, Maintainable
 		switch (justName())
 		{
+		// ball - need to re-do this
 		case "Ball":
+			stopsMovement = false;
+			maintainable = true;
+			instant = true;
+			break;
+		// maintainable and free-moving
 		case "Beam":
 		case "Heal I":
 		case "Heal II":
@@ -283,8 +325,8 @@ public class Ability
 			stopsMovement = false;
 			maintainable = true;
 			instant = true;
-			onOff = false;
 			break;
+		// maintainable and stopping
 		case "Shield":
 		case "Clairvoyance":
 		case "Clairvoyance Charge":
@@ -294,48 +336,47 @@ public class Ability
 			stopsMovement = true;
 			maintainable = true;
 			instant = true;
-			onOff = false;
 			break;
+		// punch
 		case "Punch":
 			stopsMovement = true;
 			maintainable = false;
 			instant = true;
-			onOff = false;
 			break;
+		// on-off stuff
 		case "Flight I":
 		case "Flight II":
 		case "Telekinetic Flight":
 		case "Ghost Mode I":
 		case "Ghost Mode II":
-			stopsMovement = false;
-			maintainable = false;
-			instant = true;
-			onOff = true;
-			break;
 		case "Sense Powers":
 			stopsMovement = false;
 			maintainable = false;
 			instant = true;
-			onOff = false;
 			break;
+		// default
 		default:
 			stopsMovement = false;
 			maintainable = false;
 			instant = false;
-			onOff = false;
 			break;
 		}
 
 		// tags
-		for (String s : Ability.descriptions)
-			if (s.startsWith(justName()))
-			{
-				String text = getDescription(name);
-				if (text.indexOf("\n") == -1)
-					Main.errorMessage("ability class go to this line and solve this. name was "+name+" and text was: "+text);
-				text = text.substring(text.indexOf("\n") + 1, text.indexOf("\n", text.indexOf("\n") + 1)); // skip first line, delete fluff and description
-				tag(text);
-			}
+		tagloop:
+		{
+			for (String s : Ability.descriptions)
+				if (s.startsWith(justName()))
+				{
+					String text = getDescription(name);
+					if (text.indexOf("\n") == -1)
+						Main.errorMessage("ability class go to this line and solve this. name was " + name + " and text was: " + text);
+					text = text.substring(text.indexOf("\n") + 1, text.indexOf("\n", text.indexOf("\n") + 1)); // skip first line, delete fluff and description
+					tag(text);
+					break tagloop;
+				}
+			Main.errorMessage("[Ablt] There has been no tag found for the ability:   " + name);
+		}
 	}
 
 	private void tag(String tagList)
@@ -367,6 +408,8 @@ public class Ability
 
 	public boolean hasTag(String tag)
 	{
+		if (tags.length == 0)
+			return false;
 		for (int i = 0; i < tags.length; i++)
 			if (tags[i].equals(tag))
 				return true;
@@ -377,10 +420,10 @@ public class Ability
 	{
 		String s = "";
 		for (int i = 0; i < tags.length; i++)
-			s += " "+tags[i];
+			s += " " + tags[i];
 		return s.substring(1);
 	}
-	
+
 	public void stopAllSounds()
 	{
 		for (int i = 0; i < sounds.size(); i++)
@@ -602,7 +645,7 @@ public class Ability
 		return text;
 	}
 
-	static List<Ability> ECAbilities(int elementNum, int rank, int points)
+	static List<Ability> ECAbilities(int elementNum, int rank, int points) /// TODO remove
 	{
 		// rank 1 = Elemental Combat I
 		// rank 2 = Elemental Combat II
@@ -718,4 +761,77 @@ public class Ability
 				return a1.name.compareTo(a2.name);
 		}
 	};
+
+	public static Ability ability(String abilityName, int pnts)
+	{
+		String element = null;
+		String trimmedAbilityName = abilityName;
+		if (abilityName.indexOf("<") != -1)
+		{
+			element = abilityName.substring(abilityName.indexOf("<") + 1, abilityName.indexOf(">"));
+			trimmedAbilityName = abilityName.substring(0, abilityName.indexOf("<") - 1);
+		}
+		switch (trimmedAbilityName)
+		{
+		case "Punch":
+			return new Punch(pnts);
+		case "Heal I":
+			return new Heal_I(pnts);
+		case "Heal II":
+			return new Heal_II(pnts);
+		case "Force Shield":
+			return new Force_Shield(pnts);
+		case "Ranged Explosion":
+			return new Ranged_Explosion(pnts);
+		case "Flight I":
+			return new Flight_I(pnts);
+		case "Flight II":
+			return new Flight_II(pnts);
+		case "Blink":
+			return new Blink(pnts);
+		case "Ghost Mode I":
+			return new Ghost_Mode_I(pnts);
+		case "Strong Force Field":
+			return new Strong_Force_Field(pnts);
+		case "Beam":
+			return new Beam_E(element, pnts);
+		case "Ball":
+			return new Ball_E(element, pnts);
+		case "Shield":
+			return new Shield_E(element, pnts);
+		case "Pool":
+			return new Pool_E(element, pnts);
+		case "Wall":
+			return new Wall_E(element, pnts);
+		case "Spray":
+			return new Spray_E(element, pnts);
+		case "Strike":
+			return new Strike_E(element, pnts);
+		case "Toughness III":
+			return new Toughness_III(pnts);
+		case "Sense Life":
+			return new Sense_Life(pnts);
+		case "Sense Mana and Stamina":
+			return new Sense_Mana_and_Stamina(pnts);
+		case "Sense Movement":
+			return new Sense_Movement(pnts);
+		case "Sense Structure":
+			return new Sense_Structure(pnts);
+		case "Sense Parahumans":
+			return new Sense_Parahumans(pnts);
+		case "Sense Powers":
+			return new Sense_Powers(pnts);
+		case "Sense Element":
+			return new Sense_Element_E(element, pnts);
+		case "Elemental Combat I":
+			return new Elemental_Combat_I_E(element, pnts);
+		case "Elemental Combat II":
+			return new Elemental_Combat_II_E(element, pnts);
+		default:
+			Main.errorMessage("Donald trump peninsula error - " + abilityName);
+			// return null;
+			// Just because the game isn't finished yet and I still haven't made all 151 ability methods:
+			return new Ability(abilityName, pnts);
+		}
+	}
 }

@@ -13,6 +13,7 @@ public class Player extends Person
 	public boolean						resizeUIButtonPressed	= false;
 	public boolean						spacePressed			= false;
 	public boolean						rotateButtonPressed		= false;
+	public boolean						successfulTarget;
 	
 	// maybe hotkeys shouldn't belong to the player?
 

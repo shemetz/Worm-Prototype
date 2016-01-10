@@ -1,7 +1,8 @@
 package mainClasses;
 public class EP
 {
-	int elementNum, points;
+	public int elementNum;
+	public int points;
 
 	public EP(int e, int p)
 	{

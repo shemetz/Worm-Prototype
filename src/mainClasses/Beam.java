@@ -2,24 +2,22 @@ package mainClasses;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
-import shouldBeDefault.Point3D;
-
 public class Beam extends Drawable
 {
-	Person				creator;
-	boolean				isChild;
-	Point3D				start, end;
-	int					elementNum;
-	int					endType;									// 0 = regular end, 1 = flat, -1 = not tested yet.
-	double				endAngle;
-	int					frameNum;									// 0, 1, 2 or 3
-	int					points;
-	double				timeLeft;
-	double				damaging;
-	final static int	lengthOfBeamImg	= 200, heightOfBeamImg = 40;
-	double				range;										// The maximum range of this beam. Subsequent reflection-beams will have shorter range.
-	double				size;
-	double				height;										// z is in center of beam, like balls
+	public Person				creator;
+	public boolean				isChild;
+	public Point3D				start, end;
+	public int					elementNum;
+	public int					endType;									// 0 = regular end, 1 = flat, -1 = not tested yet.
+	public double				endAngle;
+	public int					frameNum;									// 0, 1, 2 or 3
+	public int					points;
+	public double				timeLeft;
+	public double				damaging;
+	public final static int	lengthOfBeamImg	= 200, heightOfBeamImg = 40;
+	public double				range;										// The maximum range of this beam. Subsequent reflection-beams will have shorter range.
+	public double				size;
+	public double				height;										// z is in center of beam, like balls
 
 	public Beam(Person creator, Point3D start, Point3D end, int elementNum, int points, double range)
 	{

@@ -149,61 +149,7 @@ public class Person extends RndPhysObj
 		selfFrame(0);
 	}
 
-	void usePassive(Ability a, boolean add)
-	{
-		a.on = !a.on;
-		// For passive abilities, added or removed
-		// the "val" variable is used to cancel out an ability's effects before it is disabled, to return back to normal.
-		int val = 1;
-		if (!add)
-			val = -1;
-		// for some reason I needf this to be out of the cases
-		List<Ability> addedAbilities;
-		switch (a.justName())
-		{
-		case "Sense Life":
-		case "Sense Mana and Stamina":
-		case "Sense Movement":
-		case "Sense Structure":
-		case "Sense Parahumans":
-		case "Sense Element":
-			// TODO special visual effect? nah
-			break;
-		case "Elemental Combat II":
-			addedAbilities = Ability.ECAbilities(a.getElementNum(), 2, a.points);
-			if (add)
-				abilities.addAll(addedAbilities);
-			else
-				abilities.removeAll(addedAbilities);
-			break;
-		case "Elemental Combat I":
-			addedAbilities = Ability.ECAbilities(a.getElementNum(), 1, a.points);
-			if (add)
-				abilities.addAll(addedAbilities);
-			else
-				abilities.removeAll(addedAbilities);
-			break;
-		case "Leg Muscles":
-			runSpeed += val * 50 * a.points;
-			runAccel += val * 1000 * a.points;
-			break;
-		case "Toughness III":
-			life *= val * 100 * a.points / maxLife + 1;
-			maxLife += val * 100 * a.points;
-			break;
-		case "Wound Regeneration I":
-			lifeRegen += val * 1 * a.points;
-			break;
-		case "Wound Regeneration II":
-			lifeRegen += val * 2 * a.points;
-			break;
-		default:
-			Main.errorMessage("No usePassive case: " + a.name); // not justName, by the way
-			break;
-		}
-	}
-
-	void affect(Effect e, boolean add)
+	public void affect(Effect e, boolean add)
 	{
 		// For passive effects, added or removed
 		// the "val" variable is used to cancel out an effect's effects before it is removed, to return back to normal.
@@ -256,14 +202,14 @@ public class Person extends RndPhysObj
 		}
 	}
 
-	void damage(double damage)
+	public void damage(double damage)
 	{
 		life -= damage;
 		timeSinceLastHit = 0;
 		inCombat = true;
 	}
 
-	void initStats()
+	public void initStats()
 	{
 		// all of this is TEMP
 		STRENGTH = 3;
@@ -284,10 +230,10 @@ public class Person extends RndPhysObj
 		charge = 0;
 
 		// Temp?
-		abilities.add(new Ability("Punch", 0));
+		abilities.add(Ability.ability("Punch", 0));
 	}
 
-	void updateSubStats()
+	public void updateSubStats()
 	{
 		maxStamina = 4 + 2 * FITNESS;
 		naturalArmor = (int) (0.7 * STRENGTH + 0.3 * FITNESS);
@@ -303,7 +249,7 @@ public class Person extends RndPhysObj
 		sprintingStaminaCost = 1.8;
 	}
 
-	void initSounds()
+	public void initSounds()
 	{
 		sounds.add(new SoundEffect("Scorched.wav", "Scorched")); // 0 - when a beam hits you
 	}
@@ -314,7 +260,7 @@ public class Person extends RndPhysObj
 			sounds.get(i).stop();
 	}
 
-	void initAnimation()
+	public void initAnimation()
 	{
 		// randomize look
 		int legs = Main.random.nextInt(2);
@@ -379,7 +325,7 @@ public class Person extends RndPhysObj
 		changeImage(animation.get(animState).get(animFrame));
 	}
 
-	void insertFullBodyAnimation(int stateNum, int frameNum, List<Integer> n)
+	public void insertFullBodyAnimation(int stateNum, int frameNum, List<Integer> n)
 	{
 		// following line might be wrong. It should just start as a transparent 96x96 image.
 		BufferedImage img = new BufferedImage(96, 96, BufferedImage.TYPE_INT_ARGB);
@@ -711,7 +657,7 @@ public class Person extends RndPhysObj
 					a.cooldownLeft = 0;
 			} else if (a.cooldownLeft == 0) // check if this passive ability is unactivated
 			{
-				usePassive(a, true);
+				a.use(null, this, null); //such elegant
 				a.cooldownLeft = -1;
 			}
 		}
@@ -792,7 +738,7 @@ public class Person extends RndPhysObj
 		}
 	}
 
-	void drawData(Graphics2D buffer, boolean drawLife, boolean drawMana, boolean drawStamina, double cameraRotation)
+	public void drawData(Graphics2D buffer, boolean drawLife, boolean drawMana, boolean drawStamina, double cameraRotation)
 	{
 		buffer.rotate(cameraRotation, x, y);
 		if (drawLife)
@@ -804,7 +750,7 @@ public class Person extends RndPhysObj
 		buffer.rotate(-cameraRotation, x, y);
 	}
 
-	void drawLife(Graphics2D buffer)
+	public void drawLife(Graphics2D buffer)
 	{
 		buffer.setStroke(new BasicStroke(2));
 		buffer.setColor(Color.red);
@@ -813,7 +759,7 @@ public class Person extends RndPhysObj
 		buffer.drawRect((int) x - 50, (int) y - radius / 2 - 36, 100, 8);
 	}
 
-	void drawMana(Graphics2D buffer)
+	public void drawMana(Graphics2D buffer)
 	{
 		buffer.setStroke(new BasicStroke(2));
 		buffer.setColor(Color.blue);
@@ -822,7 +768,7 @@ public class Person extends RndPhysObj
 		buffer.drawRect((int) x - 50, (int) y - radius / 2 - 28, 100, 8);
 	}
 
-	void drawStamina(Graphics2D buffer)
+	public void drawStamina(Graphics2D buffer)
 	{
 		buffer.setStroke(new BasicStroke(2));
 		buffer.setColor(Color.green);

@@ -8,18 +8,18 @@ import java.util.List;
 
 public class VisualEffect
 {
-	double		timeLeft;
-	double		duration;
-	boolean		onTop;
-	Point		p1, p2;
-	double		z;
-	Point		p1p2variations;
-	List<Point>	points;
-	Color		color;
-	int			frame;
-	int			type, subtype;
-	double		angle;
-	double		size;
+	public double		timeLeft;
+	public double		duration;
+	public boolean		onTop;
+	public Point		p1, p2;
+	public double		z;
+	public Point		p1p2variations;
+	public List<Point>	points;
+	public Color		color;
+	public int			frame;
+	public int			type, subtype;
+	public double		angle;
+	public double		size;
 
 	/*
 	 * 1 = successful blink. Random blue lines between entry and exit points.

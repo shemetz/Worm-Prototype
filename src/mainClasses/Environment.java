@@ -8,7 +8,9 @@ import java.awt.Frame;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,6 +22,7 @@ import mainResourcesPackage.SoundEffect;
 
 public class Environment
 {
+	public final double				TAU					= Math.PI * 2;
 	public final int				numOfClouds			= 0;
 	public final int				minCloudHeight		= 60,
 											maxCloudHeight = 400;
@@ -128,6 +131,948 @@ public class Environment
 	private int			healthSum		= 0,
 								poolNum = 0;
 	private boolean[][]	checkedSquares	= new boolean[width][height];
+
+	public void moveVine(Vine v, double deltaTime)
+	{
+		double originalAngle = v.rotation;
+		v.creator.rotation = v.rotation;
+		double desiredAngle = Math.atan2(v.creator.target.y - v.creator.y, v.creator.target.x - v.creator.x);
+
+		if (v.state == 1) // grabbling
+		{
+			// TODO this entire thing....
+			/*
+			 * It might need to incorporate deltaTime somehow, although that's not very important It looks *okay* when grabbling people, but seriously buggy when grabbling a ball Why does the ball just constantly become faster and faster and
+			 * stretches more and more???
+			 */
+
+			double maxSpringiness = 40; // If it's too high (or doesn't exist), repeated rotation of vine will constantly escalate the delta length for some reason, and physics will wackify.
+			double springiness = v.deltaLength;
+			if (springiness < -maxSpringiness)
+				springiness = -maxSpringiness;
+			if (springiness > maxSpringiness)
+				springiness = maxSpringiness;
+
+			// pulling/pushing like a spring: F = k*delta
+			v.creator.xVel -= Math.cos(v.rotation) * springiness * v.rigidity / v.creator.mass / 2;// functionally has twice the mass
+			v.creator.yVel -= Math.sin(v.rotation) * springiness * v.rigidity / v.creator.mass / 2;//
+			v.grabbledThing.xVel += Math.cos(v.rotation) * springiness * v.rigidity / v.grabbledThing.mass;
+			v.grabbledThing.yVel += Math.sin(v.rotation) * springiness * v.rigidity / v.grabbledThing.mass;
+
+			// Pulling vine sideways
+			double difference = desiredAngle - v.rotation;
+			while (difference < -TAU / 2)
+				difference += TAU;
+			while (difference > TAU / 2)
+				difference -= TAU;
+			double circularAccel = v.spinStrength / (v.grabbledThing.mass * Math.max(v.length + v.deltaLength, 200)); // when vine is shorter than ~2 meters, it isn't infinitely easy to wrangle.
+			if (difference < 0)
+				circularAccel *= -1;
+			v.grabbledThing.xVel += circularAccel * Math.cos(v.rotation + TAU / 4);
+			v.grabbledThing.yVel += circularAccel * Math.sin(v.rotation + TAU / 4);
+
+			if (v.grabbledThing instanceof Ball)
+				if (v.grabbledThing.velocity() > 500)
+					v.grabbledThing.zVel = 0;
+		}
+		if (v.state == 0 || v.state == 2)
+		{
+			if (v.state == 0) // checking retraction
+			{
+				if (v.length > v.range - v.startDistance)
+					v.retract();
+				if (v.length > Math.sqrt(Methods.DistancePow2(v.creator.target.x, v.creator.target.y, v.start.x, v.start.y))) // retracts if it reaches mouse point
+					v.retract(); // TODO add a settings-menu option to disable this
+			}
+
+			double vineSpeed = 20;
+			if (v.state == 2) // retracting
+				vineSpeed = -vineSpeed;
+			// Pulling vine sideways
+			v.rotate(desiredAngle, deltaTime);
+			if (v.endPauseTimeLeft == 0)
+			{
+				double angle = Math.atan2(v.end.y - v.start.y, v.end.x - v.start.x);
+				v.end.x += vineSpeed * Math.cos(angle);
+				v.end.y += vineSpeed * Math.sin(angle);
+			} else if (v.endPauseTimeLeft < 0)
+				v.endPauseTimeLeft = 0;
+			else
+				v.endPauseTimeLeft -= deltaTime;
+		}
+
+		Line2D vineLine = new Line2D.Double(v.start.x, v.start.y, v.end.x, v.end.y);
+
+		double shortestDistancePow2 = Double.MAX_VALUE;
+
+		int collisionType = -1;
+		Point2D intersectionPoint = null;
+
+		// 0 walls
+		int lowestGridX = Math.min(v.start.x, v.end.x) / squareSize;
+		int lowestGridY = Math.min(v.start.y, v.end.y) / squareSize;
+		int highestGridX = Math.max(v.start.x, v.end.x) / squareSize;
+		int highestGridY = Math.max(v.start.y, v.end.y) / squareSize;
+
+		Point collidedWall = null;
+		if (v.z - v.height / 2 < 1)
+			for (int x = lowestGridX; x <= highestGridX; x++)
+				for (int y = lowestGridY; y <= highestGridY; y++)
+					if (wallTypes[x][y] != -1)
+					{
+						Rectangle2D wallRect = new Rectangle2D.Double(x * squareSize, y * squareSize, squareSize, squareSize);
+						// if they intersect
+						if (vineLine.intersects(wallRect))
+						{
+							// find point of intersection (and side)
+							List<Line2D> lines = new ArrayList<Line2D>();
+							lines.add(new Line2D.Double(wallRect.getX(), wallRect.getY(), wallRect.getX() + wallRect.getWidth(), wallRect.getY()));
+							lines.add(new Line2D.Double(wallRect.getX(), wallRect.getY(), wallRect.getX(), wallRect.getY() + wallRect.getWidth()));
+							lines.add(new Line2D.Double(wallRect.getX() + wallRect.getWidth(), wallRect.getY(), wallRect.getX() + wallRect.getWidth(), wallRect.getY() + wallRect.getWidth()));
+							lines.add(new Line2D.Double(wallRect.getX(), wallRect.getY() + wallRect.getWidth(), wallRect.getX() + wallRect.getWidth(), wallRect.getY() + wallRect.getWidth()));
+
+							for (int i = 0; i < lines.size(); i++)
+								if (!lines.get(i).intersectsLine(vineLine))
+								{
+									lines.remove(i);
+									i--;
+								}
+							// finding closest point on rectangle
+							Point2D intersectionP = null;
+							for (int i = 0; i < lines.size(); i++)
+							{
+								Point2D intersection = Methods.getLineLineIntersection(lines.get(i), vineLine);
+								if (intersection != null)
+								{
+									double distancePow2 = Methods.DistancePow2(v.start, intersection);
+									if (distancePow2 < shortestDistancePow2)
+									{
+										intersectionP = intersection;
+										shortestDistancePow2 = distancePow2;
+									} else
+									{
+										lines.remove(i);
+										i--;
+									}
+								} else
+								{
+									lines.remove(i);
+									i--;
+								}
+							}
+							if (intersectionP != null)
+							{
+								collisionType = 0;
+								intersectionPoint = intersectionP;
+								collidedWall = new Point(x, y);
+							}
+						}
+					}
+
+		// 1 ffs
+		ForceField collidedFF = null;
+		for (ForceField ff : FFs)
+			if (v.z - v.height / 2 < ff.z + ff.height || v.z + v.height / 2 > ff.z)
+			{
+
+				// find point of intersection (and side)
+				List<Line2D> lines = new ArrayList<Line2D>();
+
+				for (int j = 0; j < ff.p.length - 1; j++)
+					lines.add(new Line2D.Double(ff.p[j], ff.p[j + 1]));
+				lines.add(new Line2D.Double(ff.p[ff.p.length - 1], ff.p[0]));
+				if (!lines.isEmpty())
+
+					for (int i = 0; i < lines.size(); i++)
+						if (!lines.get(i).intersectsLine(vineLine))
+						{
+							lines.remove(i);
+							i--;
+						}
+				// finding closest point
+				Point2D intersectionP = null;
+				for (int i = 0; i < lines.size(); i++)
+				{
+					Point2D intersection = Methods.getLineLineIntersection(lines.get(i), vineLine);
+					if (intersection != null)
+					{
+						double distancePow2 = Methods.DistancePow2(v.start, intersection);
+						if (distancePow2 < shortestDistancePow2)
+						{
+							intersectionP = intersection;
+							shortestDistancePow2 = distancePow2;
+							intersectionPoint = intersection;
+						} else
+						{
+							lines.remove(i);
+							i--;
+						}
+					} else
+					{
+						lines.remove(i);
+						i--;
+					}
+				}
+				if (intersectionP != null)
+				{
+					collisionType = 1;
+					collidedFF = ff;
+				}
+
+			}
+
+		// 2 arcffs/
+		ArcForceField collidedAFF = null;
+		for (ArcForceField aff : arcFFs)
+			if (v.z - v.height / 2 < aff.z + aff.height || v.z + v.height / 2 > aff.z)
+			{
+
+				Rectangle2D generalBounds = new Rectangle2D.Double(aff.x - aff.maxRadius, aff.y - aff.maxRadius, aff.maxRadius * 2, aff.maxRadius * 2);
+				// easier intersection first
+				if (vineLine.intersects(generalBounds))
+				{
+					// detailed intersection
+					double minAngle = aff.rotation - aff.arc / 2;
+					double maxAngle = aff.rotation + aff.arc / 2;
+
+					while (minAngle < 0)
+						minAngle += 2 * Math.PI;
+					while (minAngle >= 2 * Math.PI)
+						minAngle -= 2 * Math.PI;
+					while (maxAngle < 0)
+						maxAngle += 2 * Math.PI;
+					while (maxAngle >= 2 * Math.PI)
+						maxAngle -= 2 * Math.PI;
+
+					Point2D closestPointToSegment = Methods.getClosestPointOnSegment(vineLine.getX1(), vineLine.getY1(), vineLine.getX2(), vineLine.getY2(), aff.x, aff.y);
+
+					List<Point2D> points = new ArrayList<Point2D>();
+					List<Line2D> lines = new ArrayList<Line2D>();
+
+					for (int k = -1; k < 2; k += 2) // intended to check both intersections of the line with the circle
+					{
+						double closestPointDistanceMax = Math.sqrt(Methods.DistancePow2(closestPointToSegment.getX(), closestPointToSegment.getY(), aff.x, aff.y));
+						double angleToCollisionPointMax = Math.atan2(closestPointToSegment.getY() - aff.y, closestPointToSegment.getX() - aff.x)
+								+ k * Math.acos(closestPointDistanceMax / aff.maxRadius);
+
+						double closestPointDistanceMin = Math.sqrt(Methods.DistancePow2(closestPointToSegment.getX(), closestPointToSegment.getY(), aff.x, aff.y));
+						double angleToCollisionPointMin = Math.atan2(closestPointToSegment.getY() - aff.y, closestPointToSegment.getX() - aff.x)
+								+ k * Math.acos(closestPointDistanceMin / aff.minRadius);
+
+						Point2D closestPointMax = new Point2D.Double(aff.x + aff.maxRadius * Math.cos(angleToCollisionPointMax), aff.y + aff.maxRadius * Math.sin(angleToCollisionPointMax));
+						Point2D closestPointMin = new Point2D.Double(aff.x + aff.minRadius * Math.cos(angleToCollisionPointMin), aff.y + aff.minRadius * Math.sin(angleToCollisionPointMin));
+
+						while (angleToCollisionPointMax < 0)
+							angleToCollisionPointMax += 2 * Math.PI;
+						while (angleToCollisionPointMax >= 2 * Math.PI)
+							angleToCollisionPointMax -= 2 * Math.PI;
+
+						while (angleToCollisionPointMin < 0)
+							angleToCollisionPointMin += 2 * Math.PI;
+						while (angleToCollisionPointMin >= 2 * Math.PI)
+							angleToCollisionPointMin -= 2 * Math.PI;
+
+						// outer arc
+						if (closestPointDistanceMax < aff.maxRadius)
+							if (minAngle < maxAngle)
+							{
+								if (angleToCollisionPointMax > minAngle && angleToCollisionPointMax < maxAngle)
+								{
+									points.add(closestPointMax);
+									lines.add(new Line2D.Double(closestPointMax.getX() + 12 * Math.cos(angleToCollisionPointMax + Math.PI / 2),
+											closestPointMax.getY() + 12 * Math.sin(angleToCollisionPointMax + Math.PI / 2),
+											closestPointMax.getX() - 12 * Math.cos(angleToCollisionPointMax + Math.PI / 2),
+											closestPointMax.getY() - 12 * Math.sin(angleToCollisionPointMax + Math.PI / 2)));
+								}
+							} else if (angleToCollisionPointMax < maxAngle || angleToCollisionPointMax > minAngle)
+							{
+								points.add(closestPointMax);
+								lines.add(new Line2D.Double(closestPointMax.getX() + 12 * Math.cos(angleToCollisionPointMax + Math.PI / 2),
+										closestPointMax.getY() + 12 * Math.sin(angleToCollisionPointMax + Math.PI / 2), closestPointMax.getX() - 12 * Math.cos(angleToCollisionPointMax + Math.PI / 2),
+										closestPointMax.getY() - 12 * Math.sin(angleToCollisionPointMax + Math.PI / 2)));
+
+							}
+						// inner arc
+						if (closestPointDistanceMin < aff.minRadius)
+							if (minAngle < maxAngle)
+							{
+								if (angleToCollisionPointMin > minAngle && angleToCollisionPointMin < maxAngle)
+								{
+									points.add(closestPointMin);
+									lines.add(new Line2D.Double(closestPointMin.getX() + 12 * Math.cos(angleToCollisionPointMin + Math.PI / 2),
+											closestPointMin.getY() + 12 * Math.sin(angleToCollisionPointMin + Math.PI / 2),
+											closestPointMin.getX() - 12 * Math.cos(angleToCollisionPointMin + Math.PI / 2),
+											closestPointMin.getY() - 12 * Math.sin(angleToCollisionPointMin + Math.PI / 2)));
+								}
+							} else if (angleToCollisionPointMin < maxAngle || angleToCollisionPointMin > minAngle)
+							{
+								points.add(closestPointMin);
+								lines.add(new Line2D.Double(closestPointMin.getX() + 12 * Math.cos(angleToCollisionPointMin + Math.PI / 2),
+										closestPointMin.getY() + 12 * Math.sin(angleToCollisionPointMin + Math.PI / 2), closestPointMin.getX() - 12 * Math.cos(angleToCollisionPointMin + Math.PI / 2),
+										closestPointMin.getY() - 12 * Math.sin(angleToCollisionPointMin + Math.PI / 2)));
+							}
+					}
+					// two sides:
+					Line2D l1 = new Line2D.Double(aff.x + aff.minRadius * Math.cos(aff.rotation - 0.5 * aff.arc), aff.y + aff.minRadius * Math.sin(aff.rotation - 0.5 * aff.arc),
+							aff.x + aff.maxRadius * Math.cos(aff.rotation - 0.5 * aff.arc), aff.y + aff.maxRadius * Math.sin(aff.rotation - 0.5 * aff.arc));
+					Line2D l2 = new Line2D.Double(aff.x + aff.minRadius * Math.cos(aff.rotation + 0.5 * aff.arc), aff.y + aff.minRadius * Math.sin(aff.rotation + 0.5 * aff.arc),
+							aff.x + aff.maxRadius * Math.cos(aff.rotation + 0.5 * aff.arc), aff.y + aff.maxRadius * Math.sin(aff.rotation + 0.5 * aff.arc));
+					lines.add(l1);
+					points.add(Methods.getSegmentIntersection(l1, vineLine));
+					lines.add(l2);
+					points.add(Methods.getSegmentIntersection(l2, vineLine));
+					// finding closest point
+					Point2D intersectionP = null;
+					for (int i = 0; i < points.size(); i++)
+					{
+						Point2D intersection = points.get(i);
+						if (intersection != null)
+						{
+							double distancePow2 = Methods.DistancePow2(v.start, intersection);
+							if (distancePow2 < shortestDistancePow2)
+							{
+								intersectionP = intersection;
+								shortestDistancePow2 = distancePow2;
+							} else
+							{
+								points.remove(i);
+								lines.remove(i);
+								i--;
+							}
+						} else
+						{
+							points.remove(i);
+							lines.remove(i);
+							i--;
+						}
+					}
+					if (intersectionP != null)
+					{
+						collisionType = 2;
+						collidedAFF = aff;
+						intersectionPoint = intersectionP;
+					}
+
+				}
+			}
+
+		// 3,4 persons
+		Person collidedPerson = null;
+		for (Person p : people)
+			if (p.id != v.creator.id)
+				if (!p.prone)
+				{
+					// grabbling test
+					if (v.state == 0 || v.state == 2)
+						if (Math.abs(p.z - v.end.z) < 2 && Methods.DistancePow2(p.x, p.y, v.end.x, v.end.y) < Vine.grabblingRange * Vine.grabblingRange)
+						{
+							collisionType = 3;
+							collidedPerson = p;
+							intersectionPoint = new Point2D.Double(-1, -1); // irrelevant
+						}
+
+					// collision with the body (length) of the vine
+					if (v.state != 1 && !v.creator.equals(v.grabbledThing))
+						if (Methods.LineToPointDistancePow2(v.start.Point(), v.end.Point(), p.Point()) <= p.radius * p.radius / 4)
+						{
+							Point closestPoint = Methods.getClosestRoundedPointOnSegment(v.start.Point(), v.end.Point(), p.Point());
+							double distancePow2 = Methods.DistancePow2(p.Point(), closestPoint);
+							if (distancePow2 < shortestDistancePow2)
+							{
+								shortestDistancePow2 = distancePow2;
+								collisionType = 4;
+								collidedPerson = p;
+								intersectionPoint = new Point2D.Double(-1, -1); // irrelevant
+							}
+						}
+				}
+
+		// 5,6 balls
+		Ball collidedBall = null;
+		for (Ball b : balls)
+		{
+			// grabbling test
+			if (v.state == 0 || v.state == 2)
+				if (Math.abs(b.z - v.end.z) < 2 && Methods.DistancePow2(b.x, b.y, v.end.x, v.end.y) < Vine.grabblingRange * Vine.grabblingRange)
+				{
+					collisionType = 5;
+					collidedBall = b;
+					intersectionPoint = new Point2D.Double(-1, -1); // irrelevant
+				}
+
+			// collision with the body (length) of the vine
+			if (v.state != 1)
+				if (Methods.LineToPointDistancePow2(v.start.Point(), v.end.Point(), b.Point()) <= b.radius * b.radius)
+				{
+					Point closestPoint = Methods.getClosestRoundedPointOnSegment(v.start.Point(), v.end.Point(), b.Point());
+					double distancePow2 = Methods.DistancePow2(b.Point(), closestPoint);
+					if (distancePow2 < shortestDistancePow2)
+					{
+						shortestDistancePow2 = distancePow2;
+						collisionType = 6;
+						collidedBall = b;
+						intersectionPoint = new Point2D.Double(-1, -1); // irrelevant
+					}
+				}
+		}
+
+		if (collisionType == -1)
+			return;
+		if (intersectionPoint == null)
+		{
+			Main.errorMessage("what what what what? Um");
+			return;
+		}
+		Point roundedIntersectionPoint = new Point((int) intersectionPoint.getX(), (int) intersectionPoint.getY());
+
+		switch (collisionType)
+		{
+		case 0: // wall
+			// TODO Create plant debris / cut-off plant between intersection point and vine end
+			v.grabbledThing = null;
+
+			v.end.x = roundedIntersectionPoint.x;
+			v.end.y = roundedIntersectionPoint.y;
+			v.retract();
+			v.fixPosition();
+			damageWall(collidedWall.x, collidedWall.y, v.getDamage() + v.getPushback(), EP.damageType(EP.toInt("Plant")));
+			break;
+		case 1: // force field
+			v.end.x = roundedIntersectionPoint.x;
+			v.end.y = roundedIntersectionPoint.y;
+			v.retract();
+			v.fixPosition();
+			damageFF(collidedFF, v.getDamage() + v.getPushback(), roundedIntersectionPoint);
+			break;
+		case 2: // arc force field
+			v.end.x = roundedIntersectionPoint.x;
+			v.end.y = roundedIntersectionPoint.y;
+			v.retract();
+			v.fixPosition();
+			damageArcForceField(collidedAFF, v.getDamage() + v.getPushback(), roundedIntersectionPoint, EP.damageType("Plant"));
+			break;
+		case 3: // person (grabbled)
+			v.end = new Point3D((int) collidedPerson.x, (int) collidedPerson.y, (int) collidedPerson.z);
+			v.grabbledThing = collidedPerson;
+			v.state = 1;
+			v.fixPosition();
+			break;
+		case 4: // person (intersected)
+			v.rotate(originalAngle, deltaTime * 2);
+			if (v.state == 1)
+			{
+				double difference = desiredAngle - v.rotation;
+				while (difference < -TAU / 2)
+					difference += TAU;
+				while (difference > TAU / 2)
+					difference -= TAU;
+				double hitAngle = v.rotation + (difference > 0 ? TAU / 4 : -TAU / 4);
+				double vineCollisionPercentage = 0.01;
+				double push = Math.min(Math.sqrt(Math.pow(v.grabbledThing.xVel, 2) + Math.pow(v.grabbledThing.yVel, 2)) * vineCollisionPercentage, v.getCollisionPushback());
+				hitPerson(collidedPerson, v.getCollisionDamage(), push, hitAngle, 0);
+				collidedPerson.rotation = hitAngle;
+				collidedPerson.slippedTimeLeft = 3;
+				collidedPerson.prone = true;
+			}
+			v.fixPosition();
+			break;
+		case 5: // ball (grabbled)
+			v.end = new Point3D((int) collidedBall.x, (int) collidedBall.y, (int) collidedBall.z);
+			v.grabbledThing = collidedBall;
+			v.state = 1;
+			v.fixPosition();
+			break;
+		case 6: // ball (intersected)
+			v.rotate(originalAngle, deltaTime * 2);
+			v.fixPosition();
+			break;
+		default:
+			Main.errorMessage("tutorial times 4: how to write an error message 404");
+			break;
+		}
+	}
+
+	public void moveBeam(Beam b, boolean recursive, double deltaTime) // Recursive
+	{
+		double angle = Math.atan2(b.end.y - b.start.y, b.end.x - b.start.x);
+		// move it slightly forward
+		b.end.x += 3 * Math.cos(angle);
+		b.end.y += 3 * Math.sin(angle);
+		Line2D beamLine = new Line2D.Double(b.start.x, b.start.y, b.end.x, b.end.y);
+		boolean flatEnd = false;
+
+		// Preliminary collision testing, in order to reduce the number of collisions to 1
+		double shortestDistancePow2 = Double.MAX_VALUE;
+		Line2D collisionLine = null;
+		int collisionType = -1; // -1 = none, 0 = wall, 1 = force field, 2 = arc force field, 3 = person, 4 = ball
+
+		// walls
+		Point collidedWall = null;
+		if (b.z - b.height / 2 < 1)
+			for (int x = 0; x < width; x++)
+				for (int y = 0; y < width; y++)
+					if (wallTypes[x][y] != -1)
+					{
+						Rectangle2D wallRect = new Rectangle2D.Double(x * squareSize, y * squareSize, squareSize, squareSize);
+						// if they intersect
+						if (beamLine.intersects(wallRect))
+						{
+							// find point of intersection (and side)
+							List<Line2D> lines = new ArrayList<Line2D>();
+							lines.add(new Line2D.Double(wallRect.getX(), wallRect.getY(), wallRect.getX() + wallRect.getWidth(), wallRect.getY()));
+							lines.add(new Line2D.Double(wallRect.getX(), wallRect.getY(), wallRect.getX(), wallRect.getY() + wallRect.getWidth()));
+							lines.add(new Line2D.Double(wallRect.getX() + wallRect.getWidth(), wallRect.getY(), wallRect.getX() + wallRect.getWidth(), wallRect.getY() + wallRect.getWidth()));
+							lines.add(new Line2D.Double(wallRect.getX(), wallRect.getY() + wallRect.getWidth(), wallRect.getX() + wallRect.getWidth(), wallRect.getY() + wallRect.getWidth()));
+
+							for (int i = 0; i < lines.size(); i++)
+								if (!lines.get(i).intersectsLine(beamLine))
+								{
+									lines.remove(i);
+									i--;
+								}
+							// finding closest point on rectangle
+							Point2D intersectionP = null;
+							for (int i = 0; i < lines.size(); i++)
+							{
+								Point2D intersection = Methods.getLineLineIntersection(lines.get(i), beamLine);
+								if (intersection != null)
+								{
+									double distancePow2 = Methods.DistancePow2(b.start, intersection);
+									if (distancePow2 < shortestDistancePow2)
+									{
+										intersectionP = intersection;
+										shortestDistancePow2 = distancePow2;
+										collisionLine = lines.get(i);
+									} else
+									{
+										lines.remove(i);
+										i--;
+									}
+								} else
+								{
+									lines.remove(i);
+									i--;
+								}
+							}
+							if (intersectionP != null)
+							{
+								collisionType = 0;
+								collidedWall = new Point(x, y);
+							}
+						}
+					}
+
+		// forcefields
+		ForceField collidedFF = null;
+		for (ForceField ff : FFs)
+		{
+			if (b.z - b.height / 2 < ff.z + ff.height && b.z + b.height / 2 > ff.z)
+			{
+				Rectangle2D generalBounds = new Rectangle2D.Double(ff.x - ff.length / 2 - ff.width / 2, ff.y - ff.length / 2 - ff.width / 2, ff.length + ff.width, ff.length + ff.width);
+				// easier intersection first
+				if (beamLine.intersects(generalBounds))
+				{
+					// detailed intersection
+					List<Line2D> lines = new ArrayList<Line2D>();
+					for (int j = 0; j < ff.p.length - 1; j++)
+						lines.add(new Line2D.Double(ff.p[j], ff.p[j + 1]));
+					lines.add(new Line2D.Double(ff.p[ff.p.length - 1], ff.p[0]));
+					if (!lines.isEmpty())
+
+						for (int i = 0; i < lines.size(); i++)
+							if (!lines.get(i).intersectsLine(beamLine))
+							{
+								lines.remove(i);
+								i--;
+							}
+					// finding closest point
+					Point2D intersectionP = null;
+					for (int i = 0; i < lines.size(); i++)
+					{
+						Point2D intersection = Methods.getLineLineIntersection(lines.get(i), beamLine);
+						if (intersection != null)
+						{
+							double distancePow2 = Methods.DistancePow2(b.start, intersection);
+							if (distancePow2 < shortestDistancePow2)
+							{
+								intersectionP = intersection;
+								shortestDistancePow2 = distancePow2;
+								collisionLine = lines.get(i);
+							} else
+							{
+								lines.remove(i);
+								i--;
+							}
+						} else
+						{
+							lines.remove(i);
+							i--;
+						}
+					}
+					if (intersectionP != null)
+					{
+						collisionType = 1;
+						collidedFF = ff;
+					}
+				}
+			}
+		}
+
+		// arc force fields
+		ArcForceField collidedAFF = null;
+		for (ArcForceField aff : arcFFs)
+		{
+			if (b.z - b.height / 2 < aff.z + aff.height && b.z + b.height / 2 > aff.z)
+			{
+				Rectangle2D generalBounds = new Rectangle2D.Double(aff.x - aff.maxRadius, aff.y - aff.maxRadius, aff.maxRadius * 2, aff.maxRadius * 2);
+				// easier intersection first
+				if (beamLine.intersects(generalBounds))
+				{
+					// detailed intersection
+					double minAngle = aff.rotation - aff.arc / 2;
+					double maxAngle = aff.rotation + aff.arc / 2;
+
+					while (minAngle < 0)
+						minAngle += 2 * Math.PI;
+					while (minAngle >= 2 * Math.PI)
+						minAngle -= 2 * Math.PI;
+					while (maxAngle < 0)
+						maxAngle += 2 * Math.PI;
+					while (maxAngle >= 2 * Math.PI)
+						maxAngle -= 2 * Math.PI;
+
+					Point2D closestPointToSegment = Methods.getClosestPointOnSegment(beamLine.getX1(), beamLine.getY1(), beamLine.getX2(), beamLine.getY2(), aff.x, aff.y);
+
+					List<Point2D> points = new ArrayList<Point2D>();
+					List<Line2D> lines = new ArrayList<Line2D>();
+
+					for (int k = -1; k < 2; k += 2) // intended to check both intersections of the line with the circle
+					{
+						double closestPointDistanceMax = Math.sqrt(Methods.DistancePow2(closestPointToSegment.getX(), closestPointToSegment.getY(), aff.x, aff.y));
+						double angleToCollisionPointMax = Math.atan2(closestPointToSegment.getY() - aff.y, closestPointToSegment.getX() - aff.x)
+								+ k * Math.acos(closestPointDistanceMax / aff.maxRadius);
+
+						double closestPointDistanceMin = Math.sqrt(Methods.DistancePow2(closestPointToSegment.getX(), closestPointToSegment.getY(), aff.x, aff.y));
+						double angleToCollisionPointMin = Math.atan2(closestPointToSegment.getY() - aff.y, closestPointToSegment.getX() - aff.x)
+								+ k * Math.acos(closestPointDistanceMin / aff.minRadius);
+
+						Point2D closestPointMax = new Point2D.Double(aff.x + aff.maxRadius * Math.cos(angleToCollisionPointMax), aff.y + aff.maxRadius * Math.sin(angleToCollisionPointMax));
+						Point2D closestPointMin = new Point2D.Double(aff.x + aff.minRadius * Math.cos(angleToCollisionPointMin), aff.y + aff.minRadius * Math.sin(angleToCollisionPointMin));
+
+						while (angleToCollisionPointMax < 0)
+							angleToCollisionPointMax += 2 * Math.PI;
+						while (angleToCollisionPointMax >= 2 * Math.PI)
+							angleToCollisionPointMax -= 2 * Math.PI;
+
+						while (angleToCollisionPointMin < 0)
+							angleToCollisionPointMin += 2 * Math.PI;
+						while (angleToCollisionPointMin >= 2 * Math.PI)
+							angleToCollisionPointMin -= 2 * Math.PI;
+
+						// outer arc
+						if (closestPointDistanceMax < aff.maxRadius)
+							if (minAngle < maxAngle)
+							{
+								if (angleToCollisionPointMax > minAngle && angleToCollisionPointMax < maxAngle)
+								{
+									points.add(closestPointMax);
+									lines.add(new Line2D.Double(closestPointMax.getX() + 12 * Math.cos(angleToCollisionPointMax + Math.PI / 2),
+											closestPointMax.getY() + 12 * Math.sin(angleToCollisionPointMax + Math.PI / 2),
+											closestPointMax.getX() - 12 * Math.cos(angleToCollisionPointMax + Math.PI / 2),
+											closestPointMax.getY() - 12 * Math.sin(angleToCollisionPointMax + Math.PI / 2)));
+								}
+							} else if (angleToCollisionPointMax < maxAngle || angleToCollisionPointMax > minAngle)
+							{
+								points.add(closestPointMax);
+								lines.add(new Line2D.Double(closestPointMax.getX() + 12 * Math.cos(angleToCollisionPointMax + Math.PI / 2),
+										closestPointMax.getY() + 12 * Math.sin(angleToCollisionPointMax + Math.PI / 2), closestPointMax.getX() - 12 * Math.cos(angleToCollisionPointMax + Math.PI / 2),
+										closestPointMax.getY() - 12 * Math.sin(angleToCollisionPointMax + Math.PI / 2)));
+
+							}
+						// inner arc
+						if (closestPointDistanceMin < aff.minRadius)
+							if (minAngle < maxAngle)
+							{
+								if (angleToCollisionPointMin > minAngle && angleToCollisionPointMin < maxAngle)
+								{
+									points.add(closestPointMin);
+									lines.add(new Line2D.Double(closestPointMin.getX() + 12 * Math.cos(angleToCollisionPointMin + Math.PI / 2),
+											closestPointMin.getY() + 12 * Math.sin(angleToCollisionPointMin + Math.PI / 2),
+											closestPointMin.getX() - 12 * Math.cos(angleToCollisionPointMin + Math.PI / 2),
+											closestPointMin.getY() - 12 * Math.sin(angleToCollisionPointMin + Math.PI / 2)));
+								}
+							} else if (angleToCollisionPointMin < maxAngle || angleToCollisionPointMin > minAngle)
+							{
+								points.add(closestPointMin);
+								lines.add(new Line2D.Double(closestPointMin.getX() + 12 * Math.cos(angleToCollisionPointMin + Math.PI / 2),
+										closestPointMin.getY() + 12 * Math.sin(angleToCollisionPointMin + Math.PI / 2), closestPointMin.getX() - 12 * Math.cos(angleToCollisionPointMin + Math.PI / 2),
+										closestPointMin.getY() - 12 * Math.sin(angleToCollisionPointMin + Math.PI / 2)));
+							}
+					}
+					// two sides:
+					Line2D l1 = new Line2D.Double(aff.x + aff.minRadius * Math.cos(aff.rotation - 0.5 * aff.arc), aff.y + aff.minRadius * Math.sin(aff.rotation - 0.5 * aff.arc),
+							aff.x + aff.maxRadius * Math.cos(aff.rotation - 0.5 * aff.arc), aff.y + aff.maxRadius * Math.sin(aff.rotation - 0.5 * aff.arc));
+					Line2D l2 = new Line2D.Double(aff.x + aff.minRadius * Math.cos(aff.rotation + 0.5 * aff.arc), aff.y + aff.minRadius * Math.sin(aff.rotation + 0.5 * aff.arc),
+							aff.x + aff.maxRadius * Math.cos(aff.rotation + 0.5 * aff.arc), aff.y + aff.maxRadius * Math.sin(aff.rotation + 0.5 * aff.arc));
+					lines.add(l1);
+					points.add(Methods.getSegmentIntersection(l1, beamLine));
+					lines.add(l2);
+					points.add(Methods.getSegmentIntersection(l2, beamLine));
+					// finding closest point
+					Point2D intersectionP = null;
+					for (int i = 0; i < points.size(); i++)
+					{
+						Point2D intersection = points.get(i);
+						if (intersection != null)
+						{
+							double distancePow2 = Methods.DistancePow2(b.start, intersection);
+							if (distancePow2 < shortestDistancePow2)
+							{
+								intersectionP = intersection;
+								shortestDistancePow2 = distancePow2;
+								collisionLine = lines.get(i);
+							} else
+							{
+								points.remove(i);
+								lines.remove(i);
+								i--;
+							}
+						} else
+						{
+							points.remove(i);
+							lines.remove(i);
+							i--;
+						}
+					}
+					if (intersectionP != null)
+					{
+						collisionType = 2;
+						collidedAFF = aff;
+					}
+				}
+			}
+		}
+
+		Person collidedPerson = null;
+		for (Person p : people)
+		{
+			if (p.z <= b.z + b.height / 2 && p.z + p.height > b.z - b.height / 2) // height check
+			{
+				Rectangle2D TyrannosaurusRect = new Rectangle2D.Double(p.x - 0.5 * p.radius, p.y - 0.5 * p.radius, p.radius, p.radius);
+				if (beamLine.intersects(TyrannosaurusRect)) // intersection check
+				{
+					// copy paste from the Walls part
+					List<Line2D> lines = new ArrayList<Line2D>();
+					lines.add(new Line2D.Double(TyrannosaurusRect.getX(), TyrannosaurusRect.getY(), TyrannosaurusRect.getX() + TyrannosaurusRect.getWidth(), TyrannosaurusRect.getY()));
+					lines.add(new Line2D.Double(TyrannosaurusRect.getX(), TyrannosaurusRect.getY(), TyrannosaurusRect.getX(), TyrannosaurusRect.getY() + TyrannosaurusRect.getWidth()));
+					lines.add(new Line2D.Double(TyrannosaurusRect.getX() + TyrannosaurusRect.getWidth(), TyrannosaurusRect.getY(), TyrannosaurusRect.getX() + TyrannosaurusRect.getWidth(),
+							TyrannosaurusRect.getY() + TyrannosaurusRect.getWidth()));
+					lines.add(new Line2D.Double(TyrannosaurusRect.getX(), TyrannosaurusRect.getY() + TyrannosaurusRect.getWidth(), TyrannosaurusRect.getX() + TyrannosaurusRect.getWidth(),
+							TyrannosaurusRect.getY() + TyrannosaurusRect.getWidth()));
+
+					for (int i = 0; i < lines.size(); i++)
+						if (!lines.get(i).intersectsLine(beamLine))
+						{
+							lines.remove(i);
+							i--;
+						}
+					// finding closest point on rectangle
+					Point2D intersectionP = null;
+					for (int i = 0; i < lines.size(); i++)
+					{
+						Point2D intersection = Methods.getLineLineIntersection(lines.get(i), beamLine);
+						if (intersection != null)
+						{
+							double distancePow2 = Methods.DistancePow2(b.start, intersection);
+							if (distancePow2 < shortestDistancePow2)
+							{
+								intersectionP = intersection;
+								shortestDistancePow2 = distancePow2;
+								collisionLine = lines.get(i);
+							} else
+							{
+								lines.remove(i);
+								i--;
+							}
+						} else
+						{
+							lines.remove(i);
+							i--;
+						}
+					}
+					if (intersectionP != null)
+					{
+						collisionType = 3;
+						collidedPerson = p;
+					}
+				}
+			}
+		}
+
+		Ball collidedBall = null;
+		for (Ball ball : balls)
+		{
+			if (b.z + b.height / 2 > ball.z - b.height / 2 && b.z - b.height / 2 < ball.z + b.height / 2)
+			{
+				Rectangle2D rekt = new Rectangle2D.Double(ball.x - ball.radius, ball.y - ball.radius, 2 * ball.radius, 2 * ball.radius);
+				if (rekt.intersectsLine(beamLine))
+				{
+					double distancePow2 = Methods.LineToPointDistancePow2(new Point(b.start.x, b.start.y), new Point(b.end.x, b.end.y), new Point((int) ball.x, (int) ball.y));
+					if (distancePow2 < ball.radius * ball.radius)
+					{
+						Point2D intersectionP = null;
+						double realDistancePow2 = Methods.DistancePow2(b.start, new Point((int) ball.x, (int) ball.y));
+						if (realDistancePow2 < shortestDistancePow2)
+						{
+							intersectionP = new Point2D.Double(b.start.x + Math.sqrt(realDistancePow2) * Math.cos(angle), b.start.y + Math.sqrt(realDistancePow2) * Math.sin(angle));
+							shortestDistancePow2 = realDistancePow2;
+							collisionLine = new Line2D.Double(intersectionP.getX() + 100 * Math.cos(angle + Math.PI / 2), intersectionP.getY() + 100 * Math.sin(angle + Math.PI / 2),
+									intersectionP.getX() - 100 * Math.cos(angle + Math.PI / 2), intersectionP.getY() - 100 * Math.sin(angle + Math.PI / 2));
+							collisionType = 4;
+							collidedBall = ball;
+						}
+					}
+				}
+			}
+		}
+
+		if (collisionType == -1)
+		{
+			b.endType = 0;
+			b.endAngle = angle;
+			return;
+		}
+
+		// collision handling
+		Point2D intersectionPoint = Methods.getSegmentIntersection(collisionLine, beamLine);
+		if (intersectionPoint == null)
+		{
+			b.endType = 0;
+			b.endAngle = angle;
+			return;
+		}
+		Point roundedIntersectionPoint = new Point((int) intersectionPoint.getX(), (int) intersectionPoint.getY());
+		Beam b2 = null; // ...
+		switch (collisionType)
+		{
+		case 0: // wall
+			b.end.x = roundedIntersectionPoint.x;
+			b.end.y = roundedIntersectionPoint.y;
+			b.endType = 1;
+			flatEnd = true;
+			if (roundedIntersectionPoint.x == collidedWall.x * squareSize) // left
+				b.endAngle = 0;
+			if (roundedIntersectionPoint.y == collidedWall.y * squareSize) // up
+				b.endAngle = Math.PI / 2;
+			if (roundedIntersectionPoint.x == collidedWall.x * squareSize + squareSize) // right
+				b.endAngle = Math.PI;
+			if (roundedIntersectionPoint.y == collidedWall.y * squareSize + squareSize) // down
+				b.endAngle = -Math.PI / 2;
+			damageWall(collidedWall.x, collidedWall.y, b.getDamage() + b.getPushback(), EP.damageType(b.elementNum));
+			break;
+		case 1: // Force Field
+			b.end.x = roundedIntersectionPoint.x;
+			b.end.y = roundedIntersectionPoint.y;
+			b.endType = 1;
+			flatEnd = true;
+
+			// if the new beam is within the FF...
+			if (recursive)
+			{
+				b2 = getReflectedBeam(b, collisionLine);
+
+				Line2D diagonal1 = new Line2D.Double(collidedFF.p[0], collidedFF.p[2]);
+				Line2D diagonal2 = new Line2D.Double(collidedFF.p[1], collidedFF.p[3]);
+				if (b2 != null)
+				{
+					Line2D beam2Line = new Line2D.Double(b2.start.x, b2.start.y, b2.end.x, b2.end.y);
+					if (diagonal1.intersectsLine(beam2Line) || diagonal2.intersectsLine(beam2Line)) // only happens (i think) when you create a beam inside a force field
+					{
+						; // is bad. TODO make this code slightly shorter?
+					} else
+					{
+						beams.add(b2);
+						moveBeam(b2, true, deltaTime); // Recursion!!!
+						// sound effect (reflection electric sound)
+						if (!collidedFF.sounds.get(0).active)
+							collidedFF.sounds.get(0).loop();
+						else
+							collidedFF.sounds.get(0).justActivated = true;
+					}
+				}
+			}
+			break;
+		case 2: // Arc Force Field
+			b.end.x = roundedIntersectionPoint.x;
+			b.end.y = roundedIntersectionPoint.y;
+			b.endType = 0;
+			if (EP.damageType(b.elementNum) == 4) // electricity or energy
+				if (recursive)
+				{
+					b2 = getReflectedBeam(b, collisionLine);
+					if (b2 != null) // BUGS MADE ME DO THIS
+					{
+						beams.add(b2);
+						moveBeam(b2, true, deltaTime); // Recursion!!!
+					}
+				} else
+					damageArcForceField(collidedAFF, b.getDamage() + b.getPushback(), roundedIntersectionPoint, EP.damageType(b.elementNum));
+			break;
+		case 3: // Person
+			b.end.x = roundedIntersectionPoint.x;
+			b.end.y = roundedIntersectionPoint.y;
+			b.endType = 0;
+
+			// damaging the person
+			hitPerson(collidedPerson, b.getDamage(), b.getPushback(), angle, EP.damageType(b.elementNum), deltaTime);
+			// sound effect (scorched flesh)
+			if (!collidedPerson.sounds.get(0).active)
+				collidedPerson.sounds.get(0).loop();
+			else
+				collidedPerson.sounds.get(0).justActivated = true;
+			break;
+		case 4: // Ball
+			b.end.x = roundedIntersectionPoint.x;
+			b.end.y = roundedIntersectionPoint.y;
+			b.endType = 0;
+
+			collidedBall.mass -= 0.2 * b.getDamage() * deltaTime; // TODO what the shit? Damaging the ball's mass? Whaaa?
+			// I'm not sure what I did here with the angles but it looks OK
+			if (Math.random() < 0.5)
+				ballDebris(collidedBall, "beam hit");
+			break;
+		default:
+			Main.errorMessage("Dragon and Defiant, sitting in a tree, K-I-S-S-I-S-S-I-P-P-I");
+			break;
+		}
+
+		if (!flatEnd)
+		{
+			b.endType = 0;
+			b.endAngle = angle;
+		}
+
+	}
+
+	Beam getReflectedBeam(Beam b, Line2D collisionLine)
+	{
+		double angle = Math.atan2(b.end.y - b.start.y, b.end.x - b.start.x);
+		double lineAngle = Math.atan2(collisionLine.getY2() - collisionLine.getY1(), collisionLine.getX2() - collisionLine.getX1());
+		b.endAngle = lineAngle + Math.PI / 2;
+		double newBeamAngle = 2 * lineAngle - angle; // math
+		// reflection beam
+		final double startDistance = 15; // if this is lower than ~15, there will be flickering in some reflections, but if this is higher than ~15 there will be a noticeable starting distance, especially with tiny beams.
+		// possible TODO to solve that problem : multiply this number by 90-the angle between the laser and the FF's hit side.
+		double beamLength = Math.sqrt(Math.pow(b.end.x - b.start.x, 2) + Math.pow(b.end.y - b.start.y, 2)); // Should work
+		double newRange = b.range - beamLength;
+		if (newRange < 0) // because bugs
+			return null;
+		Beam b2 = new Beam(b.creator, new Point3D((int) (b.end.x + startDistance * Math.cos(newBeamAngle)), (int) (b.end.y + startDistance * Math.sin(newBeamAngle)), b.end.z),
+				new Point3D((int) (b.end.x + newRange * Math.cos(newBeamAngle)), (int) (b.end.y + newRange * Math.sin(newBeamAngle)), b.end.z), b.elementNum, b.points, newRange);
+		b2.frameNum = b.frameNum;
+		b2.isChild = true;
+		return b2;
+	}
 
 	public void ballDebris(Ball b, String type)
 	{
@@ -408,6 +1353,8 @@ public class Environment
 				}
 				p.timeBetweenDamageTexts = 0;
 			}
+
+			p.inCombat = true; // TODO
 		}
 		// PUSHBACK
 		double velocityPush = pushback * 3000 / (p.mass + 10 * p.STRENGTH); // the 3000 is subject to change

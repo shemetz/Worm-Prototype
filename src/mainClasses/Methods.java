@@ -14,8 +14,6 @@ import java.awt.image.BufferedImage;
 import java.awt.image.ConvolveOp;
 import java.awt.image.Kernel;
 
-import shouldBeDefault.Point3D;
-
 public class Methods
 {
 	// Handy rotation method
@@ -48,18 +46,18 @@ public class Methods
 	}
 
 	// Compute the squared distance from A to B
-	static double DistancePow2(Point a, Point b)
+	public static double DistancePow2(Point a, Point b)
 	{
 		return (a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y);
 	}
 
 	// Compute the squared distance from A to B
-	static double DistancePow2(Point2D a, Point2D b)
+	public static double DistancePow2(Point2D a, Point2D b)
 	{
 		return (a.getX() - b.getX()) * (a.getX() - b.getX()) + (a.getY() - b.getY()) * (a.getY() - b.getY());
 	}
 
-	static double DistancePow2(double ax, double ay, double bx, double by)
+	public static double DistancePow2(double ax, double ay, double bx, double by)
 	{
 		return (ax - bx) * (ax - bx) + (ay - by) * (ay - by);
 	}

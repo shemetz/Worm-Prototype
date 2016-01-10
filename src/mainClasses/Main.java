@@ -28,11 +28,9 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
 import java.awt.font.FontRenderContext;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
-import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.RenderedImage;
 import java.io.File;
@@ -47,8 +45,8 @@ import java.util.Random;
 import javax.imageio.ImageIO;
 import javax.swing.Timer;
 
+import mainClasses.abilities.Sense_Powers;
 import mainResourcesPackage.SoundEffect;
-import shouldBeDefault.Point3D;
 
 public class Main extends Frame implements KeyListener, MouseListener, MouseMotionListener, MouseWheelListener, ComponentListener, WindowFocusListener
 {
@@ -72,9 +70,6 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 	final double				someConstant			= 0.03;
 	final double				standingFrictionBenefit	= 2.2;
 	final double				ghostFrictionMultiplier	= 0.7;
-	final double				activationCooldown		= 0.5;																											// cooldown after activating an instant on/off ability, such as Flight or Ghost
-																																										// Mode, during which you can't disable the ability. Exists to fix keys being held
-																																										// while pressed.
 	final double				sqrt2					= Math.sqrt(2);
 	final double				sqrt2by2				= sqrt2 / 2;
 	final double				cameraSmoothing			= 2.5;
@@ -87,9 +82,6 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 	Font						tooltipFont				= new Font("Serif", Font.PLAIN, 12);
 	DateFormat					dateFormat				= new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
 	static Random				random					= new Random();
-
-	// Game things
-	final double				punchRotationSpeed		= 1.3;
 
 	// CAMERA AND MOUSE STUFF
 	PointerInfo					pin;																																	// Don't use this
@@ -115,19 +107,16 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 	Environment					env;
 	Player						player;
 	int							frameNum				= 0;
-	boolean						successfulTarget;
 	boolean						stopUsingPower			= false;
 	double						timeSinceLastScreenshot	= 2;
 	Image						lastScreenshot			= null;
+	public final static int		numOfElements			= 33;
 
 	// Visual graphical variables
 	Point						tooltipPoint			= new Point(-1, -1);
 	String						tooltip					= "";
 	int							hotkeyHovered			= -1;
 	int							hotkeySelected			= -1;
-
-	// special but I don't like this
-	int[]						sensePowersElementLevels;
 
 	Line2D						drawLine				= null;																											// temp
 	Rectangle2D					drawRect				= null;																											// also temp
@@ -139,648 +128,12 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 
 	// METHODS
 
-	// This is the huge method. Be prepared.
-	// This won't use the ability if there isn't enough mana/stamina/charge/stuff.
-	void useAbility(Ability ability, Person user, Point target)
-	{
-		user.inCombat = true; // TODO not for all abilities?
-		/*
-		 * REMEMBER TO CHECK IF NEEDED FOR THE FOLLOWING THINGS: ability.cost <= user.mana, !user.maintaining, ability.cooldownLeft == 0, !user.prone, ability.on
-		 */
-		// angle to target
-		double angle = Math.atan2(target.y - user.y, target.x - user.x);
-		// difference between user's rotation and angle:
-		double tempAngleThing = Math.abs(user.rotation - angle) % (2 * Math.PI);
-		double angleDifference = tempAngleThing > Math.PI ? 2 * Math.PI - tempAngleThing : tempAngleThing;
-		// clamp target to range:
-		int comeOnProgramWorkWithMeHere = 0;
-		if (user.rangeArea != null && !user.rangeArea.isEmpty())
-			while (!user.rangeArea.contains(target.x, target.y))
-			{
-				target.x = (int) (user.x + Math.cos(angle) * (ability.range - comeOnProgramWorkWithMeHere));
-				target.y = (int) (user.y + Math.sin(angle) * (ability.range - comeOnProgramWorkWithMeHere));
-				comeOnProgramWorkWithMeHere += 10;
-			}
-		int gridX = target.x / squareSize, gridY = target.y / squareSize;
-
-		// for on/off powers, attack modes and maintained powers: switches state.
-		switch (ability.justName())
-		{
-		case "Sense Powers":
-			if (ability.cooldownLeft == 0)
-			{
-				ability.on = !ability.on;
-				updateSensePowers(ability);
-				ability.cooldownLeft = ability.cooldown;
-			}
-			break;
-		case "Ranged Explosion":
-			if (user.mana >= ability.cost && !user.maintaining && ability.cooldownLeft == 0 && !user.prone)
-			{
-				// TODO make it not only in the user'z Z but in the one the user tried to do (most likely 0, unless cursor is above another object)
-				env.createExplosion(target.x, target.y, user.z, ability.areaRadius, ability.points * 3, ability.points * 3, -1);
-				user.mana -= ability.cost;
-				ability.cooldownLeft = ability.cooldown;
-			}
-			break;
-		case "Heal I":
-		case "Heal II":
-			/*
-			 * Continuously heal the closest injured person within range, or yourself.
-			 */
-			if (ability.on)
-			{
-				ability.on = false;
-				user.maintaining = false;
-				user.abilityMaintaining = -1;
-				break;
-			} else if (!user.prone && !user.maintaining && ability.cooldownLeft <= 0)
-			{
-				user.maintaining = true;
-				ability.on = true;
-				ability.targetEffect1 = 0;
-			}
-			break;
-		case "Strong Force Field":
-			/*
-			 * Create a strong, decaying static force field, to be used as temporary defense.
-			 */
-			if (!user.maintaining && ability.cost <= user.mana && ability.cooldownLeft == 0)
-			{
-				// TODO check collisions
-				env.FFs.add(new ForceField(user.x + ability.range * Math.cos(angle), user.y + ability.range * Math.sin(angle), user.z, 100 + 50 * ability.points, 5 + ability.points * 7,
-						angle + 0.5 * Math.PI, 80 * ability.points, 1));
-				user.mana -= ability.cost;
-				ability.cooldownLeft = ability.cooldown;
-			}
-			break;
-		case "Beam":
-			/*
-			 * Continuously shoot a beam at a target direction
-			 */
-			if (!ability.getElement().equals("Plant")) // not plant (which uses Vines)
-			{
-				if (ability.on)
-				{
-					user.notAnimating = false;
-					ability.on = false;
-					user.maintaining = false;
-					if (user.mana <= 0.5)
-						ability.cooldownLeft = ability.cooldown;
-					for (int i = 0; i < env.beams.size(); i++)
-						if (env.beams.get(i).creator.id == user.id)
-						{
-							env.beams.remove(i);
-							i--;
-						}
-					ability.stopAllSounds();
-					break;
-				} else if (!user.prone && !user.maintaining && ability.cooldownLeft <= 0)
-				{
-					user.notAnimating = true;
-					user.maintaining = true;
-					ability.on = true;
-					user.switchAnimation(2);
-					ability.sounds.get(0).loop();
-				}
-			} else
-			{
-				// plant vines
-				if (ability.on)
-				{
-					user.notAnimating = false;
-					user.maintaining = false;
-					ability.on = false;
-					ability.cooldownLeft = ability.cooldown;
-					for (int i = 0; i < env.vines.size(); i++) // TODO change this from removing vines to leaving the leftovers which just keep flying for about a second
-						if (env.vines.get(i).creator.id == user.id)
-						{
-							env.vines.get(i).die();
-							env.vines.remove(i);
-							i--;
-						}
-					ability.stopAllSounds();
-					break;
-				} else if (!user.prone && !user.maintaining && ability.cooldownLeft <= 0)
-				{
-					user.notAnimating = true;
-					user.maintaining = true;
-					ability.on = true;
-					// create vine
-					final double vineExitDistance = 40;
-					ability.playSound("Beam");
-					angle = angle + user.inaccuracyAngle; // rotation changes in updateTargeting
-					Point3D start = new Point3D((int) (user.x + vineExitDistance * Math.cos(angle)), (int) (user.y + vineExitDistance * Math.sin(angle)), (int) user.z); // starts beamExitDistance pixels in front of the user
-					Point3D end = new Point3D((int) (user.x + 2 * vineExitDistance * Math.cos(angle)), (int) (user.y + 2 * vineExitDistance * Math.sin(angle)), (int) user.z);
-					Vine v = new Vine(user, start, end, ability.points, ability.range);
-					env.vines.add(v);
-					moveVine(v, globalDeltaTime);
-					user.switchAnimation(2);
-					ability.sounds.get(0).loop();
-				}
-			}
-			break;
-		case "Flight I":
-		case "Flight II":
-		case "Telekinetic Flight":
-			if (!ability.on && user.stamina > 2 && !user.prone && ability.cooldownLeft == 0)
-			{
-				ability.on = true;
-				if (user.z == 0)
-					user.z += 0.1;
-				switch (ability.justName())
-				{
-				case "Flight I":
-					user.flySpeed = 100 * ability.points; // 100 to 300 pixels per second
-					break;
-				case "Flight II":
-					user.flySpeed = 200 * ability.points; // 800 to 1200 pixels per second
-					break;
-				case "Telekinetic Flight":
-					user.flySpeed = 30 * Math.pow(1.8, ability.points);
-					break;
-				default:
-					errorMessage("What? Aren't there only 3 types of flight?");
-					break;
-				}
-				ability.cooldownLeft = activationCooldown;
-			} else if (ability.on && ability.cooldownLeft == 0)
-			{
-				ability.on = false;
-				ability.cooldownLeft = ability.cooldown;
-				user.flySpeed = -1;
-			}
-			break;
-		case "Pool":
-			/*
-			 * Create a pool. Destroys any walls in that area. The cost of creating a pool is reduced if there's an adjacent pool.
-			 */
-			// test for lesser cost
-			boolean lesserCost = false;
-			for (int i = gridX - 1; i <= gridX + 1; i++)
-				for (int j = gridY - 1; j <= gridY + 1; j++)
-					if (env.poolTypes[i][j] == ability.getElementNum())
-						lesserCost = true;
-			if (!ability.on && !user.maintaining && (ability.cost <= user.mana || (lesserCost && Math.max(ability.cost - 2, 0) < user.mana)))
-			{
-				boolean canCreate = true;
-				// stop creating pool if there already is a different pool there
-				if (env.poolTypes[gridX][gridY] != -1)
-					if (env.poolTypes[gridX][gridY] != ability.getElementNum() || (env.poolTypes[gridX][gridY] == ability.getElementNum() && env.poolHealths[gridX][gridY] >= 100))
-						canCreate = false;
-				// stop creating pool if it collides with someone
-				for (Person p : env.people)
-				{
-					if ((int) (p.x - 0.5 * p.radius) / squareSize == gridX && (int) (p.y - 0.5 * p.radius) / squareSize == gridY)
-						canCreate = false;
-					if ((int) (p.x + 0.5 * p.radius) / squareSize == gridX && (int) (p.y - 0.5 * p.radius) / squareSize == gridY)
-						canCreate = false;
-					if ((int) (p.x - 0.5 * p.radius) / squareSize == gridX && (int) (p.y + 0.5 * p.radius) / squareSize == gridY)
-						canCreate = false;
-					if ((int) (p.x + 0.5 * p.radius) / squareSize == gridX && (int) (p.y + 0.5 * p.radius) / squareSize == gridY)
-						canCreate = false;
-				}
-				if (canCreate)
-				{
-					if (lesserCost)
-						user.mana -= Math.max(ability.cost - 1.5, 0);
-					else
-						user.mana -= ability.cost;
-					// starting the pool
-					ability.targetEffect1 = gridX;
-					ability.targetEffect2 = gridY;
-					ability.targetEffect3 = 0; // able
-					env.addPool(gridX, gridY, ability.getElementNum(), false);
-					env.poolHealths[gridX][gridY] = Math.max(env.poolHealths[gridX][gridY], 1);
-					user.maintaining = true;
-					user.notAnimating = true;
-					ability.cooldownLeft = ability.cooldown;
-					ability.on = true;
-					user.switchAnimation(2);
-				} else
-					ability.targetEffect3 = 1; // unable
-			} else if (ability.on && user.maintaining)
-			{
-				if (env.poolHealths[target.x / squareSize][target.y / squareSize] > 90)
-					env.poolHealths[target.x / squareSize][target.y / squareSize] = 100; // to fix some problems
-				env.connectPool(target.x / squareSize, target.y / squareSize);
-				// finishing the pool
-				ability.on = false;
-				user.maintaining = false;
-				user.notAnimating = false;
-			}
-			break;
-		case "Wall":
-			/*
-			 * Create a wall. Destroys any pools in that area.
-			 */
-			boolean repairingWall = env.wallTypes[gridX][gridY] == ability.getElementNum() && env.wallHealths[gridX][gridY] < 100 && 0.3 <= user.mana;
-			if (!ability.on && !user.maintaining && (ability.cost <= user.mana || repairingWall))
-			{
-				boolean canCreate = true;
-				if (!repairingWall)
-				{
-					// stop creating wall if there already is a different wall there
-					if (env.wallTypes[gridX][gridY] != -1)
-						if (env.wallTypes[gridX][gridY] != ability.getElementNum() || (env.wallTypes[gridX][gridY] == ability.getElementNum() && env.wallHealths[gridX][gridY] >= 100))
-							canCreate = false;
-					// stop creating wall if it collides with someone
-					for (Person p : env.people)
-					{
-						if ((int) (p.x - 0.5 * p.radius) / squareSize == gridX && (int) (p.y - 0.5 * p.radius) / squareSize == gridY)
-							canCreate = false;
-						if ((int) (p.x + 0.5 * p.radius) / squareSize == gridX && (int) (p.y - 0.5 * p.radius) / squareSize == gridY)
-							canCreate = false;
-						if ((int) (p.x - 0.5 * p.radius) / squareSize == gridX && (int) (p.y + 0.5 * p.radius) / squareSize == gridY)
-							canCreate = false;
-						if ((int) (p.x + 0.5 * p.radius) / squareSize == gridX && (int) (p.y + 0.5 * p.radius) / squareSize == gridY)
-							canCreate = false;
-					}
-				}
-				if (canCreate)
-				{
-					// starting the wall
-					ability.targetEffect1 = gridX;
-					ability.targetEffect2 = gridY;
-					ability.targetEffect3 = 0; // able
-					env.addWall(gridX, gridY, ability.getElementNum(), false);
-					env.wallHealths[gridX][gridY] = Math.max(env.wallHealths[gridX][gridY], 1);
-					if (repairingWall)
-						user.mana -= 0.3;
-					else
-						user.mana -= ability.cost;
-					user.maintaining = true;
-					user.notAnimating = true;
-					ability.cooldownLeft = ability.cooldown;
-					ability.on = true;
-					user.switchAnimation(2);
-				} else
-					ability.targetEffect3 = 1; // unable
-			} else if (ability.on && user.maintaining)
-			{
-				if (env.wallHealths[target.x / squareSize][target.y / squareSize] > 90)
-					env.wallHealths[target.x / squareSize][target.y / squareSize] = 100; // to fix some problems
-				env.connectWall(target.x / squareSize, target.y / squareSize);
-				// finishing the wall
-				ability.on = false;
-				user.maintaining = false;
-				user.notAnimating = false;
-			}
-			break;
-		case "Force Shield":
-			/*
-			 * Create a decaying static force field, to be used as temporary defense.
-			 */
-			if (!user.maintaining && ability.cost <= user.mana && ability.cooldownLeft == 0)
-			{
-				// TODO check collisions
-				env.FFs.add(new ForceField(user.x + ability.range * Math.cos(angle), user.y + ability.range * Math.sin(angle), user.z, 100 + 100 * ability.points / 3, 10 + ability.points * 1,
-						angle + 0.5 * Math.PI, 20 * ability.points, 0));
-				user.mana -= ability.cost;
-				ability.cooldownLeft = ability.cooldown;
-			}
-			break;
-		case "Ghost Mode I":
-			/*
-			 * On/Off: while On, be in Ghost Mode.
-			 */
-			if (!ability.on) // entering
-			{
-				if (ability.cooldownLeft > 0 || ability.cost > user.mana)
-					break;
-				ability.on = true;
-				// TODO some kind of visual effect maybe?
-				user.ghostMode = true;
-				user.mana -= ability.cost;
-				ability.timeLeft = ability.points;
-				ability.cooldownLeft = activationCooldown;
-			} else if (ability.cooldownLeft == 0)
-			{
-				if (!user.insideWall)
-				{
-					ability.on = false;
-					user.ghostMode = false;
-					ability.cooldownLeft = ability.cooldown;
-					ability.timeLeft = 0;
-				} else
-					ability.timeLeft = 0;
-			}
-			break;
-		case "Ball":
-			/*
-			 * Throw a ball at target direction
-			 */
-			if (ability.on)
-			{
-				ability.on = false;
-				user.maintaining = false;
-				user.notAnimating = false;
-				user.abilityMaintaining = -1;
-				break;
-			}
-			if (user.prone || user.maintaining)
-				break;
-
-			user.maintaining = true;
-			ability.on = true;
-			user.switchAnimation(2);
-			user.notAnimating = true;
-			break;
-		case "Blink":
-			/*
-			 * Teleport ahead to target direction
-			 * 
-			 * visual effect types:
-			 * 
-			 * 1 = just blinked, and there's an effect.
-			 * 
-			 * 2 = failed to blink
-			 */
-			if (ability.cooldownLeft > 0 || ability.cost > user.mana)
-				break;
-			boolean cannot = false;
-			// if not maintaining a power, the user will rotate to fit the teleportation.
-			if (!user.maintaining)
-				user.rotation = angle;
-			user.x += ability.range * Math.cos(angle);
-			user.y += ability.range * Math.sin(angle);
-			// test boundaries
-			if (user.x < 0 || user.y < 0 || user.x > env.widthPixels || user.y > env.heightPixels)
-			{
-				cannot = true;
-				user.x -= ability.range * Math.cos(angle);
-				user.y -= ability.range * Math.sin(angle);
-			}
-			// test collisions (with walls only! TEMP TODO)
-			if (!cannot && !player.ghostMode)
-				for (int i = (int) (user.x - 0.5 * user.radius); !cannot && i / squareSize <= (int) (user.x + 0.5 * user.radius) / squareSize; i += squareSize)
-					for (int j = (int) (user.y - 0.5 * user.radius); !cannot && j / squareSize <= (int) (user.y + 0.5 * user.radius) / squareSize; j += squareSize)
-						if (env.wallTypes[i / squareSize][j / squareSize] != -1)
-						{
-							cannot = true;
-							user.x -= ability.range * Math.cos(angle);
-							user.y -= ability.range * Math.sin(angle);
-						}
-			if (!cannot) // managed to teleport
-			{
-				user.mana -= ability.cost;
-				ability.cooldownLeft = ability.cooldown;
-				final int numOfLines = 5;
-				for (int j = 0; j < numOfLines; j++)
-				{
-					VisualEffect eff = new VisualEffect();
-					eff.type = 1;
-					eff.duration = 0.4;
-					eff.timeLeft = eff.duration;
-					eff.p1p2variations = new Point(user.radius, user.radius);
-					eff.p1 = new Point((int) (user.x - ability.range * Math.cos(angle)), (int) (user.y - ability.range * Math.sin(angle)));
-					eff.p2 = new Point((int) (user.x), (int) (user.y));
-					eff.onTop = false;
-					env.effects.add(eff);
-				}
-				// SFX
-				ability.playSound("Blink success");
-			} else
-			// tried to blink into something
-			{
-				final int numOfLines = 3;
-				for (int j = 0; j < numOfLines; j++)
-				{
-					VisualEffect eff = new VisualEffect();
-					eff.type = 2;
-					eff.duration = 0.3;
-					eff.timeLeft = eff.duration;
-					eff.p1p2variations = new Point(user.radius, user.radius);
-					eff.p1 = new Point((int) (user.x + ability.range * Math.cos(angle)), (int) (user.y + ability.range * Math.sin(angle)));
-					eff.p2 = new Point((int) (user.x), (int) (user.y));
-					eff.onTop = true;
-					env.effects.add(eff);
-				}
-
-				// SFX
-				ability.playSound("Blink fail");
-			}
-			break;
-		case "Shield":
-			/*
-			 * Create and hold an elemental shield (force field near you) that you can aim, and will protect you until it breaks.
-			 */
-			if (!user.maintaining && !user.prone)
-			// activating the shield
-			{
-				if (ability.cost / 5 > user.mana || ability.cooldownLeft > 0)
-					break;
-
-				final double arc = Math.PI / 2, minRadius = 80, maxRadius = 92;
-				env.arcFFs.add(new ArcForceField(user, angle, arc, minRadius, maxRadius, (int) (ability.points * 10), ability.getElementNum()));
-				user.maintaining = true;
-				ability.on = true;
-				user.switchAnimation(2);
-				user.notMoving = ability.stopsMovement;
-				user.notAnimating = true;
-
-			} else if (ability.on)
-			// deactivating the shield
-			{
-				double remainingFFhealth = 0;
-				for (int i = 0; i < env.arcFFs.size(); i++)
-					if (env.arcFFs.get(i).target.equals(user))
-					{
-						remainingFFhealth = env.arcFFs.get(i).life + env.arcFFs.get(i).extraLife;
-						env.shieldDebris(env.arcFFs.get(i), "deactivate");
-						env.arcFFs.remove(i);
-						i--;
-					}
-				ability.cooldownLeft = 1 + 0.8 * ability.cooldown - 0.8 * ability.cooldown * remainingFFhealth / (ability.points * 10); // if shield had full HP, 1 cooldown. if had no HP, full
-																																		// cooldown.
-				user.maintaining = false;
-				ability.on = false;
-				user.notMoving = false;
-				user.notAnimating = false;
-			}
-			break;
-		// Unpowered abilities
-		case "Punch":
-			/*
-			 * Punch
-			 */
-			if (user.z == 0)
-			{
-				if (!user.prone && !user.maintaining)
-					if (ability.cost <= user.stamina)
-					{
-						user.notMoving = ability.stopsMovement; // returns to be False in hotkey();
-						user.switchAnimation(0); // before punching the user simply rotates to the target direction
-						if (ability.cooldownLeft <= 0)
-						{
-							if (angleDifference < 0.2)
-							{
-								user.punchedSomebody = false;
-								angle = angle - user.missAngle + 2 * user.missAngle * random.nextDouble(); // possibility to miss with a punch, of course.
-								user.rotation = angle;
-								testUserPunch(user, false, true, ability);
-								// for dev tool purposes:
-								double range = user.radius * 1.15;
-								user.target = new Point((int) (user.x + range * Math.cos(user.rotation)), (int) (user.y + range * Math.sin(user.rotation)));
-								//
-
-								user.switchAnimation(5);
-								user.stamina -= ability.cost;
-								ability.cooldownLeft = ability.cooldown;
-							}
-							// Rotate towards target anyways
-							else
-							{
-								if (user.z == 0)
-									user.rotate(angle, globalDeltaTime * punchRotationSpeed);
-								else
-									user.rotate(angle, globalDeltaTime * 3 * punchRotationSpeed);
-							}
-						} else if ((user.animState == 5 || user.animState == 6) && user.animFrame < 2) // during a punch
-						{
-							if (!user.punchedSomebody)
-								testUserPunch(user, false, false, ability);
-						}
-					} else
-						user.notMoving = false;
-			} else if (user.z >= 1.1)
-			{
-				if (!user.prone && !user.maintaining && ability.cost <= user.stamina) // maybe the previous if can be inserted after the identical if of the other one? dunno
-				{
-					/*
-					 * Flight-punches have no cooldown, and instead of activating immediately when pressing they cause the user to glide downwards while moving (like what happens when you don't press any key while flying), except they stop going
-					 * lower when they're at z = 1.1, and then they keep staying at the same level. When they are close enough to an enemy (and aiming at it) they will fist him (ha) and have their stamina reduced for the cost, as always.
-					 */
-					// remember: the flight-changing occurs on movePerson, using a test of user.powerRepetitivelyTryingToUse
-
-					if (ability.cooldownLeft == 0)
-						user.punchedSomebody = false;
-
-					if (!user.punchedSomebody)
-						if (testUserPunch(user, true, false, ability))
-						{
-							user.stamina -= ability.cost;
-							user.switchAnimation(11 + (user.lastHandUsedIsRight ? 0 : 1));
-							ability.cooldownLeft = ability.cooldown;
-						} else
-							user.switchAnimation(10);
-
-				}
-			}
-			break;
-		default:
-			errorMessage("couldn't find ability code for " + ability.justName());
-			break;
-		}
-	}
-
 	void maintainAbility(Ability ability, Person user, Point target, double deltaTime)
 	{
 		double angle = Math.atan2(target.y - user.y, target.x - user.x);
 		switch (ability.justName())
 		{
-		case "Sense Powers":
-			// update Sense Powers radar
-			if (frameNum % (1000 / frameTimerDelay * 5) == 0) // every 5 seconds
-			{
-				updateSensePowers(ability);
-			}
-			break;
-		case "Heal I":
-			if (ability.costPerSecond * deltaTime <= user.mana)
-			{
-				if (frameNum % 6 == 0)
-					ability.frameNum++;
-				if (ability.frameNum >= 4)
-					ability.frameNum = 0;
-
-				double shortestDistancePow2 = ability.range * ability.range;
-				Person healingTarget = user;
-				for (Person p : env.people)
-					if (p != user)
-					{
-						double distancePow2 = Methods.DistancePow2(user.x, user.y, p.x, p.y);
-						if (distancePow2 < shortestDistancePow2)
-						{
-							shortestDistancePow2 = distancePow2;
-							if (ability.targetEffect1 * ability.targetEffect1 >= distancePow2)
-								ability.targetEffect1 -= 1 * ability.points * deltaTime * (ability.range + 20 - Math.sqrt(ability.range - ability.targetEffect1) - ability.targetEffect1);
-							healingTarget = p;
-						}
-					}
-				healingTarget.affect(new Effect(deltaTime, "Healed", ability.points), true);
-				if (healingTarget != user)
-				{
-					VisualEffect healingEffect = new VisualEffect();
-					healingEffect.timeLeft = deltaTime * 2;
-					healingEffect.frame = ability.frameNum;
-					healingEffect.p1 = new Point((int) user.x, (int) user.y);
-					healingEffect.p2 = new Point((int) healingTarget.x, (int) healingTarget.y);
-					healingEffect.type = 3;
-					healingEffect.angle = Math.atan2(healingTarget.y - user.y, healingTarget.x - user.x);
-
-					env.effects.add(healingEffect);
-				}
-				user.mana -= deltaTime * ability.costPerSecond;
-			}
-			break;
 		case "Beam":
-			final double beamExitDistance = 40;
-			if (!ability.getElement().equals("Plant")) // non-plant
-			{
-				if (ability.cooldownLeft == 0)
-					if (user.mana >= ability.costPerSecond * deltaTime)
-					{
-						ability.playSound("Beam");
-						angle = user.rotation + user.inaccuracyAngle; // rotation changes in updateTargeting
-						Point3D start = new Point3D((int) (user.x + beamExitDistance * Math.cos(angle)), (int) (user.y + beamExitDistance * Math.sin(angle)), (int) user.z); // starts beamExitDistance pixels in front of the user
-						// TODO piercing beams, or electric lightning bolts
-						Point3D end = new Point3D((int) (user.x + ability.range * Math.cos(angle)), (int) (user.y + ability.range * Math.sin(angle)), (int) user.z);
-						Beam b = new Beam(user, start, end, ability.getElementNum(), ability.points, ability.range);
-						b.frameNum = ability.frameNum;
-						env.beams.add(b);
-						moveBeam(b, true);
-						user.mana -= ability.costPerSecond * deltaTime;
-						if (frameNum % 10 == 0)
-						{
-							ability.frameNum++;
-							if (ability.frameNum >= 4)
-								ability.frameNum = 0;
-						}
-					} else
-					{
-						ability.stopSound("Beam");
-						ability.cooldownLeft = ability.cooldown;
-					}
-			} else // plant vines
-			{
-				if (ability.cooldownLeft == 0)
-					if (user.mana >= ability.costPerSecond * deltaTime)
-					{
-						if (!user.holdingVine) // create new vine after stopping mid-way
-						{
-							// create vine
-							final double vineExitDistance = 40;
-							ability.playSound("Beam");
-							angle = angle + user.inaccuracyAngle; // rotation changes in updateTargeting
-							Point3D start = new Point3D((int) (user.x + vineExitDistance * Math.cos(angle)), (int) (user.y + vineExitDistance * Math.sin(angle)), (int) user.z); // starts beamExitDistance pixels in front of the user
-							Point3D end = new Point3D((int) (user.x + 2 * vineExitDistance * Math.cos(angle)), (int) (user.y + 2 * vineExitDistance * Math.sin(angle)), (int) user.z);
-							Vine v = new Vine(user, start, end, ability.points, ability.range);
-							env.vines.add(v);
-							moveVine(v, deltaTime);
-						}
-						user.mana -= ability.costPerSecond * deltaTime;
-					} else
-					{
-						ability.cooldownLeft = ability.cooldown;
-						for (int i = 0; i < env.vines.size(); i++) // TODO change this from removing vines to leaving the leftovers which just keep flying for about a second
-							if (env.vines.get(i).creator.id == user.id)
-							{
-								env.vines.get(i).retract();
-							}
-					}
-
-			}
 			break;
 		case "Flight I":
 		case "Flight II":
@@ -832,7 +185,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 			break;
 		case "Pool":
 			if (ability.cooldownLeft <= 0 || env.poolHealths[(int) ability.targetEffect1][(int) ability.targetEffect2] <= 0)
-				useAbility(ability, user, target);
+				ability.use(env, user, target);
 			else
 			{
 				// effects
@@ -848,7 +201,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 			break;
 		case "Wall":
 			if (ability.cooldownLeft <= 0 || env.wallHealths[(int) ability.targetEffect1][(int) ability.targetEffect2] <= 0)
-				useAbility(ability, user, target);
+				ability.use(env, user, target);
 			else
 			{
 				// effects
@@ -864,7 +217,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 				if (!user.insideWall)
 				{
 					user.panic = false;
-					useAbility(ability, user, target);
+					ability.use(env, user, target);
 				} else
 				{
 					user.mana -= 1.5 * deltaTime; // punish
@@ -881,7 +234,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 			break;
 		case "Shield":
 			if (user.mana < ability.costPerSecond)
-				useAbility(ability, user, target);
+				ability.use(env, user, target);
 			else
 			{
 				user.mana -= ability.costPerSecond * deltaTime;
@@ -969,20 +322,20 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 		for (int i = 0; i < env.vines.size(); i++)
 		{
 			Vine v = env.vines.get(i);
-			moveVine(v, deltaTime);
+			env.moveVine(v, deltaTime);
 			v.fixPosition();
 			if (v.length < v.startDistance) // vine retracted and didn't hit anyone
 			{
 				for (Ability a : v.creator.abilities)
 					if (a.name.equals("Beam <Plant>"))
-						useAbility(a, v.creator, v.creator.target);
+						a.use(env, v.creator, v.creator.target);
 			}
 		}
 		// BEAMS
 		for (int i = 0; i < env.beams.size(); i++)
 		{
 			Beam b = env.beams.get(i);
-			moveBeam(b, !b.isChild);
+			env.moveBeam(b, !b.isChild, deltaTime);
 			if (frameNum % 15 == 0)
 				b.frameNum++;
 			if (b.frameNum >= 4)
@@ -996,20 +349,24 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 			}
 		} // BUG - Reflecting a beam will cause increased pushback due to something related to the order of stuff in a frame. Maybe friction?
 			// targeting
-		updateTargeting();
+		updateTargeting(deltaTime);
+		//PEOPLE
 		for (Person p : env.people)
 		{
 			if (p.getClass().equals(NPC.class))
 				frameAIupdate((NPC) p, deltaTime);
+
 			// maintaining person abilities
 			for (Ability a : p.abilities)
 				if (a.on && a.cost != -1)
-					maintainAbility(a, p, p.target, deltaTime);
-			// abilities the person is trying to repetitively use (e.g. holding down the Punch ability's key)
+					a.maintain(env, p, p.target, deltaTime);
+			// using abilities the person is trying to repetitively use (e.g. holding down the Punch ability's key)
 			if (p.abilityTryingToRepetitivelyUse != -1)
 			{
-				useAbility(p.abilities.get(p.abilityTryingToRepetitivelyUse), p, p.target);
+				p.inCombat = true; // TODO
+				p.abilities.get(p.abilityTryingToRepetitivelyUse).use(env, p, p.target);
 			}
+
 			p.selfFrame(deltaTime);
 			for (Effect e : p.effects)
 				e.nextFrame(frameNum);
@@ -1096,6 +453,8 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 				}
 			}
 		}
+
+		// BALLS
 		for (int i = 0; i < env.balls.size(); i++)
 		{
 			Ball b = env.balls.get(i);
@@ -1119,6 +478,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 				i--;
 			}
 		}
+		// ARC FORCE FIELDS
 		for (int i = 0; i < env.arcFFs.size(); i++)
 		{
 			ArcForceField aff = env.arcFFs.get(i);
@@ -1143,10 +503,11 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 					if (p.equals(aff.target))
 						for (Ability a : p.abilities)
 							if (a.justName().equals("Shield"))
-								useAbility(a, p, p.target); // that method will remove the arc force field.
+								a.use(env, p, p.target); // that method will remove the arc force field.
 				i--;
 			}
 		}
+		// FORCE FIELDS
 		for (int i = 0; i < env.FFs.size(); i++)
 		{
 			ForceField ff = env.FFs.get(i);
@@ -1159,6 +520,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 				i--;
 			}
 		}
+		// WALLS & POOLS
 		for (int x = 0; x < env.width; x++)
 			for (int y = 0; y < env.height; y++)
 			{
@@ -1169,7 +531,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 				{
 					if (env.poolHealths[x][y] <= 0)
 						env.remove(x, y);
-					if (frameNum % 25 == 0) // decay, 50 seconds = 100 damage
+					if (frameNum % 25 == 0) // pools decay, 50 seconds = 100 damage
 						env.poolHealths[x][y] -= 1;
 				}
 				// possible TODO: flow from pools to other pools
@@ -1224,949 +586,6 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 			lastScreenshot = null;
 
 		keyPressFixingMethod(-1, true);
-	}
-
-	void moveBeam(Beam b, boolean recursive) // Recursive
-	{
-		double angle = Math.atan2(b.end.y - b.start.y, b.end.x - b.start.x);
-		// move it slightly forward
-		b.end.x += 3 * Math.cos(angle);
-		b.end.y += 3 * Math.sin(angle);
-		Line2D beamLine = new Line2D.Double(b.start.x, b.start.y, b.end.x, b.end.y);
-		boolean flatEnd = false;
-
-		// Preliminary collision testing, in order to reduce the number of collisions to 1
-		double shortestDistancePow2 = Double.MAX_VALUE;
-		Line2D collisionLine = null;
-		int collisionType = -1; // -1 = none, 0 = wall, 1 = force field, 2 = arc force field, 3 = person, 4 = ball
-
-		// walls
-		Point collidedWall = null;
-		if (b.z - b.height / 2 < 1)
-			for (int x = 0; x < env.width; x++)
-				for (int y = 0; y < env.width; y++)
-					if (env.wallTypes[x][y] != -1)
-					{
-						Rectangle2D wallRect = new Rectangle2D.Double(x * squareSize, y * squareSize, squareSize, squareSize);
-						// if they intersect
-						if (beamLine.intersects(wallRect))
-						{
-							// find point of intersection (and side)
-							List<Line2D> lines = new ArrayList<Line2D>();
-							lines.add(new Line2D.Double(wallRect.getX(), wallRect.getY(), wallRect.getX() + wallRect.getWidth(), wallRect.getY()));
-							lines.add(new Line2D.Double(wallRect.getX(), wallRect.getY(), wallRect.getX(), wallRect.getY() + wallRect.getWidth()));
-							lines.add(new Line2D.Double(wallRect.getX() + wallRect.getWidth(), wallRect.getY(), wallRect.getX() + wallRect.getWidth(), wallRect.getY() + wallRect.getWidth()));
-							lines.add(new Line2D.Double(wallRect.getX(), wallRect.getY() + wallRect.getWidth(), wallRect.getX() + wallRect.getWidth(), wallRect.getY() + wallRect.getWidth()));
-
-							for (int i = 0; i < lines.size(); i++)
-								if (!lines.get(i).intersectsLine(beamLine))
-								{
-									lines.remove(i);
-									i--;
-								}
-							// finding closest point on rectangle
-							Point2D intersectionP = null;
-							for (int i = 0; i < lines.size(); i++)
-							{
-								Point2D intersection = Methods.getLineLineIntersection(lines.get(i), beamLine);
-								if (intersection != null)
-								{
-									double distancePow2 = Methods.DistancePow2(b.start, intersection);
-									if (distancePow2 < shortestDistancePow2)
-									{
-										intersectionP = intersection;
-										shortestDistancePow2 = distancePow2;
-										collisionLine = lines.get(i);
-									} else
-									{
-										lines.remove(i);
-										i--;
-									}
-								} else
-								{
-									lines.remove(i);
-									i--;
-								}
-							}
-							if (intersectionP != null)
-							{
-								collisionType = 0;
-								collidedWall = new Point(x, y);
-							}
-						}
-					}
-
-		// forcefields
-		ForceField collidedFF = null;
-		for (ForceField ff : env.FFs)
-		{
-			if (b.z - b.height / 2 < ff.z + ff.height && b.z + b.height / 2 > ff.z)
-			{
-				Rectangle2D generalBounds = new Rectangle2D.Double(ff.x - ff.length / 2 - ff.width / 2, ff.y - ff.length / 2 - ff.width / 2, ff.length + ff.width, ff.length + ff.width);
-				// easier intersection first
-				if (beamLine.intersects(generalBounds))
-				{
-					// detailed intersection
-					List<Line2D> lines = new ArrayList<Line2D>();
-					for (int j = 0; j < ff.p.length - 1; j++)
-						lines.add(new Line2D.Double(ff.p[j], ff.p[j + 1]));
-					lines.add(new Line2D.Double(ff.p[ff.p.length - 1], ff.p[0]));
-					if (!lines.isEmpty())
-
-						for (int i = 0; i < lines.size(); i++)
-							if (!lines.get(i).intersectsLine(beamLine))
-							{
-								lines.remove(i);
-								i--;
-							}
-					// finding closest point
-					Point2D intersectionP = null;
-					for (int i = 0; i < lines.size(); i++)
-					{
-						Point2D intersection = Methods.getLineLineIntersection(lines.get(i), beamLine);
-						if (intersection != null)
-						{
-							double distancePow2 = Methods.DistancePow2(b.start, intersection);
-							if (distancePow2 < shortestDistancePow2)
-							{
-								intersectionP = intersection;
-								shortestDistancePow2 = distancePow2;
-								collisionLine = lines.get(i);
-							} else
-							{
-								lines.remove(i);
-								i--;
-							}
-						} else
-						{
-							lines.remove(i);
-							i--;
-						}
-					}
-					if (intersectionP != null)
-					{
-						collisionType = 1;
-						collidedFF = ff;
-					}
-				}
-			}
-		}
-
-		// arc force fields
-		ArcForceField collidedAFF = null;
-		for (ArcForceField aff : env.arcFFs)
-		{
-			if (b.z - b.height / 2 < aff.z + aff.height && b.z + b.height / 2 > aff.z)
-			{
-				Rectangle2D generalBounds = new Rectangle2D.Double(aff.x - aff.maxRadius, aff.y - aff.maxRadius, aff.maxRadius * 2, aff.maxRadius * 2);
-				// easier intersection first
-				if (beamLine.intersects(generalBounds))
-				{
-					// detailed intersection
-					double minAngle = aff.rotation - aff.arc / 2;
-					double maxAngle = aff.rotation + aff.arc / 2;
-
-					while (minAngle < 0)
-						minAngle += 2 * Math.PI;
-					while (minAngle >= 2 * Math.PI)
-						minAngle -= 2 * Math.PI;
-					while (maxAngle < 0)
-						maxAngle += 2 * Math.PI;
-					while (maxAngle >= 2 * Math.PI)
-						maxAngle -= 2 * Math.PI;
-
-					Point2D closestPointToSegment = Methods.getClosestPointOnSegment(beamLine.getX1(), beamLine.getY1(), beamLine.getX2(), beamLine.getY2(), aff.x, aff.y);
-
-					List<Point2D> points = new ArrayList<Point2D>();
-					List<Line2D> lines = new ArrayList<Line2D>();
-
-					for (int k = -1; k < 2; k += 2) // intended to check both intersections of the line with the circle
-					{
-						double closestPointDistanceMax = Math.sqrt(Methods.DistancePow2(closestPointToSegment.getX(), closestPointToSegment.getY(), aff.x, aff.y));
-						double angleToCollisionPointMax = Math.atan2(closestPointToSegment.getY() - aff.y, closestPointToSegment.getX() - aff.x)
-								+ k * Math.acos(closestPointDistanceMax / aff.maxRadius);
-
-						double closestPointDistanceMin = Math.sqrt(Methods.DistancePow2(closestPointToSegment.getX(), closestPointToSegment.getY(), aff.x, aff.y));
-						double angleToCollisionPointMin = Math.atan2(closestPointToSegment.getY() - aff.y, closestPointToSegment.getX() - aff.x)
-								+ k * Math.acos(closestPointDistanceMin / aff.minRadius);
-
-						Point2D closestPointMax = new Point2D.Double(aff.x + aff.maxRadius * Math.cos(angleToCollisionPointMax), aff.y + aff.maxRadius * Math.sin(angleToCollisionPointMax));
-						Point2D closestPointMin = new Point2D.Double(aff.x + aff.minRadius * Math.cos(angleToCollisionPointMin), aff.y + aff.minRadius * Math.sin(angleToCollisionPointMin));
-
-						while (angleToCollisionPointMax < 0)
-							angleToCollisionPointMax += 2 * Math.PI;
-						while (angleToCollisionPointMax >= 2 * Math.PI)
-							angleToCollisionPointMax -= 2 * Math.PI;
-
-						while (angleToCollisionPointMin < 0)
-							angleToCollisionPointMin += 2 * Math.PI;
-						while (angleToCollisionPointMin >= 2 * Math.PI)
-							angleToCollisionPointMin -= 2 * Math.PI;
-
-						// outer arc
-						if (closestPointDistanceMax < aff.maxRadius)
-							if (minAngle < maxAngle)
-							{
-								if (angleToCollisionPointMax > minAngle && angleToCollisionPointMax < maxAngle)
-								{
-									points.add(closestPointMax);
-									lines.add(new Line2D.Double(closestPointMax.getX() + 12 * Math.cos(angleToCollisionPointMax + Math.PI / 2),
-											closestPointMax.getY() + 12 * Math.sin(angleToCollisionPointMax + Math.PI / 2),
-											closestPointMax.getX() - 12 * Math.cos(angleToCollisionPointMax + Math.PI / 2),
-											closestPointMax.getY() - 12 * Math.sin(angleToCollisionPointMax + Math.PI / 2)));
-								}
-							} else if (angleToCollisionPointMax < maxAngle || angleToCollisionPointMax > minAngle)
-							{
-								points.add(closestPointMax);
-								lines.add(new Line2D.Double(closestPointMax.getX() + 12 * Math.cos(angleToCollisionPointMax + Math.PI / 2),
-										closestPointMax.getY() + 12 * Math.sin(angleToCollisionPointMax + Math.PI / 2), closestPointMax.getX() - 12 * Math.cos(angleToCollisionPointMax + Math.PI / 2),
-										closestPointMax.getY() - 12 * Math.sin(angleToCollisionPointMax + Math.PI / 2)));
-
-							}
-						// inner arc
-						if (closestPointDistanceMin < aff.minRadius)
-							if (minAngle < maxAngle)
-							{
-								if (angleToCollisionPointMin > minAngle && angleToCollisionPointMin < maxAngle)
-								{
-									points.add(closestPointMin);
-									lines.add(new Line2D.Double(closestPointMin.getX() + 12 * Math.cos(angleToCollisionPointMin + Math.PI / 2),
-											closestPointMin.getY() + 12 * Math.sin(angleToCollisionPointMin + Math.PI / 2),
-											closestPointMin.getX() - 12 * Math.cos(angleToCollisionPointMin + Math.PI / 2),
-											closestPointMin.getY() - 12 * Math.sin(angleToCollisionPointMin + Math.PI / 2)));
-								}
-							} else if (angleToCollisionPointMin < maxAngle || angleToCollisionPointMin > minAngle)
-							{
-								points.add(closestPointMin);
-								lines.add(new Line2D.Double(closestPointMin.getX() + 12 * Math.cos(angleToCollisionPointMin + Math.PI / 2),
-										closestPointMin.getY() + 12 * Math.sin(angleToCollisionPointMin + Math.PI / 2), closestPointMin.getX() - 12 * Math.cos(angleToCollisionPointMin + Math.PI / 2),
-										closestPointMin.getY() - 12 * Math.sin(angleToCollisionPointMin + Math.PI / 2)));
-							}
-					}
-					// two sides:
-					Line2D l1 = new Line2D.Double(aff.x + aff.minRadius * Math.cos(aff.rotation - 0.5 * aff.arc), aff.y + aff.minRadius * Math.sin(aff.rotation - 0.5 * aff.arc),
-							aff.x + aff.maxRadius * Math.cos(aff.rotation - 0.5 * aff.arc), aff.y + aff.maxRadius * Math.sin(aff.rotation - 0.5 * aff.arc));
-					Line2D l2 = new Line2D.Double(aff.x + aff.minRadius * Math.cos(aff.rotation + 0.5 * aff.arc), aff.y + aff.minRadius * Math.sin(aff.rotation + 0.5 * aff.arc),
-							aff.x + aff.maxRadius * Math.cos(aff.rotation + 0.5 * aff.arc), aff.y + aff.maxRadius * Math.sin(aff.rotation + 0.5 * aff.arc));
-					lines.add(l1);
-					points.add(Methods.getSegmentIntersection(l1, beamLine));
-					lines.add(l2);
-					points.add(Methods.getSegmentIntersection(l2, beamLine));
-					// finding closest point
-					Point2D intersectionP = null;
-					for (int i = 0; i < points.size(); i++)
-					{
-						Point2D intersection = points.get(i);
-						if (intersection != null)
-						{
-							double distancePow2 = Methods.DistancePow2(b.start, intersection);
-							if (distancePow2 < shortestDistancePow2)
-							{
-								intersectionP = intersection;
-								shortestDistancePow2 = distancePow2;
-								collisionLine = lines.get(i);
-							} else
-							{
-								points.remove(i);
-								lines.remove(i);
-								i--;
-							}
-						} else
-						{
-							points.remove(i);
-							lines.remove(i);
-							i--;
-						}
-					}
-					if (intersectionP != null)
-					{
-						collisionType = 2;
-						collidedAFF = aff;
-					}
-				}
-			}
-		}
-
-		Person collidedPerson = null;
-		for (Person p : env.people)
-		{
-			if (p.z <= b.z + b.height / 2 && p.z + p.height > b.z - b.height / 2) // height check
-			{
-				Rectangle2D TyrannosaurusRect = new Rectangle2D.Double(p.x - 0.5 * p.radius, p.y - 0.5 * p.radius, p.radius, p.radius);
-				if (beamLine.intersects(TyrannosaurusRect)) // intersection check
-				{
-					// copy paste from the Walls part
-					List<Line2D> lines = new ArrayList<Line2D>();
-					lines.add(new Line2D.Double(TyrannosaurusRect.getX(), TyrannosaurusRect.getY(), TyrannosaurusRect.getX() + TyrannosaurusRect.getWidth(), TyrannosaurusRect.getY()));
-					lines.add(new Line2D.Double(TyrannosaurusRect.getX(), TyrannosaurusRect.getY(), TyrannosaurusRect.getX(), TyrannosaurusRect.getY() + TyrannosaurusRect.getWidth()));
-					lines.add(new Line2D.Double(TyrannosaurusRect.getX() + TyrannosaurusRect.getWidth(), TyrannosaurusRect.getY(), TyrannosaurusRect.getX() + TyrannosaurusRect.getWidth(),
-							TyrannosaurusRect.getY() + TyrannosaurusRect.getWidth()));
-					lines.add(new Line2D.Double(TyrannosaurusRect.getX(), TyrannosaurusRect.getY() + TyrannosaurusRect.getWidth(), TyrannosaurusRect.getX() + TyrannosaurusRect.getWidth(),
-							TyrannosaurusRect.getY() + TyrannosaurusRect.getWidth()));
-
-					for (int i = 0; i < lines.size(); i++)
-						if (!lines.get(i).intersectsLine(beamLine))
-						{
-							lines.remove(i);
-							i--;
-						}
-					// finding closest point on rectangle
-					Point2D intersectionP = null;
-					for (int i = 0; i < lines.size(); i++)
-					{
-						Point2D intersection = Methods.getLineLineIntersection(lines.get(i), beamLine);
-						if (intersection != null)
-						{
-							double distancePow2 = Methods.DistancePow2(b.start, intersection);
-							if (distancePow2 < shortestDistancePow2)
-							{
-								intersectionP = intersection;
-								shortestDistancePow2 = distancePow2;
-								collisionLine = lines.get(i);
-							} else
-							{
-								lines.remove(i);
-								i--;
-							}
-						} else
-						{
-							lines.remove(i);
-							i--;
-						}
-					}
-					if (intersectionP != null)
-					{
-						collisionType = 3;
-						collidedPerson = p;
-					}
-				}
-			}
-		}
-
-		Ball collidedBall = null;
-		for (Ball ball : env.balls)
-		{
-			if (b.z + b.height / 2 > ball.z - b.height / 2 && b.z - b.height / 2 < ball.z + b.height / 2)
-			{
-				Rectangle2D rekt = new Rectangle2D.Double(ball.x - ball.radius, ball.y - ball.radius, 2 * ball.radius, 2 * ball.radius);
-				if (rekt.intersectsLine(beamLine))
-				{
-					double distancePow2 = Methods.LineToPointDistancePow2(new Point(b.start.x, b.start.y), new Point(b.end.x, b.end.y), new Point((int) ball.x, (int) ball.y));
-					if (distancePow2 < ball.radius * ball.radius)
-					{
-						Point2D intersectionP = null;
-						double realDistancePow2 = Methods.DistancePow2(b.start, new Point((int) ball.x, (int) ball.y));
-						if (realDistancePow2 < shortestDistancePow2)
-						{
-							intersectionP = new Point2D.Double(b.start.x + Math.sqrt(realDistancePow2) * Math.cos(angle), b.start.y + Math.sqrt(realDistancePow2) * Math.sin(angle));
-							shortestDistancePow2 = realDistancePow2;
-							collisionLine = new Line2D.Double(intersectionP.getX() + 100 * Math.cos(angle + Math.PI / 2), intersectionP.getY() + 100 * Math.sin(angle + Math.PI / 2),
-									intersectionP.getX() - 100 * Math.cos(angle + Math.PI / 2), intersectionP.getY() - 100 * Math.sin(angle + Math.PI / 2));
-							collisionType = 4;
-							collidedBall = ball;
-						}
-					}
-				}
-			}
-		}
-
-		if (collisionType == -1)
-		{
-			b.endType = 0;
-			b.endAngle = angle;
-			return;
-		}
-
-		// collision handling
-		Point2D intersectionPoint = Methods.getSegmentIntersection(collisionLine, beamLine);
-		if (intersectionPoint == null)
-		{
-			b.endType = 0;
-			b.endAngle = angle;
-			return;
-		}
-		Point roundedIntersectionPoint = new Point((int) intersectionPoint.getX(), (int) intersectionPoint.getY());
-		Beam b2 = null; // ...
-		switch (collisionType)
-		{
-		case 0: // wall
-			b.end.x = roundedIntersectionPoint.x;
-			b.end.y = roundedIntersectionPoint.y;
-			b.endType = 1;
-			flatEnd = true;
-			if (roundedIntersectionPoint.x == collidedWall.x * squareSize) // left
-				b.endAngle = 0;
-			if (roundedIntersectionPoint.y == collidedWall.y * squareSize) // up
-				b.endAngle = Math.PI / 2;
-			if (roundedIntersectionPoint.x == collidedWall.x * squareSize + squareSize) // right
-				b.endAngle = Math.PI;
-			if (roundedIntersectionPoint.y == collidedWall.y * squareSize + squareSize) // down
-				b.endAngle = -Math.PI / 2;
-			env.damageWall(collidedWall.x, collidedWall.y, b.getDamage() + b.getPushback(), EP.damageType(b.elementNum));
-			break;
-		case 1: // Force Field
-			b.end.x = roundedIntersectionPoint.x;
-			b.end.y = roundedIntersectionPoint.y;
-			b.endType = 1;
-			flatEnd = true;
-
-			// if the new beam is within the FF...
-			if (recursive)
-			{
-				b2 = getReflectedBeam(b, collisionLine);
-
-				Line2D diagonal1 = new Line2D.Double(collidedFF.p[0], collidedFF.p[2]);
-				Line2D diagonal2 = new Line2D.Double(collidedFF.p[1], collidedFF.p[3]);
-				if (b2 != null)
-				{
-					Line2D beam2Line = new Line2D.Double(b2.start.x, b2.start.y, b2.end.x, b2.end.y);
-					if (diagonal1.intersectsLine(beam2Line) || diagonal2.intersectsLine(beam2Line)) // only happens (i think) when you create a beam inside a force field
-					{
-						; // is bad. TODO make this code slightly shorter?
-					} else
-					{
-						env.beams.add(b2);
-						moveBeam(b2, true); // Recursion!!!
-						// sound effect (reflection electric sound)
-						if (!collidedFF.sounds.get(0).active)
-							collidedFF.sounds.get(0).loop();
-						else
-							collidedFF.sounds.get(0).justActivated = true;
-					}
-				}
-			}
-			break;
-		case 2: // Arc Force Field
-			b.end.x = roundedIntersectionPoint.x;
-			b.end.y = roundedIntersectionPoint.y;
-			b.endType = 0;
-			if (EP.damageType(b.elementNum) == 4) // electricity or energy
-				if (recursive)
-				{
-					b2 = getReflectedBeam(b, collisionLine);
-					if (b2 != null) // BUGS MADE ME DO THIS
-					{
-						env.beams.add(b2);
-						moveBeam(b2, true); // Recursion!!!
-					}
-				} else
-					env.damageArcForceField(collidedAFF, b.getDamage() + b.getPushback(), roundedIntersectionPoint, EP.damageType(b.elementNum));
-			break;
-		case 3: // Person
-			b.end.x = roundedIntersectionPoint.x;
-			b.end.y = roundedIntersectionPoint.y;
-			b.endType = 0;
-
-			// damaging the person
-			env.hitPerson(collidedPerson, b.getDamage(), b.getPushback(), angle, EP.damageType(b.elementNum), globalDeltaTime);
-			// sound effect (scorched flesh)
-			if (!collidedPerson.sounds.get(0).active)
-				collidedPerson.sounds.get(0).loop();
-			else
-				collidedPerson.sounds.get(0).justActivated = true;
-			break;
-		case 4: // Ball
-			b.end.x = roundedIntersectionPoint.x;
-			b.end.y = roundedIntersectionPoint.y;
-			b.endType = 0;
-
-			collidedBall.mass -= 0.2 * b.getDamage() * globalDeltaTime; // TODO what the shit? Damaging the ball's mass? Whaaa?
-			// I'm not sure what I did here with the angles but it looks OK
-			if (frameNum % 2 == 0)
-				env.ballDebris(collidedBall, "beam hit");
-			break;
-		default:
-			errorMessage("Dragon and Defiant, sitting in a tree, K-I-S-S-I-S-S-I-P-P-I");
-			break;
-		}
-
-		if (!flatEnd)
-		{
-			b.endType = 0;
-			b.endAngle = angle;
-		}
-
-	}
-
-	void moveVine(Vine v, double deltaTime)
-	{
-		double originalAngle = v.rotation;
-		v.creator.rotation = v.rotation;
-		double desiredAngle = Math.atan2(v.creator.target.y - v.creator.y, v.creator.target.x - v.creator.x);
-
-		if (v.state == 1) // grabbling
-		{
-			//TODO this entire thing....
-			/*
-			 * It might need to incorporate deltaTime somehow, although that's not very important
-			 * It looks *okay* when grabbling people, but seriously buggy when grabbling a ball
-			 * Why does the ball just constantly become faster and faster and stretches more and more???
-			 */
-			
-			double maxSpringiness = 40; // If it's too high (or doesn't exist), repeated rotation of vine will constantly escalate the delta length for some reason, and physics will wackify.
-			double springiness = v.deltaLength;
-			if (springiness < -maxSpringiness)
-				springiness = -maxSpringiness;
-			if (springiness > maxSpringiness)
-				springiness = maxSpringiness;
-
-			// pulling/pushing like a spring: F = k*delta
-			v.creator.xVel -= Math.cos(v.rotation) * springiness * v.rigidity / v.creator.mass / 2;// functionally has twice the mass
-			v.creator.yVel -= Math.sin(v.rotation) * springiness * v.rigidity / v.creator.mass / 2;//
-			v.grabbledThing.xVel += Math.cos(v.rotation) * springiness * v.rigidity / v.grabbledThing.mass;
-			v.grabbledThing.yVel += Math.sin(v.rotation) * springiness * v.rigidity / v.grabbledThing.mass;
-
-			// Pulling vine sideways
-			double difference = desiredAngle - v.rotation;
-			while (difference < -TAU / 2)
-				difference += TAU;
-			while (difference > TAU / 2)
-				difference -= TAU;
-			double circularAccel = v.spinStrength / (v.grabbledThing.mass * Math.max(v.length + v.deltaLength, 200)); // when vine is shorter than ~2 meters, it isn't infinitely easy to wrangle.
-			if (difference < 0)
-				circularAccel *= -1;
-			v.grabbledThing.xVel += circularAccel * Math.cos(v.rotation + TAU / 4);
-			v.grabbledThing.yVel += circularAccel * Math.sin(v.rotation + TAU / 4);
-
-			if (v.grabbledThing instanceof Ball)
-				if (v.grabbledThing.velocity() > 500)
-					v.grabbledThing.zVel = 0;
-		}
-		if (v.state == 0 || v.state == 2)
-		{
-			if (v.state == 0) // checking retraction
-			{
-				if (v.length > v.range - v.startDistance)
-					v.retract();
-				if (v.length > Math.sqrt(Methods.DistancePow2(v.creator.target.x, v.creator.target.y, v.start.x, v.start.y))) // retracts if it reaches mouse point
-					v.retract(); // TODO add a settings-menu option to disable this
-			}
-
-			double vineSpeed = 20;
-			if (v.state == 2) // retracting
-				vineSpeed = -vineSpeed;
-			// Pulling vine sideways
-			v.rotate(desiredAngle, deltaTime);
-			if (v.endPauseTimeLeft == 0)
-			{
-				double angle = Math.atan2(v.end.y - v.start.y, v.end.x - v.start.x);
-				v.end.x += vineSpeed * Math.cos(angle);
-				v.end.y += vineSpeed * Math.sin(angle);
-			} else if (v.endPauseTimeLeft < 0)
-				v.endPauseTimeLeft = 0;
-			else
-				v.endPauseTimeLeft -= deltaTime;
-		}
-
-		Line2D vineLine = new Line2D.Double(v.start.x, v.start.y, v.end.x, v.end.y);
-
-		double shortestDistancePow2 = Double.MAX_VALUE;
-
-		int collisionType = -1;
-		Point2D intersectionPoint = null;
-
-		// 0 walls
-		int lowestGridX = Math.min(v.start.x, v.end.x) / squareSize;
-		int lowestGridY = Math.min(v.start.y, v.end.y) / squareSize;
-		int highestGridX = Math.max(v.start.x, v.end.x) / squareSize;
-		int highestGridY = Math.max(v.start.y, v.end.y) / squareSize;
-
-		Point collidedWall = null;
-		if (v.z - v.height / 2 < 1)
-			for (int x = lowestGridX; x <= highestGridX; x++)
-				for (int y = lowestGridY; y <= highestGridY; y++)
-					if (env.wallTypes[x][y] != -1)
-					{
-						Rectangle2D wallRect = new Rectangle2D.Double(x * squareSize, y * squareSize, squareSize, squareSize);
-						// if they intersect
-						if (vineLine.intersects(wallRect))
-						{
-							// find point of intersection (and side)
-							List<Line2D> lines = new ArrayList<Line2D>();
-							lines.add(new Line2D.Double(wallRect.getX(), wallRect.getY(), wallRect.getX() + wallRect.getWidth(), wallRect.getY()));
-							lines.add(new Line2D.Double(wallRect.getX(), wallRect.getY(), wallRect.getX(), wallRect.getY() + wallRect.getWidth()));
-							lines.add(new Line2D.Double(wallRect.getX() + wallRect.getWidth(), wallRect.getY(), wallRect.getX() + wallRect.getWidth(), wallRect.getY() + wallRect.getWidth()));
-							lines.add(new Line2D.Double(wallRect.getX(), wallRect.getY() + wallRect.getWidth(), wallRect.getX() + wallRect.getWidth(), wallRect.getY() + wallRect.getWidth()));
-
-							for (int i = 0; i < lines.size(); i++)
-								if (!lines.get(i).intersectsLine(vineLine))
-								{
-									lines.remove(i);
-									i--;
-								}
-							// finding closest point on rectangle
-							Point2D intersectionP = null;
-							for (int i = 0; i < lines.size(); i++)
-							{
-								Point2D intersection = Methods.getLineLineIntersection(lines.get(i), vineLine);
-								if (intersection != null)
-								{
-									double distancePow2 = Methods.DistancePow2(v.start, intersection);
-									if (distancePow2 < shortestDistancePow2)
-									{
-										intersectionP = intersection;
-										shortestDistancePow2 = distancePow2;
-									} else
-									{
-										lines.remove(i);
-										i--;
-									}
-								} else
-								{
-									lines.remove(i);
-									i--;
-								}
-							}
-							if (intersectionP != null)
-							{
-								collisionType = 0;
-								intersectionPoint = intersectionP;
-								collidedWall = new Point(x, y);
-							}
-						}
-					}
-
-		// 1 ffs
-		ForceField collidedFF = null;
-		for (ForceField ff : env.FFs)
-			if (v.z - v.height / 2 < ff.z + ff.height || v.z + v.height / 2 > ff.z)
-			{
-
-				// find point of intersection (and side)
-				List<Line2D> lines = new ArrayList<Line2D>();
-
-				for (int j = 0; j < ff.p.length - 1; j++)
-					lines.add(new Line2D.Double(ff.p[j], ff.p[j + 1]));
-				lines.add(new Line2D.Double(ff.p[ff.p.length - 1], ff.p[0]));
-				if (!lines.isEmpty())
-
-					for (int i = 0; i < lines.size(); i++)
-						if (!lines.get(i).intersectsLine(vineLine))
-						{
-							lines.remove(i);
-							i--;
-						}
-				// finding closest point
-				Point2D intersectionP = null;
-				for (int i = 0; i < lines.size(); i++)
-				{
-					Point2D intersection = Methods.getLineLineIntersection(lines.get(i), vineLine);
-					if (intersection != null)
-					{
-						double distancePow2 = Methods.DistancePow2(v.start, intersection);
-						if (distancePow2 < shortestDistancePow2)
-						{
-							intersectionP = intersection;
-							shortestDistancePow2 = distancePow2;
-							intersectionPoint = intersection;
-						} else
-						{
-							lines.remove(i);
-							i--;
-						}
-					} else
-					{
-						lines.remove(i);
-						i--;
-					}
-				}
-				if (intersectionP != null)
-				{
-					collisionType = 1;
-					collidedFF = ff;
-				}
-
-			}
-
-		// 2 arcffs/
-		ArcForceField collidedAFF = null;
-		for (ArcForceField aff : env.arcFFs)
-			if (v.z - v.height / 2 < aff.z + aff.height || v.z + v.height / 2 > aff.z)
-			{
-
-				Rectangle2D generalBounds = new Rectangle2D.Double(aff.x - aff.maxRadius, aff.y - aff.maxRadius, aff.maxRadius * 2, aff.maxRadius * 2);
-				// easier intersection first
-				if (vineLine.intersects(generalBounds))
-				{
-					// detailed intersection
-					double minAngle = aff.rotation - aff.arc / 2;
-					double maxAngle = aff.rotation + aff.arc / 2;
-
-					while (minAngle < 0)
-						minAngle += 2 * Math.PI;
-					while (minAngle >= 2 * Math.PI)
-						minAngle -= 2 * Math.PI;
-					while (maxAngle < 0)
-						maxAngle += 2 * Math.PI;
-					while (maxAngle >= 2 * Math.PI)
-						maxAngle -= 2 * Math.PI;
-
-					Point2D closestPointToSegment = Methods.getClosestPointOnSegment(vineLine.getX1(), vineLine.getY1(), vineLine.getX2(), vineLine.getY2(), aff.x, aff.y);
-
-					List<Point2D> points = new ArrayList<Point2D>();
-					List<Line2D> lines = new ArrayList<Line2D>();
-
-					for (int k = -1; k < 2; k += 2) // intended to check both intersections of the line with the circle
-					{
-						double closestPointDistanceMax = Math.sqrt(Methods.DistancePow2(closestPointToSegment.getX(), closestPointToSegment.getY(), aff.x, aff.y));
-						double angleToCollisionPointMax = Math.atan2(closestPointToSegment.getY() - aff.y, closestPointToSegment.getX() - aff.x)
-								+ k * Math.acos(closestPointDistanceMax / aff.maxRadius);
-
-						double closestPointDistanceMin = Math.sqrt(Methods.DistancePow2(closestPointToSegment.getX(), closestPointToSegment.getY(), aff.x, aff.y));
-						double angleToCollisionPointMin = Math.atan2(closestPointToSegment.getY() - aff.y, closestPointToSegment.getX() - aff.x)
-								+ k * Math.acos(closestPointDistanceMin / aff.minRadius);
-
-						Point2D closestPointMax = new Point2D.Double(aff.x + aff.maxRadius * Math.cos(angleToCollisionPointMax), aff.y + aff.maxRadius * Math.sin(angleToCollisionPointMax));
-						Point2D closestPointMin = new Point2D.Double(aff.x + aff.minRadius * Math.cos(angleToCollisionPointMin), aff.y + aff.minRadius * Math.sin(angleToCollisionPointMin));
-
-						while (angleToCollisionPointMax < 0)
-							angleToCollisionPointMax += 2 * Math.PI;
-						while (angleToCollisionPointMax >= 2 * Math.PI)
-							angleToCollisionPointMax -= 2 * Math.PI;
-
-						while (angleToCollisionPointMin < 0)
-							angleToCollisionPointMin += 2 * Math.PI;
-						while (angleToCollisionPointMin >= 2 * Math.PI)
-							angleToCollisionPointMin -= 2 * Math.PI;
-
-						// outer arc
-						if (closestPointDistanceMax < aff.maxRadius)
-							if (minAngle < maxAngle)
-							{
-								if (angleToCollisionPointMax > minAngle && angleToCollisionPointMax < maxAngle)
-								{
-									points.add(closestPointMax);
-									lines.add(new Line2D.Double(closestPointMax.getX() + 12 * Math.cos(angleToCollisionPointMax + Math.PI / 2),
-											closestPointMax.getY() + 12 * Math.sin(angleToCollisionPointMax + Math.PI / 2),
-											closestPointMax.getX() - 12 * Math.cos(angleToCollisionPointMax + Math.PI / 2),
-											closestPointMax.getY() - 12 * Math.sin(angleToCollisionPointMax + Math.PI / 2)));
-								}
-							} else if (angleToCollisionPointMax < maxAngle || angleToCollisionPointMax > minAngle)
-							{
-								points.add(closestPointMax);
-								lines.add(new Line2D.Double(closestPointMax.getX() + 12 * Math.cos(angleToCollisionPointMax + Math.PI / 2),
-										closestPointMax.getY() + 12 * Math.sin(angleToCollisionPointMax + Math.PI / 2), closestPointMax.getX() - 12 * Math.cos(angleToCollisionPointMax + Math.PI / 2),
-										closestPointMax.getY() - 12 * Math.sin(angleToCollisionPointMax + Math.PI / 2)));
-
-							}
-						// inner arc
-						if (closestPointDistanceMin < aff.minRadius)
-							if (minAngle < maxAngle)
-							{
-								if (angleToCollisionPointMin > minAngle && angleToCollisionPointMin < maxAngle)
-								{
-									points.add(closestPointMin);
-									lines.add(new Line2D.Double(closestPointMin.getX() + 12 * Math.cos(angleToCollisionPointMin + Math.PI / 2),
-											closestPointMin.getY() + 12 * Math.sin(angleToCollisionPointMin + Math.PI / 2),
-											closestPointMin.getX() - 12 * Math.cos(angleToCollisionPointMin + Math.PI / 2),
-											closestPointMin.getY() - 12 * Math.sin(angleToCollisionPointMin + Math.PI / 2)));
-								}
-							} else if (angleToCollisionPointMin < maxAngle || angleToCollisionPointMin > minAngle)
-							{
-								points.add(closestPointMin);
-								lines.add(new Line2D.Double(closestPointMin.getX() + 12 * Math.cos(angleToCollisionPointMin + Math.PI / 2),
-										closestPointMin.getY() + 12 * Math.sin(angleToCollisionPointMin + Math.PI / 2), closestPointMin.getX() - 12 * Math.cos(angleToCollisionPointMin + Math.PI / 2),
-										closestPointMin.getY() - 12 * Math.sin(angleToCollisionPointMin + Math.PI / 2)));
-							}
-					}
-					// two sides:
-					Line2D l1 = new Line2D.Double(aff.x + aff.minRadius * Math.cos(aff.rotation - 0.5 * aff.arc), aff.y + aff.minRadius * Math.sin(aff.rotation - 0.5 * aff.arc),
-							aff.x + aff.maxRadius * Math.cos(aff.rotation - 0.5 * aff.arc), aff.y + aff.maxRadius * Math.sin(aff.rotation - 0.5 * aff.arc));
-					Line2D l2 = new Line2D.Double(aff.x + aff.minRadius * Math.cos(aff.rotation + 0.5 * aff.arc), aff.y + aff.minRadius * Math.sin(aff.rotation + 0.5 * aff.arc),
-							aff.x + aff.maxRadius * Math.cos(aff.rotation + 0.5 * aff.arc), aff.y + aff.maxRadius * Math.sin(aff.rotation + 0.5 * aff.arc));
-					lines.add(l1);
-					points.add(Methods.getSegmentIntersection(l1, vineLine));
-					lines.add(l2);
-					points.add(Methods.getSegmentIntersection(l2, vineLine));
-					// finding closest point
-					Point2D intersectionP = null;
-					for (int i = 0; i < points.size(); i++)
-					{
-						Point2D intersection = points.get(i);
-						if (intersection != null)
-						{
-							double distancePow2 = Methods.DistancePow2(v.start, intersection);
-							if (distancePow2 < shortestDistancePow2)
-							{
-								intersectionP = intersection;
-								shortestDistancePow2 = distancePow2;
-							} else
-							{
-								points.remove(i);
-								lines.remove(i);
-								i--;
-							}
-						} else
-						{
-							points.remove(i);
-							lines.remove(i);
-							i--;
-						}
-					}
-					if (intersectionP != null)
-					{
-						collisionType = 2;
-						collidedAFF = aff;
-						intersectionPoint = intersectionP;
-					}
-
-				}
-			}
-
-		// 3,4 persons
-		Person collidedPerson = null;
-		for (Person p : env.people)
-			if (p.id != v.creator.id)
-				if (!p.prone)
-				{
-					// grabbling test
-					if (v.state == 0 || v.state == 2)
-						if (Math.abs(p.z - v.end.z) < 2 && Methods.DistancePow2(p.x, p.y, v.end.x, v.end.y) < Vine.grabblingRange * Vine.grabblingRange)
-						{
-							collisionType = 3;
-							collidedPerson = p;
-							intersectionPoint = new Point2D.Double(-1, -1); // irrelevant
-						}
-
-					// collision with the body (length) of the vine
-					if (v.state != 1 && !v.creator.equals(v.grabbledThing))
-						if (Methods.LineToPointDistancePow2(v.start.Point(), v.end.Point(), p.Point()) <= p.radius * p.radius / 4)
-						{
-							Point closestPoint = Methods.getClosestRoundedPointOnSegment(v.start.Point(), v.end.Point(), p.Point());
-							double distancePow2 = Methods.DistancePow2(p.Point(), closestPoint);
-							if (distancePow2 < shortestDistancePow2)
-							{
-								shortestDistancePow2 = distancePow2;
-								collisionType = 4;
-								collidedPerson = p;
-								intersectionPoint = new Point2D.Double(-1, -1); // irrelevant
-							}
-						}
-				}
-
-		// 5,6 balls
-		Ball collidedBall = null;
-		for (Ball b : env.balls)
-		{
-			// grabbling test
-			if (v.state == 0 || v.state == 2)
-				if (Math.abs(b.z - v.end.z) < 2 && Methods.DistancePow2(b.x, b.y, v.end.x, v.end.y) < Vine.grabblingRange * Vine.grabblingRange)
-				{
-					collisionType = 5;
-					collidedBall = b;
-					intersectionPoint = new Point2D.Double(-1, -1); // irrelevant
-				}
-
-			// collision with the body (length) of the vine
-			if (v.state != 1)
-				if (Methods.LineToPointDistancePow2(v.start.Point(), v.end.Point(), b.Point()) <= b.radius * b.radius)
-				{
-					Point closestPoint = Methods.getClosestRoundedPointOnSegment(v.start.Point(), v.end.Point(), b.Point());
-					double distancePow2 = Methods.DistancePow2(b.Point(), closestPoint);
-					if (distancePow2 < shortestDistancePow2)
-					{
-						shortestDistancePow2 = distancePow2;
-						collisionType = 6;
-						collidedBall = b;
-						intersectionPoint = new Point2D.Double(-1, -1); // irrelevant
-					}
-				}
-		}
-
-		if (collisionType == -1)
-			return;
-		if (intersectionPoint == null)
-		{
-			errorMessage("what what what what? Um");
-			return;
-		}
-		Point roundedIntersectionPoint = new Point((int) intersectionPoint.getX(), (int) intersectionPoint.getY());
-
-		switch (collisionType)
-		{
-		case 0: // wall
-			// TODO Create plant debris / cut-off plant between intersection point and vine end
-			v.grabbledThing = null;
-
-			v.end.x = roundedIntersectionPoint.x;
-			v.end.y = roundedIntersectionPoint.y;
-			v.retract();
-			v.fixPosition();
-			env.damageWall(collidedWall.x, collidedWall.y, v.getDamage() + v.getPushback(), EP.damageType(EP.toInt("Plant")));
-			break;
-		case 1: // force field
-			v.end.x = roundedIntersectionPoint.x;
-			v.end.y = roundedIntersectionPoint.y;
-			v.retract();
-			v.fixPosition();
-			env.damageFF(collidedFF, v.getDamage() + v.getPushback(), roundedIntersectionPoint);
-			break;
-		case 2: // arc force field
-			v.end.x = roundedIntersectionPoint.x;
-			v.end.y = roundedIntersectionPoint.y;
-			v.retract();
-			v.fixPosition();
-			env.damageArcForceField(collidedAFF, v.getDamage() + v.getPushback(), roundedIntersectionPoint, EP.damageType("Plant"));
-			break;
-		case 3: // person (grabbled)
-			v.end = new Point3D((int) collidedPerson.x, (int) collidedPerson.y, (int) collidedPerson.z);
-			v.grabbledThing = collidedPerson;
-			v.state = 1;
-			v.fixPosition();
-			break;
-		case 4: // person (intersected)
-			v.rotate(originalAngle, deltaTime * 2);
-			if (v.state == 1)
-			{
-				double difference = desiredAngle - v.rotation;
-				while (difference < -TAU / 2)
-					difference += TAU;
-				while (difference > TAU / 2)
-					difference -= TAU;
-				double hitAngle = v.rotation + (difference > 0 ? TAU / 4 : -TAU / 4);
-				double vineCollisionPercentage = 0.01;
-				double push = Math.min(Math.sqrt(Math.pow(v.grabbledThing.xVel, 2) + Math.pow(v.grabbledThing.yVel, 2)) * vineCollisionPercentage, v.getCollisionPushback());
-				env.hitPerson(collidedPerson, v.getCollisionDamage(), push, hitAngle, 0);
-				collidedPerson.rotation = hitAngle;
-				collidedPerson.slippedTimeLeft = 3;
-				collidedPerson.prone = true;
-			}
-			v.fixPosition();
-			break;
-		case 5: // ball (grabbled)
-			v.end = new Point3D((int) collidedBall.x, (int) collidedBall.y, (int) collidedBall.z);
-			v.grabbledThing = collidedBall;
-			v.state = 1;
-			v.fixPosition();
-			break;
-		case 6: // ball (intersected)
-			v.rotate(originalAngle, deltaTime * 2);
-			v.fixPosition();
-			break;
-		default:
-			errorMessage("tutorial times 4: how to write an error message 404");
-			break;
-		}
-	}
-
-	Beam getReflectedBeam(Beam b, Line2D collisionLine)
-	{
-		double angle = Math.atan2(b.end.y - b.start.y, b.end.x - b.start.x);
-		double lineAngle = Math.atan2(collisionLine.getY2() - collisionLine.getY1(), collisionLine.getX2() - collisionLine.getX1());
-		b.endAngle = lineAngle + Math.PI / 2;
-		double newBeamAngle = 2 * lineAngle - angle; // math
-		// reflection beam
-		final double startDistance = 15; // if this is lower than ~15, there will be flickering in some reflections, but if this is higher than ~15 there will be a noticeable starting distance, especially with tiny beams.
-		// possible TODO to solve that problem : multiply this number by 90-the angle between the laser and the FF's hit side.
-		double beamLength = Math.sqrt(Math.pow(b.end.x - b.start.x, 2) + Math.pow(b.end.y - b.start.y, 2)); // Should work
-		double newRange = b.range - beamLength;
-		if (newRange < 0) // because bugs
-			return null;
-		Beam b2 = new Beam(b.creator, new Point3D((int) (b.end.x + startDistance * Math.cos(newBeamAngle)), (int) (b.end.y + startDistance * Math.sin(newBeamAngle)), b.end.z),
-				new Point3D((int) (b.end.x + newRange * Math.cos(newBeamAngle)), (int) (b.end.y + newRange * Math.sin(newBeamAngle)), b.end.z), b.elementNum, b.points, newRange);
-		b2.frameNum = b.frameNum;
-		b2.isChild = true;
-		return b2;
 	}
 
 	void updateFF(ForceField ff, double deltaTime)
@@ -2411,7 +830,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 		// TODO
 	}
 
-	void updateTargeting() // for the player
+	void updateTargeting(double deltaTime) // for the player
 	{
 		player.target = new Point(mx, my);
 		double angle = Math.atan2(player.target.y - player.y, player.target.x - player.x);
@@ -2426,19 +845,13 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 		{
 			player.target = new Point(-1, -1);
 			player.targetType = "";
-			successfulTarget = false;
+			player.successfulTarget = false;
 			return;
 		}
 		// if the area isn't nice
 		switch (ability.rangeType)
 		{
 		case "Create in grid":
-			player.rangeArea = new Area();
-			for (int i = (int) (player.x - ability.range); i < (int) (player.x + ability.range); i += squareSize)
-				for (int j = (int) (player.y - ability.range); j < (int) (player.y + ability.range); j += squareSize)
-					if (Math.pow(player.x - i / squareSize * squareSize - 0.5 * squareSize, 2) + Math.pow(player.y - j / squareSize * squareSize - 0.5 * squareSize, 2) <= ability.range
-							* ability.range)
-						player.rangeArea.add(new Area(new Rectangle2D.Double(i / squareSize * squareSize, j / squareSize * squareSize, squareSize, squareSize)));
 			break;
 		default:
 			player.rangeArea = null;
@@ -2459,155 +872,8 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 				player.target.x = (int) (player.x + Math.cos(angle) * ability.range);
 				player.target.y = (int) (player.y + Math.sin(angle) * ability.range);
 			}
-		int gridX = player.target.x / squareSize, gridY = player.target.y / squareSize;
-		switch (ability.justName())
-		{
-		case "Ranged Explosion":
-			player.targetType = "explosion";
-			break;
-		case "Heal I":
-		case "Heal II":
-			player.targetType = "";
-			player.target = new Point(-1, -1);
-			break;
-		case "Pool":
-			player.targetType = "createInGrid";
-			if (!player.maintaining)
-			{
-				if (Methods.DistancePow2(new Point((int) (player.x), (int) (player.y)), new Point(gridX * squareSize + squareSize / 2, gridY * squareSize + squareSize / 2)) > ability.range
-						* ability.range)
-				{
-					player.target.x = (int) (player.x + Math.cos(angle) * (ability.range / 2));
-					player.target.y = (int) (player.y + Math.sin(angle) * (ability.range / 2));
-					gridX = player.target.x / squareSize;
-					gridY = player.target.y / squareSize;
-				}
-				boolean canCreate = true;
-				if (env.poolTypes[gridX][gridY] != -1)
-					if (env.poolTypes[gridX][gridY] != ability.getElementNum() || (env.poolTypes[gridX][gridY] == ability.getElementNum() && env.poolHealths[gridX][gridY] >= 100))
-						canCreate = false;
-				// stop creating pool if it collides with someone
-				for (Person p : env.people)
-				{
-					if ((int) (p.x - 0.5 * p.radius) / squareSize == gridX && (int) (p.y - 0.5 * p.radius) / squareSize == gridY)
-						canCreate = false;
-					if ((int) (p.x + 0.5 * p.radius) / squareSize == gridX && (int) (p.y - 0.5 * p.radius) / squareSize == gridY)
-						canCreate = false;
-					if ((int) (p.x - 0.5 * p.radius) / squareSize == gridX && (int) (p.y + 0.5 * p.radius) / squareSize == gridY)
-						canCreate = false;
-					if ((int) (p.x + 0.5 * p.radius) / squareSize == gridX && (int) (p.y + 0.5 * p.radius) / squareSize == gridY)
-						canCreate = false;
-				}
-				ability.targetEffect3 = canCreate ? 0 : 1;
-				ability.targetEffect1 = gridX;
-				ability.targetEffect2 = gridY;
-				player.target = new Point((int) gridX * squareSize + squareSize / 2, (int) gridY * squareSize + squareSize / 2);
-			} else // don't change target
-				player.target = new Point((int) ability.targetEffect1 * squareSize + squareSize / 2, (int) ability.targetEffect2 * squareSize + squareSize / 2);
-			break;
-		case "Wall":
-			player.targetType = "createInGrid";
-			if (!player.maintaining)
-			{
-				boolean canCreate = true;
-				if (env.wallTypes[gridX][gridY] != -1)
-					if (env.wallTypes[gridX][gridY] != ability.getElementNum() || (env.wallTypes[gridX][gridY] == ability.getElementNum() && env.wallHealths[gridX][gridY] >= 100))
-						canCreate = false;
-				// stop creating wall if it collides with someone
-				for (Person p : env.people)
-				{
-					if ((int) (p.x - 0.5 * p.radius) / squareSize == gridX && (int) (p.y - 0.5 * p.radius) / squareSize == gridY)
-						canCreate = false;
-					if ((int) (p.x + 0.5 * p.radius) / squareSize == gridX && (int) (p.y - 0.5 * p.radius) / squareSize == gridY)
-						canCreate = false;
-					if ((int) (p.x - 0.5 * p.radius) / squareSize == gridX && (int) (p.y + 0.5 * p.radius) / squareSize == gridY)
-						canCreate = false;
-					if ((int) (p.x + 0.5 * p.radius) / squareSize == gridX && (int) (p.y + 0.5 * p.radius) / squareSize == gridY)
-						canCreate = false;
-				}
-				ability.targetEffect3 = canCreate ? 0 : 1;
-				ability.targetEffect1 = gridX;
-				ability.targetEffect2 = gridY;
-				player.target = new Point((int) gridX * squareSize + squareSize / 2, (int) gridY * squareSize + squareSize / 2);
-			} else // don't change target
-				player.target = new Point((int) ability.targetEffect1 * squareSize + squareSize / 2, (int) ability.targetEffect2 * squareSize + squareSize / 2);
-			break;
-		case "Blink":
-			player.target = new Point((int) (player.x + ability.range * Math.cos(angle)), (int) (player.y + ability.range * Math.sin(angle)));
-			player.targetType = "teleport";
-			successfulTarget = true;
-			// test boundaries
-			if (player.target.x < 0 || player.target.y < 0 || player.target.x > env.widthPixels || player.target.y > env.heightPixels)
-				successfulTarget = false;
-			else if (!player.ghostMode)
-				for (int i = (int) (player.target.x - 0.5 * player.radius); successfulTarget && i / squareSize <= (int) (player.target.x + 0.5 * player.radius) / squareSize; i += squareSize)
-					for (int j = (int) (player.target.y - 0.5 * player.radius); successfulTarget && j / squareSize <= (int) (player.target.y + 0.5 * player.radius) / squareSize; j += squareSize)
-						if (env.wallTypes[i / squareSize][j / squareSize] != -1)
-							successfulTarget = false;
 
-			// sweet awesome triangles
-			ability.targetEffect1 += 0.031;
-			ability.targetEffect2 += 0.053;
-			ability.targetEffect3 -= 0.041;
-			break;
-		case "Shield":
-			player.targetType = "look";
-			player.target = new Point(-1, -1);
-			if (!player.leftMousePressed) // stops aiming shield while pressing mouse, to blink for example
-				player.rotate(angle, globalDeltaTime);
-			break;
-		case "Ball":
-			player.targetType = "look";
-			player.target = new Point((int) (player.x + ability.range * Math.cos(angle)), (int) (player.y + ability.range * Math.sin(angle)));
-			if (!player.leftMousePressed)
-				player.rotate(angle, 3.0 * globalDeltaTime);
-			break;
-		case "Beam":
-			player.targetType = "look";
-			if (!player.leftMousePressed && !player.holdingVine)
-				player.rotate(angle, 3.0 * globalDeltaTime);
-			// if it's a vine and it's holding onto something, the person's rotation is hard-changed to the vine's angle in frame()
-			break;
-		case "Strong Force Field":
-			player.targetType = "createFF";
-			player.target = new Point((int) (player.x + ability.range * Math.cos(angle)), (int) (player.y + ability.range * Math.sin(angle)));
-			// length
-			ability.targetEffect2 = 100 + 50 * (int) ability.points;
-			// width
-			ability.targetEffect3 = 5 + 7 * ability.points;
-
-			if (!player.leftMousePressed)
-				player.rotate(angle, 3.0 * globalDeltaTime);
-			break;
-		case "Force Shield":
-			player.targetType = "createFF";
-			player.target = new Point((int) (player.x + ability.range * Math.cos(angle)), (int) (player.y + ability.range * Math.sin(angle)));
-			// length
-			ability.targetEffect2 = 100 + 100 * (int) ability.points / 3;
-			// width
-			ability.targetEffect3 = 10 + (int) ability.points * 1;
-
-			if (!player.leftMousePressed)
-				player.rotate(angle, 3.0 * globalDeltaTime);
-			break;
-		case "Ghost Mode I":
-		case "Flight I":
-		case "Flight II":
-		case "Telekinetic Flight":
-		case "Sense Powers":
-			player.targetType = "";
-			player.target = new Point(-1, -1);
-			break;
-		case "Punch":
-			player.targetType = "look";
-			player.target = new Point(mx, my);
-			break;
-		default:
-			errorMessage("No targeting code found for the \"" + ability.name + "\" ability");
-			player.targetType = "";
-			player.target = new Point(-1, -1);
-			break;
-		}
+		ability.updatePlayerTargeting(env, player, player.target, deltaTime);
 	}
 
 	void drawRange(Graphics2D buffer, Ability ability)
@@ -2706,7 +972,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 		case "teleport":
 			buffer.setStroke(new BasicStroke(3));
 			final int radius = 35;
-			if (successfulTarget)
+			if (player.successfulTarget)
 			{
 				buffer.setColor(new Color(53, 230, 240));
 				buffer.drawLine(player.target.x + (int) (radius * 1.3 * Math.cos(ability.targetEffect1)), player.target.y + (int) (radius * 1.3 * Math.sin(ability.targetEffect1)),
@@ -2791,10 +1057,6 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 		Resources.initialize();
 		Person.resetIDs();
 
-		sensePowersElementLevels = new int[33];
-		for (int i = 0; i < sensePowersElementLevels.length; i++)
-			sensePowersElementLevels[i] = 0;
-
 		// ~~~TEMPORARY TESTING~~~
 
 		env = new Environment(50, 50);
@@ -2811,38 +1073,40 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 		env.shadowY = -0.7;
 
 		player = new Player(96 * 20, 96 * 20);
-		player.abilities.add(new Ability("Heal I", 5));
-		player.abilities.add(new Ability("Force Shield", 5));
-		player.abilities.add(new Ability("Strong Force Field", 5));
-		player.abilities.add(new Ability("Flight I", 5));
-		player.abilities.add(new Ability("Blink", 5));
-		player.abilities.add(new Ability("Beam <Energy>", 5));
-		player.abilities.add(new Ability("Ghost Mode I", 5));
-		player.abilities.add(new Ability("Sense Life", 5));
-		player.abilities.add(new Ability("Sense Mana and Stamina", 5));
-		player.abilities.add(new Ability("Elemental Combat II <Earth>", 5));
-		player.abilities.add(new Ability("Beam <Plant>", 5));
-		player.abilities.add(new Ability("Sense Powers", 4));
+		player.abilities.add(Ability.ability("Ball <Earth>", 5));
+		player.abilities.add(Ability.ability("Heal I", 5));
+		player.abilities.add(Ability.ability("Force Shield", 5));
+		player.abilities.add(Ability.ability("Flight I", 5));
+		player.abilities.add(Ability.ability("Blink", 5));
+		player.abilities.add(Ability.ability("Beam <Energy>", 5));
+		player.abilities.add(Ability.ability("Ghost Mode I", 5));
+		player.abilities.add(Ability.ability("Sense Life", 5));
+		player.abilities.add(Ability.ability("Sense Mana and Stamina", 5));
+		player.abilities.add(Ability.ability("Elemental Combat II <Earth>", 5));
+		player.updateAbilities(); // for the elemental combat
+		player.abilities.add(Ability.ability("Beam <Plant>", 5));
+		player.abilities.add(Ability.ability("Sense Powers", 4));
+		player.abilities.add(Ability.ability("Strong Force Field", 5));
 		player.updateAbilities(); // Because we added some abilities and the hotkeys haven't been updated
 		env.people.add(player);
 		camera = new Point3D((int) player.x, (int) player.y, (int) player.z + 25);
 
 		Person shmulik = new NPC(96 * 22, 96 * 19, "aggressive");
-		shmulik.abilities.add(new Ability("Beam <Energy>", 6));
-		shmulik.abilities.add(new Ability("Flight II", 5));
-		shmulik.abilities.add(new Ability("Force Shield", 3));
-		shmulik.abilities.add(new Ability("Ball <Earth>", 6));
-		shmulik.abilities.add(new Ability("Heal I", 3));
+		shmulik.abilities.add(Ability.ability("Beam <Energy>", 6));
+		shmulik.abilities.add(Ability.ability("Flight II", 5));
+		shmulik.abilities.add(Ability.ability("Force Shield", 3));
+		shmulik.abilities.add(Ability.ability("Ball <Earth>", 6));
+		shmulik.abilities.add(Ability.ability("Heal I", 3));
 		// env.people.add(shmulik);
 
 		Person tzippi = new NPC(96 * 15, 96 * 25, "passive");
-		tzippi.trigger();
+		// tzippi.trigger();
 		env.people.add(tzippi);
 		Person aa = new NPC(96 * 17, 96 * 27, "passive");
-		aa.trigger();
+		// aa.trigger();
 		env.people.add(aa);
 		Person cc = new NPC(96 * 10, 96 * 25, "passive");
-		cc.trigger();
+		// cc.trigger();
 		env.people.add(cc);
 	}
 
@@ -2873,28 +1137,26 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 						{
 							p.abilityMaintaining = abilityIndex;
 							if (!a.on)
-								useAbility(a, p, p.target);
+								a.use(env, p, p.target);
 						} // Can't start a maintainable ability while maintaining another
 					} else
 					{
-						if (a.instant) // Instant ability, without aim
+						if (a.instant && !a.hasTag("on-off")) // Instant ability, without aim
 						{
-							useAbility(a, p, p.target);
-							if (!a.onOff) // on/off abilities aren't repetitively used
-								p.abilityTryingToRepetitivelyUse = abilityIndex;
+							a.use(env, p, p.target);
+							p.abilityTryingToRepetitivelyUse = abilityIndex;
 						} else
 							p.abilityAiming = abilityIndex; // straightforward
 					}
 				}
 				// if trying to use ability while repetitively trying another, doesn't work
-			} else if (p.abilityAiming != -1 && p.abilityAiming == abilityIndex) // activate currently aimed ability
+			} else if (p.abilityAiming != -1 && p.abilityAiming == abilityIndex) // = activate currently aimed ability
 			{
-				useAbility(a, p, p.target);
+				a.use(env, p, p.target);
 				p.abilityAiming = -1;
 			} else if (p.maintaining && p.abilityMaintaining == abilityIndex)
 			{
-				// a == on should be true always
-				useAbility(a, p, p.target); // stop maintaining
+				a.use(env, p, p.target); // stop maintaining
 				p.abilityMaintaining = -1;
 			} else if (!p.maintaining && p.abilityMaintaining == abilityIndex) // player's maintaining was stopped before player released key
 				p.abilityMaintaining = -1;
@@ -2979,7 +1241,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 									for (Ability a : p.abilities) // stop flying when landing this way
 										if (a.hasTag("flight"))
 										{
-											useAbility(a, p, p.target);
+											a.use(env, p, p.target);
 										}
 									p.zVel = 0;
 									if (p instanceof NPC)
@@ -3377,7 +1639,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 								if (bounce)
 								{
 									// PHYSICS
-									double angle = 2 * ff.rotation - b.angle() + Math.PI;
+									double angle = 2 * ff.rotation - b.angle() + Math.PI; // 2*rotation - angle + 180
 									// avoiding repeat-bounce immediately afterwards
 									moveQuantumX = Math.cos(angle);
 									moveQuantumY = Math.sin(angle);
@@ -3394,7 +1656,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 								if (bounce)
 								{
 									// PHYSICS
-									double angle = 2 * ff.rotation - b.angle() + Math.PI;
+									double angle = 2 * ff.rotation - b.angle() + Math.PI;// 2*rotation - angle + 180
 									// avoiding repeat-bounce immediately afterwards
 									moveQuantumX = Math.cos(angle);
 									moveQuantumY = Math.sin(angle);
@@ -3412,7 +1674,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 								if (bounce)
 								{
 									// PHYSICS
-									double angle = 2 * ff.rotation - b.angle() + Math.PI;
+									double angle = 2 * ff.rotation - b.angle();// 2*rotation - angle
 									// avoiding repeat-bounce immediately afterwards
 									moveQuantumX = Math.cos(angle);
 									moveQuantumY = Math.sin(angle);
@@ -3429,7 +1691,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 								if (bounce)
 								{
 									// PHYSICS
-									double angle = 2 * ff.rotation - b.angle() + Math.PI;
+									double angle = 2 * ff.rotation - b.angle(); // 2*rotation - angle
 									// avoiding repeat-bounce immediately afterwards
 									moveQuantumX = Math.cos(angle);
 									moveQuantumY = Math.sin(angle);
@@ -3557,7 +1819,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 			for (Ability a : p.abilities) // stop flying when landing this way
 				if (a.hasTag("flight") && a.on)
 				{
-					useAbility(a, p, p.target);
+					a.use(env, p, p.target);
 				}
 		}
 		if (p.z < 0.1 || (p.z == 1 && !p.ghostMode && env.wallTypes[(int) (p.x) / squareSize][(int) (p.y) / squareSize] != -1)) // on ground or on a wall
@@ -3610,124 +1872,6 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 		}
 
 		return 0;
-	}
-
-	boolean testUserPunch(Person user, boolean onlyOrganics, boolean missSound, Ability punchAbility)
-	{
-		double range = user.radius * 1.15;
-		if (user.flySpeed != -1)
-			range = range + 65; // eh
-		double damage = user.STRENGTH;
-		double pushback = user.STRENGTH * 1.5; // TODO have some cool power that greatly increases the pushback, thus making the user bounce off of walls!
-		pushback += Math.sqrt(user.xVel * user.xVel + user.yVel * user.yVel) * 100 / 3000; // TODO uhhh
-
-		// Notice:
-		damage += 0.2 * pushback;
-		pushback -= 0.2 * pushback;
-
-		int damageType = 0; // TODO other punch types that aren't blunt?
-		int timesTested = 2; // number of checks; number of parts the range is divided into.
-		double extraVerticalHeight = 0.4;
-		final double extraAimingAngle = user.flySpeed == -1 ? 0.3 : 0.8; // If the user is flying the arc of punch-testing is larger, because it's more difficult to aim with the keyboard and while moving.
-		for (int l = 0; l < timesTested; l++)
-		{
-			range = user.radius * 1.15 * (1 - (double) l / timesTested);
-			collisionCheck: if (true)
-			{
-				for (double m = -1; m <= 1; m++)
-				{
-					user.target = new Point((int) (user.x + range * Math.cos(user.rotation + extraAimingAngle * m)), (int) (user.y + range * Math.sin(user.rotation + extraAimingAngle * m)));
-					if (!onlyOrganics)
-					{
-						int i = user.target.x / squareSize;
-						int j = user.target.y / squareSize;
-						if (env.wallTypes[i][j] != -1)
-						{
-							double leftoverPushback = env.wallHealths[i][j] > damage + pushback ? pushback : Math.min(env.wallHealths[i][j], pushback);
-							env.damageWall(i, j, damage + pushback, damageType);
-							env.hitPerson(user, damage, leftoverPushback, user.rotation - Math.PI, damageType);
-							user.punchedSomebody = true;
-							break collisionCheck;
-						}
-						for (ForceField ff : env.FFs)
-							if (ff.z + ff.height > user.z && ff.z < user.z + user.height)
-							{
-								Rectangle2D ffBoundingBox = new Rectangle2D.Double(ff.x - ff.length / 2, ff.y - ff.length / 2, ff.length, ff.length);
-								if (ffBoundingBox.contains(user.target))
-								{
-									// Note: this uses ff.width + 20 because the regular width is sometimes too thin and the punch is on the other side so it isn't recognized
-									Area forcefieldArea = new Area(new Rectangle2D.Double(ff.x - ff.length / 2, ff.y - ff.width / 2 - 20 / 2, ff.length, ff.width + 20));
-									AffineTransform aft = new AffineTransform();
-									aft.rotate(ff.rotation, ff.x, ff.y);
-									forcefieldArea.transform(aft);
-									if (forcefieldArea.contains(user.target))
-									{
-										double leftoverPushback = ff.life > damage + pushback ? pushback : Math.min(env.wallHealths[i][j], pushback);
-										env.damageFF(ff, damage + pushback, user.target);
-										env.hitPerson(user, damage, leftoverPushback, user.rotation - Math.PI, 4); // Shock damage
-										user.punchedSomebody = true;
-										break collisionCheck;
-									}
-								}
-							}
-						for (Ball b : env.balls)
-							if (b.z + b.height > user.z && b.z < user.z + user.height)
-								if (Methods.DistancePow2(new Point((int) b.x, (int) b.y), user.target) < b.radius * b.radius)
-								{
-									// Shatters the ball
-									// TODO add ball reflecting using fists (so epic!)
-									b.xVel = 0; // destroys ball
-									b.yVel = 0; //
-									env.hitPerson(user, b.getDamage(), pushback, user.rotation - Math.PI, EP.damageType(b.elementNum));
-									// epicness
-									env.ballDebris(b, "punch");
-									user.punchedSomebody = true;
-									break collisionCheck;
-								}
-					}
-					for (Person p : env.people)
-						// allowing higher vertical range, for flying people? //TODO leave it as it is or remove it and lower punch-flight height to about 0.6
-						if (p.z + p.height > user.z - extraVerticalHeight && p.z < user.z + user.height + extraVerticalHeight)
-							// This is actually the purpose of the punches, by the way
-							if (!p.equals(user)) // TODO find a better way (not two double-number comparisons) to make sure they aren't the same. Maybe with person.equals()?
-								if (p.x - p.radius / 2 < user.target.x && p.y - p.radius / 2 < user.target.y && p.x + p.radius / 2 > user.target.x && p.y + p.radius / 2 > user.target.y)
-								{
-									env.hitPerson(p, damage, pushback, user.rotation, damageType); // This is such an elegant line of code :3
-									user.punchedSomebody = true;
-									break collisionCheck;
-								}
-				}
-			}
-		}
-		if (user.punchedSomebody)
-		{
-			// backwards pushback
-			env.hitPerson(user, 0, pushback * 0.6, user.rotation + Math.PI, 0);
-			// Sound effect of hit
-			punchAbility.playSound("Punch hit");
-			return true;
-		} else
-		{
-			if (missSound)
-				punchAbility.playSound("Punch miss");
-			return false;
-		}
-	}
-
-	void updateSensePowers(Ability ability)
-	{
-		for (int i = 0; i < sensePowersElementLevels.length; i++)
-		{
-			sensePowersElementLevels[i] = (int) (random.nextGaussian() * 2); // deviation of 2 really seems like the best one.
-		}
-		for (Person p : env.people)
-			if (!p.equals(player))
-			{
-				double distancePow2 = Methods.DistancePow2(player.x, player.y, p.x, p.y);
-				if (distancePow2 < Math.pow(ability.range, 2))
-					for (EP ep : p.DNA)
-						sensePowersElementLevels[ep.elementNum] += ep.points;
-			}
 	}
 
 	void paintBuffer(Graphics g)
@@ -3820,6 +1964,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 					elementSenses[a.getElementNum()] = a.range;
 					break;
 				case "Sense Powers":
+					Sense_Powers spAbility = (Sense_Powers) a;
 					// summing up the levels
 
 					// this is supposed to look fantastic.
@@ -3836,7 +1981,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 					for (int i = 0; i < elementIndexes.length; i++)
 					{
 						double angle = TAU / elementIndexes.length * i - 0.3 * TAU;
-						int elementLevel = 2 * sensePowersElementLevels[elementIndexes[i]];
+						int elementLevel = 2 * spAbility.details[elementIndexes[i]];
 						if (elementLevel <= 0)
 							continue;
 						Color color = Color.decode("#" + colorHexCodes[i]);
@@ -4070,7 +2215,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 				if (ability.cooldownLeft != 0)
 				{// note that when the cooldown is over it will "jump" from low transparency to full transparency
 					buffer.setColor(new Color(0, 0, 0, (int) (130 + 100 * ability.cooldownLeft / ability.cooldown)));
-					buffer.fillRect((int) (31 * UIzoomLevel + i * 80 * UIzoomLevel), frameHeight - 90 + 1, 60 - 1, 60 - 1);
+					buffer.fillRect((int) (31 * UIzoomLevel + i * 80 * UIzoomLevel), (int) (frameHeight - 89 * UIzoomLevel), (int) (59 * UIzoomLevel), (int) (59 * UIzoomLevel));
 				}
 				if (ability.cost > player.mana)
 				{
@@ -4080,7 +2225,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 						buffer.setColor(Color.yellow); // repairing walls
 					else
 						buffer.setColor(Color.red);
-					buffer.drawRect((int) (27 * UIzoomLevel + i * 80 * UIzoomLevel), (int) (frameHeight - 92 * UIzoomLevel), (int) (66 * UIzoomLevel), (int) (66 * UIzoomLevel));
+					buffer.drawRect((int) (27 * UIzoomLevel + i * 80 * UIzoomLevel), (int) (frameHeight - 93 * UIzoomLevel), (int) (66 * UIzoomLevel), (int) (66 * UIzoomLevel));
 				}
 
 				// ON/OFF
@@ -4939,7 +3084,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 					if (player.abilityAiming == -1) // trying to stop maintained power
 					{
 						stopUsingPower = true;
-						useAbility(player.abilities.get(player.abilityMaintaining), player, new Point(mx, my));
+						player.abilities.get(player.abilityMaintaining).use(env, player, new Point(mx, my));
 						player.abilityMaintaining = -1;
 					} else // trying to stop mid-maintain ability
 					{
@@ -5042,7 +3187,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 		System.out.println(whatever);
 	}
 
-	static void errorMessage(Object whatever)
+	public static void errorMessage(Object whatever)
 	{
 		// Used for error messages
 		System.out.println(whatever);
