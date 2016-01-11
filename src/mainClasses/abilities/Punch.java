@@ -22,6 +22,8 @@ public class Punch extends Ability
 	public Punch(int p)
 	{
 		super("Punch", p);
+		range = (int) (1.15 * 70); //TODO move this into the part in Person and make it depend on radius
+		//range = (int) (1.15 * radius);
 	}
 
 	public void use(Environment env, Person user, Point target)
@@ -37,7 +39,7 @@ public class Punch extends Ability
 		double angleDifference = tempAngleThing > Math.PI ? 2 * Math.PI - tempAngleThing : tempAngleThing;
 		if (user.z == 0)
 		{
-			if (!user.prone && !user.maintaining)
+			if (!user.prone && (!user.maintaining || user.abilities.get(user.abilityMaintaining) instanceof Sprint)) //special enable for sprint-punching
 				if (cost <= user.stamina)
 				{
 					user.notMoving = stopsMovement; // returns to be False in hotkey();
@@ -137,9 +139,10 @@ public class Punch extends Ability
 						int j = user.target.y / squareSize;
 						if (env.wallTypes[i][j] != -1)
 						{
-							double leftoverPushback = env.wallHealths[i][j] > damage + pushback ? pushback : Math.min(env.wallHealths[i][j], pushback);
+							int wallHealth = env.wallHealths[i][j];
+							double leftoverPushback = wallHealth > damage + pushback ? pushback : Math.min(wallHealth, pushback);
 							env.damageWall(i, j, damage + pushback, damageType);
-							env.hitPerson(user, damage, leftoverPushback, user.rotation - Math.PI, damageType);
+							env.hitPerson(user, Math.max(0, 7 - 0.5*user.STRENGTH), leftoverPushback, user.rotation - Math.PI, 0); //When punching walls, you damage yourself by 7 damage points.
 							user.punchedSomebody = true;
 							break collisionCheck;
 						}
@@ -159,7 +162,7 @@ public class Punch extends Ability
 									{
 										double leftoverPushback = ff.life > damage + pushback ? pushback : Math.min(env.wallHealths[i][j], pushback);
 										env.damageFF(ff, damage + pushback, user.target);
-										env.hitPerson(user, damage, leftoverPushback, user.rotation - Math.PI, 4); // Shock damage
+										env.hitPerson(user, ff.armor, leftoverPushback, user.rotation - Math.PI, 4); // Shock damage, equal to the armor of the force field.
 										user.punchedSomebody = true;
 										break collisionCheck;
 									}

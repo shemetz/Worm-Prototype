@@ -36,7 +36,7 @@ public class Beam extends Drawable
 		shadow = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
 		x = start.x;
 		y = start.y;
-		z = start.z + 0.5;
+		z = start.z;
 		rotation = Math.atan2(end.y - start.y, end.x - start.x);
 
 		timeLeft = 0.02; // 0.02 = no trail, 0.04 = one trail, 0.06 = two trails....

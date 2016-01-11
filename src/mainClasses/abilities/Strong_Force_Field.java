@@ -25,8 +25,10 @@ public class Strong_Force_Field extends Ability
 		if (!user.maintaining && cost <= user.mana && cooldownLeft == 0)
 		{
 			// TODO check collisions
-			env.FFs.add(new ForceField(user.x + range * Math.cos(angle), user.y + range * Math.sin(angle), user.z, 100 + 50 * points, 5 + points * 7,
-					angle + 0.5 * Math.PI, 80 * points, 1));
+			ForceField forcey = new ForceField(user.x + range * Math.cos(angle), user.y + range * Math.sin(angle), user.z, 100 + 50 * points, 5 + points * 7,
+					angle + 0.5 * Math.PI, 80 * points, 1);
+			forcey.armor = points;
+			env.FFs.add(forcey);
 			user.mana -= cost;
 			cooldownLeft = cooldown;
 		}

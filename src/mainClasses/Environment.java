@@ -284,8 +284,7 @@ public class Environment
 							if (aff.elementNum == 6 && EP.damageType(b.elementNum) == 4) // electricity and energy balls bounce off of energy
 							{
 								double damage = (b.getDamage() + b.getPushback()) * 0.5; // half damage, because the ball bounces
-								damageArcForceField(aff, damage,
-										new Point((int) (aff.target.x + aff.maxRadius * Math.cos(angleToBall)), (int) (aff.target.y + aff.maxRadius * Math.sin(angleToBall))),
+								damageArcForceField(aff, damage, new Point((int) (aff.target.x + aff.maxRadius * Math.cos(angleToBall)), (int) (aff.target.y + aff.maxRadius * Math.sin(angleToBall))),
 										EP.damageType(b.elementNum));
 								hitPerson(aff.target, 0, 0.5 * b.getPushback(), b.angle(), 0);
 								// TODO cool sparks
@@ -308,8 +307,7 @@ public class Environment
 								// TODO damage depends on ball speed maybe?a
 								// TODO water strong against fire, electricity unblockable by some and entirely blockable by others, , bouncing from metal, etc.
 								double damage = b.getDamage() + b.getPushback();
-								damageArcForceField(aff, damage,
-										new Point((int) (aff.target.x + aff.maxRadius * Math.cos(angleToBall)), (int) (aff.target.y + aff.maxRadius * Math.sin(angleToBall))),
+								damageArcForceField(aff, damage, new Point((int) (aff.target.x + aff.maxRadius * Math.cos(angleToBall)), (int) (aff.target.y + aff.maxRadius * Math.sin(angleToBall))),
 										EP.damageType(b.elementNum));
 								hitPerson(aff.target, 0, 0.5 * b.getPushback(), b.angle(), 0);
 
@@ -481,7 +479,6 @@ public class Environment
 		return true;
 	}
 
-
 	void movePerson(Person p, double deltaTime)
 	{
 		double velocityLeft = Math.sqrt(p.xVel * p.xVel + p.yVel * p.yVel) * deltaTime;
@@ -505,6 +502,17 @@ public class Environment
 			// Move p a fraction
 			p.x += moveQuantumX;
 			p.y += moveQuantumY;
+
+			// boundary check
+			if (p.x < 0 + 80 + p.radius)
+				p.x = 0 + 80 + p.radius;
+			if (p.y < 0 + 80 + p.radius)
+				p.y = 0 + 80 + p.radius;
+			if (p.x > this.widthPixels - 80 - p.radius)
+				p.x = this.widthPixels - 80 - p.radius;
+			if (p.y > this.heightPixels - 80 - p.radius)
+				p.y = this.heightPixels - 80 - p.radius;
+
 			// check collisions with walls in the environment, locked to a grid
 			if (p.z <= 1)
 				for (int i = (int) (p.x - 0.5 * p.radius); velocityLeft > 0 && i / squareSize <= (int) (p.x + 0.5 * p.radius) / squareSize; i += squareSize)
@@ -691,22 +699,42 @@ public class Environment
 
 	boolean collideWithWall(Person p, int x, int y) // x and y in grid
 	{
+		int wallElement = wallTypes[x][y];
 		// returns whether or not this collision changes the person's speed
 		// TODO add stuff concerning bounce powers, or breaking through walls, or damaging walls, or damaging characters flung into walls
-		final double bounceEfficiency = 0.4;
+		final double bounceEfficiency = 0.4; // should depend on element
 		// assumes objects have no angle
 		Rectangle intersectRect = new Rectangle(x * squareSize, y * squareSize, squareSize, squareSize)
 				.intersection(new Rectangle((int) (p.x - 0.5 * p.radius), (int) (p.y - 0.5 * p.radius), (int) (p.radius), (int) (p.radius)));
-		if (p.x > intersectRect.x + 0.5 * intersectRect.width)
-			p.xVel = Math.abs(p.xVel) * bounceEfficiency;
-		if (p.x < intersectRect.x + 0.5 * intersectRect.width)
-			p.xVel = -Math.abs(p.xVel) * bounceEfficiency;
-		if (p.y > intersectRect.y + 0.5 * intersectRect.height)
-			p.yVel = Math.abs(p.yVel) * bounceEfficiency;
-		if (p.y < intersectRect.y + 0.5 * intersectRect.height)
-			p.yVel = -Math.abs(p.yVel) * bounceEfficiency;
+		// Damage to walls is mass of person * velocity * 0.00005; (kg * cm/s)
+		// Damage to people is velocity * wall health * 0.00001;
+		hitPerson(p, wallHealths[x][y] * p.velocity() * 0.00004, 0, p.angle() + TAU / 2, 0); // blunt damage
+		damageWall(x, y, p.mass * p.velocity() * 0.0005, 0); // blunt damage
+		if (wallHealths[x][y] > 0) // if wall survives the collision, it deflects the person
+		{
+			if (p.x > intersectRect.x + 0.5 * intersectRect.width)
+				p.xVel = Math.abs(p.xVel) * bounceEfficiency;
+			if (p.x < intersectRect.x + 0.5 * intersectRect.width)
+				p.xVel = -Math.abs(p.xVel) * bounceEfficiency;
+			if (p.y > intersectRect.y + 0.5 * intersectRect.height)
+				p.yVel = Math.abs(p.yVel) * bounceEfficiency;
+			if (p.y < intersectRect.y + 0.5 * intersectRect.height)
+				p.yVel = -Math.abs(p.yVel) * bounceEfficiency;
+			return true;
+		} else
+		{
+			// extra debris
+			for (int i = 0; i < 5; i++)
+				debris.add(new Debris(x * squareSize + 0.5 * squareSize, y * squareSize + 0.5 * squareSize, 0, Math.PI * 2 / 5 * i, wallElement, 200));
+			// slow down the person
+			double energyLost = 10000;
+			double newVelocity = p.velocity() - energyLost / Math.sqrt(p.mass);
+			double ratio = newVelocity / p.velocity();
+			p.xVel *= ratio;
+			p.yVel *= ratio;
+			return false;
+		}
 
-		return true;
 	}
 
 	void collideWithWall(RndPhysObj b, int x, int y, int px, int py) // x and y in grid
@@ -726,7 +754,7 @@ public class Environment
 		b.xVel *= bounceEfficiency;
 		b.yVel *= bounceEfficiency;
 	}
-	
+
 	public void moveVine(Vine v, double deltaTime)
 	{
 		double originalAngle = v.rotation;
@@ -1635,7 +1663,7 @@ public class Environment
 			// I'm not sure what I did here with the angles but it looks OK
 			if (Math.random() < 0.5)
 				ballDebris(collidedBall, "beam hit", collidedBall.angle());
-			if (collidedBall.mass < 0) //additional debris for destruction
+			if (collidedBall.mass < 0) // additional debris for destruction
 				ballDebris(collidedBall, "shatter", collidedBall.angle());
 			break;
 		default:
@@ -1664,13 +1692,13 @@ public class Environment
 		double newRange = b.range - beamLength;
 		if (newRange < 0) // because bugs
 			return null;
-		Beam b2 = new Beam(b.creator, new Point3D((int) (b.end.x + startDistance * Math.cos(newBeamAngle)), (int) (b.end.y + startDistance * Math.sin(newBeamAngle)), b.end.z),
-				new Point3D((int) (b.end.x + newRange * Math.cos(newBeamAngle)), (int) (b.end.y + newRange * Math.sin(newBeamAngle)), b.end.z), b.elementNum, b.points, newRange);
+		Beam b2 = new Beam(b.creator, new Point3D((int) (b.end.x + startDistance * Math.cos(newBeamAngle)), (int) (b.end.y + startDistance * Math.sin(newBeamAngle)), b.end.z - 0.01),
+				new Point3D((int) (b.end.x + newRange * Math.cos(newBeamAngle)), (int) (b.end.y + newRange * Math.sin(newBeamAngle)), b.end.z - 0.01), b.elementNum, b.points, newRange);
 		b2.frameNum = b.frameNum;
 		b2.isChild = true;
 		return b2;
 	}
-	
+
 	public void ballDebris(Ball b, String type, double angle)
 	{
 		// "angle" is not always necessary
@@ -1716,12 +1744,14 @@ public class Environment
 
 	public void damageWall(int i, int j, double damage, int damageType)
 	{
+		if (wallTypes[i][j] == -2)
+			return;
 		// fire can't hurt lava, acid can't hurt acid, electricity can't hurt energy, etc.
 		if (damageType > 1 && EP.damageType(wallTypes[i][j]) == damageType)
 			return;
 		// TODO elemental bonuses against some walls.
 		// note: because there are so many walls, destroying the wall occurs here and not in a frame check like other objects.
-		int wallArmor = 10;
+		final int wallArmor = 10;
 		if (damage - wallArmor < 1)
 		{
 			return;
@@ -1730,9 +1760,33 @@ public class Environment
 		if (showDamageNumbers)
 			uitexts.add(new UIText(i * squareSize + squareSize / 2 - 10, j * squareSize + squareSize / 2 - 10, "" + (int) (damage - wallArmor), 5));
 		if (wallHealths[i][j] <= 0)
-		{
 			destroyWall(i, j);
+		if (damage > 30 && damageType == 0) // hits additional walls if high and blunt damage
+		{
+			// damages other walls by damage * 1 / (distance-1)^2
+			int extra = (int) (((damage - 1) / 11)); // extra number of grid squares from this wall that can possibly be damaged
+			for (int x = Math.max(i - extra, 0); x < i + extra && x < width; x++)
+				for (int y = Math.max(j - extra, 0); y < j + extra && y < height; y++)
+				{
+					if (wallHealths[x][y] > 0 && (x != i || y != j))
+						nonRecursiveDamageWall(x, y, damage / Math.sqrt(Methods.DistancePow2(i, j, x, y)));
+				}
 		}
+		connectWall(i, j); // update cracks
+	}
+
+	public void nonRecursiveDamageWall(int i, int j, double damage)
+	{
+		if (wallTypes[i][j] == -2)
+			return;
+		final int wallArmor = 10;
+		if (damage - wallArmor < 1)
+			return;
+		wallHealths[i][j] -= (int) (damage - wallArmor);
+		if (showDamageNumbers)
+			uitexts.add(new UIText(i * squareSize + squareSize / 2 - 10, j * squareSize + squareSize / 2 - 10, "" + (int) (damage - wallArmor), 5));
+		if (wallHealths[i][j] <= 0)
+			destroyWall(i, j);
 		connectWall(i, j); // update cracks
 	}
 
@@ -2165,8 +2219,8 @@ public class Environment
 		{
 			public int compare(Drawable d1, Drawable d2)
 			{
-				Integer i1 = new Integer((int) d1.z);
-				Integer i2 = new Integer((int) d2.z);
+				Double i1 = new Double( d1.z);
+				Double i2 = new Double( d2.z);
 				return i1.compareTo(i2);
 			}
 		};

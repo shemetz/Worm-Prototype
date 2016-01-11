@@ -32,6 +32,9 @@ import mainClasses.abilities.Sense_Structure;
 import mainClasses.abilities.Shield_E;
 import mainClasses.abilities.Spray_E;
 import mainClasses.abilities.Sprint;
+import mainClasses.abilities.Strength_I;
+import mainClasses.abilities.Strength_II;
+import mainClasses.abilities.Strength_III;
 import mainClasses.abilities.Strike_E;
 import mainClasses.abilities.Strong_Force_Field;
 import mainClasses.abilities.Toughness_III;
@@ -142,6 +145,9 @@ public class Ability
 		case "Leg Muscles":
 		case "Elemental Combat I":
 		case "Elemental Combat II":
+		case "Strength I":
+		case "Strength II":
+		case "Strength III":
 			cost = -1;
 			costType = "none";
 			cooldown = -1;
@@ -782,6 +788,12 @@ public class Ability
 		{
 		case "Sprint":
 			return new Sprint(pnts);
+		case "Strength I":
+			return new Strength_I(pnts);
+		case "Strength II":
+			return new Strength_II(pnts);
+		case "Strength III":
+			return new Strength_III(pnts);
 		case "Punch":
 			return new Punch(pnts);
 		case "Heal I":

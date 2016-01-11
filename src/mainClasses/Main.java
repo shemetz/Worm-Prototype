@@ -45,6 +45,7 @@ import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.Timer;
 
+import mainClasses.abilities.Punch;
 import mainClasses.abilities.Sense_Powers;
 import mainClasses.abilities.Sprint;
 import mainResourcesPackage.SoundEffect;
@@ -338,8 +339,6 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 			Ball b = env.balls.get(i);
 			// gravity
 			b.zVel -= 0.001 * gravity * deltaTime;
-			if (b.z <= 1)
-				print(b.z);
 			b.rotation += b.angularVelocity * deltaTime;
 			if (b.xVel == 0 || b.yVel == 0 || b.mass <= 0 || !env.moveBall(b, deltaTime)) // ball was destroyed, or ball stopped. Also, moves the ball
 			{
@@ -533,7 +532,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 				Ability punch = null;
 				int index = -1;
 				for (int i = 0; i < p.abilities.size(); i++)
-					if (p.abilities.get(i).name.equals("Punch"))
+					if (p.abilities.get(i) instanceof Punch)
 					{
 						index = i;
 						punch = p.abilities.get(index);
@@ -957,14 +956,11 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		player = new Player(96 * 20, 96 * 20);
 		player.abilities.add(Ability.ability("Ball <Earth>", 5));
 		player.abilities.add(Ability.ability("Ball <Fire>", 5));
-		player.abilities.add(Ability.ability("Heal I", 5));
-		player.abilities.add(Ability.ability("Force Shield", 5));
 		player.abilities.add(Ability.ability("Flight I", 5));
 		player.abilities.add(Ability.ability("Blink", 5));
 		player.abilities.add(Ability.ability("Beam <Energy>", 5));
 		player.abilities.add(Ability.ability("Ghost Mode I", 5));
 		player.abilities.add(Ability.ability("Sense Life", 5));
-		player.abilities.add(Ability.ability("Sense Mana and Stamina", 5));
 		player.abilities.add(Ability.ability("Elemental Combat II <Earth>", 5));
 		player.updateAbilities(); // for the elemental combat
 		player.abilities.add(Ability.ability("Beam <Plant>", 5));
@@ -980,7 +976,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		shmulik.abilities.add(Ability.ability("Force Shield", 3));
 		shmulik.abilities.add(Ability.ability("Ball <Earth>", 6));
 		shmulik.abilities.add(Ability.ability("Heal I", 3));
-		// env.people.add(shmulik);
+		env.people.add(shmulik);
 
 		Person tzippi = new NPC(96 * 15, 96 * 25, "passive");
 		// tzippi.trigger();
@@ -1059,8 +1055,14 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 			keyPressFixingMethod(n, press);
 		} else
 		{
-			if (press && (tabHoverAbility == -1 || player.abilities.get(tabHoverAbility).cost != -1)) // the order of the || is important
+			// Unbinding hotkeys
+			if (press && (tabHoverAbility == -1 || !player.abilities.get(tabHoverAbility).hasTag("passive"))) // the order of the || is important
+			{
+				if (tabHoverAbility == -1 && hotkeySelected == n - 1)
+					hotkeySelected = -1;
 				player.hotkeys[n - 1] = tabHoverAbility;
+				updateNiceHotkeys();
+			}
 			player.abilityAiming = -1;
 
 			// if keys are released during tab it is a problem? TODO test
@@ -1073,8 +1075,12 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 	{
 		// method is called each frame
 		// this entire method is to prevent the bug that happens when the keyboard stops giving "press" signals but haven't yet sent the "release" signal
-		if (n != -1)
+		if (n != -1) // n should be 1-10
 			presses[n - 1] = press;
+		else
+			return;
+		if (player.hotkeys[n - 1] == -1)
+			return;
 		// auto-press all non-released keys
 		for (int i = 0; i < presses.length; i++)
 			if (presses[i])
@@ -1195,7 +1201,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		env.drawFloor(buffer, this, bounds);
 		drawBottomEffects(buffer);
 		// environment not including effects and clouds
-		env.draw(buffer, this, camera.z, bounds, cameraRotation);
+		env.draw(buffer, this, (int) camera.z, bounds, cameraRotation);
 		drawTopEffects(buffer);
 
 		if (hotkeySelected != -1 && player.hotkeys[hotkeySelected] != -1)
@@ -1495,9 +1501,9 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 			int y = nch[i].y;
 			buffer.setStroke(new BasicStroke((float) (3 * UIzoomLevel)));
 			buffer.setColor(Color.black);
-			buffer.drawString(hotkeyStrings[i], x + (int) (12 * UIzoomLevel), y + (int) (76 * UIzoomLevel));
 			if (player.hotkeys[i] != -1)
 			{
+				buffer.drawString(hotkeyStrings[i], x + (int) (12 * UIzoomLevel), y + (int) (76 * UIzoomLevel));
 				Ability ability = player.abilities.get(player.hotkeys[i]);
 				scaleBuffer(buffer, x, y, UIzoomLevel);
 				buffer.drawImage(Resources.icons.get(ability.name), x, y, this);
@@ -1558,9 +1564,9 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 			} else
 			// no power in that space
 			{
-				buffer.setStroke(dashedStroke3);
-				buffer.setColor(new Color(0, 0, 0, 90));
-				buffer.drawRect(x, y, (int) (60 * UIzoomLevel), (int) (60 * UIzoomLevel));
+				// buffer.setStroke(dashedStroke3);
+				// buffer.setColor(new Color(0, 0, 0, 90));
+				// buffer.drawRect(x, y, (int) (60 * UIzoomLevel), (int) (60 * UIzoomLevel));
 			}
 			// remember - black rectangle after icon
 		}
@@ -1694,14 +1700,16 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 			else
 				player.flyDirection = 0;
 
-			if (!(player.abilityTryingToRepetitivelyUse != -1 && player.abilities.get(player.abilityTryingToRepetitivelyUse).justName().equals("Punch")))
+			if (player.abilityTryingToRepetitivelyUse == -1 || !player.abilities.get(player.abilityTryingToRepetitivelyUse).justName().equals("Punch")) // if not punching
 			{
 				if (!player.notAnimating)
 					player.rotate(player.directionOfAttemptedMovement, globalDeltaTime);
 			} else
 			// fly-punch users can't really stop...or aim themselves...
-			if (player.strengthOfAttemptedMovement != 0)
+			if (player.flySpeed != -1 && player.strengthOfAttemptedMovement != 0)
+			{
 				player.rotate(player.directionOfAttemptedMovement, globalDeltaTime * 0.3);
+			}
 		}
 	}
 
@@ -2322,11 +2330,23 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		} else
 		{
 			// switch currently range-selected ability
-			hotkeySelected += direction ? 1 : -1;
-			if (hotkeySelected >= player.numOfHotkeys)
+			boolean thereAreHotkeys = false;
+			for (int i = 0; i < player.hotkeys.length; i++)
+				if (player.hotkeys[i] != -1)
+					thereAreHotkeys = true;
+			if (!thereAreHotkeys)
+				return;
+			if (hotkeySelected == -1 && !direction)
+				hotkeySelected = player.hotkeys.length;
+			if (hotkeySelected == player.hotkeys.length - 1 && direction)
+				hotkeySelected = -2;
+			do
+				hotkeySelected += direction ? 1 : -1;
+			while (hotkeySelected > -1 && hotkeySelected < player.hotkeys.length && player.hotkeys[hotkeySelected] == -1);
+			if (hotkeySelected >= player.hotkeys.length)
 				hotkeySelected = -1;
 			if (hotkeySelected < -1)
-				hotkeySelected = player.numOfHotkeys - 1;
+				hotkeySelected = player.hotkeys.length - 1;
 		}
 	}
 
@@ -2396,7 +2416,6 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		}
 		if (me.getButton() == MouseEvent.BUTTON2) // Mid Click
 		{
-			print("new Point(" + screenmx + ", " + screenmy + "), ");
 			playerPressHotkey(1, true);
 		}
 		if (me.getButton() == MouseEvent.BUTTON3) // Right Click
@@ -2520,9 +2539,24 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		{
 
 		case 0:
-			for (int i = 0; i < nch.length; i++)
-				nch[i] = new Point((int) (30 * UIzoomLevel + i * 80 * UIzoomLevel), (int) (frameHeight - 90 * UIzoomLevel));
+			if (player != null)
+			{
+				int numOfActiveHotkeys = 0;
+				for (int i = 0; i < player.hotkeys.length; i++)
+					if (player.hotkeys[i] != -1)
+						numOfActiveHotkeys++;
+				int k = 0;
+				for (int i = 0; i < nch.length; i++)
+					if (player.hotkeys[i] != -1)
+					{
+						nch[i] = new Point();
+						nch[i].x = (int) (frameWidth / 2 - numOfActiveHotkeys * 40 * UIzoomLevel + k * 80 * UIzoomLevel);
+						nch[i].y = (int) (frameHeight - 100 * UIzoomLevel);
+						k++;
+					}
+			}
 			break;
+
 		case 1:
 			for (int i = 0; i < nch.length; i++)
 				nch[i] = new Point((int) (frameWidth / 2 - 40 * UIzoomLevel), (int) (frameHeight - 180 * UIzoomLevel));

@@ -3,7 +3,6 @@ package mainClasses;
 public class Player extends Person
 {
 	public int[]	hotkeys;								// Mid-Click, Shift, Q, E, R, F, V, C, X, Z
-	public int		numOfHotkeys					= -1;
 	public String targetType = "";
 	
 	public boolean leftMousePressed;
@@ -41,12 +40,5 @@ public class Player extends Person
 			{
 				k--;
 			}
-		numOfHotkeys = k;
-	}
-
-	public int checkHotkey(int num)
-	{
-		// returns num of ability in player's abilities list, or 0 if there's none
-		return hotkeys[num];
 	}
 }
