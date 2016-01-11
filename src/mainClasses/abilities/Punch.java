@@ -175,7 +175,7 @@ public class Punch extends Ability
 									b.yVel = 0; //
 									env.hitPerson(user, b.getDamage(), pushback, user.rotation - Math.PI, EP.damageType(b.elementNum));
 									// epicness
-									env.ballDebris(b, "punch");
+									env.ballDebris(b, "punch", b.angle());
 									user.punchedSomebody = true;
 									break collisionCheck;
 								}

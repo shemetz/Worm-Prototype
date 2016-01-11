@@ -31,6 +31,7 @@ import mainClasses.abilities.Sense_Powers;
 import mainClasses.abilities.Sense_Structure;
 import mainClasses.abilities.Shield_E;
 import mainClasses.abilities.Spray_E;
+import mainClasses.abilities.Sprint;
 import mainClasses.abilities.Strike_E;
 import mainClasses.abilities.Strong_Force_Field;
 import mainClasses.abilities.Toughness_III;
@@ -135,8 +136,6 @@ public class Ability
 		// Most stuff:
 		switch (justName())
 		{
-		// passive abilities have a cost of -1! That's how you know!
-		// cooldown -1 = passive, 1 = on/off, anything else is probably activated or maintained. It's IMPORTANT that on/off abilities have cooldown 1.
 		case "Toughness III":
 		case "Wound Regeneration II":
 		case "Wound Regeneration I":
@@ -276,6 +275,13 @@ public class Ability
 			range = 1; // is actually 1.15 * puncher's radius.
 			rangeType = "Look";
 			break;
+		case "Sprint":
+			cost = 0;
+			costType = "stamina";
+			costPerSecond = 3;
+			cooldown = 1;
+			rangeType = "";
+			break;
 
 		// Senses
 		case "Sense Life":
@@ -317,6 +323,7 @@ public class Ability
 			break;
 		// maintainable and free-moving
 		case "Beam":
+		case "Sprint":
 		case "Heal I":
 		case "Heal II":
 		case "Absorb Armor":
@@ -773,6 +780,8 @@ public class Ability
 		}
 		switch (trimmedAbilityName)
 		{
+		case "Sprint":
+			return new Sprint(pnts);
 		case "Punch":
 			return new Punch(pnts);
 		case "Heal I":

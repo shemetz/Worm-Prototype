@@ -35,6 +35,7 @@ public class Ball_E extends Ability
 		user.switchAnimation(2);
 		user.notAnimating = true;
 	}
+	
 	public void maintain(Environment env, Person user, Point target, double deltaTime)
 	{
 		if (cooldownLeft == 0)
@@ -73,7 +74,7 @@ public class Ball_E extends Ability
 				if (ballCreationSuccess)
 					env.balls.add(b);
 				else
-					env.ballDebris(b, "shatter");
+					env.ballDebris(b, "shatter", b.angle());
 				user.mana -= cost;
 				user.rotate(angle, deltaTime);
 			}

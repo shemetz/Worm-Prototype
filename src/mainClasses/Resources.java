@@ -1,4 +1,5 @@
 package mainClasses;
+
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -25,7 +26,7 @@ public class Resources
 	final static int								arcFFImageWidth	= 288;
 	static BufferedImage[]							balls;																// element
 	static BufferedImage[][]						beams;																// element, type (0,1,2,3 = start, 4,5,6,7 = middle, 8,9,10,11 = flat end, 12,13,14,15 regular end)
-	static BufferedImage[][]						debris;																// element, type
+	static BufferedImage[][]						debris;																// element, type. 12 = smoke
 	static BufferedImage[][]						debrisShadows;														// element, type
 	final static int								debrisWidth		= 40;
 	static List<BufferedImage>						clouds;
@@ -50,8 +51,8 @@ public class Resources
 		icons = new HashMap<String, BufferedImage>();
 		arcForceFields = new BufferedImage[elementalNum][4]; // 0-11 = elemental (6 = energy)
 		balls = new BufferedImage[elementalNum];
-		debris = new BufferedImage[elementalNum][6];
-		debrisShadows = new BufferedImage[elementalNum][6];
+		debris = new BufferedImage[elementalNum + 1][6];
+		debrisShadows = new BufferedImage[elementalNum + 1][6];
 		cracks = new BufferedImage[3][12]; // 11 is saved for the original wall, not corners
 		clouds = new ArrayList<BufferedImage>();
 		cloudShadows = new ArrayList<BufferedImage>();
@@ -173,6 +174,14 @@ public class Resources
 				// rest are empty :/
 			}
 		}
+
+		for (int j = 0; j < 3; j++)
+			debris[12][j] = ResourceLoader.getBufferedImage("elementalAbilities/Smoke_debris_" + j + ".png");
+		for (int j = 0; j < 3; j++)
+			debris[12][j + 3] = ResourceLoader.getBufferedImage("elementalAbilities/Smoke_smalldebris_" + j + ".png");
+		for (int j = 0; j < debris[0].length; j++)
+			debrisShadows[12][j] = Drawable.createShadow(debris[12][j]);
+
 		for (int i = 0; i < 3; i++)
 		{
 			for (int j = 0; j < 11; j++)
@@ -376,7 +385,7 @@ public class Resources
 			}
 
 		// Effect icons:
-		List<String> effectNames = Arrays.asList("Healed", "Burning", "Health Bonus"); //all effect names should be written here! TODO make sure it happens
+		List<String> effectNames = Arrays.asList("Healed", "Burning", "Health Bonus"); // all effect names should be written here! TODO make sure it happens
 		for (String s : effectNames)
 			icons.put(s, ResourceLoader.getBufferedImage("icons/effects/" + s + ".png"));
 

@@ -10,6 +10,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
+import mainClasses.abilities.Sprint;
 import mainResourcesPackage.SoundEffect;
 
 public class Person extends RndPhysObj
@@ -229,8 +230,9 @@ public class Person extends RndPhysObj
 		stamina = maxStamina;
 		charge = 0;
 
-		// Temp?
+		// Natural abilities
 		abilities.add(Ability.ability("Punch", 0));
+		abilities.add(Ability.ability("Sprint", 0));
 	}
 
 	public void updateSubStats()
@@ -355,8 +357,18 @@ public class Person extends RndPhysObj
 		switch (animState)
 		{
 		/// <number of frames per second> <animation name>
-		case 0: // ~7 running
-		case 1: // ~7 standing
+		case 1: // ~7 running
+			for (Ability a: abilities)
+				if (a instanceof Sprint && a.on)
+				{
+					if (frameNum % 4 == 0)
+						animFrame++;
+					break;
+				}
+			if (frameNum % 7 == 0)
+				animFrame++;
+			break;
+		case 0: // ~7 standing
 		case 2: // ~7 holding shield
 		case 3: // ~7 slipping
 			if (frameNum % 7 == 0)
@@ -653,7 +665,7 @@ public class Person extends RndPhysObj
 			{
 				if (a.cooldownLeft > 0)
 					a.cooldownLeft -= 1 * deltaTime;
-				else if (a.cooldownLeft < 0)
+				if (a.cooldownLeft < 0)
 					a.cooldownLeft = 0;
 			} else if (a.cooldownLeft == 0) // check if this passive ability is unactivated
 			{

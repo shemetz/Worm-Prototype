@@ -2,6 +2,7 @@ package mainResourcesPackage;
 import java.awt.image.BufferedImage;
 
 import javax.imageio.ImageIO;
+import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 
@@ -31,7 +32,10 @@ public class ResourceLoader
 		try
 		{
 			Clip c = AudioSystem.getClip();
-			c.open(AudioSystem.getAudioInputStream(rl.getClass().getResource("sounds/" + fileName)));
+			AudioInputStream input = AudioSystem.getAudioInputStream(rl.getClass().getResource("sounds/" + fileName));
+			if (input == null)
+				System.out.println("No audio clip found - "+fileName);
+			c.open(input);
 			return c;
 			// Make sure to update the fileName parameter to make it work with
 			// your directory setup

@@ -5,7 +5,7 @@ public class Debris extends Drawable
 {
 	double velocity;
 	double angle;
-	int elementNum;
+	int elementNum; //13 = smoke
 	int type;
 
 	public Debris(double x1, double y1, double z1, double a1, int e1, double v1)

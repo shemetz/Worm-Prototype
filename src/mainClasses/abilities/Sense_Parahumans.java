@@ -16,6 +16,6 @@ public class Sense_Parahumans extends Ability
 	
 	public void use(Environment env, Person user, Point target)
 	{
-		
+		on = !on;
 	}
 }

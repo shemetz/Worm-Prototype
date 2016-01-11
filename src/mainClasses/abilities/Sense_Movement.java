@@ -17,6 +17,6 @@ public class Sense_Movement extends Ability
 	
 	public void use(Environment env, Person user, Point target)
 	{
-		
+		on = !on;
 	}
 }

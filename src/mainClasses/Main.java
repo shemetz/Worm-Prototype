@@ -12,7 +12,6 @@ import java.awt.Point;
 import java.awt.PointerInfo;
 import java.awt.Rectangle;
 import java.awt.Shape;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
@@ -43,12 +42,14 @@ import java.util.List;
 import java.util.Random;
 
 import javax.imageio.ImageIO;
+import javax.swing.JFrame;
 import javax.swing.Timer;
 
 import mainClasses.abilities.Sense_Powers;
+import mainClasses.abilities.Sprint;
 import mainResourcesPackage.SoundEffect;
 
-public class Main extends Frame implements KeyListener, MouseListener, MouseMotionListener, MouseWheelListener, ComponentListener, WindowFocusListener
+public class Main extends JFrame implements KeyListener, MouseListener, MouseMotionListener, MouseWheelListener, ComponentListener, WindowFocusListener
 {
 	// Current version of the program
 	private static final long	serialVersionUID		= 1;
@@ -82,6 +83,8 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 	Font						tooltipFont				= new Font("Serif", Font.PLAIN, 12);
 	DateFormat					dateFormat				= new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
 	static Random				random					= new Random();
+	Point[]						nch;
+	int							hotkeysLook				= 0;
 
 	// CAMERA AND MOUSE STUFF
 	PointerInfo					pin;																																	// Don't use this
@@ -127,131 +130,6 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 	int							tabHoverAbility			= -1;																											// ability player is hovering above which, with the mouse
 
 	// METHODS
-
-	void maintainAbility(Ability ability, Person user, Point target, double deltaTime)
-	{
-		double angle = Math.atan2(target.y - user.y, target.x - user.x);
-		switch (ability.justName())
-		{
-		case "Beam":
-			break;
-		case "Flight I":
-		case "Flight II":
-			user.stamina -= deltaTime * ability.costPerSecond;
-		case "Telekinetic Flight":
-			if (ability.cooldownLeft > 0)
-				ability.cooldownLeft -= deltaTime;
-			break;
-		case "Ball":
-			if (ability.cooldownLeft == 0)
-				if (user.mana >= ability.cost)
-				{
-					angle = angle + user.missAngle * (2 * random.nextDouble() - 1);
-					ability.cooldownLeft = ability.cooldown;
-					Ball b = new Ball(ability.getElementNum(), ability.points, angle);
-					b.x = user.x + ability.range * Math.cos(angle);
-					b.y = user.y + ability.range * Math.sin(angle);
-					b.z = user.z + 0.9;
-					b.xVel += user.xVel;
-					b.yVel += user.yVel;
-
-					// TODO move this to a new method in Environment?
-					boolean ballCreationSuccess = true;
-
-					Point ballCenter = new Point((int) b.x, (int) b.y);
-					// pow2 to avoid using Math.sqrt(), which is supposedly computationally expensive.
-					double ballRadiusPow2 = Math.pow(b.radius, 2);
-					// test force field collision
-					for (ForceField ff : env.FFs)
-						if (ff.x - 0.5 * ff.length <= b.x + b.radius && ff.x + 0.5 * ff.length >= b.x - b.radius && ff.y - 0.5 * ff.length <= b.y + b.radius
-								&& ff.y + 0.5 * ff.length >= b.y - b.radius)
-							if ((0 <= Methods.realDotProduct(ff.p[0], ballCenter, ff.p[1]) && Methods.realDotProduct(ff.p[0], ballCenter, ff.p[1]) <= ff.width * ff.width
-									&& 0 <= Methods.realDotProduct(ff.p[0], ballCenter, ff.p[3]) && Methods.realDotProduct(ff.p[0], ballCenter, ff.p[3]) <= ff.length * ff.length)
-									|| Methods.LineToPointDistancePow2(ff.p[0], ff.p[1], ballCenter) < ballRadiusPow2 || Methods.LineToPointDistancePow2(ff.p[2], ff.p[3], ballCenter) < ballRadiusPow2
-									|| Methods.LineToPointDistancePow2(ff.p[1], ff.p[2], ballCenter) < ballRadiusPow2 || Methods.LineToPointDistancePow2(ff.p[3], ff.p[0], ballCenter) < ballRadiusPow2)
-							{
-								ballCreationSuccess = false;
-								// damage FF
-								double damage = (b.getDamage() + b.getPushback()) * 0.5; // half damage, because the ball "bounces"
-								env.damageFF(ff, damage, ballCenter);
-							}
-					if (ballCreationSuccess)
-						env.balls.add(b);
-					else
-						env.ballDebris(b, "shatter");
-					user.mana -= ability.cost;
-					user.rotate(angle, deltaTime);
-				}
-			break;
-		case "Pool":
-			if (ability.cooldownLeft <= 0 || env.poolHealths[(int) ability.targetEffect1][(int) ability.targetEffect2] <= 0)
-				ability.use(env, user, target);
-			else
-			{
-				// effects
-				env.otherDebris((ability.targetEffect1 + 0.5) * squareSize, (ability.targetEffect2 + 0.5) * squareSize, ability.getElementNum(), "pool heal", frameNum);
-				env.poolHealths[(int) ability.targetEffect1][(int) ability.targetEffect2] += ability.points;
-				if (env.poolHealths[(int) ability.targetEffect1][(int) ability.targetEffect2] >= 100)
-					env.poolHealths[(int) ability.targetEffect1][(int) ability.targetEffect2] = 100;
-				// Might be resource-costly:
-				env.updatePools();
-				//
-				user.mana -= ability.costPerSecond * deltaTime;
-			}
-			break;
-		case "Wall":
-			if (ability.cooldownLeft <= 0 || env.wallHealths[(int) ability.targetEffect1][(int) ability.targetEffect2] <= 0)
-				ability.use(env, user, target);
-			else
-			{
-				// effects
-				env.otherDebris((ability.targetEffect1 + 0.5) * squareSize, (ability.targetEffect2 + 0.5) * squareSize, ability.getElementNum(), "wall heal", frameNum);
-				env.wallHealths[(int) ability.targetEffect1][(int) ability.targetEffect2] = (int) Math.max(Math.max((1 - ability.cooldownLeft / ability.cooldown) * 100, 1),
-						env.wallHealths[(int) ability.targetEffect1][(int) ability.targetEffect2]); // make sure you aren't decreasing current health
-				user.mana -= ability.costPerSecond * deltaTime;
-			}
-			break;
-		case "Ghost Mode I":
-			if (ability.timeLeft <= 0)
-			{
-				if (!user.insideWall)
-				{
-					user.panic = false;
-					ability.use(env, user, target);
-				} else
-				{
-					user.mana -= 1.5 * deltaTime; // punish
-					env.hitPerson(user, 15 * deltaTime, 0, 0, 9, deltaTime); // punish
-					user.stamina -= 1.5 * deltaTime; // punish
-					ability.timeLeft = 0;
-					user.panic = true;
-				}
-
-			} else
-				ability.timeLeft -= deltaTime;
-			if (ability.cooldownLeft > 0)
-				ability.cooldownLeft -= deltaTime;
-			break;
-		case "Shield":
-			if (user.mana < ability.costPerSecond)
-				ability.use(env, user, target);
-			else
-			{
-				user.mana -= ability.costPerSecond * deltaTime;
-				for (ArcForceField a : env.arcFFs)
-					if (a.target.equals(user))
-					{
-						a.rotation = user.rotation;
-						if (a.extraLife > 0)
-							user.mana -= ability.cost * deltaTime;
-					}
-			}
-			break;
-		default:
-			errorMessage("couldn't find maintain-ability code for " + ability.justName());
-			break;
-		}
-	}
 
 	void frame()
 	{
@@ -350,7 +228,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 		} // BUG - Reflecting a beam will cause increased pushback due to something related to the order of stuff in a frame. Maybe friction?
 			// targeting
 		updateTargeting(deltaTime);
-		//PEOPLE
+		// PEOPLE
 		for (Person p : env.people)
 		{
 			if (p.getClass().equals(NPC.class))
@@ -373,7 +251,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 			// movement
 			double floorFriction = applyGravityAndFrictionAndReturnFriction(p, deltaTime);
 			checkMovementAttempt(p, floorFriction, deltaTime);
-			movePerson(p, deltaTime);
+			env.movePerson(p, deltaTime);
 			// Animation
 			p.nextFrame(frameNum);
 			for (int i = 0; i < p.uitexts.size(); i++)
@@ -460,9 +338,10 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 			Ball b = env.balls.get(i);
 			// gravity
 			b.zVel -= 0.001 * gravity * deltaTime;
-
+			if (b.z <= 1)
+				print(b.z);
 			b.rotation += b.angularVelocity * deltaTime;
-			if (b.xVel == 0 || b.yVel == 0 || b.mass <= 0 || !moveBall(b, deltaTime)) // ball was destroyed, or ball stopped
+			if (b.xVel == 0 || b.yVel == 0 || b.mass <= 0 || !env.moveBall(b, deltaTime)) // ball was destroyed, or ball stopped. Also, moves the ball
 			{
 				env.balls.remove(i);
 				i--;
@@ -709,7 +588,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 						if (a.justName().equals("Ball"))
 						{
 							// aim the ball the right direction, taking into account the velocity addition caused by the person moving
-							double v = Ball.giveVelocity(a.getElementNum(), a.points);
+							double v = Ball.giveVelocity(a.points);
 							double xv = v * Math.cos(angleToTarget);
 							double yv = v * Math.sin(angleToTarget);
 							xv -= p.xVel;
@@ -1057,6 +936,9 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 		Resources.initialize();
 		Person.resetIDs();
 
+		nch = new Point[10];
+		updateNiceHotkeys();
+
 		// ~~~TEMPORARY TESTING~~~
 
 		env = new Environment(50, 50);
@@ -1074,6 +956,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 
 		player = new Player(96 * 20, 96 * 20);
 		player.abilities.add(Ability.ability("Ball <Earth>", 5));
+		player.abilities.add(Ability.ability("Ball <Fire>", 5));
 		player.abilities.add(Ability.ability("Heal I", 5));
 		player.abilities.add(Ability.ability("Force Shield", 5));
 		player.abilities.add(Ability.ability("Flight I", 5));
@@ -1203,600 +1086,6 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 			pressAbilityKey(player.hotkeys[n - 1], false, player);
 	}
 
-	void movePerson(Person p, double deltaTime)
-	{
-		double velocityLeft = Math.sqrt(p.xVel * p.xVel + p.yVel * p.yVel) * deltaTime;
-
-		p.lastSpeed = velocityLeft / deltaTime;
-		double moveQuantumX = p.xVel / velocityLeft * deltaTime;
-		double moveQuantumY = p.yVel / velocityLeft * deltaTime; // vector combination of moveQuantumX and moveQuantumY is equal to 1 pixel per frame.
-		// This function moves the physics object one pixel towards their direction, until they can't move anymore or they collide with something.
-		if (velocityLeft > 0)
-			p.insideWall = false; // pretty important
-		Rectangle2D personRect = new Rectangle2D.Double((int) p.x - p.radius / 2, (int) p.y - p.radius / 2, p.radius, p.radius); // for FF collisions
-		while (velocityLeft > 0)
-		{
-			if (velocityLeft < 1)
-			{ // last part of movement
-				moveQuantumX *= velocityLeft;
-				moveQuantumY *= velocityLeft;
-			} else
-				// non-last parts of movement
-				velocityLeft -= 1;
-			// Move p a fraction
-			p.x += moveQuantumX;
-			p.y += moveQuantumY;
-			// check collisions with walls in the environment, locked to a grid
-			if (p.z <= 1)
-				for (int i = (int) (p.x - 0.5 * p.radius); velocityLeft > 0 && i / squareSize <= (int) (p.x + 0.5 * p.radius) / squareSize; i += squareSize)
-					for (int j = (int) (p.y - 0.5 * p.radius); velocityLeft > 0 && j / squareSize <= (int) (p.y + 0.5 * p.radius) / squareSize; j += squareSize)
-					{
-						if (env.wallTypes[i / squareSize][j / squareSize] != -1)
-						{
-							if (!p.ghostMode) // ghosts pass through stuff
-							{
-								if (p.z > 0.1 && p.z <= 1 && p.zVel < 0) // if falling into a wall
-								{
-									p.z = 1; // standing on a wall
-									for (Ability a : p.abilities) // stop flying when landing this way
-										if (a.hasTag("flight"))
-										{
-											a.use(env, p, p.target);
-										}
-									p.zVel = 0;
-									if (p instanceof NPC)
-										((NPC) p).justCollided = true;
-								} else if (p.z < 1)
-								{
-									double prevVelocity = velocityLeft;
-									if (collideWithWall(p, i / squareSize, j / squareSize))
-									{
-										p.x -= moveQuantumX;
-										p.y -= moveQuantumY;
-										if (p instanceof NPC)
-											((NPC) p).justCollided = true;
-										if (p.z > 0 && p.zVel < 0)
-										{
-											p.z -= p.zVel * deltaTime;
-											p.zVel = 0;
-										}
-										velocityLeft *= Math.sqrt(p.xVel * p.xVel + p.yVel * p.yVel) * deltaTime / prevVelocity;
-										// "velocity" decreases as the thing moves. If speed is decreased, velocity is multiplied by the ratio of the previous speed and the current one.
-										if (velocityLeft != 0)
-										{
-											moveQuantumX = p.xVel / velocityLeft * deltaTime;
-											moveQuantumY = p.yVel / velocityLeft * deltaTime;
-											p.x += moveQuantumX;
-											p.y += moveQuantumY;
-										}
-									}
-								}
-							} else // to avoid ghosts reappearing inside walls
-								p.insideWall = true;
-						}
-					}
-
-			for (Person p2 : env.people)
-				if (!p.equals(p2))
-				{
-					Rectangle2D p1rect = new Rectangle2D.Double(p.x - 0.5 * p.radius, p.y - 0.5 * p.radius, p.radius, p.radius);
-					Rectangle2D p2rect = new Rectangle2D.Double(p2.x - 0.5 * p2.radius, p2.y - 0.5 * p2.radius, p2.radius, p2.radius);
-					if (p1rect.intersects(p2rect)) // collision check
-					{
-						if (p2.z + p2.height > p.z && p2.z < p.z + p.height)
-						{
-							// physics. Assumes the two people are circles.
-							// The following code is translated from a StackExchange answer.
-							double xVelocity = p2.xVel - p.xVel;
-							double yVelocity = p2.yVel - p.yVel;
-							double dotProduct = (p2.x - p.x) * xVelocity + (p2.y - p.y) * yVelocity;
-							// Neat vector maths, used for checking if the objects moves towards one another.
-							if (dotProduct < 0)
-							{
-								double collisionScale = dotProduct / Methods.DistancePow2(p.x, p.y, p2.x, p2.y);
-								double xCollision = (p2.x - p.x) * collisionScale;
-								double yCollision = (p2.y - p.y) * collisionScale;
-								// The Collision vector is the speed difference projected on the Dist vector,
-								// thus it is the component of the speed difference needed for the collision.
-								double combinedMass = p.mass + p2.mass;
-								double collisionWeightA = 2 * p2.mass / combinedMass;
-								double collisionWeightB = 2 * p.mass / combinedMass;
-								p.xVel += collisionWeightA * xCollision;
-								p.yVel += collisionWeightA * yCollision;
-								p2.xVel -= collisionWeightB * xCollision;
-								p2.yVel -= collisionWeightB * yCollision;
-								p.x -= 2 * moveQuantumX; // good enough for most purposes right now
-								p.y -= 2 * moveQuantumY;//
-								if (p instanceof NPC)
-									((NPC) p).justCollided = true;
-								if (p2 instanceof NPC)
-									((NPC) p2).justCollided = true;
-							}
-						}
-					}
-				}
-			for (ForceField ff : env.FFs)
-			{
-				// checks if (rotated) force field corners are inside person hitbox
-				if (ff.z + ff.height > p.z && ff.z < p.z + p.height)
-				{
-					boolean collidedWithACorner = false;
-					for (Point p1 : ff.p)
-						if (p1.x > p.x - p.radius / 2 && p1.x < p.x + p.radius / 2 && p1.y > p.y - p.radius / 2 && p1.y < p.y + p.radius / 2)
-						{
-							collidedWithACorner = true;
-							// hitting corners just reverses the person's movement
-							p.x -= moveQuantumX;
-							p.y -= moveQuantumY;
-							p.xVel = -p.xVel;
-							p.yVel = -p.yVel;
-							p.x += deltaTime * p.xVel;
-							p.y += deltaTime * p.yVel;
-							env.hitPerson(p, 5 * deltaTime, 0, 0, 4);
-							if (p instanceof NPC)
-								((NPC) p).justCollided = true;
-						}
-					if (!collidedWithACorner)
-					{
-						Line2D l1 = new Line2D.Double(ff.p[0].x, ff.p[0].y, ff.p[3].x, ff.p[3].y);
-						Line2D l2 = new Line2D.Double(ff.p[0].x, ff.p[0].y, ff.p[1].x, ff.p[1].y);
-						Line2D l3 = new Line2D.Double(ff.p[2].x, ff.p[2].y, ff.p[1].x, ff.p[1].y);
-						Line2D l4 = new Line2D.Double(ff.p[2].x, ff.p[2].y, ff.p[3].x, ff.p[3].y);
-						boolean collided = false;
-						double lineAngle = 0;
-						if (personRect.intersectsLine(l1))
-						{
-							collided = true;
-							lineAngle = ff.rotation + 0.5 * Math.PI;
-						}
-						if (personRect.intersectsLine(l2))
-						{
-							collided = true;
-							lineAngle = ff.rotation;
-						}
-						if (personRect.intersectsLine(l3))
-						{
-							collided = true;
-							lineAngle = ff.rotation + 0.5 * Math.PI;
-						}
-						if (personRect.intersectsLine(l4))
-						{
-							collided = true;
-							lineAngle = ff.rotation;
-						}
-						if (collided)
-						{
-							// BUGGY
-							// SRSLY
-							// TODO
-							p.x -= moveQuantumX;
-							p.y -= moveQuantumY;
-							// attempt at physics
-							double personAngle = Math.atan2(moveQuantumY, moveQuantumX); // can also use yVel, xVel
-							personAngle = 2 * lineAngle - personAngle + Math.PI;
-							double velocity = Math.sqrt(p.xVel * p.xVel + p.yVel * p.yVel);
-							p.xVel = velocity * Math.cos(personAngle);
-							p.yVel = velocity * Math.sin(personAngle);
-							moveQuantumX = Math.cos(personAngle) * deltaTime;
-							moveQuantumY = Math.sin(personAngle) * deltaTime;
-							p.x += 80 * moveQuantumX;
-							p.y += 80 * moveQuantumY;
-							// zap
-							env.hitPerson(p, 5 * deltaTime, 0, 0, 4);
-							if (p instanceof NPC)
-								((NPC) p).justCollided = true;
-						}
-					}
-				}
-
-			}
-			if (velocityLeft < 1) // continue
-				velocityLeft = 0;
-			personRect = new Rectangle2D.Double((int) p.x - p.radius / 2, (int) p.y - p.radius / 2, p.radius, p.radius);
-		}
-		// extra check for insideWall, in case you stand still
-		if (p.ghostMode && p.z < 1)
-			for (int i = (int) (p.x - 0.5 * p.radius); i / squareSize <= (int) (p.x + 0.5 * p.radius) / squareSize; i += squareSize)
-				for (int j = (int) (p.y - 0.5 * p.radius); j / squareSize <= (int) (p.y + 0.5 * p.radius) / squareSize; j += squareSize)
-					if (env.wallTypes[i / squareSize][j / squareSize] != -1)
-						p.insideWall = true;
-		// test boundaries
-		if (p.x < 0 || p.y < 0 || p.x > env.widthPixels || p.y > env.heightPixels)
-		{
-			p.x -= p.xVel;
-			p.y -= p.yVel;
-			p.xVel = 0;
-			p.yVel = 0;
-		}
-	}
-
-	boolean moveBall(Ball b, double deltaTime)
-	{
-		// return false if ball was destroyed
-
-		double velocityLeft = Math.sqrt(b.xVel * b.xVel + b.yVel * b.yVel) * deltaTime;
-		double moveQuantumX = b.xVel / velocityLeft * deltaTime;
-		double moveQuantumY = b.yVel / velocityLeft * deltaTime; // vector combination of moveQuantumX and moveQuantumY is equal to 1 pixel per frame.
-
-		// This function moves the physics object one pixel towards their direction, until they can't move anymore or they collide with something.
-		while (velocityLeft > 0)
-		{
-			if (velocityLeft < 1)
-			{ // last part of movement
-				moveQuantumX *= velocityLeft;
-				moveQuantumY *= velocityLeft;
-				velocityLeft = 0;
-			} else
-				// non-last parts of movement
-				velocityLeft--;
-			// Move p a fraction
-			// IMPORTANT NOTE!!!!! moveQuantumX and moveQuantumY don't update every check, so if the velocity or the angle change they should be recalculated immediately afterwards (like when a ball
-			// bounces).
-			b.x += moveQuantumX;
-			b.y += moveQuantumY;
-
-			// if ball exits edge of environment
-			if (b.x - b.radius < 0 || b.y - b.radius < 0 || b.x + b.radius > env.heightPixels || b.y + b.radius > env.heightPixels)
-				return false;
-
-			// check collisions with walls in the environment, locked to a grid
-			if (b.z < 1)
-				for (int i = (int) (b.x - b.radius); velocityLeft > 0 && i / squareSize <= (int) (b.x + b.radius) / squareSize; i += squareSize)
-					for (int j = (int) (b.y - b.radius); velocityLeft > 0 && j / squareSize <= (int) (b.y + b.radius) / squareSize; j += squareSize)
-					{
-						if (env.wallTypes[i / squareSize][j / squareSize] != -1)
-						{
-							Point p = new Point((i / squareSize) * squareSize, (j / squareSize) * squareSize);
-							double px = b.x, py = b.y;
-							// point on rectangle closest to circle. (snaps the point to the rectangle, pretty much, if the circle center is inside the rectangle there isn't snapping, but this is fine
-							// since it will detect a collision as a result)
-
-							if (px > p.x + squareSize)
-								px = p.x + squareSize;
-							if (px < p.x)
-								px = p.x;
-							if (py > p.y + squareSize)
-								py = p.y + squareSize;
-							if (py < p.y)
-								py = p.y;
-
-							// distance check:
-							if (Math.pow(b.x - px, 2) + Math.pow(b.y - py, 2) < Math.pow(b.radius, 2))
-							{
-								// collision confirmed.
-								// Resolving collision:
-								boolean bounce = false;
-								// TODO balls bouncing off certain walls?
-								if (bounce)
-								{
-									double prevVelocity = velocityLeft;
-									collideWithWall(b, i / squareSize, j / squareSize, (int) px, (int) py);
-									b.x -= moveQuantumX;
-									b.y -= moveQuantumY;
-									velocityLeft *= b.velocity() / prevVelocity * deltaTime; // "velocity" decreases as the thing moves. If speed is decreased, velocity is multiplied by
-									// the ratio of the previous speed and the current one.
-									if (velocityLeft != 0)
-									{
-										moveQuantumX = b.xVel / velocityLeft * deltaTime;
-										moveQuantumY = b.yVel / velocityLeft * deltaTime;
-										b.x += moveQuantumX;
-										b.y += moveQuantumY;
-									}
-								} else
-								{
-									env.damageWall(i / squareSize, j / squareSize, b.getDamage() + b.getPushback(), EP.damageType(b.elementNum));
-									// debris
-									env.ballDebris(b, "wall");
-									// ball was destroyed
-									return false;
-								}
-							}
-						}
-					}
-
-			// check collisions with people!
-			for (Person p : env.people)
-			{
-				// TODO testing for evasion, etc.
-				if (p.z + p.height > b.z && p.z < b.z + b.height)
-					if (!p.ghostMode || EP.damageType(b.elementNum) == 4 || EP.damageType(b.elementNum) == 2) // shock and fire
-						// temp collide calculation
-						if (Math.sqrt(Math.pow(p.x - b.x, 2) + Math.pow(p.y - b.y, 2)) < p.radius / 2 + b.radius)
-						{
-							boolean bounce = false;
-							// TODO find out which power causes bounce skin
-							for (int i = 0; i < p.abilities.size(); i++)
-								if (p.abilities.get(i).name.equals("some_bounce_ability"))
-									bounce = true;
-							if (bounce)
-							{
-								if (b.x - b.radius < p.x + 0.5 * p.radius || b.x + b.radius > p.x - 0.5 * p.radius)
-									b.xVel = -b.xVel;
-								if (b.y - b.radius < p.y + 0.5 * p.radius || b.y + b.radius > p.y - 0.5 * p.radius)
-									b.yVel = -b.yVel;
-							} else
-							{
-								// damage person
-								env.hitPerson(p, b.getDamage(), b.getPushback(), b.angle(), EP.damageType(b.elementNum));
-								if (p instanceof NPC)
-									((NPC) p).justCollided = true;
-								env.ballDebris(b, "shatter");
-								// destroy ball
-								return false;
-							}
-						}
-			}
-
-			// check collisions with arc force fields
-			for (ArcForceField aff : env.arcFFs)
-			{
-				if (aff.z + aff.height > b.z && aff.z < b.z + b.height)
-				{
-					double angleToBall = Math.atan2(b.y - aff.target.y, b.x - aff.target.x);
-					while (angleToBall < 0)
-						angleToBall += 2 * Math.PI;
-					double minAngle = (aff.rotation - (aff.arc + 2 * b.radius / aff.maxRadius) / 2);
-					double maxAngle = (aff.rotation + (aff.arc + 2 * b.radius / aff.maxRadius) / 2);
-					while (minAngle < 0)
-						minAngle += 2 * Math.PI;
-					while (minAngle >= 2 * Math.PI)
-						minAngle -= 2 * Math.PI;
-					while (maxAngle < 0)
-						maxAngle += 2 * Math.PI;
-					while (maxAngle >= 2 * Math.PI)
-						maxAngle -= 2 * Math.PI;
-					boolean withinAngles = false;
-					// Okay so here's a thing: I assume the circle is a point, and increase the aff's dimensions for the calculation, and it's almost precise!
-					if (minAngle < maxAngle)
-					{
-						if (angleToBall > minAngle && angleToBall < maxAngle)
-							withinAngles = true;
-					} else if (angleToBall < minAngle || angleToBall > maxAngle)
-						withinAngles = true;
-					if (withinAngles)
-					{
-						double distance = Math.sqrt(Math.pow(aff.target.y - b.y, 2) + Math.pow(aff.target.x - b.x, 2));
-						if (distance > aff.minRadius - b.radius && distance < aff.maxRadius + b.radius)
-						// That's totally not a legit collision check, but honestly? it's pretty darn close, according to my intuition.
-						{
-							if (aff.elementNum == 6 && EP.damageType(b.elementNum) == 4) // electricity and energy balls bounce off of energy
-							{
-								double damage = (b.getDamage() + b.getPushback()) * 0.5; // half damage, because the ball bounces
-								env.damageArcForceField(aff, damage,
-										new Point((int) (aff.target.x + aff.maxRadius * Math.cos(angleToBall)), (int) (aff.target.y + aff.maxRadius * Math.sin(angleToBall))),
-										EP.damageType(b.elementNum));
-								env.hitPerson(aff.target, 0, 0.5 * b.getPushback(), b.angle(), 0);
-								// TODO cool sparks
-								// PHYSICS
-								double angle = 2 * angleToBall - b.angle() + Math.PI;
-								// avoiding repeat-bounce immediately afterwards
-								moveQuantumX = Math.cos(angle);
-								moveQuantumY = Math.sin(angle);
-								double velocity = b.velocity();
-								b.xVel = velocity * moveQuantumX;
-								b.yVel = velocity * moveQuantumY;
-								// avoiding it some more
-								b.x += moveQuantumX;
-								b.y += moveQuantumY;
-							} else if (EP.damageType(aff.elementNum) > 1 && EP.damageType(aff.elementNum) != EP.damageType(b.elementNum)) // if damage resistance, and not a "normal" element
-							{
-								errorMessage("You need to write some code here!");
-							} else
-							{
-								// TODO damage depends on ball speed maybe?a
-								// TODO water strong against fire, electricity unblockable by some and entirely blockable by others, , bouncing from metal, etc.
-								double damage = b.getDamage() + b.getPushback();
-								env.damageArcForceField(aff, damage,
-										new Point((int) (aff.target.x + aff.maxRadius * Math.cos(angleToBall)), (int) (aff.target.y + aff.maxRadius * Math.sin(angleToBall))),
-										EP.damageType(b.elementNum));
-								env.hitPerson(aff.target, 0, 0.5 * b.getPushback(), b.angle(), 0);
-
-								// Special effects! debris!
-								env.ballDebris(b, "arc force field", angleToBall);
-								return false;
-							}
-						}
-					}
-				}
-			}
-
-			// Force Fields
-			for (ForceField ff : env.FFs)
-			{
-				if (ff.z + ff.height > b.z && ff.z < b.z + b.height)
-					// to avoid needless computation, This line tests basic hitbox collisions first
-					if (ff.x - 0.5 * ff.length <= b.x + b.radius && ff.x + 0.5 * ff.length >= b.x - b.radius && ff.y - 0.5 * ff.length <= b.y + b.radius && ff.y + 0.5 * ff.length >= b.y - b.radius)
-					{
-						boolean bounce = true;
-						// TODO move it to once per frame in the FF's code area in frame()
-						while (ff.rotation < 0)
-							ff.rotation += 2 * Math.PI;
-						while (ff.rotation >= 2 * Math.PI)
-							ff.rotation -= 2 * Math.PI;
-						Point ballCenter = new Point((int) b.x, (int) b.y);
-						// pow2 to avoid using Math.sqrt(), which is supposedly computationally expensive.
-						double ballRadiusPow2 = Math.pow(b.radius, 2);
-						// TODO also test if circle is entirely within the forcefield's rectangle
-						/*
-						 * four cases because four vertices, and each has its own visual effect In cases 01 and 23, the bounce angle is -Math.PI. but in cases 12 and 30 it's -0. Because rectangle. I can split them to two if-else-ifs because a circle
-						 * can't collide with more than 2 of the vertices at once, obviously
-						 */
-						if (0 <= Methods.realDotProduct(ff.p[0], ballCenter, ff.p[1]) && Methods.realDotProduct(ff.p[0], ballCenter, ff.p[1]) <= ff.width * ff.width
-								&& 0 <= Methods.realDotProduct(ff.p[0], ballCenter, ff.p[3]) && Methods.realDotProduct(ff.p[0], ballCenter, ff.p[3]) <= ff.length * ff.length)
-						// circle center is within FF. This basically never ever should happen.
-						{
-							env.damageFF(ff, b.getDamage() + b.getPushback(), ballCenter);
-
-							// FX
-							for (int i = 0; i < 7; i++)
-								env.debris.add(new Debris(b.x, b.y, b.z, b.angle() + 4 + i * (4) / 6, b.elementNum, 500));
-							return false;
-						} else
-						{
-							if (Methods.LineToPointDistancePow2(ff.p[0], ff.p[1], ballCenter) < ballRadiusPow2)
-							{
-								// TODO cool sparks
-								if (bounce)
-								{
-									// PHYSICS
-									double angle = 2 * ff.rotation - b.angle() + Math.PI; // 2*rotation - angle + 180
-									// avoiding repeat-bounce immediately afterwards
-									moveQuantumX = Math.cos(angle);
-									moveQuantumY = Math.sin(angle);
-									double velocity = b.velocity();
-									b.xVel = velocity * moveQuantumX;
-									b.yVel = velocity * moveQuantumY;
-									// avoiding it some more
-									b.x += moveQuantumX;
-									b.y += moveQuantumY;
-								}
-							} else if (Methods.LineToPointDistancePow2(ff.p[2], ff.p[3], ballCenter) < ballRadiusPow2)
-							{
-								// TODO cool sparks
-								if (bounce)
-								{
-									// PHYSICS
-									double angle = 2 * ff.rotation - b.angle() + Math.PI;// 2*rotation - angle + 180
-									// avoiding repeat-bounce immediately afterwards
-									moveQuantumX = Math.cos(angle);
-									moveQuantumY = Math.sin(angle);
-									double velocity = b.velocity();
-									b.xVel = velocity * moveQuantumX;
-									b.yVel = velocity * moveQuantumY;
-									// avoiding it some more
-									b.x += moveQuantumX;
-									b.y += moveQuantumY;
-								}
-							}
-							if (Methods.LineToPointDistancePow2(ff.p[1], ff.p[2], ballCenter) < ballRadiusPow2)
-							{
-								// TODO cool sparks
-								if (bounce)
-								{
-									// PHYSICS
-									double angle = 2 * ff.rotation - b.angle();// 2*rotation - angle
-									// avoiding repeat-bounce immediately afterwards
-									moveQuantumX = Math.cos(angle);
-									moveQuantumY = Math.sin(angle);
-									double velocity = b.velocity();
-									b.xVel = velocity * moveQuantumX;
-									b.yVel = velocity * moveQuantumY;
-									// avoiding it some more
-									b.x += moveQuantumX;
-									b.y += moveQuantumY;
-								}
-							} else if (Methods.LineToPointDistancePow2(ff.p[3], ff.p[0], ballCenter) < ballRadiusPow2)
-							{
-								// TODO cool sparks
-								if (bounce)
-								{
-									// PHYSICS
-									double angle = 2 * ff.rotation - b.angle(); // 2*rotation - angle
-									// avoiding repeat-bounce immediately afterwards
-									moveQuantumX = Math.cos(angle);
-									moveQuantumY = Math.sin(angle);
-									double velocity = b.velocity();
-									b.xVel = velocity * moveQuantumX;
-									b.yVel = velocity * moveQuantumY;
-									// avoiding it some more
-									b.x += moveQuantumX;
-									b.y += moveQuantumY;
-								}
-							}
-						}
-					}
-			}
-			for (Ball b2 : env.balls)
-			{
-				if (b == b2 || b2.mass <= 0 || b2.velocity() <= 0)
-					continue;
-				// TODO testing for evasion, etc.
-				if (b2.z + b2.height > b.z && b2.z < b.z + b.height)
-					if (Math.pow(b2.x - b.x, 2) + Math.pow(b2.y - b.y, 2) < Math.pow(b2.radius + b.radius, 2))
-					{
-						boolean bounce = false;
-						if (bounce)
-						{
-							// TODO balls bounce from each other (shouldn't be hard)
-						} else
-						{
-							if (b.mass > b2.mass)
-							{
-								env.ballDebris(b2, "shatter");
-								// collisions reduce mass from the stronger ball
-								b.mass -= b2.mass;
-								b2.xVel = 0;
-								b2.yVel = 0;
-								b2.mass = 0;
-							} else if (b2.mass > b.mass)
-							{
-								env.ballDebris(b, "shatter");
-								b2.mass -= b.mass;
-								return false;
-							} else // equal masses
-							{
-								env.ballDebris(b2, "shatter");
-								env.ballDebris(b, "shatter");
-								b2.xVel = 0;
-								b2.yVel = 0;
-								b2.mass = 0;
-								return false;
-							}
-						}
-					}
-			}
-		}
-
-		// ball gravity
-		b.z += b.zVel;
-		if (b.z < 0)
-		{
-			// debris
-			env.ballDebris(b, "shatter");
-			return false;
-		}
-
-		return true;
-	}
-
-	boolean collideWithWall(Person p, int x, int y) // x and y in grid
-	{
-		// returns whether or not this collision changes the person's speed
-		// TODO add stuff concerning bounce powers, or breaking through walls, or damaging walls, or damaging characters flung into walls
-		final double bounceEfficiency = 0.4;
-		// assumes objects have no angle
-		Rectangle intersectRect = new Rectangle(x * squareSize, y * squareSize, squareSize, squareSize)
-				.intersection(new Rectangle((int) (p.x - 0.5 * p.radius), (int) (p.y - 0.5 * p.radius), (int) (p.radius), (int) (p.radius)));
-		if (p.x > intersectRect.x + 0.5 * intersectRect.width)
-			p.xVel = Math.abs(p.xVel) * bounceEfficiency;
-		if (p.x < intersectRect.x + 0.5 * intersectRect.width)
-			p.xVel = -Math.abs(p.xVel) * bounceEfficiency;
-		if (p.y > intersectRect.y + 0.5 * intersectRect.height)
-			p.yVel = Math.abs(p.yVel) * bounceEfficiency;
-		if (p.y < intersectRect.y + 0.5 * intersectRect.height)
-			p.yVel = -Math.abs(p.yVel) * bounceEfficiency;
-
-		return true;
-	}
-
-	void collideWithWall(RndPhysObj b, int x, int y, int px, int py) // x and y in grid
-	{
-		final double bounceEfficiency = 1;
-		// assumes walls have no angle, of course (they don't)
-
-		if (px == x * squareSize && (b.angle() < Math.PI / 2 || b.angle() >= Math.PI * 3 / 2)) // left side, moving right
-			b.xVel = -b.xVel;
-		if (px == (x + 1) * squareSize && b.angle() >= Math.PI / 2 && b.angle() < Math.PI * 3 / 2) // right side, moving left
-			b.xVel = -b.xVel;
-		if (py == y * squareSize && b.angle() < Math.PI) // up side, moving down
-			b.yVel = -b.yVel;
-		if (py == (y + 1) * squareSize && b.angle() >= Math.PI) // down side, moving up
-			b.yVel = -b.yVel;
-
-		b.xVel *= bounceEfficiency;
-		b.yVel *= bounceEfficiency;
-	}
-
 	double applyGravityAndFrictionAndReturnFriction(Person p, double deltaTime)
 	{
 		double velocity = Math.sqrt(p.xVel * p.xVel + p.yVel * p.yVel);
@@ -1806,7 +1095,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 		{ // TODO WTF?
 			// = when framerate causes problems
 			p.z = 0.9;
-			movePerson(p, deltaTime); // to test for wall-touching
+			env.movePerson(p, deltaTime); // to test for wall-touching
 		}
 
 		p.z += deltaTime * p.zVel;
@@ -2202,20 +1491,24 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 		frc = buffer.getFontRenderContext();
 		for (int i = 0; i < player.hotkeys.length; i++)
 		{
+			int x = nch[i].x;
+			int y = nch[i].y;
 			buffer.setStroke(new BasicStroke((float) (3 * UIzoomLevel)));
 			buffer.setColor(Color.black);
-			buffer.drawString(hotkeyStrings[i], (int) (42 * UIzoomLevel + i * 80 * UIzoomLevel), (int) (frameHeight - 14 * UIzoomLevel));
+			buffer.drawString(hotkeyStrings[i], x + (int) (12 * UIzoomLevel), y + (int) (76 * UIzoomLevel));
 			if (player.hotkeys[i] != -1)
 			{
 				Ability ability = player.abilities.get(player.hotkeys[i]);
-				buffer.drawImage(Resources.icons.get(ability.name), (int) (30 * UIzoomLevel + i * 80 * UIzoomLevel), (int) (frameHeight - 90 * UIzoomLevel), this);
-				buffer.drawRect((int) (30 * UIzoomLevel + i * 80 * UIzoomLevel), (int) (frameHeight - 90 * UIzoomLevel), (int) (60 * UIzoomLevel), (int) (60 * UIzoomLevel));
+				scaleBuffer(buffer, x, y, UIzoomLevel);
+				buffer.drawImage(Resources.icons.get(ability.name), x, y, this);
+				scaleBuffer(buffer, x, y, 1 / UIzoomLevel);
+				buffer.drawRect(x, y, (int) (60 * UIzoomLevel), (int) (60 * UIzoomLevel));
 
 				// Cooldown and mana notifications
 				if (ability.cooldownLeft != 0)
 				{// note that when the cooldown is over it will "jump" from low transparency to full transparency
 					buffer.setColor(new Color(0, 0, 0, (int) (130 + 100 * ability.cooldownLeft / ability.cooldown)));
-					buffer.fillRect((int) (31 * UIzoomLevel + i * 80 * UIzoomLevel), (int) (frameHeight - 89 * UIzoomLevel), (int) (59 * UIzoomLevel), (int) (59 * UIzoomLevel));
+					buffer.fillRect(x + (int) (UIzoomLevel), y + (int) (1 * UIzoomLevel), (int) (59 * UIzoomLevel), (int) (59 * UIzoomLevel));
 				}
 				if (ability.cost > player.mana)
 				{
@@ -2225,7 +1518,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 						buffer.setColor(Color.yellow); // repairing walls
 					else
 						buffer.setColor(Color.red);
-					buffer.drawRect((int) (27 * UIzoomLevel + i * 80 * UIzoomLevel), (int) (frameHeight - 93 * UIzoomLevel), (int) (66 * UIzoomLevel), (int) (66 * UIzoomLevel));
+					buffer.drawRect(x + (int) (-3 * UIzoomLevel), y + (int) (-3 * UIzoomLevel), (int) (66 * UIzoomLevel), (int) (66 * UIzoomLevel));
 				}
 
 				// ON/OFF
@@ -2233,7 +1526,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 				{
 					buffer.setColor(Color.cyan);
 					buffer.setStroke(new BasicStroke(2));
-					buffer.drawRect((int) (31 * UIzoomLevel + i * 80 * UIzoomLevel), (int) (frameHeight - 89 * UIzoomLevel), (int) (59 * UIzoomLevel), (int) (59 * UIzoomLevel));
+					buffer.drawRect(x + (int) (1 * UIzoomLevel), y + (int) (1 * UIzoomLevel), (int) (59 * UIzoomLevel), (int) (59 * UIzoomLevel));
 				}
 
 				// current power
@@ -2241,17 +1534,18 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 				{
 					buffer.setColor(Color.green);
 					buffer.setStroke(new BasicStroke(2));
-					buffer.drawRect((int) (31 * UIzoomLevel + i * 80 * UIzoomLevel), (int) (frameHeight - 89 * UIzoomLevel), (int) (59 * UIzoomLevel), (int) (59 * UIzoomLevel));
+					buffer.drawRect(x + (int) (1 * UIzoomLevel), y + (int) (1 * UIzoomLevel), (int) (59 * UIzoomLevel), (int) (59 * UIzoomLevel));
 				}
 
 				// selected power for targeting
 				if (i == hotkeySelected)
 				{
+					int uiz = (int) UIzoomLevel;
 					buffer.setColor(Color.cyan);
-					buffer.fillRect((int) (31 * UIzoomLevel + i * 80 * UIzoomLevel), (int) (frameHeight - 28 * UIzoomLevel), (int) (58 * UIzoomLevel), (int) (4 * UIzoomLevel)); // bottom
-					buffer.fillRect((int) (31 * UIzoomLevel + i * 80 * UIzoomLevel), (int) (frameHeight - 95 * UIzoomLevel), (int) (58 * UIzoomLevel), (int) (4 * UIzoomLevel)); // top
-					buffer.fillRect((int) (25 * UIzoomLevel + i * 80 * UIzoomLevel), (int) (frameHeight - 91 * UIzoomLevel), (int) (4 * UIzoomLevel), (int) (58 * UIzoomLevel)); // left
-					buffer.fillRect((int) (92 * UIzoomLevel + i * 80 * UIzoomLevel), (int) (frameHeight - 91 * UIzoomLevel), (int) (4 * UIzoomLevel), (int) (58 * UIzoomLevel)); // right
+					buffer.fillRect(x + uiz, y + (int) (62 * UIzoomLevel), (int) (58 * UIzoomLevel), (int) (4 * UIzoomLevel)); // bottom
+					buffer.fillRect(x + uiz, y + (int) (-5 * UIzoomLevel), (int) (58 * UIzoomLevel), (int) (4 * UIzoomLevel)); // top
+					buffer.fillRect(x + (int) (-5 * UIzoomLevel), y + uiz, (int) (4 * UIzoomLevel), (int) (58 * UIzoomLevel)); // left
+					buffer.fillRect(x + (int) (62 * UIzoomLevel), y + uiz, (int) (4 * UIzoomLevel), (int) (58 * UIzoomLevel)); // right
 				}
 
 				// selected power during tab
@@ -2259,14 +1553,14 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 				{
 					buffer.setStroke(new BasicStroke(1));
 					buffer.setColor(Color.yellow);
-					buffer.drawRect((int) (30 * UIzoomLevel + i * 80 * UIzoomLevel), (int) (frameHeight - 90 * UIzoomLevel), (int) (60 * UIzoomLevel), (int) (60 * UIzoomLevel));
+					buffer.drawRect(x, y, (int) (60 * UIzoomLevel), (int) (60 * UIzoomLevel));
 				}
 			} else
 			// no power in that space
 			{
 				buffer.setStroke(dashedStroke3);
 				buffer.setColor(new Color(0, 0, 0, 90));
-				buffer.drawRect((int) (30 * UIzoomLevel + i * 80 * UIzoomLevel), (int) (frameHeight - 90 * UIzoomLevel), (int) (60 * UIzoomLevel), (int) (60 * UIzoomLevel));
+				buffer.drawRect(x, y, (int) (60 * UIzoomLevel), (int) (60 * UIzoomLevel));
 			}
 			// remember - black rectangle after icon
 		}
@@ -2512,24 +1806,44 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 						p.switchAnimation(7);
 					} else if (p.z == 0 || p.z == 1) // walking on ground or walking on walls
 					{
-						// making sure dude has enough stamina
-						if (p.runningStaminaCost * deltaTime * p.strengthOfAttemptedMovement > p.stamina)
-							p.strengthOfAttemptedMovement = p.stamina / (p.runningStaminaCost * deltaTime);
+						double staminaMultiplier = 1;
+						double runMultiplier = 1;
+						for (Ability a : p.abilities)
+							if (a instanceof Sprint && a.on)
+							{
+								staminaMultiplier *= a.costPerSecond;
+								runMultiplier *= 2;
+							}
+
+						// making sure dude/dudette has enough stamina
+						double timesStaminaFitsIntoStaminaCost = p.stamina / (p.runningStaminaCost * deltaTime * staminaMultiplier);
+						if (timesStaminaFitsIntoStaminaCost < 1)
+						{
+							runMultiplier *= timesStaminaFitsIntoStaminaCost; // Because of the 3:2 ratio, if you try to sprint while lacking stamina you will run slower
+							staminaMultiplier *= timesStaminaFitsIntoStaminaCost;
+						}
+
+						p.stamina -= staminaMultiplier * p.runningStaminaCost * deltaTime * p.strengthOfAttemptedMovement;
+
 						if (movementVariation)
 							p.strengthOfAttemptedMovement *= 1 - 0.6 * Math.abs(Math.sin((p.directionOfAttemptedMovement - p.rotation) / 2)); // backwards = 0.4, forwards = 1, sideways = 0.6 (roughly)
-						if (Math.sqrt(Math.abs(p.xVel * p.xVel + p.yVel * p.yVel)) < p.runSpeed * 100 / friction) // TODO change from using math.sqrt to just comparing squared values?
+
+						// A person with 0 stamina will be unable to move anymore, so to fix it:
+						if (runMultiplier < 0.2)
+							runMultiplier = 0.2;
+
+						if (p.xVel * p.xVel + p.yVel * p.yVel < Math.pow(p.runSpeed * runMultiplier * 100 / friction, 2))
 						{
-							p.xVel += Math.cos(p.directionOfAttemptedMovement) * deltaTime * p.strengthOfAttemptedMovement * p.runAccel * friction / 100;
-							p.yVel += Math.sin(p.directionOfAttemptedMovement) * deltaTime * p.strengthOfAttemptedMovement * p.runAccel * friction / 100;
+							p.xVel += Math.cos(p.directionOfAttemptedMovement) * deltaTime * p.strengthOfAttemptedMovement * p.runAccel * friction / 100 * runMultiplier;
+							p.yVel += Math.sin(p.directionOfAttemptedMovement) * deltaTime * p.strengthOfAttemptedMovement * p.runAccel * friction / 100 * runMultiplier;
 						}
-						// STAMINA COST FOR RUNNING IS IN HERE
-						p.stamina -= p.runningStaminaCost * deltaTime * p.strengthOfAttemptedMovement;
+
 						// switch to running animation
 						if (!p.notAnimating)
 							p.switchAnimation(1);
 					} else// freefalling?
 					{
-						if (Math.sqrt(Math.abs(p.xVel * p.xVel + p.yVel * p.yVel)) < 300) // TODO change from using math.sqrt to just comparing squared values?
+						if (p.xVel * p.xVel + p.yVel * p.yVel < Math.pow(300, 2))
 						{
 							p.xVel += Math.cos(p.directionOfAttemptedMovement) * deltaTime * p.strengthOfAttemptedMovement * 20;
 							p.yVel += Math.sin(p.directionOfAttemptedMovement) * deltaTime * p.strengthOfAttemptedMovement * 20;
@@ -2545,7 +1859,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 				// air-punching (trying to punch while flying)
 				if (p.flySpeed != -1)
 				{
-					if (Math.sqrt(Math.abs(p.xVel * p.xVel + p.yVel * p.yVel)) < p.flySpeed) // TODO change from using math.sqrt to just comparing squared values?
+					if (p.xVel * p.xVel + p.yVel * p.yVel < p.flySpeed * p.flySpeed)
 					{
 						p.xVel += Math.cos(p.directionOfAttemptedMovement) * deltaTime * 100 * p.strengthOfAttemptedMovement * p.runAccel / 100;
 						p.yVel += Math.sin(p.directionOfAttemptedMovement) * deltaTime * 100 * p.strengthOfAttemptedMovement * p.runAccel / 100;
@@ -2676,8 +1990,10 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 			else if (player.rotateButtonPressed)
 				cameraRotation = 0;
 			else if (player.resizeUIButtonPressed)
+			{
 				UIzoomLevel = 1;
-			else
+				updateNiceHotkeys();
+			} else
 				env.remove((mx) / 96, (my) / 96);
 			break;
 		case KeyEvent.VK_K:
@@ -2736,6 +2052,12 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 			break;
 		case KeyEvent.VK_F2:
 			env.showDamageNumbers = !env.showDamageNumbers;
+			break;
+		case KeyEvent.VK_F3:
+			hotkeysLook++;
+			if (hotkeysLook >= 3)
+				hotkeysLook = 0;
+			updateNiceHotkeys();
 			break;
 		case KeyEvent.VK_F12:
 			if (timeSinceLastScreenshot > 0.1)
@@ -2829,8 +2151,6 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 
 	public Main()
 	{
-		frameWidth = (int) Toolkit.getDefaultToolkit().getScreenSize().getWidth();
-		frameHeight = (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight();
 
 		restart();
 		this.addWindowListener(new WindowAdapter()
@@ -2841,10 +2161,16 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 			}
 		});
 		this.addMouseWheelListener(this);
-		this.setSize(frameWidth, frameHeight);
-		this.setVisible(true);
+		this.setSize(640, 640);
 		this.setResizable(true);
 		this.setFocusTraversalKeysEnabled(false);
+		this.setExtendedState(Frame.MAXIMIZED_BOTH);
+
+		frameWidth = (int) this.getBounds().getWidth();
+		frameHeight = (int) this.getBounds().getHeight();
+		updateFrame();
+
+		this.setVisible(true);
 		addKeyListener(this);
 		addMouseListener(this);
 		addMouseMotionListener(this);
@@ -2937,6 +2263,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 	{
 		frameWidth = (int) this.getBounds().getWidth();
 		frameHeight = (int) this.getBounds().getHeight();
+		updateFrame();
 	}
 
 	public void windowGainedFocus(WindowEvent arg0)
@@ -2991,6 +2318,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 				UIzoomLevel *= 0.9;
 			else
 				UIzoomLevel *= 1.1;
+			updateNiceHotkeys();
 		} else
 		{
 			// switch currently range-selected ability
@@ -3068,6 +2396,7 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 		}
 		if (me.getButton() == MouseEvent.BUTTON2) // Mid Click
 		{
+			print("new Point(" + screenmx + ", " + screenmy + "), ");
 			playerPressHotkey(1, true);
 		}
 		if (me.getButton() == MouseEvent.BUTTON3) // Right Click
@@ -3125,11 +2454,11 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 		{
 			if (player.hotkeys[i] != -1)
 			{
-				if (screenmx > 30 + i * 80 && screenmy > frameHeight - 90 && screenmx < 30 + i * 80 + 60 && screenmy < frameHeight - 90 + 60)
+				if (screenmx > nch[i].x && screenmy > nch[i].y && screenmx < nch[i].x + 60 && screenmy < nch[i].y + 60)
 				{
 					foundOne = true;
 					hotkeyHovered = i;
-					tooltipPoint = new Point(38 + i * 80, frameHeight - 100);
+					tooltipPoint = new Point(nch[i].x + 8, nch[i].y - 10);
 					tooltip = player.abilities.get(player.hotkeys[i]).niceName();
 					if (player.rightMousePressed)
 					{
@@ -3179,6 +2508,79 @@ public class Main extends Frame implements KeyListener, MouseListener, MouseMoti
 					}
 				}
 		}
+	}
+
+	Point[] niceHotkeyDefault = new Point[]
+	{ new Point(1200, 970), new Point(640, 970), new Point(840, 770), new Point(920, 770), new Point(1000, 770), new Point(1000, 850), new Point(1000, 930), new Point(920, 930), new Point(840, 930),
+			new Point(840, 850) };
+
+	void updateNiceHotkeys()
+	{
+		switch (hotkeysLook)
+		{
+
+		case 0:
+			for (int i = 0; i < nch.length; i++)
+				nch[i] = new Point((int) (30 * UIzoomLevel + i * 80 * UIzoomLevel), (int) (frameHeight - 90 * UIzoomLevel));
+			break;
+		case 1:
+			for (int i = 0; i < nch.length; i++)
+				nch[i] = new Point((int) (frameWidth / 2 - 40 * UIzoomLevel), (int) (frameHeight - 180 * UIzoomLevel));
+			nch[0].x += 200 * UIzoomLevel;
+			nch[0].y += 80 * UIzoomLevel;
+			nch[1].x -= 200 * UIzoomLevel;
+			nch[1].y += 80 * UIzoomLevel;
+
+			nch[2].x -= 80 * UIzoomLevel;
+			nch[2].y -= 80 * UIzoomLevel;
+			nch[3].x -= 0 * UIzoomLevel;
+			nch[3].y -= 80 * UIzoomLevel;
+			nch[4].x += 80 * UIzoomLevel;
+			nch[4].y -= 80 * UIzoomLevel;
+			nch[5].x += 80 * UIzoomLevel;
+			nch[5].y -= 0 * UIzoomLevel;
+			nch[6].x += 80 * UIzoomLevel;
+			nch[6].y += 80 * UIzoomLevel;
+			nch[7].x += 0 * UIzoomLevel;
+			nch[7].y += 80 * UIzoomLevel;
+			nch[8].x -= 80 * UIzoomLevel;
+			nch[8].y += 80 * UIzoomLevel;
+			nch[9].x -= 80 * UIzoomLevel;
+			nch[9].y += 0 * UIzoomLevel;
+			break;
+		case 2:
+			for (int i = 0; i < nch.length; i++)
+				nch[i] = new Point((int) (frameWidth / 2 - 35 * UIzoomLevel), (int) (frameHeight - 180 * UIzoomLevel));
+
+			nch[1].x -= 240 * UIzoomLevel;
+			nch[1].y += 40 * UIzoomLevel;
+			nch[2].x -= 160 * UIzoomLevel;
+			nch[2].y += 0 * UIzoomLevel;
+			nch[3].x -= 80 * UIzoomLevel;
+			nch[3].y += 0 * UIzoomLevel;
+			nch[4].x -= 0 * UIzoomLevel;
+			nch[4].y += 0 * UIzoomLevel;
+			nch[5].x += 80 * UIzoomLevel;
+			nch[5].y += 0 * UIzoomLevel;
+			nch[9].x -= 130 * UIzoomLevel;
+			nch[9].y += 80 * UIzoomLevel;
+			nch[8].x -= 50 * UIzoomLevel;
+			nch[8].y += 80 * UIzoomLevel;
+			nch[7].x += 30 * UIzoomLevel;
+			nch[7].y += 80 * UIzoomLevel;
+			nch[6].x += 110 * UIzoomLevel;
+			nch[6].y += 80 * UIzoomLevel;
+			nch[0].x += 190 * UIzoomLevel;
+			nch[0].y += 40 * UIzoomLevel;
+			break;
+		default:
+			break;
+		}
+	}
+
+	void updateFrame()
+	{
+		updateNiceHotkeys();
 	}
 
 	static void print(Object whatever)

@@ -32,6 +32,11 @@ public class Flight_I extends Ability
 		}
 	}
 
+	public void maintain(Environment env, Person user, Point target, double deltaTime)
+	{
+		user.stamina -= deltaTime * costPerSecond;
+	}
+
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
 	{
 		player.targetType = "";

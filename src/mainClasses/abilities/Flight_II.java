@@ -17,7 +17,6 @@ public class Flight_II extends Ability
 
 	public void use(Environment env, Person user, Point target)
 	{
-
 		if (!on && user.stamina > 2 && !user.prone && cooldownLeft == 0)
 		{
 			on = true;
@@ -31,6 +30,11 @@ public class Flight_II extends Ability
 			cooldownLeft = cooldown;
 			user.flySpeed = -1;
 		}
+	}
+
+	public void maintain(Environment env, Person user, Point target, double deltaTime)
+	{
+		user.stamina -= deltaTime * costPerSecond;
 	}
 
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)

@@ -43,6 +43,27 @@ public class Ghost_Mode_I extends Ability
 		}
 	}
 
+	public void maintain(Environment env, Person user, Point target, double deltaTime)
+	{
+		if (timeLeft <= 0)
+		{
+			if (!user.insideWall)
+			{
+				user.panic = false;
+				use(env, user, target);
+			} else
+			{
+				user.mana -= 1.5 * deltaTime; // punish
+				env.hitPerson(user, 15, 0, 0, 9, deltaTime); // punish
+				user.stamina -= 1.5 * deltaTime; // punish
+				timeLeft = 0;
+				user.panic = true;
+			}
+
+		} else
+			timeLeft -= deltaTime;
+	}
+
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
 	{
 		player.targetType = "";

@@ -13,12 +13,12 @@ public class Shield_E extends Ability
 
 	public Shield_E(String elementName, int p)
 	{
-		super("Shield <"+elementName+">", p);
+		super("Shield <" + elementName + ">", p);
 	}
-	
+
 	public void use(Environment env, Person user, Point target)
 	{
-		double angle = Math.atan2(target.y-user.y, target.x-user.x);
+		double angle = Math.atan2(target.y - user.y, target.x - user.x);
 		/*
 		 * Create and hold an elemental shield (force field near you) that you can aim, and will protect you until it breaks.
 		 */
@@ -49,21 +49,34 @@ public class Shield_E extends Ability
 					i--;
 				}
 			cooldownLeft = 1 + 0.8 * cooldown - 0.8 * cooldown * remainingFFhealth / (points * 10); // if shield had full HP, 1 cooldown. if had no HP, full
-																																	// cooldown.
+																									// cooldown.
 			user.maintaining = false;
 			on = false;
 			user.notMoving = false;
 			user.notAnimating = false;
 		}
 	}
+
 	public void maintain(Environment env, Person user, Point target, double deltaTime)
 	{
-		
+		if (user.mana < costPerSecond)
+			use(env, user, target);
+		else
+		{
+			user.mana -= costPerSecond * deltaTime;
+			for (ArcForceField a : env.arcFFs)
+				if (a.target.equals(user))
+				{
+					a.rotation = user.rotation;
+					if (a.extraLife > 0)
+						user.mana -= cost * deltaTime;
+				}
+		}
 	}
 
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
 	{
-		double angle = Math.atan2(target.y-player.y, target.x-player.x);
+		double angle = Math.atan2(target.y - player.y, target.x - player.x);
 		player.targetType = "look";
 		player.target = new Point(-1, -1);
 		if (!player.leftMousePressed) // stops aiming shield while pressing mouse, to blink for example

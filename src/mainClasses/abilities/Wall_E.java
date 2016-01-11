@@ -27,7 +27,6 @@ public class Wall_E extends Ability
 
 	public void use(Environment env, Person user, Point target)
 	{
-
 		/*
 		 * Create a wall. Destroys any pools in that area.
 		 */
@@ -88,7 +87,16 @@ public class Wall_E extends Ability
 
 	public void maintain(Environment env, Person user, Point target, double deltaTime)
 	{
-
+		if (cooldownLeft <= 0 || env.wallHealths[(int) targetEffect1][(int) targetEffect2] <= 0)
+			use(env, user, target);
+		else
+		{
+			// effects
+			env.otherDebris((targetEffect1 + 0.5) * squareSize, (targetEffect2 + 0.5) * squareSize, getElementNum(), "wall heal", frameNum);
+			env.wallHealths[(int) targetEffect1][(int) targetEffect2] = (int) Math.max(Math.max((1 - cooldownLeft / cooldown) * 100, 1),
+					env.wallHealths[(int) targetEffect1][(int) targetEffect2]); // make sure you aren't decreasing current health
+			user.mana -= costPerSecond * deltaTime;
+		}
 	}
 
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)

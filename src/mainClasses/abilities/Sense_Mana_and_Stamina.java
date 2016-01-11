@@ -17,6 +17,6 @@ public class Sense_Mana_and_Stamina extends Ability
 	
 	public void use(Environment env, Person user, Point target)
 	{
-		
+		on = !on;
 	}
 }

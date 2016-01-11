@@ -7,29 +7,33 @@ import mainClasses.Environment;
 import mainClasses.Person;
 import mainClasses.Player;
 
-public class TEMPLATE extends Ability
+public class Sprint extends Ability
 {
 
-	public TEMPLATE(int p)
+	public Sprint(int p)
 	{
-		super("TEMPLATE", p);
+		super("Sprint", p);
+		costPerSecond = 3 - 0.3 * points;
 	}
 
 	public void use(Environment env, Person user, Point target)
 	{
-		@SuppressWarnings("unused")
-		double angle = Math.atan2(target.y - user.y, target.x - user.x);
+		if (cooldownLeft == 0 || on)
+		{
+			if (on)
+				cooldownLeft = cooldown;
+			on = !on;
+			user.maintaining = !user.maintaining;
+		}
 	}
 
 	public void maintain(Environment env, Person user, Point target, double deltaTime)
 	{
-		@SuppressWarnings("unused")
-		double angle = Math.atan2(target.y - user.y, target.x - user.x);
+
 	}
 
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
 	{
-		@SuppressWarnings("unused")
-		double angle = Math.atan2(player.target.y - player.y, player.target.x - player.x);
+
 	}
 }

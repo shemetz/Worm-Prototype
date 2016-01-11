@@ -83,7 +83,20 @@ public class Pool_E extends Ability
 
 	public void maintain(Environment env, Person user, Point target, double deltaTime)
 	{
-
+		if (cooldownLeft <= 0 || env.poolHealths[(int) targetEffect1][(int) targetEffect2] <= 0)
+			use(env, user, target);
+		else
+		{
+			// effects
+			env.otherDebris((targetEffect1 + 0.5) * squareSize, (targetEffect2 + 0.5) * squareSize, getElementNum(), "pool heal", frameNum);
+			env.poolHealths[(int) targetEffect1][(int) targetEffect2] += points;
+			if (env.poolHealths[(int) targetEffect1][(int) targetEffect2] >= 100)
+				env.poolHealths[(int) targetEffect1][(int) targetEffect2] = 100;
+			// Might be resource-costly:
+			env.updatePools();
+			//
+			user.mana -= costPerSecond * deltaTime;
+		}
 	}
 
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)

@@ -7,7 +7,7 @@ Cost: 1 Stamina.
 
 
 Sprint (On/Off)
-on-off escape continuous-cost
+escape continuous-cost
 Run twice as fast, consuming thrice as much mana.
 While on, your run speed and run acceleration are multiplied by 2, but the stamina consumption for running (usually 0.6 S/s) is multiplied by 3 (1.8 S/s)
 
