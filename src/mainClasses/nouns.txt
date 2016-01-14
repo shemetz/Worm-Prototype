@@ -874,7 +874,7 @@ smell-flesh,acid
 smile-flesh,buff
 smoke-fire
 snail-movement
-snake-steal,sense
+snake-steal,sense,acid
 sneeze-teleport
 snow-ice
 snowflake-ice

@@ -116,7 +116,6 @@ Anders
 Andie
 Andonis
 Andre
-Andrea
 Andreas
 Andrej
 Andres
@@ -1261,6 +1260,7 @@ Isidore
 Ismail
 Israel
 Istvan
+Itamar
 Ivan
 Ivor
 Izaak
@@ -2938,6 +2938,3 @@ Zippy
 Zollie
 Zolly
 Zorro
-Rahul
-Shumeet
-Vibhu

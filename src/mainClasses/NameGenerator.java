@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -33,14 +34,18 @@ public class NameGenerator
 			String mainElement = EP.elementList[mainEP.elementNum];
 			String secondaryElement = secondaryEP == null ? "general" : EP.elementList[secondaryEP.elementNum];
 
-			switch (random.nextInt(10))
+			switch (random.nextInt(11))
 			{
-			case 0://
-			case 1:// Noun Noun
+			case 0:// Noun Noun
 				name = noun(secondaryElement) + " " + noun(mainElement);
 				break;
-			case 2:// The Noun
-				name = "The " + noun(mainElement);
+			case 1:// Nounnoun
+				name = noun(secondaryElement) + noun(mainElement).toLowerCase();
+				break;
+			case 2:// (The) Noun
+				name = noun(mainElement);
+				if (random.nextBoolean())
+					name = "The " + name;
 				break;
 			case 3:// Title Noun
 				name = pretitles.get(random.nextInt(pretitles.size())) + " " + noun(mainElement); // TODO check gender
@@ -49,19 +54,28 @@ public class NameGenerator
 				name = "The " + noun(mainElement) + " " + posttitles.get(random.nextInt(pretitles.size()));
 				break;
 			case 5://
-			case 6:// Noun Name / Adjective Name
+			case 6:// Name Noun / Adjective Name (ALLITERATIVE)
+				String str;
+				boolean nounOrAdj = random.nextBoolean();
+				if (nounOrAdj)
+					str = noun(mainElement);
+				else
+					str = adj(mainElement);
+
+				String letters = "" + str.charAt(0);
+				if (str.startsWith("Sh") || str.startsWith("Ch"))
+					letters += "h";
+
 				String firstname;
 				if (random.nextBoolean()) // TODO check gender
-					firstname = females.get(random.nextInt(females.size()));
+					firstname = alliterative(females, letters);
 				else
-					firstname = males.get(random.nextInt(males.size()));
-				String letters = "" + firstname.charAt(0);
-				if (firstname.startsWith("Sh") || firstname.startsWith("Ch"))
-					letters += "h";
-				if (random.nextBoolean())
-					name = firstname + " " + alliterative(elementRelatedNouns.get(EP.toInt(mainElement)), letters);
+					firstname = alliterative(males, letters);
+
+				if (nounOrAdj)
+					name = firstname + " " + str;
 				else
-					name = alliterative(elementRelatedAdjs.get(EP.toInt(mainElement)), letters) + " " + firstname;
+					name = str + " " + firstname;
 				break;
 			case 7:// Verber
 				name = verb(mainElement) + "er";
@@ -72,8 +86,13 @@ public class NameGenerator
 				else
 					name = verb(secondaryElement) + noun(mainElement).toLowerCase();
 				break;
-			case 9: //Adjective Noun
+			case 9: // Adjective Noun
 				name = adj(secondaryElement) + " " + noun(mainElement);
+				break;
+			case 10: // Adjective / Adjective Title
+				name = adj(mainElement);
+				if (random.nextBoolean())
+					name += " "+posttitles.get(random.nextInt(posttitles.size()));
 				break;
 			default:
 				Main.errorMessage("This is actually irrelevant code");
@@ -82,6 +101,21 @@ public class NameGenerator
 			}
 		} else
 			name = "Muggle " + noun();
+
+		// Small chance of coolness
+		char[] cs = name.toCharArray();
+		for (int i = 0; i < cs.length; i++)
+			if (random.nextInt(100) == 0)
+			{
+				if (cs[i] == 'c' && (i + 1 >= cs.length || cs[i + 1] != 'h'))
+					cs[i] = 'k'; // c -> k
+				if (cs[i] == 'i' && i + 1 < cs.length)
+				{
+					cs[i] = 'e'; //
+					cs[i + 1] = 'e'; // i -> ee
+				}
+			}
+
 		return name;
 	}
 
@@ -93,6 +127,8 @@ public class NameGenerator
 	public static String noun(String element)
 	{
 		int num = -1;
+		if (random.nextInt(8) == 0) 
+			num = 32;
 		if (element.equals("general"))
 			num = 32;
 		else
@@ -103,6 +139,8 @@ public class NameGenerator
 	public static String verb(String element)
 	{
 		int num = -1;
+		if (random.nextInt(8) == 0) 
+			num = 32;
 		if (element.equals("general"))
 			num = 32;
 		else
@@ -113,6 +151,8 @@ public class NameGenerator
 	public static String adj(String element)
 	{
 		int num = -1;
+		if (random.nextInt(3) == 0) // 33% of any adjective being a general one - because they're simply too good and plentiful
+			num = 32;
 		if (element.equals("general"))
 			num = 32;
 		else
@@ -126,6 +166,8 @@ public class NameGenerator
 		for (String s : wordsToPickFrom)
 			if (s.startsWith(toMatch))
 				suitableWords.add(s);
+		if (suitableWords.isEmpty())
+			return "Problematic";
 		return suitableWords.get(random.nextInt(suitableWords.size()));
 	}
 
@@ -140,6 +182,10 @@ public class NameGenerator
 		posttitles = new ArrayList<String>();
 		for (int i = 0; i < 33 + 1; i++)
 			elementRelatedNouns.add(new ArrayList<String>());
+		for (int i = 0; i < 33 + 1; i++)
+			elementRelatedVerbs.add(new ArrayList<String>());
+		for (int i = 0; i < 33 + 1; i++)
+			elementRelatedAdjs.add(new ArrayList<String>());
 
 		try
 		{
@@ -183,7 +229,7 @@ public class NameGenerator
 					verbs.add(name);
 				} catch (Exception e)
 				{
-					// System.out.println("missing hyphen in: " + line);
+					System.out.println("missing hyphen in: " + line);
 				}
 			}
 			in.close();
@@ -220,7 +266,12 @@ public class NameGenerator
 			in = new BufferedReader(new InputStreamReader(PowerGenerator.class.getResourceAsStream("females.txt"), "UTF-8"));
 			while (in.ready())
 				females.add(capitalize(in.readLine()));
+
 			in.close();
+
+			// titles
+			pretitles = Arrays.asList("Lord", "Lady", "Mr", "Doctor", "Miss", "Captain", "Admiral", "Sir");
+			posttitles = Arrays.asList("Man", "Woman", "Dude", "Mistress", "Master", "Girl", "Kid", "Boy");
 
 		} catch (IOException e)
 		{
