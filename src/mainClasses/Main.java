@@ -116,7 +116,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 	boolean						stopUsingPower			= false;
 	double						timeSinceLastScreenshot	= 2;
 	Image						lastScreenshot			= null;
-	public final static int		numOfElements			= 33;
+	public final static int		numOfElements			= 32;
 
 	// Visual graphical variables
 	Point						tooltipPoint			= new Point(-1, -1);
@@ -947,6 +947,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		PowerGenerator.initializeTables();
 		Ability.initializeDescriptions();
 		Resources.initialize();
+		NameGenerator.initialize();
 		Person.resetIDs();
 
 		nch = new Point[10];
@@ -984,6 +985,8 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		player.updateAbilities(); // Because we added some abilities and the hotkeys haven't been updated
 		env.people.add(player);
 		camera = new Point3D((int) player.x, (int) player.y, (int) player.z + 25);
+		player.DNA = EPgenerator.generateEPs();
+		player.rename();
 
 		Person shmulik = new NPC(96 * 22, 96 * 19, "aggressive");
 		shmulik.abilities.add(Ability.ability("Beam <Energy>", 6));
@@ -991,13 +994,14 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		shmulik.abilities.add(Ability.ability("Force Shield", 3));
 		shmulik.abilities.add(Ability.ability("Ball <Earth>", 6));
 		shmulik.abilities.add(Ability.ability("Heal I", 3));
+		shmulik.name = "Shmulik";
 		env.people.add(shmulik);
 
 		Person tzippi = new NPC(96 * 15, 96 * 25, "passive");
-		// tzippi.trigger();
+		tzippi.trigger();
 		env.people.add(tzippi);
 		Person aa = new NPC(96 * 17, 96 * 27, "passive");
-		// aa.trigger();
+		aa.trigger();
 		env.people.add(aa);
 		Person cc = new NPC(96 * 10, 96 * 25, "passive");
 		// cc.trigger();
@@ -1387,6 +1391,10 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 
 		// starting beyond window title bar
 		buffer.translate(8, 30);
+		//Name
+		buffer.setFont(new Font("Monospaced", Font.BOLD, (int) (20 * UIzoomLevel)));
+		buffer.setColor(Color.black);
+		buffer.drawString(player.name,(int)(20*UIzoomLevel), 25);
 		// Health, Mana, Stamina
 		buffer.setStroke(new BasicStroke(1));
 		// assuming neither of the following stats is too high (< x10 normal amount)
@@ -2021,7 +2029,10 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 			break;
 		case KeyEvent.VK_K:
 			for (Person p : env.people)
+			{
 				p.initAnimation();
+				p.rename();
+			}
 			break;
 		case KeyEvent.VK_CONTROL:
 			player.ctrlPressed = true;

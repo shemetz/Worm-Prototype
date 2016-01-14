@@ -1,4 +1,5 @@
 package mainClasses;
+
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -16,14 +17,15 @@ import mainResourcesPackage.SoundEffect;
 public class Person extends RndPhysObj
 {
 	public int							id;
+	public String						name;
 
 	public int							animState;
 	public int							animFrame;
 
-	public List<EP>					DNA;
+	public List<EP>						DNA;
 	public List<Ability>				abilities;
-	public List<Effect>				effects;
-	public List<UIText>				uitexts;
+	public List<Effect>					effects;
+	public List<UIText>					uitexts;
 
 	// STATS
 	public int							STRENGTH;
@@ -66,7 +68,7 @@ public class Person extends RndPhysObj
 	public double						timeBetweenDamageTexts;
 	public double						waitingDamage;
 	public Point						target;
-	public Area						rangeArea;
+	public Area							rangeArea;
 	public boolean						lastHandUsedIsRight					= false;
 	public boolean						punchedSomebody						= false;
 	public boolean						notMoving							= false;
@@ -101,7 +103,7 @@ public class Person extends RndPhysObj
 	public Person(double x1, double y1)
 	{
 		super(x1, y1, 0, 0);
-		mass = 70; //TODO
+		mass = 70; // TODO
 		radius = 48;
 		id = Person.giveID();
 		commanderID = id;
@@ -356,7 +358,7 @@ public class Person extends RndPhysObj
 		{
 		/// <number of frames per second> <animation name>
 		case 1: // ~7 running
-			for (Ability a: abilities)
+			for (Ability a : abilities)
 				if (a instanceof Sprint && a.on)
 				{
 					if (frameNum % 4 == 0)
@@ -588,6 +590,13 @@ public class Person extends RndPhysObj
 		// TEMP. In the future triggers will be based on the danger/trauma of the person.
 		randomizeDNA();
 		activateDNA();
+		if (this instanceof NPC)
+			rename();
+	}
+
+	public void rename()
+	{
+		name = NameGenerator.generate(this);
 	}
 
 	public void selfFrame(double deltaTime)
@@ -667,7 +676,7 @@ public class Person extends RndPhysObj
 					a.cooldownLeft = 0;
 			} else if (a.cooldownLeft == 0) // check if this passive ability is unactivated
 			{
-				a.use(null, this, null); //such elegant
+				a.use(null, this, null); // such elegant
 				a.cooldownLeft = -1;
 			}
 		}
@@ -758,6 +767,13 @@ public class Person extends RndPhysObj
 		if (drawStamina)
 			drawStamina(buffer);
 		buffer.rotate(-cameraRotation, x, y);
+	}
+
+	public void drawName(Graphics2D buffer)
+	{
+		buffer.setFont(new Font(Font.MONOSPACED, Font.BOLD, 16));
+		buffer.setColor(Color.black);
+		buffer.drawString(name, (int) (x - name.length() / 2 * 11), (int) (y - radius - 18));
 	}
 
 	public void drawLife(Graphics2D buffer)

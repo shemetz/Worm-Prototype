@@ -2379,13 +2379,18 @@ public class Environment
 				// important drawings:
 				d.drawShadow(buffer, shadowX, shadowY);
 				d.draw(buffer, cameraZed);
-				if (d.getClass().equals(Person.class) || d.getClass().getSuperclass().equals(Person.class))
+				if (d instanceof Person || d.getClass().getSuperclass().equals(Person.class))
 				{
 					Person p = (Person) d;
 					if (showDamageNumbers)
 						p.drawUITexts(buffer, cameraZed, cameraRotation);
 				}
-				if (d.getClass().equals(Beam.class))
+				if (d instanceof NPC)
+				{
+					Person p = (Person) d;
+					p.drawName(buffer);
+				}
+				if (d instanceof Beam)
 				{
 					Beam b = (Beam) d;
 					b.drawTopEffects(buffer, cameraZed); // TODO why not include this in draw()?

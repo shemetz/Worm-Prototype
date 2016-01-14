@@ -141,7 +141,7 @@ public class Ability
 		tagloop:
 		{
 			for (String s : Ability.descriptions)
-				if (s.startsWith(justName()))
+				if (s.startsWith(justName()) && s.charAt(justName().length()) == ' ')
 				{
 					String text = getDescription(name);
 					if (text.indexOf("\n") == -1)
@@ -499,7 +499,7 @@ public class Ability
 		public int compare(Ability a1, Ability a2)
 		{
 			if (a1.points != a2.points)
-				return Integer.compare(a1.points, a2.points);
+				return Integer.compare(a2.points, a1.points);
 			else
 				return a1.name.compareTo(a2.name);
 		}
@@ -581,7 +581,8 @@ public class Ability
 		case "Elemental Combat II":
 			return new Elemental_Combat_II_E(element, pnts);
 		default:
-			Main.errorMessage("Donald trump peninsula error - " + abilityName);
+			// Main.errorMessage("Donald trump peninsula error - " + abilityName);
+
 			// return null;
 			// Just because the game isn't finished yet and I still haven't made all 151 ability methods:
 			return new Ability(abilityName, pnts);

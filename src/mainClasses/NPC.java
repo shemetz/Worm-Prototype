@@ -23,6 +23,7 @@ public class NPC extends Person
 		strategy = s1;
 		tactic = "no target";
 		rightOrLeft = true;
+		rename(); //random npc name - no abilities yet
 	}
 
 	public void setCommander(int comID)

@@ -352,7 +352,7 @@ public class PowerGenerator
 		{
 			String element = s.substring(s.indexOf("<") + 1);
 			element = element.substring(0, element.indexOf(">"));
-			if (EP.damageType(element) == 0) // can't be resisted
+			if (EP.damageType(element) == 0 || EP.damageType(element) == 1) // can't be resisted
 			{
 				addAbility(abilities, "noob", points); // Yes, that means that instead of Elemental Resistance <Metal>: 8, you'll get something random: 4.
 				return;

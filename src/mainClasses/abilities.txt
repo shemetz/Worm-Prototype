@@ -673,7 +673,7 @@ For a period of 2*Level seconds, a target is frozen in time. It cannot be damage
 Costs 3 Mana.
 
 
-Chronobiological Control (Passive, On/Off)
+Chronobiology (Passive, On/Off)
 on-off buff level-up cost
 Your body’s organs move faster or slower through time.
 Everything your body does related to time is slower faster, either multiplied by 1.0+0.3*Level or divided by that same amount. This includes regeneration, effects that apply to you such as buffs or debuffs, and aging (if anyone cares about that).
