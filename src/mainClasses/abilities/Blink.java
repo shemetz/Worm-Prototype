@@ -16,6 +16,14 @@ public class Blink extends Ability
 	public Blink(int p)
 	{
 		super("Blink", p);
+		cost = 1 + (double) (points) / 3;
+		costType = "mana";
+		cooldown = 0.1 + (double) (points) / 4;
+		targetEffect1 = 0;
+		targetEffect2 = 2;
+		targetEffect3 = 4;
+		range = points * 100;
+		rangeType = "Exact range"; // maybe change it to up-to range?
 	}
 
 	public void use(Environment env, Person user, Point target)

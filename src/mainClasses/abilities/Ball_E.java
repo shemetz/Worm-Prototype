@@ -15,6 +15,14 @@ public class Ball_E extends Ability
 	public Ball_E(String elementName, int p)
 	{
 		super("Ball <"+elementName+">", p);
+		cost = 5 / elementalAttackNumbers[getElementNum()][2];
+		costType = "mana";
+		cooldown = 5 / elementalAttackNumbers[getElementNum()][2];
+		range = 80;
+		rangeType = "Look";
+		stopsMovement = false;
+		maintainable = true;
+		instant = true;
 	}
 	
 	public void use(Environment env, Person user, Point target)

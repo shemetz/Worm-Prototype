@@ -14,6 +14,14 @@ public class Strong_Force_Field extends Ability
 	public Strong_Force_Field(int p)
 	{
 		super("Strong Force Field", p);
+		cooldown = Math.max(7 - points, 0.3);
+		targetEffect1 = -1;
+		targetEffect2 = 0; // length
+		targetEffect3 = 0; // width
+		range = 68;
+		rangeType = "Exact range";
+		cost = 4;
+		costType = "mana";
 	}
 	
 	public void use(Environment env, Person user, Point target)

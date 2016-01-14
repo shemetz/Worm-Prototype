@@ -23,6 +23,16 @@ public class Wall_E extends Ability
 	public Wall_E(String elementName, int p)
 	{
 		super("Wall <" + elementName + ">", p);
+		cost = Math.max(3 - 0.3 * points, 0.8);
+		costType = "mana";
+		cooldown = Math.max(3 - 0.3 * points, 0.3); // is used for creating the wall
+		costPerSecond = 1;
+		targetEffect1 = -1; // x grid position
+		targetEffect2 = -1; // y grid position
+		range = 600;
+		rangeType = "Create in grid";
+		maintainable = true;
+		instant = true;
 	}
 
 	public void use(Environment env, Person user, Point target)

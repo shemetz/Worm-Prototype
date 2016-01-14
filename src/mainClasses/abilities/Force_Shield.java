@@ -14,6 +14,14 @@ public class Force_Shield extends Ability
 	public Force_Shield(int p)
 	{
 		super("Force Shield", p);
+		cost = 3;
+		costType = "mana";
+		cooldown = 1;
+		targetEffect1 = -1;
+		targetEffect2 = 0; // length
+		targetEffect3 = 0; // width
+		range = 68;
+		rangeType = "Exact range";
 	}
 
 	public void use(Environment env, Person user, Point target)

@@ -4,7 +4,6 @@ import java.awt.Graphics2D;
 
 public class Ball extends RndPhysObj
 {
-	public double	height;
 	public int		elementNum;
 	public int		points;
 	final int ballMass = 10;

@@ -17,6 +17,20 @@ public class Beam_E extends Ability
 	public Beam_E(String elementName, int p)
 	{
 		super("Beam <"+elementName+">", p);
+		cost = 0;
+		costPerSecond = 5 / elementalAttackNumbers[getElementNum()][2];
+		costType = "mana";
+		rangeType = "Exact range";
+		cooldown = 0.5; // after stopping a beam attack, this is the cooldown to start a new one
+
+		if (getElement().equals("Plant"))
+			range = 80 * points;
+		else
+			range = 500 * points;
+		stopsMovement = false;
+		maintainable = true;
+		instant = true;
+		
 		frameNum = 0;
 		beamFrameNum = 0;
 	}

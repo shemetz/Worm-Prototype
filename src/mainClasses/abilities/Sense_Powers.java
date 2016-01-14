@@ -21,6 +21,13 @@ public class Sense_Powers extends Ability
 	public Sense_Powers(int p)
 	{
 		super("Sense Powers", p);
+		cost = 0;
+		costType = "none";
+		cooldown = 1;
+		range = (int) (50 * Math.pow(2, points));
+		rangeType = "Circle area";
+		instant = true;
+		
 		details = new int[Main.numOfElements];
 		for (int i = 0; i < details.length; i++)
 			details[i] = 0;

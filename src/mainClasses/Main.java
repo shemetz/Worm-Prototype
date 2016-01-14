@@ -45,8 +45,10 @@ import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.Timer;
 
+import mainClasses.abilities.Protective_Bubble_I;
 import mainClasses.abilities.Punch;
 import mainClasses.abilities.Sense_Powers;
+import mainClasses.abilities.Shield_E;
 import mainClasses.abilities.Sprint;
 import mainResourcesPackage.SoundEffect;
 
@@ -357,32 +359,44 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 			}
 		}
 		// ARC FORCE FIELDS
-		for (int i = 0; i < env.arcFFs.size(); i++)
+		affloop: for (int i = 0; i < env.arcFFs.size(); i++)
 		{
 			ArcForceField aff = env.arcFFs.get(i);
 			aff.update(deltaTime);
 			if (frameNum % 10 == 0) // check for next AFF frame 5 times per second, because the check includes drawing an image
 			{
-				// Currently force fields change images after lower than (e.g.) 75 health, not 75% health!
-				int frame = 0;
-				if (aff.life >= 75)
-					frame = 0;
-				else if (aff.life >= 50)
-					frame = 1;
-				else if (aff.life >= 15)
-					frame = 2;
-				else
-					frame = 3;
-				aff.changeImage(Resources.arcForceFields[aff.elementNum][frame]);
+				aff.updateImage();
 			}
 			if (aff.life <= 0)
 			{
 				for (Person p : env.people)
 					if (p.equals(aff.target))
 						for (Ability a : p.abilities)
-							if (a.justName().equals("Shield"))
-								a.use(env, p, p.target); // that method will remove the arc force field.
-				i--;
+						{
+							if (a instanceof Shield_E)
+							{
+								Shield_E ability = (Shield_E) a;
+								if (ability.shield.equals(aff))
+								{
+									ability.use(env, p, p.target); // that method will remove the arc force field.
+									i--;
+									continue affloop;
+								}
+							}
+							if (a instanceof Protective_Bubble_I)
+							{
+								Protective_Bubble_I ability = (Protective_Bubble_I) a;
+								if (ability.bubble.equals(aff))
+								{
+									ability.on = false;
+									ability.cooldownLeft = ability.cooldown;
+									env.shieldDebris(aff, "bubble");
+									env.arcFFs.remove(i);
+									i--;
+									continue affloop;
+								}
+							}
+						}
 			}
 		}
 		// FORCE FIELDS
@@ -954,6 +968,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		env.shadowY = -0.7;
 
 		player = new Player(96 * 20, 96 * 20);
+		player.abilities.add(Ability.ability("Protective Bubble I", 5));
 		player.abilities.add(Ability.ability("Ball <Earth>", 5));
 		player.abilities.add(Ability.ability("Ball <Fire>", 5));
 		player.abilities.add(Ability.ability("Flight I", 5));

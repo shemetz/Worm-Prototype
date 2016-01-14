@@ -13,6 +13,12 @@ public class Sprint extends Ability
 	public Sprint(int p)
 	{
 		super("Sprint", p);
+		cost = 0;
+		costType = "stamina";
+		cooldown = 1;
+		rangeType = "";
+		maintainable = true;
+		instant = true;
 		costPerSecond = 3 - 0.3 * points;
 	}
 

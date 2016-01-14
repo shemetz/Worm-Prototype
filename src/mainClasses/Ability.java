@@ -20,6 +20,7 @@ import mainClasses.abilities.Ghost_Mode_I;
 import mainClasses.abilities.Heal_I;
 import mainClasses.abilities.Heal_II;
 import mainClasses.abilities.Pool_E;
+import mainClasses.abilities.Protective_Bubble_I;
 import mainClasses.abilities.Punch;
 import mainClasses.abilities.Ranged_Explosion;
 import mainClasses.abilities.Sense_Element_E;
@@ -114,9 +115,10 @@ public class Ability
 		name = n;
 		points = p;
 
-		// default values. Ideally this code is useless.
+		// default values.
 		costPerSecond = -1;
 		cooldown = -1;
+		cooldownLeft = 0;
 		cost = -1;
 		costPerSecond = -1;
 		range = -1;
@@ -124,257 +126,17 @@ public class Ability
 		instant = false;
 		maintainable = false;
 		stopsMovement = false;
-		costType = "";
-
-		assignVariables();
-		addSounds();
-		cooldownLeft = 0;
+		on = false;
+		costType = "none";
 		timeLeft = 0;
+
+		addTags();
+		addSounds();
 		elementNum = getElementNum();
 	}
 
-	void assignVariables()
+	void addTags()
 	{
-		range = 600; // default range is 6 meters
-		// Most stuff:
-		switch (justName())
-		{
-		case "Toughness III":
-		case "Wound Regeneration II":
-		case "Wound Regeneration I":
-		case "Leg Muscles":
-		case "Elemental Combat I":
-		case "Elemental Combat II":
-		case "Strength I":
-		case "Strength II":
-		case "Strength III":
-			cost = -1;
-			costType = "none";
-			cooldown = -1;
-			range = -1;
-			break;
-
-		case "Ranged Explosion":
-			cost = 3;
-			costType = "mana";
-			cooldown = 1;
-			rangeType = "Ranged circular area";
-			areaRadius = points * 50;
-			break;
-		case "Heal I":
-			cost = 0;
-			costPerSecond = 1;
-			costType = "mana";
-			cooldown = 0;
-			range = 50 * points;
-			rangeType = "Circle area";
-			break;
-		case "Strong Force Field":
-			cooldown = Math.max(7 - points, 0.3);
-			targetEffect1 = -1;
-			targetEffect2 = 0; // length
-			targetEffect3 = 0; // width
-			range = 68;
-			rangeType = "Exact range";
-			cost = 4;
-			costType = "mana";
-			break;
-		case "Flight I":
-			costPerSecond = Math.max(5 - points, 0);
-			costType = "stamina";
-			cooldown = 1;
-			cost = 0;
-			break;
-		case "Flight II":
-			costPerSecond = 0.4;
-			costType = "stamina";
-			cooldown = 1;
-			cost = 0;
-			break;
-		case "Telekinetic Flight":
-			// costPerSecond = 0
-			costType = "none";
-			cooldown = 1;
-			cost = 0;
-			break;
-		case "Pool":
-			cost = Math.max(3 - 0.3 * points, 0.8); // reduced cost is that minus 1.5
-			costPerSecond = 1;
-			costType = "mana";
-			cooldown = Math.max(3 - 0.3 * points, 0.3); // is used for creating the pool
-			targetEffect1 = -1; // x grid position
-			targetEffect2 = -1; // y grid position
-			range = 600;
-			rangeType = "Create in grid";
-			break;
-		case "Wall":
-			cost = Math.max(3 - 0.3 * points, 0.8);
-			costType = "mana";
-			cooldown = Math.max(3 - 0.3 * points, 0.3); // is used for creating the wall
-			costPerSecond = 1;
-			targetEffect1 = -1; // x grid position
-			targetEffect2 = -1; // y grid position
-			range = 600;
-			rangeType = "Create in grid";
-			break;
-		case "Force Shield":
-			cost = 3;
-			costType = "mana";
-			cooldown = 1;
-			targetEffect1 = -1;
-			targetEffect2 = 0; // length
-			targetEffect3 = 0; // width
-			range = 68;
-			rangeType = "Exact range";
-			break;
-		case "Blink":
-			cost = 1 + (double) (points) / 3;
-			costType = "mana";
-			cooldown = 0.1 + (double) (points) / 4;
-			targetEffect1 = 0;
-			targetEffect2 = 2;
-			targetEffect3 = 4;
-			range = points * 100;
-			rangeType = "Exact range"; // maybe change it to up-to range?
-			break;
-		case "Ball":
-			cost = 5 / elementalAttackNumbers[getElementNum()][2];
-			costType = "mana";
-			cooldown = 5 / elementalAttackNumbers[getElementNum()][2];
-			range = 80;
-			rangeType = "Look";
-			break;
-		case "Beam":
-			cost = 0;
-			costPerSecond = 5 / elementalAttackNumbers[getElementNum()][2];
-			costType = "mana";
-			rangeType = "Exact range";
-			cooldown = 0.5; // after stopping a beam attack, this is the cooldown to start a new one
-
-			if (getElement().equals("Plant"))
-				range = 80 * points;
-			else
-				range = 500 * points;
-			break;
-		case "Shield":
-			cost = 2;
-			costPerSecond = 0.3;
-			costType = "mana";
-			cooldown = 5;
-			range = -1;
-			rangeType = "Look";
-			break;
-		case "Ghost Mode I":
-			cost = 2 * points;
-			costType = "mana";
-			costPerSecond = 0.3;
-			cooldown = 5;
-			range = -1;
-			rangeType = "";
-			break;
-
-		// Unpowered abilities.
-		case "Punch":
-			cost = 1;
-			costType = "stamina";
-			cooldown = 0.55; // is actually 0.55 - Math.min(0.02*FITNESS, 0.15);
-			range = 1; // is actually 1.15 * puncher's radius.
-			rangeType = "Look";
-			break;
-		case "Sprint":
-			cost = 0;
-			costType = "stamina";
-			costPerSecond = 3;
-			cooldown = 1;
-			rangeType = "";
-			break;
-
-		// Senses
-		case "Sense Life":
-		case "Sense Mana and Stamina":
-		case "Sense Structure":
-			cost = -1;
-			costType = "none";
-			cooldown = -1;
-			range = (int) (50 * Math.pow(2, points));
-			rangeType = "Circle area";
-			break;
-		case "Sense Powers":
-			cost = 0;
-			costType = "none";
-			cooldown = 1;
-			range = (int) (50 * Math.pow(2, points));
-			rangeType = "Circle area";
-			break;
-		case "Sense Parahumans":
-		case "Sense Element":
-			cost = -1;
-			costType = "none";
-			cooldown = -1;
-			range = (int) (50 * Math.pow(3, points));
-			rangeType = "Circle area";
-			break;
-		default:
-			Main.errorMessage("the Ability class doesn't implement the power: " + justName());
-			break;
-		}
-		// StopsMovement, Maintainable
-		switch (justName())
-		{
-		// ball - need to re-do this
-		case "Ball":
-			stopsMovement = false;
-			maintainable = true;
-			instant = true;
-			break;
-		// maintainable and free-moving
-		case "Beam":
-		case "Sprint":
-		case "Heal I":
-		case "Heal II":
-		case "Absorb Armor":
-		case "Wall":
-		case "Pool":
-			stopsMovement = false;
-			maintainable = true;
-			instant = true;
-			break;
-		// maintainable and stopping
-		case "Shield":
-		case "Clairvoyance":
-		case "Clairvoyance Charge":
-		case "Move Wall":
-		case "Escalating Scream":
-		case "Explosion Charge":
-			stopsMovement = true;
-			maintainable = true;
-			instant = true;
-			break;
-		// punch
-		case "Punch":
-			stopsMovement = true;
-			maintainable = false;
-			instant = true;
-			break;
-		// on-off stuff
-		case "Flight I":
-		case "Flight II":
-		case "Telekinetic Flight":
-		case "Ghost Mode I":
-		case "Ghost Mode II":
-		case "Sense Powers":
-			stopsMovement = false;
-			maintainable = false;
-			instant = true;
-			break;
-		// default
-		default:
-			stopsMovement = false;
-			maintainable = false;
-			instant = false;
-			break;
-		}
-
 		// tags
 		tagloop:
 		{
@@ -658,38 +420,6 @@ public class Ability
 		return text;
 	}
 
-	static List<Ability> ECAbilities(int elementNum, int rank, int points) /// TODO remove
-	{
-		// rank 1 = Elemental Combat I
-		// rank 2 = Elemental Combat II
-		// rank 3 = Charged Elemental Combat
-		List<Ability> addedAbilities = new ArrayList<Ability>();
-
-		switch (rank)
-		{
-		case 1: // Ball, Beam, Shield
-			for (int i = 0; i < 3; i++)
-				if (elementalAttacksPossible[elementNum][i])
-					addedAbilities.add(new Ability(elementalAttacks[i] + " <" + EP.elementList[elementNum] + ">", points));
-			break;
-		case 2: // All (Ball, Beam, Shield, Wall, Pool, Spray, Strike) not necessarily in that order
-			for (int i = 0; i < 7; i++)
-				if (elementalAttacksPossible[elementNum][i])
-					addedAbilities.add(new Ability(elementalAttacks[i] + " <" + EP.elementList[elementNum] + ">", points));
-			break;
-		case 3: // Charged Beam, Charged Ball
-			for (int i = 0; i < 2; i++)
-				if (elementalAttacksPossible[elementNum][i])
-					addedAbilities.add(new Ability("Charged " + elementalAttacks[i] + " <" + EP.elementList[elementNum] + ">", points));
-			break;
-		default:
-			Main.errorMessage("Unknown rank: " + rank);
-			break;
-		}
-
-		return addedAbilities;
-	}
-
 	public static void initializeDescriptions()
 	{
 		try
@@ -786,6 +516,8 @@ public class Ability
 		}
 		switch (trimmedAbilityName)
 		{
+		case "Protective Bubble I":
+			return new Protective_Bubble_I(pnts);
 		case "Sprint":
 			return new Sprint(pnts);
 		case "Strength I":

@@ -13,6 +13,11 @@ public class Flight_I extends Ability
 	public Flight_I(int p)
 	{
 		super("Flight I", p);
+		costPerSecond = Math.max(5 - points, 0);
+		costType = "stamina";
+		cooldown = 1;
+		cost = 0;
+		instant = true;
 	}
 
 	public void use(Environment env, Person user, Point target)

@@ -11,9 +11,20 @@ import mainClasses.Player;
 public class Shield_E extends Ability
 {
 
+	public ArcForceField shield;
+
 	public Shield_E(String elementName, int p)
 	{
 		super("Shield <" + elementName + ">", p);
+		cost = 2;
+		costPerSecond = 0.3;
+		costType = "mana";
+		cooldown = 5;
+		range = -1;
+		rangeType = "Look";
+		maintainable = true;
+
+		shield = null;
 	}
 
 	public void use(Environment env, Person user, Point target)
@@ -29,7 +40,8 @@ public class Shield_E extends Ability
 				return;
 
 			final double arc = Math.PI / 2, minRadius = 80, maxRadius = 92;
-			env.arcFFs.add(new ArcForceField(user, angle, arc, minRadius, maxRadius, (int) (points * 10), getElementNum()));
+			shield = new ArcForceField(user, angle, arc, minRadius, maxRadius, (int) (points * 10), getElementNum());
+			env.arcFFs.add(shield);
 			user.maintaining = true;
 			on = true;
 			user.switchAnimation(2);
@@ -41,7 +53,7 @@ public class Shield_E extends Ability
 		{
 			double remainingFFhealth = 0;
 			for (int i = 0; i < env.arcFFs.size(); i++)
-				if (env.arcFFs.get(i).target.equals(user))
+				if (env.arcFFs.get(i).equals(shield))
 				{
 					remainingFFhealth = env.arcFFs.get(i).life + env.arcFFs.get(i).extraLife;
 					env.shieldDebris(env.arcFFs.get(i), "deactivate");

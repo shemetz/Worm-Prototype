@@ -13,6 +13,13 @@ public class Ghost_Mode_I extends Ability
 	public Ghost_Mode_I(int p)
 	{
 		super("Ghost Mode I", p);
+		cost = 2 * points;
+		costType = "mana";
+		costPerSecond = 0.3;
+		cooldown = 5;
+		range = -1;
+		rangeType = "";
+		instant = true;
 	}
 
 	public void use(Environment env, Person user, Point target)

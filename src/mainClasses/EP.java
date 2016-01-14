@@ -116,6 +116,6 @@ public class EP
 
 	public static String[] elementList =
 	{ "Fire", "Water", "Wind", "Electricity", "Metal", "Ice", "Energy", "Acid", "Lava", "Flesh", "Earth", "Plant", "Sense", "Strong", "Regenerate", "Flight", "Dexterity", "Armor", "Movement",
-			"Teleport", "Ghost", "Force Field", "Time", "Loop", "Power", "Steal", "Illusion", "Summon", "Explosion", "Control", "Reshape", "Buff", "Charge" };
+			"Teleport", "Ghost", "Force Field", "Time", "Loop", "Power", "Steal", "Illusion", "Summon", "Explosion", "Control", "Buff", "Charge" };
 
 }

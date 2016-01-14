@@ -17,7 +17,6 @@ public class Beam extends Drawable
 	public final static int	lengthOfBeamImg	= 200, heightOfBeamImg = 40;
 	public double				range;										// The maximum range of this beam. Subsequent reflection-beams will have shorter range.
 	public double				size;
-	public double				height;										// z is in center of beam, like balls
 
 	public Beam(Person creator, Point3D start, Point3D end, int elementNum, int points, double range)
 	{
@@ -114,7 +113,7 @@ public class Beam extends Drawable
 		double angle = Math.atan2(end.y - start.y, end.x - start.x);
 		if (z <= cameraZed && endType != -1)
 		{
-			// end
+			// end 
 			if (endType == 0)
 			{
 				buffer.rotate(angle, end.x, end.y);

@@ -12,7 +12,6 @@ import mainResourcesPackage.SoundEffect;
 public class ForceField extends Drawable
 {
 	public int		length, width;
-	public double	height;
 	public double	life;
 	public int		maxLife;
 	public int		armor;

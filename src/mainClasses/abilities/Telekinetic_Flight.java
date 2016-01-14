@@ -7,14 +7,13 @@ import mainClasses.Environment;
 import mainClasses.Person;
 import mainClasses.Player;
 
-public class Flight_II extends Ability
+public class Telekinetic_Flight extends Ability
 {
 
-	public Flight_II(int p)
+	public Telekinetic_Flight(int p)
 	{
-		super("Flight II", p);
-		costPerSecond = 0.4;
-		costType = "stamina";
+		super("Telekinetic Flight", p);
+		costType = "none";
 		cooldown = 1;
 		cost = 0;
 		instant = true;
@@ -39,7 +38,7 @@ public class Flight_II extends Ability
 
 	public void maintain(Environment env, Person user, Point target, double deltaTime)
 	{
-		user.stamina -= deltaTime * costPerSecond;
+		
 	}
 
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)

@@ -573,7 +573,7 @@ Costs 3 Mana.
 Protective Bubble II (Activated)
 defensive force-field cost cooldown
 Create a strong spherical force field that surrounds you and follows you.
-Create a spherical force field around you. The FF’s radius is 1 meter, and its width is 0.05 + 0.2*Level meters. The FF’s life is 30*Level.
+Create a spherical force field around you. The FF’s radius is 1 meter, and its width is 0.05 + 0.2*Level meters. The FF’s life is 20*Level. The FF has Level armor.
 Cooldown: 7-Level seconds (minimum 0.3).
 Costs 4 Mana.
 
@@ -581,7 +581,7 @@ Costs 4 Mana.
 Wide Force Field (Activated)
 defensive force-field cost cooldown range
 Create a wide force field in front of you.
-Create a rectangular force field in front of you. The FF’s dimensions are: length 3+Level, height 1, width 0.1+0.1*Level (meters). The FF has 50*Level HP and loses 5% of its current life every second (minimum 1).
+Create a rectangular force field in front of you. The FF’s dimensions are: length 3+Level, height 1, width 0.1+0.1*Level (meters). The FF has 50*Level HP and loses 5% of its current life every second (minimum 1). Has Level/2 armor.
 Cooldown: 7-Level seconds (minimum 0.3).
 Costs 4 Mana.
 
@@ -589,7 +589,7 @@ Costs 4 Mana.
 Strong Force Field (Activated)
 defensive force-field cost cooldown range
 Create a very strong force field in front of you.
-Create a rectangular force field in front of you. The FF’s dimensions are: length 1+0.5*Level, height 1, width 0.05+0.07*Level (meters). The FF has 80*Level HP and loses 5% of its current life every second (minimum 1).
+Create a rectangular force field in front of you. The FF’s dimensions are: length 1+0.5*Level, height 1, width 0.05+0.07*Level (meters). The FF has 80*Level HP and loses 5% of its current life every second (minimum 1). The FF has Level armor.
 Cooldown: 7-Level seconds (minimum 0.3).
 Costs 4 Mana.
 
@@ -597,7 +597,7 @@ Costs 4 Mana.
 Mobile Force Field (Activated)
 defensive force-field cost cooldown range
 Create a mobile force field in front of you.
-Create a rectangular force field in front of you. The FF’s dimensions are: length 3+Level, height 1, width 0.1+0.1*Level (meters). The FF has 50*Level HP and loses 5% of its current life every second (minimum 1). The FF follows you just like a Protective Bubble does.
+Create a rectangular force field in front of you. The FF’s dimensions are: length 3+Level, height 1, width 0.1+0.1*Level (meters). The FF has 50*Level HP and loses 5% of its current life every second (minimum 1). The FF follows you just like a Protective Bubble does. Has Level/2 armor.
 Cooldown: 7-Level seconds (minimum 0.3).
 Costs 4 Mana.
 
@@ -621,8 +621,8 @@ Cost: 0.5 M/s while moving a force field?
 
 Bubble (Activated) Needs a rename, because of Protective Bubble
 defensive force-field cost cooldown range
-Create a weak spherical force field that surrounds somebody.
-Create a spherical force field around a targeted creature. The FF’s radius is 1 meter, and its width is 0.05 + 0.05*Level meters. The FF’s life is 20*Level.
+Create a spherical force field that surrounds somebody.
+Create a spherical force field around a targeted creature. The FF’s radius is 1 meter, and its width is 0.05 + 0.05*Level meters. The FF’s life is 10*Level. Has Level*2 armor.
 Notice: This bubble is stationary, and it can be used on enemies (to trap them).
 Cooldown: 6-Level seconds (minimum 0.3).
 Costs 3 Mana.
@@ -1100,24 +1100,6 @@ It’s easier for you to control people that can control <e>.
 When trying to use a control ability, targets that have at least one <Element> EP always get controlled, are controlled for x1.5 the time, and the mana cost (for Twitch and Mind Twitch) is reduced to 0. Also, gain +0.5*Level to maximum Mana. Needs to include level somehow!
 
 
-Reshape I (Passive) <Element>
-passive extra-abilities
-You can reshape <e>; creating walls and pools or destroying them.
-Gain Wall, Pool, Destroy Wall and Destroy Pool, all of <Element>.
-
-
-Reshape II (Passive) <Element>
-passive extra-abilities
-You can reshape <e>, shaping either walls or pools.
-Gain Wall, Move Walls, Destroy Wall, Pool, Melt and Destroy Pool, all of <Element>.
-
-
-Reshape III (Passive) <Element>
-passive extra-abilities
-You are a master of reshaping <e>, and you can also attack using walls and pools.
-Gain Wall, Move Walls, Destroy Wall, Pool, Destroy Pool, Launch Wall, Wall Prison, Splash Pool and Melt, all of <Element>.
-
-
 Wall (Activated) <Element>
 defensive build cost
 Create <an e> wall.
@@ -1126,71 +1108,11 @@ Ability can also be used to fix damaged <Element> walls.
 Cost: 6-0.5*EP Mana.
 
 
-Move Walls (Maintained) <Element>
-point level-up
-Slowly move <an e> wall.
-Target a point, move the cursor in a direction, and all walls within a range of Level meters from it start moving (in a grid) in that direction. The walls move at a speed of 0.3*Level m/s. The walls can’t move into other walls, pools or creatures.
-Cost: 0.2 M/s.
-
-
-Destroy Wall (Activated) <Element>
-cooldown
-Destroy <an e> wall.
-Target an <Element> wall. That wall’s life becomes 0.
-Cooldown: 6-0.5*Level seconds.
-Cost: 5-Level mana (minimum -1). Yes, you can gain mana from destroyed walls.
-
-
 Pool (Activated) <Element>
 defensive build cost
 Create <an e> pool or pit.
 Create a 1x1 m pool of the element. When creating pools adjacent to existing pools of the same material, the mana cost is greatly decreased.
 Cost: 7-0.5*Level(minimum 1) Mana, or 3-0.5*Level (minimum 0) Mana next to another pool.
-
-
-Destroy Pool (Activated) <Element>
-cooldown
-Destroy <an e> pool.
-Target an <Element> pool. That pool life becomes 0.
-Cooldown: 6-0.5*Level seconds.
-Cost: 5-Level Mana (minimum 0).
-
-
-Melt (Activated) <Element>
-cooldown
-Melt <an e> wall into a pool.
-Target an <Element> wall. Destroy it and create an <Element> pool instead.
-Cost: 0 Mana.
-Cooldown: 1-0.1*Level seconds (minimum 0).
-
-
-Splash Pool (Activated) <Element>
-offensive cost
-Gather the <e> of <an e> pool and launch it at a target.
-Target a pool and then a creature. The pool starts to continuously shoot an <Element> Beam at the target with level=Level+1, for 5 seconds, during which the pool loses life at the rate of 20 life per second. Maybe instead you only target a point/person, and all pools within range will shoot at them?
-Cost: 2 Mana.
-
-
-Launch Wall (Activated) <Element>
-offensive cost
-Throw <an e> wall at a target.
-Target a wall and then a creature. The wall immediately becomes an <Element> Ball and is thrown towards the target. Again, maybe instead you only target a point/person and all walls within range will shoot at them?
-Cost: 2 Mana.
-
-
-Wall Prison (Activated) <Element>
-offensive defensive build cost
-Create a circle of <e> walls around a target.
-Target a creature or a point on the ground. A square of <Element> walls are created around the target within the next 4 seconds. If the target is inside a single grid square, it’s 3x3. If they intersect one line, it’s 3x4. Etc. When used on extremely large targets, it WILL create fitting wall-prisons.
-Cost: 15-Level Mana.
-
-
-Earth Weapon (Activated)
-cooldown cost todo
-Carve stone weapons out of the floor.
-If you are currently holding nothing, create a Stone mace. If you’re holding a bow, create five Stone arrows. If you’re holding a different weapon, create a Stone mace on the ground.
-Cooldown: 8 seconds.
-Cost: 9-Level Mana.
 
 
 Elemental Void (Passive)
@@ -1401,18 +1323,3 @@ charge range duration
 Charge while in combat. Release to stun enemies around you.
 Charge while in combat. Release: enemies within a range of 15 m are stunned for 0.02*Charge*Level seconds. Uhhh does that mean you can infini-stun while at level 10? TODO CHECK THIS
 Cost: 50 Charge.
-
-
-Earthrise (Charge + Activated)
-defensive charge range extra-abilities
-Charge by destroying walls. Release to raise the earth around enemies and yourself.
-You have Demolish. Charge by 0.5*Level whenever you use Demolish. Release to create an earth wall in every single grid space within a range of 30 m that is currently empty.
-Cost: 100 Charge.
-
-
-Demolish (Activated)
-cost cooldown range
-Destroy any type of wall.
-Target a wall. That wall’s HP becomes 0.
-Cooldown: 0.3 seconds.
-Cost: 7-Level (minimum 0).

@@ -22,12 +22,12 @@ public class Resources
 	static List<List<List<List<BufferedImage>>>>	bodyPart;															// body part, permutation, state, frame
 	static Map<String, BufferedImage>				icons;																// ability, frame
 	final static int								elementalNum	= 12;
-	static BufferedImage[][]						arcForceFields;														// element, frame (healthy / 75% / 50% / 25%)
+	static BufferedImage[][]						arcForceFields;														// element (12 = Prot. Bubble), frame (healthy / 75% / 50% / 25%)
 	final static int								arcFFImageWidth	= 288;
 	static BufferedImage[]							balls;																// element
 	static BufferedImage[][]						beams;																// element, type (0,1,2,3 = start, 4,5,6,7 = middle, 8,9,10,11 = flat end, 12,13,14,15 regular end)
-	static BufferedImage[][]						debris;																// element, type. 12 = smoke
-	static BufferedImage[][]						debrisShadows;														// element, type
+	static BufferedImage[][]						debris;																// element, type. 12 = smoke, 13 = Force Field.
+	static BufferedImage[][]						debrisShadows;														// element, type.  ^
 	final static int								debrisWidth		= 40;
 	static List<BufferedImage>						clouds;
 	static List<BufferedImage>						cloudShadows;
@@ -49,10 +49,10 @@ public class Resources
 		bodyPart = new ArrayList<List<List<List<BufferedImage>>>>(); // LEGS, CHEST (+arms), HEAD, HAIR
 
 		icons = new HashMap<String, BufferedImage>();
-		arcForceFields = new BufferedImage[elementalNum][4]; // 0-11 = elemental (6 = energy)
+		arcForceFields = new BufferedImage[elementalNum + 1][4]; // 0-11 = elemental, 12 = Prot. Bubble
 		balls = new BufferedImage[elementalNum];
-		debris = new BufferedImage[elementalNum + 1][6];
-		debrisShadows = new BufferedImage[elementalNum + 1][6];
+		debris = new BufferedImage[elementalNum + 2][6];
+		debrisShadows = new BufferedImage[debris.length][6];
 		cracks = new BufferedImage[3][12]; // 11 is saved for the original wall, not corners
 		clouds = new ArrayList<BufferedImage>();
 		cloudShadows = new ArrayList<BufferedImage>();
@@ -175,12 +175,24 @@ public class Resources
 			}
 		}
 
+		//Smoke debris
 		for (int j = 0; j < 3; j++)
 			debris[12][j] = ResourceLoader.getBufferedImage("elementalAbilities/Smoke_debris_" + j + ".png");
 		for (int j = 0; j < 3; j++)
 			debris[12][j + 3] = ResourceLoader.getBufferedImage("elementalAbilities/Smoke_smalldebris_" + j + ".png");
 		for (int j = 0; j < debris[0].length; j++)
 			debrisShadows[12][j] = Drawable.createShadow(debris[12][j]);
+		//FF debris
+		for (int j = 0; j < 3; j++)
+			debris[13][j] = ResourceLoader.getBufferedImage("elementalAbilities/FF_debris_" + j + ".png");
+		for (int j = 0; j < 3; j++)
+			debris[13][j + 3] = ResourceLoader.getBufferedImage("elementalAbilities/FF_smalldebris_" + j + ".png");
+		for (int j = 0; j < debris[0].length; j++)
+			debrisShadows[13][j] = Drawable.createShadow(debris[12][j]);
+		
+		//Protective bubble
+		for (int j = 0; j < 4; j++)
+			arcForceFields[12][j] = ResourceLoader.getBufferedImage("forcefields/Protective_Bubble_" + j + ".png");
 
 		for (int i = 0; i < 3; i++)
 		{

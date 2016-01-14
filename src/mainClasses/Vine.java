@@ -14,7 +14,6 @@ public class Vine extends Drawable // Vines are plant beams, sort of
 	public int					points;
 	public double				range;							// The maximum range of this vine. Measured from the PERSON to the END.
 	public double				size;							// currently unused; TODO
-	public double				height;							// z is in center of beam, like balls
 	public double				startDistance, endDistance;		// distance from creator to start, and from creator to end
 	public double				length;							// only relevant, and fixed in size, when vine is grabbling something
 	public double				deltaLength;					// like a spring! the extra length a vine is pulled/pushed.

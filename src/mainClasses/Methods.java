@@ -242,6 +242,7 @@ public class Methods
 
 	public static double lerpAngle(double angle, double target, double amount)
 	{
+		//TODO um. Does it accept all angles, or only ones between 0 and tau, or only ones between -pi and +pi?
 		return angle + (((((target - angle) % (Math.PI * 2)) + (Math.PI * 3)) % (Math.PI * 2)) - Math.PI) * amount;
 	}
 

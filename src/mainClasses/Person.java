@@ -17,8 +17,6 @@ public class Person extends RndPhysObj
 {
 	public int							id;
 
-	public double						height;
-
 	public int							animState;
 	public int							animFrame;
 

@@ -13,6 +13,12 @@ public class Ranged_Explosion extends Ability
 	public Ranged_Explosion(int p)
 	{
 		super("Ranged Explosion", p);
+		cost = 3;
+		costType = "mana";
+		cooldown = 1;
+		range = 600;
+		rangeType = "Ranged circular area";
+		areaRadius = points * 50;
 	}
 	
 	public void use(Environment env, Person user, Point target)

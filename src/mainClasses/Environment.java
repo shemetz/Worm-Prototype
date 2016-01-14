@@ -1345,58 +1345,121 @@ public class Environment
 		ArcForceField collidedAFF = null;
 		for (ArcForceField aff : arcFFs)
 		{
-			if (b.z - b.height / 2 < aff.z + aff.height && b.z + b.height / 2 > aff.z)
-			{
-				Rectangle2D generalBounds = new Rectangle2D.Double(aff.x - aff.maxRadius, aff.y - aff.maxRadius, aff.maxRadius * 2, aff.maxRadius * 2);
-				// easier intersection first
-				if (beamLine.intersects(generalBounds))
+			if (b.z - b.height / 2 < aff.z + aff.height && b.z + b.height / 2 > aff.z) // height check
+				if (Methods.DistancePow2(b.start, aff.target.Point()) > aff.maxRadius * aff.maxRadius) // if beam did not originate inside arc force field.
 				{
-					// detailed intersection
-					double minAngle = aff.rotation - aff.arc / 2;
-					double maxAngle = aff.rotation + aff.arc / 2;
-
-					while (minAngle < 0)
-						minAngle += 2 * Math.PI;
-					while (minAngle >= 2 * Math.PI)
-						minAngle -= 2 * Math.PI;
-					while (maxAngle < 0)
-						maxAngle += 2 * Math.PI;
-					while (maxAngle >= 2 * Math.PI)
-						maxAngle -= 2 * Math.PI;
-
-					Point2D closestPointToSegment = Methods.getClosestPointOnSegment(beamLine.getX1(), beamLine.getY1(), beamLine.getX2(), beamLine.getY2(), aff.x, aff.y);
-
-					List<Point2D> points = new ArrayList<Point2D>();
-					List<Line2D> lines = new ArrayList<Line2D>();
-
-					for (int k = -1; k < 2; k += 2) // intended to check both intersections of the line with the circle
+					Rectangle2D generalBounds = new Rectangle2D.Double(aff.x - aff.maxRadius, aff.y - aff.maxRadius, aff.maxRadius * 2, aff.maxRadius * 2);
+					// easier intersection first
+					if (beamLine.intersects(generalBounds))
 					{
-						double closestPointDistanceMax = Math.sqrt(Methods.DistancePow2(closestPointToSegment.getX(), closestPointToSegment.getY(), aff.x, aff.y));
-						double angleToCollisionPointMax = Math.atan2(closestPointToSegment.getY() - aff.y, closestPointToSegment.getX() - aff.x)
-								+ k * Math.acos(closestPointDistanceMax / aff.maxRadius);
+						List<Point2D> points = new ArrayList<Point2D>();
+						List<Line2D> lines = new ArrayList<Line2D>();
+						if (aff.arc < TAU)
+						{
+							// detailed intersection
+							double minAngle = aff.rotation - aff.arc / 2;
+							double maxAngle = aff.rotation + aff.arc / 2;
 
-						double closestPointDistanceMin = Math.sqrt(Methods.DistancePow2(closestPointToSegment.getX(), closestPointToSegment.getY(), aff.x, aff.y));
-						double angleToCollisionPointMin = Math.atan2(closestPointToSegment.getY() - aff.y, closestPointToSegment.getX() - aff.x)
-								+ k * Math.acos(closestPointDistanceMin / aff.minRadius);
+							while (minAngle < 0)
+								minAngle += 2 * Math.PI;
+							while (minAngle >= 2 * Math.PI)
+								minAngle -= 2 * Math.PI;
+							while (maxAngle < 0)
+								maxAngle += 2 * Math.PI;
+							while (maxAngle >= 2 * Math.PI)
+								maxAngle -= 2 * Math.PI;
 
-						Point2D closestPointMax = new Point2D.Double(aff.x + aff.maxRadius * Math.cos(angleToCollisionPointMax), aff.y + aff.maxRadius * Math.sin(angleToCollisionPointMax));
-						Point2D closestPointMin = new Point2D.Double(aff.x + aff.minRadius * Math.cos(angleToCollisionPointMin), aff.y + aff.minRadius * Math.sin(angleToCollisionPointMin));
+							Point2D closestPointToSegment = Methods.getClosestPointOnSegment(beamLine.getX1(), beamLine.getY1(), beamLine.getX2(), beamLine.getY2(), aff.x, aff.y);
 
-						while (angleToCollisionPointMax < 0)
-							angleToCollisionPointMax += 2 * Math.PI;
-						while (angleToCollisionPointMax >= 2 * Math.PI)
-							angleToCollisionPointMax -= 2 * Math.PI;
-
-						while (angleToCollisionPointMin < 0)
-							angleToCollisionPointMin += 2 * Math.PI;
-						while (angleToCollisionPointMin >= 2 * Math.PI)
-							angleToCollisionPointMin -= 2 * Math.PI;
-
-						// outer arc
-						if (closestPointDistanceMax < aff.maxRadius)
-							if (minAngle < maxAngle)
+							for (int k = -1; k < 2; k += 2) // intended to check both intersections of the line with the circle
 							{
-								if (angleToCollisionPointMax > minAngle && angleToCollisionPointMax < maxAngle)
+								double closestPointDistanceMax = Math.sqrt(Methods.DistancePow2(closestPointToSegment.getX(), closestPointToSegment.getY(), aff.x, aff.y));
+								double angleToCollisionPointMax = Math.atan2(closestPointToSegment.getY() - aff.y, closestPointToSegment.getX() - aff.x)
+										+ k * Math.acos(closestPointDistanceMax / aff.maxRadius);
+
+								double closestPointDistanceMin = Math.sqrt(Methods.DistancePow2(closestPointToSegment.getX(), closestPointToSegment.getY(), aff.x, aff.y));
+								double angleToCollisionPointMin = Math.atan2(closestPointToSegment.getY() - aff.y, closestPointToSegment.getX() - aff.x)
+										+ k * Math.acos(closestPointDistanceMin / aff.minRadius);
+
+								Point2D closestPointMax = new Point2D.Double(aff.x + aff.maxRadius * Math.cos(angleToCollisionPointMax), aff.y + aff.maxRadius * Math.sin(angleToCollisionPointMax));
+								Point2D closestPointMin = new Point2D.Double(aff.x + aff.minRadius * Math.cos(angleToCollisionPointMin), aff.y + aff.minRadius * Math.sin(angleToCollisionPointMin));
+
+								while (angleToCollisionPointMax < 0)
+									angleToCollisionPointMax += 2 * Math.PI;
+								while (angleToCollisionPointMax >= 2 * Math.PI)
+									angleToCollisionPointMax -= 2 * Math.PI;
+
+								while (angleToCollisionPointMin < 0)
+									angleToCollisionPointMin += 2 * Math.PI;
+								while (angleToCollisionPointMin >= 2 * Math.PI)
+									angleToCollisionPointMin -= 2 * Math.PI;
+
+								// outer arc
+								if (closestPointDistanceMax < aff.maxRadius)
+									if (minAngle < maxAngle)
+									{
+										if (angleToCollisionPointMax > minAngle && angleToCollisionPointMax < maxAngle)
+										{
+											points.add(closestPointMax);
+											lines.add(new Line2D.Double(closestPointMax.getX() + 12 * Math.cos(angleToCollisionPointMax + Math.PI / 2),
+													closestPointMax.getY() + 12 * Math.sin(angleToCollisionPointMax + Math.PI / 2),
+													closestPointMax.getX() - 12 * Math.cos(angleToCollisionPointMax + Math.PI / 2),
+													closestPointMax.getY() - 12 * Math.sin(angleToCollisionPointMax + Math.PI / 2)));
+										}
+									} else if (angleToCollisionPointMax < maxAngle || angleToCollisionPointMax > minAngle)
+									{
+										points.add(closestPointMax);
+										lines.add(new Line2D.Double(closestPointMax.getX() + 12 * Math.cos(angleToCollisionPointMax + Math.PI / 2),
+												closestPointMax.getY() + 12 * Math.sin(angleToCollisionPointMax + Math.PI / 2),
+												closestPointMax.getX() - 12 * Math.cos(angleToCollisionPointMax + Math.PI / 2),
+												closestPointMax.getY() - 12 * Math.sin(angleToCollisionPointMax + Math.PI / 2)));
+
+									}
+								// inner arc
+								if (closestPointDistanceMin < aff.minRadius)
+									if (minAngle < maxAngle)
+									{
+										if (angleToCollisionPointMin > minAngle && angleToCollisionPointMin < maxAngle)
+										{
+											points.add(closestPointMin);
+											lines.add(new Line2D.Double(closestPointMin.getX() + 12 * Math.cos(angleToCollisionPointMin + Math.PI / 2),
+													closestPointMin.getY() + 12 * Math.sin(angleToCollisionPointMin + Math.PI / 2),
+													closestPointMin.getX() - 12 * Math.cos(angleToCollisionPointMin + Math.PI / 2),
+													closestPointMin.getY() - 12 * Math.sin(angleToCollisionPointMin + Math.PI / 2)));
+										}
+									} else if (angleToCollisionPointMin < maxAngle || angleToCollisionPointMin > minAngle)
+									{
+										points.add(closestPointMin);
+										lines.add(new Line2D.Double(closestPointMin.getX() + 12 * Math.cos(angleToCollisionPointMin + Math.PI / 2),
+												closestPointMin.getY() + 12 * Math.sin(angleToCollisionPointMin + Math.PI / 2),
+												closestPointMin.getX() - 12 * Math.cos(angleToCollisionPointMin + Math.PI / 2),
+												closestPointMin.getY() - 12 * Math.sin(angleToCollisionPointMin + Math.PI / 2)));
+									}
+							}
+							// two sides:
+							Line2D l1 = new Line2D.Double(aff.x + aff.minRadius * Math.cos(aff.rotation - 0.5 * aff.arc), aff.y + aff.minRadius * Math.sin(aff.rotation - 0.5 * aff.arc),
+									aff.x + aff.maxRadius * Math.cos(aff.rotation - 0.5 * aff.arc), aff.y + aff.maxRadius * Math.sin(aff.rotation - 0.5 * aff.arc));
+							Line2D l2 = new Line2D.Double(aff.x + aff.minRadius * Math.cos(aff.rotation + 0.5 * aff.arc), aff.y + aff.minRadius * Math.sin(aff.rotation + 0.5 * aff.arc),
+									aff.x + aff.maxRadius * Math.cos(aff.rotation + 0.5 * aff.arc), aff.y + aff.maxRadius * Math.sin(aff.rotation + 0.5 * aff.arc));
+							lines.add(l1);
+							points.add(Methods.getSegmentIntersection(l1, beamLine));
+							lines.add(l2);
+							points.add(Methods.getSegmentIntersection(l2, beamLine));
+						} else // much easier
+						if (Methods.LineToPointDistancePow2(b.start.Point(), b.end.Point(), aff.target.Point()) < aff.maxRadius * aff.maxRadius)
+						{
+							Point2D closestPointToSegment = Methods.getClosestPointOnSegment(beamLine.getX1(), beamLine.getY1(), beamLine.getX2(), beamLine.getY2(), aff.x, aff.y);
+
+							for (int k = -1; k < 2; k += 2) // intended to check both intersections of the line with the circle
+							{
+								double closestPointDistanceMax = Math.sqrt(Methods.DistancePow2(closestPointToSegment.getX(), closestPointToSegment.getY(), aff.x, aff.y));
+								double angleToCollisionPointMax = Math.atan2(closestPointToSegment.getY() - aff.y, closestPointToSegment.getX() - aff.x)
+										+ k * Math.acos(closestPointDistanceMax / aff.maxRadius);
+
+								Point2D closestPointMax = new Point2D.Double(aff.x + aff.maxRadius * Math.cos(angleToCollisionPointMax), aff.y + aff.maxRadius * Math.sin(angleToCollisionPointMax));
+
+								// outer circle
+								if (closestPointDistanceMax < aff.maxRadius)
 								{
 									points.add(closestPointMax);
 									lines.add(new Line2D.Double(closestPointMax.getX() + 12 * Math.cos(angleToCollisionPointMax + Math.PI / 2),
@@ -1404,76 +1467,41 @@ public class Environment
 											closestPointMax.getX() - 12 * Math.cos(angleToCollisionPointMax + Math.PI / 2),
 											closestPointMax.getY() - 12 * Math.sin(angleToCollisionPointMax + Math.PI / 2)));
 								}
-							} else if (angleToCollisionPointMax < maxAngle || angleToCollisionPointMax > minAngle)
-							{
-								points.add(closestPointMax);
-								lines.add(new Line2D.Double(closestPointMax.getX() + 12 * Math.cos(angleToCollisionPointMax + Math.PI / 2),
-										closestPointMax.getY() + 12 * Math.sin(angleToCollisionPointMax + Math.PI / 2), closestPointMax.getX() - 12 * Math.cos(angleToCollisionPointMax + Math.PI / 2),
-										closestPointMax.getY() - 12 * Math.sin(angleToCollisionPointMax + Math.PI / 2)));
-
 							}
-						// inner arc
-						if (closestPointDistanceMin < aff.minRadius)
-							if (minAngle < maxAngle)
-							{
-								if (angleToCollisionPointMin > minAngle && angleToCollisionPointMin < maxAngle)
-								{
-									points.add(closestPointMin);
-									lines.add(new Line2D.Double(closestPointMin.getX() + 12 * Math.cos(angleToCollisionPointMin + Math.PI / 2),
-											closestPointMin.getY() + 12 * Math.sin(angleToCollisionPointMin + Math.PI / 2),
-											closestPointMin.getX() - 12 * Math.cos(angleToCollisionPointMin + Math.PI / 2),
-											closestPointMin.getY() - 12 * Math.sin(angleToCollisionPointMin + Math.PI / 2)));
-								}
-							} else if (angleToCollisionPointMin < maxAngle || angleToCollisionPointMin > minAngle)
-							{
-								points.add(closestPointMin);
-								lines.add(new Line2D.Double(closestPointMin.getX() + 12 * Math.cos(angleToCollisionPointMin + Math.PI / 2),
-										closestPointMin.getY() + 12 * Math.sin(angleToCollisionPointMin + Math.PI / 2), closestPointMin.getX() - 12 * Math.cos(angleToCollisionPointMin + Math.PI / 2),
-										closestPointMin.getY() - 12 * Math.sin(angleToCollisionPointMin + Math.PI / 2)));
-							}
-					}
-					// two sides:
-					Line2D l1 = new Line2D.Double(aff.x + aff.minRadius * Math.cos(aff.rotation - 0.5 * aff.arc), aff.y + aff.minRadius * Math.sin(aff.rotation - 0.5 * aff.arc),
-							aff.x + aff.maxRadius * Math.cos(aff.rotation - 0.5 * aff.arc), aff.y + aff.maxRadius * Math.sin(aff.rotation - 0.5 * aff.arc));
-					Line2D l2 = new Line2D.Double(aff.x + aff.minRadius * Math.cos(aff.rotation + 0.5 * aff.arc), aff.y + aff.minRadius * Math.sin(aff.rotation + 0.5 * aff.arc),
-							aff.x + aff.maxRadius * Math.cos(aff.rotation + 0.5 * aff.arc), aff.y + aff.maxRadius * Math.sin(aff.rotation + 0.5 * aff.arc));
-					lines.add(l1);
-					points.add(Methods.getSegmentIntersection(l1, beamLine));
-					lines.add(l2);
-					points.add(Methods.getSegmentIntersection(l2, beamLine));
-					// finding closest point
-					Point2D intersectionP = null;
-					for (int i = 0; i < points.size(); i++)
-					{
-						Point2D intersection = points.get(i);
-						if (intersection != null)
+						}
+						// finding closest point
+						Point2D intersectionP = null;
+						for (int i = 0; i < points.size(); i++)
 						{
-							double distancePow2 = Methods.DistancePow2(b.start, intersection);
-							if (distancePow2 < shortestDistancePow2)
+							Point2D intersection = points.get(i);
+							if (intersection != null)
 							{
-								intersectionP = intersection;
-								shortestDistancePow2 = distancePow2;
-								collisionLine = lines.get(i);
+								double distancePow2 = Methods.DistancePow2(b.start, intersection);
+								if (distancePow2 < shortestDistancePow2)
+								{
+									intersectionP = intersection;
+									shortestDistancePow2 = distancePow2;
+									collisionLine = lines.get(i);
+								} else
+								{
+									points.remove(i);
+									lines.remove(i);
+									i--;
+								}
 							} else
 							{
 								points.remove(i);
 								lines.remove(i);
 								i--;
 							}
-						} else
+						}
+						if (intersectionP != null)
 						{
-							points.remove(i);
-							lines.remove(i);
-							i--;
+							collisionType = 2;
+							collidedAFF = aff;
 						}
 					}
-					if (intersectionP != null)
-					{
-						collisionType = 2;
-						collidedAFF = aff;
-					}
 				}
-			}
 		}
 
 		Person collidedPerson = null;
@@ -1558,7 +1586,6 @@ public class Environment
 				}
 			}
 		}
-
 		if (collisionType == -1)
 		{
 			b.endType = 0;
@@ -1630,6 +1657,7 @@ public class Environment
 			b.end.y = roundedIntersectionPoint.y;
 			b.endType = 0;
 			if (EP.damageType(b.elementNum) == 4) // electricity or energy
+			{
 				if (recursive)
 				{
 					b2 = getReflectedBeam(b, collisionLine);
@@ -1638,8 +1666,9 @@ public class Environment
 						beams.add(b2);
 						moveBeam(b2, true, deltaTime); // Recursion!!!
 					}
-				} else
-					damageArcForceField(collidedAFF, b.getDamage() + b.getPushback(), roundedIntersectionPoint, EP.damageType(b.elementNum));
+				}
+				damageArcForceField(collidedAFF, deltaTime * (b.getDamage() + b.getPushback()), roundedIntersectionPoint, EP.damageType(b.elementNum));
+			}
 			break;
 		case 3: // Person
 			b.end.x = roundedIntersectionPoint.x;
@@ -1802,15 +1831,14 @@ public class Environment
 
 	public void damageArcForceField(ArcForceField aff, double damage, Point point, int damageType)
 	{
-		if (damageType > 1 && EP.damageType(aff.elementNum) == damageType) // resistance
+		if (damageType > 1 && aff.damageType() == damageType) // resistance
 			damage *= 0.5;
 
 		double prevLife = aff.life;
 		aff.life -= damage;
 
-		if (aff.extraLife > damage)
-			aff.extraLife -= damage; // damaging shield while they're being built deals them more damage, sorta
-		else if (aff.extraLife > 0)
+		aff.extraLife -= damage; // damaging shields while they're being built deals them more damage
+		if (aff.extraLife < 0)
 			aff.extraLife = 0;
 
 		if ((prevLife >= 15 && aff.life < 15) || (prevLife >= 50 && aff.life < 50) || (prevLife >= 75 && aff.life < 75)) // TODO make it happen for every layer (more than once if two layers are broken
@@ -1818,7 +1846,22 @@ public class Environment
 			shieldDebris(aff, "shield layer removed");
 
 		if (showDamageNumbers)
-			uitexts.add(new UIText(point.x - 10, point.y - 10, "" + (int) damage, 3));
+		{
+			if (showDamageNumbers)
+				aff.waitingDamage += damage;
+			if (aff.timeBetweenDamageTexts > 0.5)
+			{
+				if (showDamageNumbers)
+				{
+					if (aff.waitingDamage > 1)
+					{
+						uitexts.add(new UIText(point.x - 10, point.y - 10, "" + (int) aff.waitingDamage, 3));
+						aff.waitingDamage -= (int) aff.waitingDamage;
+					}
+				}
+				aff.timeBetweenDamageTexts = 0;
+			}
+		}
 	}
 
 	public void createExplosion(double x, double y, double z, double radius, double damage, double pushback, int type)
@@ -1914,6 +1957,13 @@ public class Environment
 						aff.elementNum, 200));
 				debris.add(new Debris((int) (aff.target.x + 86 * Math.cos(aff.rotation)), (int) (aff.target.y + 86 * Math.sin(aff.rotation)), aff.z, aff.rotation + 0.5 * Math.PI + 0.3 * i,
 						aff.elementNum, 200));
+			}
+			break;
+		case "bubble":
+			for (int i = 0; i < 7; i++)
+			{
+				double angle = aff.rotation + i * TAU / 7 + Math.random();
+				debris.add(new Debris((int) (aff.target.x + aff.maxRadius * Math.cos(angle)), (int) (aff.target.y + aff.maxRadius * Math.sin(angle)), aff.z, angle, 13, 150));
 			}
 			break;
 		default:
@@ -2219,8 +2269,8 @@ public class Environment
 		{
 			public int compare(Drawable d1, Drawable d2)
 			{
-				Double i1 = new Double( d1.z);
-				Double i2 = new Double( d2.z);
+				Double i1 = new Double(d1.z + d1.height);
+				Double i2 = new Double(d2.z + d2.height);
 				return i1.compareTo(i2);
 			}
 		};

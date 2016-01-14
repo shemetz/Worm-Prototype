@@ -94,11 +94,11 @@ public class EPgenerator
 	}
 
 	static int[] elementChances =
-	{ 4, 4, 4, 4, 3, 4, 4, 2, 2, 2, 4, 4, 5, 10, 6, 9, 5, 9, 4, 5, 4, 6, 5, 3, 3, 3, 5, 5, 4, 4, 5, 7, 5 };
+	{ 4, 4, 4, 4, 3, 4, 4, 2, 2, 2, 4, 4, 5, 10, 6, 9, 5, 9, 4, 5, 4, 6, 5, 3, 3, 3, 5, 5, 4, 4, 7, 5 };
 
 	/*
 	 * Fire 4 Water 4 Wind 4 Electricity 4 Metal 3 Ice 4 Energy 4 Acid 2 Lava 2 Flesh 2 Earth 4 Plant 4 Sense 5 Strong 10 Regenerate 6 Flight 9 Dexterity 5 Armor 9 Movement 4 Teleport 5 Ghost 4 Force
-	 * Field 6 Time 5 Loop 3 Power 3 Steal 3 Illusion 5 Summon 5 Explosion 4 Control 4 Reshape 5 Buff 7 Charge 5
+	 * Field 6 Time 5 Loop 3 Power 3 Steal 3 Illusion 5 Summon 5 Explosion 4 Control 4 Buff 7 Charge 5
 	 */
 	static void printElementChances()
 	{

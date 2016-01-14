@@ -16,6 +16,15 @@ public class Heal_I extends Ability
 	public Heal_I(int p)
 	{
 		super("Heal I", p);
+		cost = 0;
+		costPerSecond = 1;
+		costType = "mana";
+		cooldown = 0;
+		range = 50 * points;
+		rangeType = "Circle area";
+		stopsMovement = false;
+		maintainable = true;
+		instant = true;
 	}
 
 	public void use(Environment env, Person user, Point target)

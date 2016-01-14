@@ -22,8 +22,14 @@ public class Punch extends Ability
 	public Punch(int p)
 	{
 		super("Punch", p);
-		range = (int) (1.15 * 70); //TODO move this into the part in Person and make it depend on radius
-		//range = (int) (1.15 * radius);
+		cost = 1;
+		costType = "stamina";
+		cooldown = 0.55; // is actually 0.55 - Math.min(0.02*FITNESS, 0.15);
+		rangeType = "Look";
+		stopsMovement = true;
+		instant = true;
+		range = (int) (1.15 * 70); // TODO move this into the part in Person and make it depend on radius:
+		// range = (int) (1.15 * radius);
 	}
 
 	public void use(Environment env, Person user, Point target)
@@ -39,7 +45,7 @@ public class Punch extends Ability
 		double angleDifference = tempAngleThing > Math.PI ? 2 * Math.PI - tempAngleThing : tempAngleThing;
 		if (user.z == 0)
 		{
-			if (!user.prone && (!user.maintaining || user.abilities.get(user.abilityMaintaining) instanceof Sprint)) //special enable for sprint-punching
+			if (!user.prone && (!user.maintaining || user.abilities.get(user.abilityMaintaining) instanceof Sprint)) // special enable for sprint-punching
 				if (cost <= user.stamina)
 				{
 					user.notMoving = stopsMovement; // returns to be False in hotkey();
@@ -142,7 +148,7 @@ public class Punch extends Ability
 							int wallHealth = env.wallHealths[i][j];
 							double leftoverPushback = wallHealth > damage + pushback ? pushback : Math.min(wallHealth, pushback);
 							env.damageWall(i, j, damage + pushback, damageType);
-							env.hitPerson(user, Math.max(0, 7 - 0.5*user.STRENGTH), leftoverPushback, user.rotation - Math.PI, 0); //When punching walls, you damage yourself by 7 damage points.
+							env.hitPerson(user, Math.max(0, 7 - 0.5 * user.STRENGTH), leftoverPushback, user.rotation - Math.PI, 0); // When punching walls, you damage yourself by 7 damage points.
 							user.punchedSomebody = true;
 							break collisionCheck;
 						}
