@@ -596,7 +596,7 @@ public class Person extends RndPhysObj
 
 	public void rename()
 	{
-		name = NameGenerator.generate(this);
+		name = NameGenerator.generate(this.DNA);
 	}
 
 	public void selfFrame(double deltaTime)

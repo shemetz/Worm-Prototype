@@ -21,9 +21,9 @@ public class PowerGenerator
 		List<Integer> mmPairs = new ArrayList<Integer>();
 		for (EP ep : EPs)
 		{
-			if (EP.elementList[ep.elementNum].equals("Charge")) // Charge can't be main unless it's 10
+			if (EP.elementList[ep.elementNum].equals("Charge")) // Charge can't be main unless it's 7-10
 			{
-				if (ep.points < 10)
+				if (ep.points < 7)
 					minors.add(ep);
 				else
 					majors.add(ep);
@@ -183,7 +183,7 @@ public class PowerGenerator
 				s = "Time-Freeze Target I";
 				break;
 			case 2:
-				s = "Chronobiological Control";
+				s = "Chronobiology";
 				break;
 			default:
 				Main.errorMessage("Ummmm this isn't supposed to happen");

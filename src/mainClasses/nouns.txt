@@ -368,7 +368,6 @@ editor-loop
 eel-water,electricity
 effect-energy,power,electricity
 egypt-earth
-eight-loop
 element-energy,fire,water,wind,earth
 emery-earth
 end-loop
@@ -409,7 +408,6 @@ fertilizer-plant
 fibre-energy,electricity
 fiction-ghost,summon
 field-earth,plant
-fifth-general
 fighter-strong,movement,armor
 find-sense
 fire-fire
@@ -818,7 +816,7 @@ scan-sense
 scarecrow-audiovisual
 scarf-armor
 scent-sense
-science-explosion,acid,lava
+science-explosion,acid
 scissors-general
 scooter-movement
 scorpio-acid

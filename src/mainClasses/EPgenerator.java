@@ -16,9 +16,6 @@ public class EPgenerator
 		return convertToEPlist(generateElementList());
 	}
 
-	/*
-	 * This method generates a list
-	 */
 	static int[] generateElementList()
 	{
 		int[] list = new int[10];
@@ -32,20 +29,20 @@ public class EPgenerator
 			list[i] = E1;
 		while (i < 10)
 		{
-			int nextElement = -1 + randomizer.nextInt(elements.size() + 1); // -1 = new element
-			if (nextElement == -1)
+			int nextElement = -1 + randomizer.nextInt(elements.size() + 1);
+			if (nextElement == -1) //add another element
 			{
-				int newElement = randomElement(); // can sometimes not be a new element. Not a problem, I think.
-				x = 1 + randomizer.nextInt(2); // 1-3 points for next elements
-				if (!elements.contains(newElement)) // don't add the same element twice to the pool (low chance of that ever happening, but if it does happen it would make the next check of adding
+				int newElement = randomElement();
+				x = 1 + randomizer.nextInt(2); // 1-3 points
+				if (!elements.contains(newElement)) // don't add the same element twice to the elements pool while adding points to it (low chance of that ever happening, but if it does happen it would make the next check of adding
 													// elements to be more biased towards the repeating element)
 					elements.add(newElement);
 				for (int j = 0; j < x && i < 10; j++, i++)
 					list[i] = newElement;
-			} else
+			} else //add points to an existing element
 			{
 				int element = elements.get(randomizer.nextInt(elements.size()));
-				x = 1 + randomizer.nextInt(2); // 1-3 points for next element
+				x = 1 + randomizer.nextInt(2); // 1-3 points
 				for (int j = 0; j < x && i < 10; j++, i++)
 					list[i] = element;
 			}
@@ -61,7 +58,7 @@ public class EPgenerator
 		while (x < 10)
 		{
 			int e = DNA[x], n = 0;
-			for (n = 0; x < 10 && DNA[x] == e; x++, n++)
+			for (; x < 10 && DNA[x] == e; x++, n++)
 				;
 			EPs.add(new EP(e, n));
 		}
