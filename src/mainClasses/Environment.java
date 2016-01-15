@@ -25,13 +25,13 @@ public class Environment
 	public final double				TAU					= Math.PI * 2;
 	public final int				numOfClouds			= 0;
 	public final int				minCloudHeight		= 60,
-											maxCloudHeight = 400;
+			maxCloudHeight = 400;
 	public final static double[]	floorFriction		= new double[]
-															{ 0.6 };													// depending on floor type
+			{ 0.6 };													// depending on floor type
 	public final static double[]	poolFriction		= new double[]
-															{ -1, 0.3, -1, -1, 0.8, 0.2, -1, 0.6, 0.7, 0.3, 0.8, 0.6 };	// depending on pool type
+			{ -1, 0.3, -1, -1, 0.8, 0.2, -1, 0.6, 0.7, 0.3, 0.8, 0.6 };	// depending on pool type
 	public final static double[]	wallFriction		= new double[]
-															{ -1, 0.3, -1, -1, 0.8, 0.2, -1, 0.6, 0.7, 0.3, 0.8, 0.6 };	// depending on wall type
+			{ -1, 0.3, -1, -1, 0.8, 0.2, -1, 0.6, 0.7, 0.3, 0.8, 0.6 };	// depending on wall type
 	public boolean					devMode				= false;
 	public boolean					showDamageNumbers	= true;
 	public Point					windDirection;
@@ -129,7 +129,7 @@ public class Environment
 	}
 
 	private int			healthSum		= 0,
-								poolNum = 0;
+			poolNum = 0;
 	private boolean[][]	checkedSquares	= new boolean[width][height];
 
 	boolean moveBall(Ball b, double deltaTime)
@@ -273,13 +273,13 @@ public class Environment
 					{
 						if (angleToBall > minAngle && angleToBall < maxAngle)
 							withinAngles = true;
-					} else if (angleToBall < minAngle || angleToBall > maxAngle)
+					} else if (angleToBall > minAngle || angleToBall > maxAngle)
 						withinAngles = true;
 					if (withinAngles)
 					{
 						double distance = Math.sqrt(Math.pow(aff.target.y - b.y, 2) + Math.pow(aff.target.x - b.x, 2));
 						if (distance > aff.minRadius - b.radius && distance < aff.maxRadius + b.radius)
-						// That's totally not a legit collision check, but honestly? it's pretty darn close, according to my intuition.
+							// That's totally not a legit collision check, but honestly? it's pretty darn close, according to my intuition.
 						{
 							if (aff.elementNum == 6 && EP.damageType(b.elementNum) == 4) // electricity and energy balls bounce off of energy
 							{
@@ -343,7 +343,7 @@ public class Environment
 						 */
 						if (0 <= Methods.realDotProduct(ff.p[0], ballCenter, ff.p[1]) && Methods.realDotProduct(ff.p[0], ballCenter, ff.p[1]) <= ff.width * ff.width
 								&& 0 <= Methods.realDotProduct(ff.p[0], ballCenter, ff.p[3]) && Methods.realDotProduct(ff.p[0], ballCenter, ff.p[3]) <= ff.length * ff.length)
-						// circle center is within FF. This basically never ever should happen.
+							// circle center is within FF. This basically never ever should happen.
 						{
 							damageFF(ff, b.getDamage() + b.getPushback(), ballCenter);
 
@@ -675,8 +675,8 @@ public class Environment
 					}
 				}
 
-			}				
-			
+			}
+
 			if (velocityLeft < 1) // continue
 				velocityLeft = 0;
 			personRect = new Rectangle2D.Double((int) p.x - p.radius / 2, (int) p.y - p.radius / 2, p.radius, p.radius);
@@ -696,56 +696,56 @@ public class Environment
 			p.yVel = 0;
 		}
 	}
-	
+
 	public boolean personAFFCollision(Person p, ArcForceField aff)
 	{
-				if (aff.target.equals(p))
+		if (aff.target.equals(p))
+			return false;
+		// checks square first
+		Rectangle2D affBox = new Rectangle2D.Double(aff.target.x - aff.maxRadius, aff.target.y - aff.maxRadius, aff.maxRadius * 2, aff.maxRadius * 2);
+		Rectangle2D personRect = new Rectangle2D.Double((int) p.x - p.radius / 2, (int) p.y - p.radius / 2, p.radius, p.radius);
+		if (personRect.intersects(affBox))
+		{
+			if (aff.z + aff.height > p.z && aff.z < p.z + p.height)
+			if (aff.arc < TAU) // if not bubble
+			{
+				// following code is copied from ball-aff collision
+				double angleToPerson = Math.atan2(p.y - aff.target.y, p.x - aff.target.x);
+				while (angleToPerson < 0)
+					angleToPerson += 2 * Math.PI;
+				double minAngle = aff.rotation - aff.arc/2 - Math.tan(p.radius / aff.maxRadius);
+				double maxAngle = aff.rotation + aff.arc/2 + Math.tan(p.radius / aff.maxRadius);
+				while (minAngle < 0)
+					minAngle += 2 * Math.PI;
+				while (minAngle >= 2 * Math.PI)
+					minAngle -= 2 * Math.PI;
+				while (maxAngle < 0)
+					maxAngle += 2 * Math.PI;
+				while (maxAngle >= 2 * Math.PI)
+					maxAngle -= 2 * Math.PI;
+				boolean withinAngles = false;
+				if (minAngle < maxAngle)
+				{
+					if (angleToPerson > minAngle && angleToPerson < maxAngle)
+						withinAngles = true;
+				} else if (angleToPerson > minAngle || angleToPerson < maxAngle)
+					withinAngles = true;
+				if (withinAngles)
+				{
+					double distance = Math.sqrt(Math.pow(aff.target.y - p.y, 2) + Math.pow(aff.target.x - p.x, 2));
+					if (distance > aff.minRadius - p.radius && distance < aff.maxRadius + p.radius)
+						return true;
 					return false;
-					// checks square first
-					Rectangle2D affBox = new Rectangle2D.Double(aff.target.x-aff.maxRadius,aff.target.y-aff.maxRadius,aff.maxRadius*2,aff.maxRadius*2);
-					Rectangle2D personRect = new Rectangle2D.Double((int) p.x - p.radius / 2, (int) p.y - p.radius / 2, p.radius, p.radius);
-					if (personRect.intersects(affBox))
-					{
-						if (aff.arc < TAU) //if not bubble
-						{
-							//following code is copied from ball-aff collision
-							double angleToPerson = Math.atan2(p.y - aff.target.y, p.x - aff.target.x);
-							while (angleToPerson < 0)
-								angleToPerson += 2 * Math.PI;
-							double minAngle = (aff.rotation - (aff.arc + 2 * p.radius / aff.maxRadius) / 2);
-							double maxAngle = (aff.rotation + (aff.arc + 2 * p.radius / aff.maxRadius) / 2);
-							while (minAngle < 0)
-								minAngle += 2 * Math.PI;
-							while (minAngle >= 2 * Math.PI)
-								minAngle -= 2 * Math.PI;
-							while (maxAngle < 0)
-								maxAngle += 2 * Math.PI;
-							while (maxAngle >= 2 * Math.PI)
-								maxAngle -= 2 * Math.PI;
-							boolean withinAngles = false;
-							// Okay so here's a thing: I assume the circle is a point, and increase the aff's dimensions for the calculation, and it's almost precise!
-							if (minAngle < maxAngle)
-							{
-								if (angleToPerson > minAngle && angleToPerson < maxAngle)
-									withinAngles = true;
-							} else if (angleToPerson < minAngle || angleToPerson > maxAngle)
-								withinAngles = true;
-							if (withinAngles)
-							{
-								double distance = Math.sqrt(Math.pow(aff.target.y - p.y, 2) + Math.pow(aff.target.x - p.x, 2));
-								if (distance > aff.minRadius - p.radius && distance < aff.maxRadius + p.radius)
-									return true;
-								return false;
-							}
-						} else // much easier
-						{
-							double distancePow2 = Methods.DistancePow2(aff.x, aff.y, p.x, p.y);
-							if (distancePow2 < Math.pow(p.radius + aff.maxRadius, 2))
-								return true;
-							return false;
-						}
-					}
-							return false;
+				}
+			} else // much easier
+			{
+				double distancePow2 = Methods.DistancePow2(aff.x, aff.y, p.x, p.y);
+				if (distancePow2 < Math.pow(p.radius + aff.maxRadius, 2))
+					return true;
+				return false;
+			}
+		}
+		return false;
 	}
 
 	boolean collideWithWall(Person p, int x, int y) // x and y in grid
@@ -1497,29 +1497,29 @@ public class Environment
 							lines.add(l2);
 							points.add(Methods.getSegmentIntersection(l2, beamLine));
 						} else // much easier
-						if (Methods.LineToPointDistancePow2(b.start.Point(), b.end.Point(), aff.target.Point()) < aff.maxRadius * aff.maxRadius)
-						{
-							Point2D closestPointToSegment = Methods.getClosestPointOnSegment(beamLine.getX1(), beamLine.getY1(), beamLine.getX2(), beamLine.getY2(), aff.x, aff.y);
-
-							for (int k = -1; k < 2; k += 2) // intended to check both intersections of the line with the circle
+							if (Methods.LineToPointDistancePow2(b.start.Point(), b.end.Point(), aff.target.Point()) < aff.maxRadius * aff.maxRadius)
 							{
-								double closestPointDistanceMax = Math.sqrt(Methods.DistancePow2(closestPointToSegment.getX(), closestPointToSegment.getY(), aff.x, aff.y));
-								double angleToCollisionPointMax = Math.atan2(closestPointToSegment.getY() - aff.y, closestPointToSegment.getX() - aff.x)
-										+ k * Math.acos(closestPointDistanceMax / aff.maxRadius);
+								Point2D closestPointToSegment = Methods.getClosestPointOnSegment(beamLine.getX1(), beamLine.getY1(), beamLine.getX2(), beamLine.getY2(), aff.x, aff.y);
 
-								Point2D closestPointMax = new Point2D.Double(aff.x + aff.maxRadius * Math.cos(angleToCollisionPointMax), aff.y + aff.maxRadius * Math.sin(angleToCollisionPointMax));
-
-								// outer circle
-								if (closestPointDistanceMax < aff.maxRadius)
+								for (int k = -1; k < 2; k += 2) // intended to check both intersections of the line with the circle
 								{
-									points.add(closestPointMax);
-									lines.add(new Line2D.Double(closestPointMax.getX() + 12 * Math.cos(angleToCollisionPointMax + Math.PI / 2),
-											closestPointMax.getY() + 12 * Math.sin(angleToCollisionPointMax + Math.PI / 2),
-											closestPointMax.getX() - 12 * Math.cos(angleToCollisionPointMax + Math.PI / 2),
-											closestPointMax.getY() - 12 * Math.sin(angleToCollisionPointMax + Math.PI / 2)));
+									double closestPointDistanceMax = Math.sqrt(Methods.DistancePow2(closestPointToSegment.getX(), closestPointToSegment.getY(), aff.x, aff.y));
+									double angleToCollisionPointMax = Math.atan2(closestPointToSegment.getY() - aff.y, closestPointToSegment.getX() - aff.x)
+											+ k * Math.acos(closestPointDistanceMax / aff.maxRadius);
+
+									Point2D closestPointMax = new Point2D.Double(aff.x + aff.maxRadius * Math.cos(angleToCollisionPointMax), aff.y + aff.maxRadius * Math.sin(angleToCollisionPointMax));
+
+									// outer circle
+									if (closestPointDistanceMax < aff.maxRadius)
+									{
+										points.add(closestPointMax);
+										lines.add(new Line2D.Double(closestPointMax.getX() + 12 * Math.cos(angleToCollisionPointMax + Math.PI / 2),
+												closestPointMax.getY() + 12 * Math.sin(angleToCollisionPointMax + Math.PI / 2),
+												closestPointMax.getX() - 12 * Math.cos(angleToCollisionPointMax + Math.PI / 2),
+												closestPointMax.getY() - 12 * Math.sin(angleToCollisionPointMax + Math.PI / 2)));
+									}
 								}
 							}
-						}
 						// finding closest point
 						Point2D intersectionP = null;
 						for (int i = 0; i < points.size(); i++)
@@ -1893,7 +1893,7 @@ public class Environment
 			aff.extraLife = 0;
 
 		if ((prevLife >= 15 && aff.life < 15) || (prevLife >= 50 && aff.life < 50) || (prevLife >= 75 && aff.life < 75)) // TODO make it happen for every layer (more than once if two layers are broken
-																															// at once), and also make it more random?
+			// at once), and also make it more random?
 			shieldDebris(aff, "shield layer removed");
 
 		if (showDamageNumbers)
@@ -2410,6 +2410,8 @@ public class Environment
 						buffer.drawRect((int) (p.x - 1), (int) (p.y - 1), 3, 3);
 						// hitbox
 						buffer.drawRect((int) (p.x - 0.5 * p.radius), (int) (p.y - 0.5 * p.radius), p.radius, p.radius);
+						// radius
+						buffer.drawOval((int) (p.x - 0.5 * p.radius), (int) (p.y - 0.5 * p.radius), p.radius, p.radius);
 						// target
 						buffer.setColor(Color.red);
 						buffer.drawOval(p.target.x - 10, p.target.y - 10, 20, 20);
@@ -2494,6 +2496,8 @@ public class Environment
 						buffer.drawRect((int) (p.x - 1), (int) (p.y - 1), 3, 3);
 						// hitbox
 						buffer.drawRect((int) (p.x - 0.5 * p.radius), (int) (p.y - 0.5 * p.radius), p.radius, p.radius);
+						// radius
+						buffer.drawOval((int) (p.x - 0.5 * p.radius), (int) (p.y - 0.5 * p.radius), p.radius, p.radius);
 						// target
 						buffer.setColor(Color.red);
 						buffer.drawOval(p.target.x - 10, p.target.y - 10, 20, 20);
@@ -2515,6 +2519,8 @@ public class Environment
 						buffer.drawRect((int) (p.x - 1), (int) (p.y - 1), 3, 3);
 						// hitbox
 						buffer.drawRect((int) (p.x - 0.5 * p.radius), (int) (p.y - 0.5 * p.radius), p.radius, p.radius);
+						// radius
+						buffer.drawOval((int) (p.x - 0.5 * p.radius), (int) (p.y - 0.5 * p.radius), p.radius, p.radius);
 						// target
 						buffer.setColor(new Color(255, 160, 160));
 						buffer.drawOval(p.target.x - 10, p.target.y - 10, 20, 20);
@@ -2588,7 +2594,7 @@ public class Environment
 	public void addPool(int x, int y, int elementalType, boolean fullHealth)
 	{
 		if ((wallTypes[x][y] != -1 || poolTypes[x][y] != -1) && !fullHealth)
-			return; //can't create where there's already something
+			return; // can't create where there's already something
 		poolTypes[x][y] = elementalType;
 		if (fullHealth)
 			poolHealths[x][y] = 100;

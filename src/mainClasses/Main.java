@@ -373,8 +373,12 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 					{
 						double angleToPerson = Math.atan2(p.y-aff.target.y,p.x-aff.target.x);
 						double pushStrength = 10000;
-						p.xVel += deltaTime * pushStrength * Math.cos(angleToPerson);
-						p.yVel += deltaTime * pushStrength * Math.sin(angleToPerson);
+						double xMax = 0.03*pushStrength * Math.cos(angleToPerson);
+						double yMax = 0.03*pushStrength * Math.sin(angleToPerson);
+						if ((xMax > 0 && p.xVel < xMax) || (xMax < 0 && p.xVel > xMax))
+							p.xVel += deltaTime*pushStrength * Math.cos(angleToPerson);
+						if ((yMax > 0 && p.yVel < yMax) || (yMax < 0 && p.yVel > yMax))
+							p.yVel += deltaTime*pushStrength * Math.sin(angleToPerson);
 						if (p instanceof NPC)
 							((NPC) p).justCollided = true;
 					}

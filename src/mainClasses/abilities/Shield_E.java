@@ -51,6 +51,7 @@ public class Shield_E extends Ability
 			{
 				env.arcFFs.add(shield);
 				user.maintaining = true;
+				user.rotation = angle;
 				on = true;
 				user.switchAnimation(2);
 				user.notMoving = stopsMovement;
@@ -58,6 +59,7 @@ public class Shield_E extends Ability
 			} else
 			{
 				env.shieldDebris(shield, "deactivate");
+				cooldownLeft = 0.25;
 				shield = null;
 			}
 		} else if (on)

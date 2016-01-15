@@ -22,7 +22,7 @@ Alt+<Scroll> - rescale UI
 DEV TOOLS
 
 F1 - enable dev-mode vision (See hitboxes, etc.)
-K - randomize all peoples' looks
+K - randomize all peoples' looks and names
 1 - create earth wall
 2 - create ice wall
 3 - create spike pit
