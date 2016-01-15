@@ -566,9 +566,8 @@ public class Environment
 			for (Person p2 : people)
 				if (!p.equals(p2))
 				{
-					Rectangle2D p1rect = new Rectangle2D.Double(p.x - 0.5 * p.radius, p.y - 0.5 * p.radius, p.radius, p.radius);
 					Rectangle2D p2rect = new Rectangle2D.Double(p2.x - 0.5 * p2.radius, p2.y - 0.5 * p2.radius, p2.radius, p2.radius);
-					if (p1rect.intersects(p2rect)) // collision check
+					if (personRect.intersects(p2rect)) // collision check
 					{
 						if (p2.z + p2.height > p.z && p2.z < p.z + p.height)
 						{
@@ -676,7 +675,8 @@ public class Environment
 					}
 				}
 
-			}
+			}				
+			
 			if (velocityLeft < 1) // continue
 				velocityLeft = 0;
 			personRect = new Rectangle2D.Double((int) p.x - p.radius / 2, (int) p.y - p.radius / 2, p.radius, p.radius);
@@ -695,6 +695,57 @@ public class Environment
 			p.xVel = 0;
 			p.yVel = 0;
 		}
+	}
+	
+	public boolean personAFFCollision(Person p, ArcForceField aff)
+	{
+				if (aff.target.equals(p))
+					return false;
+					// checks square first
+					Rectangle2D affBox = new Rectangle2D.Double(aff.target.x-aff.maxRadius,aff.target.y-aff.maxRadius,aff.maxRadius*2,aff.maxRadius*2);
+					Rectangle2D personRect = new Rectangle2D.Double((int) p.x - p.radius / 2, (int) p.y - p.radius / 2, p.radius, p.radius);
+					if (personRect.intersects(affBox))
+					{
+						if (aff.arc < TAU) //if not bubble
+						{
+							//following code is copied from ball-aff collision
+							double angleToPerson = Math.atan2(p.y - aff.target.y, p.x - aff.target.x);
+							while (angleToPerson < 0)
+								angleToPerson += 2 * Math.PI;
+							double minAngle = (aff.rotation - (aff.arc + 2 * p.radius / aff.maxRadius) / 2);
+							double maxAngle = (aff.rotation + (aff.arc + 2 * p.radius / aff.maxRadius) / 2);
+							while (minAngle < 0)
+								minAngle += 2 * Math.PI;
+							while (minAngle >= 2 * Math.PI)
+								minAngle -= 2 * Math.PI;
+							while (maxAngle < 0)
+								maxAngle += 2 * Math.PI;
+							while (maxAngle >= 2 * Math.PI)
+								maxAngle -= 2 * Math.PI;
+							boolean withinAngles = false;
+							// Okay so here's a thing: I assume the circle is a point, and increase the aff's dimensions for the calculation, and it's almost precise!
+							if (minAngle < maxAngle)
+							{
+								if (angleToPerson > minAngle && angleToPerson < maxAngle)
+									withinAngles = true;
+							} else if (angleToPerson < minAngle || angleToPerson > maxAngle)
+								withinAngles = true;
+							if (withinAngles)
+							{
+								double distance = Math.sqrt(Math.pow(aff.target.y - p.y, 2) + Math.pow(aff.target.x - p.x, 2));
+								if (distance > aff.minRadius - p.radius && distance < aff.maxRadius + p.radius)
+									return true;
+								return false;
+							}
+						} else // much easier
+						{
+							double distancePow2 = Methods.DistancePow2(aff.x, aff.y, p.x, p.y);
+							if (distancePow2 < Math.pow(p.radius + aff.maxRadius, 2))
+								return true;
+							return false;
+						}
+					}
+							return false;
 	}
 
 	boolean collideWithWall(Person p, int x, int y) // x and y in grid
@@ -1978,7 +2029,7 @@ public class Environment
 		{
 		case "pool heal":
 		case "wall heal":
-			if (frameNum % 20 == 0)
+			if (frameNum % 10 == 0)
 				for (double i = Math.random(); i < 7; i++)
 					debris.add(new Debris(x, y, 0, i, n, 300));
 			break;
@@ -2536,8 +2587,8 @@ public class Environment
 
 	public void addPool(int x, int y, int elementalType, boolean fullHealth)
 	{
-		if (wallTypes[x][y] != -1 || (poolTypes[x][y] != -1 && fullHealth))
-			remove(x, y);
+		if ((wallTypes[x][y] != -1 || poolTypes[x][y] != -1) && !fullHealth)
+			return; //can't create where there's already something
 		poolTypes[x][y] = elementalType;
 		if (fullHealth)
 			poolHealths[x][y] = 100;

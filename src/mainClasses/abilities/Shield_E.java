@@ -41,13 +41,25 @@ public class Shield_E extends Ability
 
 			final double arc = Math.PI / 2, minRadius = 80, maxRadius = 92;
 			shield = new ArcForceField(user, angle, arc, minRadius, maxRadius, (int) (points * 10), getElementNum());
-			env.arcFFs.add(shield);
-			user.maintaining = true;
-			on = true;
-			user.switchAnimation(2);
-			user.notMoving = stopsMovement;
-			user.notAnimating = true;
-
+			boolean nope = false;
+			for (Person p : env.people)
+				if (env.personAFFCollision(p, shield))
+				{
+					nope = true;
+				}
+			if (!nope)
+			{
+				env.arcFFs.add(shield);
+				user.maintaining = true;
+				on = true;
+				user.switchAnimation(2);
+				user.notMoving = stopsMovement;
+				user.notAnimating = true;
+			} else
+			{
+				env.shieldDebris(shield, "deactivate");
+				shield = null;
+			}
 		} else if (on)
 		// deactivating the shield
 		{

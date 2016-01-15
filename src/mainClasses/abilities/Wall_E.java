@@ -97,6 +97,7 @@ public class Wall_E extends Ability
 
 	public void maintain(Environment env, Person user, Point target, double deltaTime)
 	{
+		frameNum++;
 		if (cooldownLeft <= 0 || env.wallHealths[(int) targetEffect1][(int) targetEffect2] <= 0)
 			use(env, user, target);
 		else

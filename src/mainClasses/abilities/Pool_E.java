@@ -12,7 +12,7 @@ import mainClasses.Player;
 public class Pool_E extends Ability
 {
 
-	final int squareSize = 96;
+	final int	squareSize	= 96;
 
 	public Pool_E(String elementName, int p)
 	{
@@ -46,7 +46,7 @@ public class Pool_E extends Ability
 			boolean canCreate = true;
 			// stop creating pool if there already is a different pool there
 			if (env.poolTypes[gridX][gridY] != -1)
-				if (env.poolTypes[gridX][gridY] != getElementNum() || (env.poolTypes[gridX][gridY] == getElementNum() && env.poolHealths[gridX][gridY] >= 100))
+				if (env.poolTypes[gridX][gridY] != getElementNum() || (env.poolTypes[gridX][gridY] == getElementNum() && env.poolHealths[gridX][gridY] >= 100) || env.wallTypes[gridX][gridY] != -1)
 					canCreate = false;
 			// stop creating pool if it collides with someone
 			for (Person p : env.people)
@@ -93,6 +93,7 @@ public class Pool_E extends Ability
 
 	public void maintain(Environment env, Person user, Point target, double deltaTime)
 	{
+		frameNum++;
 		if (cooldownLeft <= 0 || env.poolHealths[(int) targetEffect1][(int) targetEffect2] <= 0)
 			use(env, user, target);
 		else
@@ -133,7 +134,7 @@ public class Pool_E extends Ability
 			// }
 			boolean canCreate = true;
 			if (env.poolTypes[gridX][gridY] != -1)
-				if (env.poolTypes[gridX][gridY] != getElementNum() || (env.poolTypes[gridX][gridY] == getElementNum() && env.poolHealths[gridX][gridY] >= 100))
+				if (env.poolTypes[gridX][gridY] != getElementNum() || (env.poolTypes[gridX][gridY] == getElementNum() && env.poolHealths[gridX][gridY] >= 100) || env.wallTypes[gridX][gridY] != -1)
 					canCreate = false;
 			// stop creating pool if it collides with someone
 			for (Person p : env.people)

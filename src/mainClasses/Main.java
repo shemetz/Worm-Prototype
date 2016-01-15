@@ -367,6 +367,17 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 			{
 				aff.updateImage();
 			}
+			//push people within
+			for (Person p: env.people)
+				if (env.personAFFCollision(p, aff))
+					{
+						double angleToPerson = Math.atan2(p.y-aff.target.y,p.x-aff.target.x);
+						double pushStrength = 10000;
+						p.xVel += deltaTime * pushStrength * Math.cos(angleToPerson);
+						p.yVel += deltaTime * pushStrength * Math.sin(angleToPerson);
+						if (p instanceof NPC)
+							((NPC) p).justCollided = true;
+					}
 			if (aff.life <= 0)
 			{
 				for (Person p : env.people)
@@ -376,7 +387,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 							if (a instanceof Shield_E)
 							{
 								Shield_E ability = (Shield_E) a;
-								if (ability.shield.equals(aff))
+								if (aff.equals(ability.shield))
 								{
 									ability.use(env, p, p.target); // that method will remove the arc force field.
 									i--;
@@ -386,7 +397,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 							if (a instanceof Protective_Bubble_I)
 							{
 								Protective_Bubble_I ability = (Protective_Bubble_I) a;
-								if (ability.bubble.equals(aff))
+								if (aff.equals(ability.bubble))
 								{
 									ability.on = false;
 									ability.cooldownLeft = ability.cooldown;
