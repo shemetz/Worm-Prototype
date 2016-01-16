@@ -28,6 +28,15 @@ public class Protective_Bubble_I extends Ability
 	{
 		double angle = Math.atan2(target.y - user.y, target.x - user.x); // can be 0, honestly
 		// activating the bubble
+		if (this.on)
+		{
+			for (ArcForceField aff : env.arcFFs)
+				if (aff.equals(bubble))
+				{
+					
+				}
+		}
+		else
 		if (!user.maintaining && !user.prone)
 		{
 			if (cost > user.mana || cooldownLeft > 0)

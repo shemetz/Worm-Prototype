@@ -278,10 +278,11 @@ public class NPC extends Person
 		}
 
 		// Instincts - move away from dangerous objects
-		moveAwayFromDangerousObjects(env);
+		if (moveAwayFromDangerousObjects(env))
+			this.rotate(this.directionOfAttemptedMovement, deltaTime);
 	}
 
-	void moveAwayFromDangerousObjects(Environment env)
+	boolean moveAwayFromDangerousObjects(Environment env)
 	{
 		final double maximumDistanceICareAboutPow2 = Math.pow(WITS*70, 2); // TODO
 
@@ -322,9 +323,10 @@ public class NPC extends Person
 			}
 		}
 		if (xElement == 0 && yElement == 0)
-			return;
+			return false;
 		this.directionOfAttemptedMovement = Math.atan2(yElement, xElement);
 		this.strengthOfAttemptedMovement = 1;
+		return true;
 	}
 
 }
