@@ -8,10 +8,12 @@ public class SoundEffect
 	Clip			sound;
 	FloatControl	volumeControl;
 	double			volume;
-	double			length;			// in seconds
-	public boolean			active;
-	public boolean			justActivated;	// becomes false at the beginning of every frame, if it's false at the end the sound is stopped in certain cases
-	public String			type;
+	double			length;				// in seconds
+	public boolean	active;
+	public boolean	justActivated;		// becomes false at the beginning of every frame, if it's false at the end the sound is stopped in certain cases
+	public String	type;
+	public boolean	paused		= false;
+	boolean			loopOrPlay	= false;
 
 	public SoundEffect(String fileName, String type1)
 	{
@@ -54,6 +56,7 @@ public class SoundEffect
 		active = true;
 		justActivated = true;
 		sound.loop(Clip.LOOP_CONTINUOUSLY);
+		loopOrPlay = true;
 	}
 
 	public void play()
@@ -61,20 +64,38 @@ public class SoundEffect
 		active = true;
 		justActivated = true;
 		sound.start();
+		loopOrPlay = false;
 	}
 
 	public void stop()
 	{
 		active = false;
 		justActivated = false;
+		paused = false;
 		sound.stop();
 		sound.setFramePosition(0);
 	}
 
 	public void pause()
 	{
-		active = false;
-		justActivated = false;
-		sound.stop();
+		if (active)
+		{
+			active = false;
+			justActivated = false;
+			sound.stop();
+			paused = true;
+		}
+	}
+
+	public void cont()// inue
+	{
+		if (paused)
+		{
+			if (loopOrPlay)
+				loop();
+			else
+				play();
+			paused = false;
+		}
 	}
 }

@@ -7,13 +7,15 @@ public class Ball extends RndPhysObj
 	public int		elementNum;
 	public int		points;
 	final int ballMass = 10;
+	public Person creator;
 
-	public Ball(int en, int p1, double angle)
+	public Ball(int en, int p1, double angle, Person creator1)
 	{
 		super(-1, -1, 1, 1);
 		rotation = 0;
 		elementNum = en;
 		points = p1;
+		creator = creator1;
 		changeImage(Resources.balls[elementNum]); // Not all the same size!!!
 
 		// TODO make mass, radius and velocity depend on element

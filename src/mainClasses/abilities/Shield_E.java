@@ -40,7 +40,7 @@ public class Shield_E extends Ability
 				return;
 
 			final double arc = Math.PI / 2, minRadius = 80, maxRadius = 92;
-			shield = new ArcForceField(user, angle, arc, minRadius, maxRadius, (int) (points * 10), getElementNum());
+			shield = new ArcForceField(user, angle, arc, minRadius, maxRadius, (int) (points * 10), this.getElementNum(), "Shield <"+this.getElement()+">");
 			boolean nope = false;
 			for (Person p : env.people)
 				if (env.personAFFCollision(p, shield))

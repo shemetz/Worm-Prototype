@@ -48,6 +48,7 @@ public class EP
 			return 3; // acid
 		case "Electricity":
 		case "Energy":
+		case "Force Field":
 			return 4; // shock
 		default:
 			Main.errorMessage("5555: Unknown element! " + element);
@@ -66,7 +67,7 @@ public class EP
 		case 4:
 		case 10:
 		case 11:
-			return 0;
+			return 0; //blunt
 		case 5:
 		case 9:
 			return 1;
@@ -77,6 +78,7 @@ public class EP
 			return 3;
 		case 3:
 		case 6:
+		case 12: //force field - applies to bubbles
 			return 4;
 		default:
 			Main.errorMessage("2112: Unknown damage type! " + eNum);

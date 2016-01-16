@@ -581,11 +581,10 @@ public class Ability
 		case "Elemental Combat II":
 			return new Elemental_Combat_II_E(element, pnts);
 		default:
-			// Main.errorMessage("Donald trump peninsula error - " + abilityName);
+			 Main.errorMessage("Donald trump peninsula error - " + abilityName);
 
-			// return null;
+			 return null;
 			// Just because the game isn't finished yet and I still haven't made all 151 ability methods:
-			return new Ability(abilityName, pnts);
 		}
 	}
 }

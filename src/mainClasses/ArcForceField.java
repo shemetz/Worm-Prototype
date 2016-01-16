@@ -15,8 +15,9 @@ public class ArcForceField extends Drawable
 	public int		elementNum;				// 12+ = not an element but a type of forcefield-matter (Protective Bubble, for example)
 	public double	waitingDamage;			// to not spam UITexts
 	public double	timeBetweenDamageTexts;
+	public String	type;//Shield <Element>, Protective Bubble, Bubble, Mobile Force Field?
 
-	public ArcForceField(Person target1, double angle1, double arc1, double minRadius1, double maxRadius1, double life1, int elementNum1)
+	public ArcForceField(Person target1, double angle1, double arc1, double minRadius1, double maxRadius1, double life1, int elementNum1, String type1)
 	{
 		maxLife = life1;
 		target = target1;
@@ -31,6 +32,7 @@ public class ArcForceField extends Drawable
 		height = 1.5;
 		waitingDamage = 0;
 		timeBetweenDamageTexts = 0;
+		type = type1;
 		int frame = 0;
 		if (elementNum < 12) // normal elemental shields
 		{

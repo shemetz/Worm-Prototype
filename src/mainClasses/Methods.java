@@ -63,6 +63,10 @@ public class Methods
 	}
 
 	// Compute the SQUARED distance from AB to C
+	public static double LineToPointDistancePow2(Point3D start, Point3D end, Point point)
+	{
+		return LineToPointDistancePow2(new Point(start.x,start.y), new Point(end.x,end.y), point);
+	}
 	public static double LineToPointDistancePow2(Point start, Point end, Point point)
 	{
 
@@ -112,6 +116,23 @@ public class Methods
 
 		return closestPoint;
 	}
+	
+	// returns closest point on AB to the point X
+		public static Point2D getClosestPointOnLine(double sx1, double sy1, double sx2, double sy2, double px, double py)
+		{
+			double xDelta = sx2 - sx1;
+			double yDelta = sy2 - sy1;
+
+			if ((xDelta == 0) && (yDelta == 0))
+			{
+				Main.errorMessage("That's not a line");
+				return null;
+			}
+
+			double u = ((px - sx1) * xDelta + (py - sy1) * yDelta) / (xDelta * xDelta + yDelta * yDelta);
+
+			return new Point2D.Double(sx1 + u * xDelta, sy1 + u * yDelta);
+		}
 
 	// Compute the dot product AB . AC
 	public static double realDotProduct(Point a, Point b, Point c)

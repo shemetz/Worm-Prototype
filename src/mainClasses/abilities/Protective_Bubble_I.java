@@ -16,9 +16,10 @@ public class Protective_Bubble_I extends Ability
 	public Protective_Bubble_I(int p)
 	{
 		super("Protective Bubble I", p);
-		cooldown = Math.min(6 - points, 0.3);
+		cooldown = Math.max(6 - points, 0.3);
 		costType = "mana";
 		cost = 3;
+		instant = true;
 
 		bubble = null;
 	}
@@ -27,32 +28,33 @@ public class Protective_Bubble_I extends Ability
 	{
 		double angle = Math.atan2(target.y - user.y, target.x - user.x); // can be 0, honestly
 		// activating the bubble
-		if (!this.on)
+		if (!user.maintaining && !user.prone)
 		{
-			if (!user.maintaining && !user.prone)
-			{
-				if (cost > user.mana || cooldownLeft > 0)
-					return;
-				double AFFwidth = 5;// 5 + 5*points; //should be
-				bubble = new ArcForceField(user, angle, 2 * Math.PI, 100, 100 + AFFwidth, 10 * points, 12);
-				env.arcFFs.add(bubble);
-				user.mana -= this.cost;
-				this.cooldownLeft = this.cooldown;
-				this.on = true;
-				// TODO sound effects
-			}
-		} else // deactivate
-		{
-			this.on = false;
-			this.cooldownLeft = 0.5 * this.cooldown;
-			bubble.life = 0; // kill
+			if (cost > user.mana || cooldownLeft > 0)
+				return;
+			
+			//Remove any current protective bubble
+			for (int i = 0; i < env.arcFFs.size(); i++)
+				if (env.arcFFs.get(i).target.equals(user) && env.arcFFs.get(i).type.equals("Protective Bubble"))
+				{
+					env.shieldDebris(env.arcFFs.get(i), "bubble");
+					env.arcFFs.remove(i);
+					i--;
+				}
+			double AFFwidth = 5;// 5 + 5*points; //should be
+			bubble = new ArcForceField(user, angle, 2 * Math.PI, 100, 100 + AFFwidth, 10 * points, 12, "Protective Bubble");
+			env.arcFFs.add(bubble);
+			user.mana -= this.cost;
+			this.cooldownLeft = this.cooldown;
+			this.on = true;
+			// TODO sound effects
 		}
 	}
 
 	public void maintain(Environment env, Person user, Point target, double deltaTime)
 	{
 		bubble.life -= bubble.life * 0.1 * deltaTime;
-		bubble.rotation = Methods.lerpAngle(bubble.rotation,user.rotation, deltaTime);
+		bubble.rotation = Methods.lerpAngle(bubble.rotation, user.rotation, deltaTime);
 	}
 
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)

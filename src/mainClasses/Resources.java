@@ -27,7 +27,7 @@ public class Resources
 	static BufferedImage[]							balls;																// element
 	static BufferedImage[][]						beams;																// element, type (0,1,2,3 = start, 4,5,6,7 = middle, 8,9,10,11 = flat end, 12,13,14,15 regular end)
 	static BufferedImage[][]						debris;																// element, type. 12 = smoke, 13 = Force Field.
-	static BufferedImage[][]						debrisShadows;														// element, type.  ^
+	static BufferedImage[][]						debrisShadows;														// element, type. ^
 	final static int								debrisWidth		= 40;
 	static List<BufferedImage>						clouds;
 	static List<BufferedImage>						cloudShadows;
@@ -175,22 +175,22 @@ public class Resources
 			}
 		}
 
-		//Smoke debris
+		// Smoke debris
 		for (int j = 0; j < 3; j++)
 			debris[12][j] = ResourceLoader.getBufferedImage("elementalAbilities/Smoke_debris_" + j + ".png");
 		for (int j = 0; j < 3; j++)
 			debris[12][j + 3] = ResourceLoader.getBufferedImage("elementalAbilities/Smoke_smalldebris_" + j + ".png");
 		for (int j = 0; j < debris[0].length; j++)
 			debrisShadows[12][j] = Drawable.createShadow(debris[12][j]);
-		//FF debris
+		// FF debris
 		for (int j = 0; j < 3; j++)
 			debris[13][j] = ResourceLoader.getBufferedImage("elementalAbilities/FF_debris_" + j + ".png");
 		for (int j = 0; j < 3; j++)
 			debris[13][j + 3] = ResourceLoader.getBufferedImage("elementalAbilities/FF_smalldebris_" + j + ".png");
 		for (int j = 0; j < debris[0].length; j++)
 			debrisShadows[13][j] = Drawable.createShadow(debris[12][j]);
-		
-		//Protective bubble
+
+		// Protective bubble
 		for (int j = 0; j < 4; j++)
 			arcForceFields[12][j] = ResourceLoader.getBufferedImage("forcefields/Protective_Bubble_" + j + ".png");
 
@@ -402,11 +402,11 @@ public class Resources
 			icons.put(s, ResourceLoader.getBufferedImage("icons/effects/" + s + ".png"));
 
 		// Clouds
-		for (int i = 0; i < 5; i++) // the number is the number of cloud images available
-		{
-			clouds.add(Methods.optimizeImage(ResourceLoader.getBufferedImage("clouds/cloud_" + i + ".png")));
-			cloudShadows.add(Cloud.cloudShadow(clouds.get(i)));
-		}
+		// for (int i = 0; i < 5; i++) // the number is the number of cloud images available
+		// {
+		// clouds.add(Methods.optimizeImage(ResourceLoader.getBufferedImage("clouds/cloud_" + i + ".png")));
+		// cloudShadows.add(Cloud.cloudShadow(clouds.get(i)));
+		// }
 
 		// Effects
 		effects.add(new ArrayList<BufferedImage>()); // Burning

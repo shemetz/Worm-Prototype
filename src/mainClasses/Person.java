@@ -70,7 +70,7 @@ public class Person extends RndPhysObj
 	public Point						target;
 	public Area							rangeArea;
 	public boolean						lastHandUsedIsRight					= false;
-	public boolean						punchedSomebody						= false;
+	public boolean						punchedSomething						= false;
 	public boolean						notMoving							= false;
 	public boolean						notAnimating						= false;
 	public double						directionOfAttemptedMovement		= 0;

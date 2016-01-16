@@ -1,22 +1,24 @@
 package mainClasses;
+
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
 public class Beam extends Drawable
 {
-	public Person				creator;
-	public boolean				isChild;
-	public Point3D				start, end;
-	public int					elementNum;
-	public int					endType;									// 0 = regular end, 1 = flat, -1 = not tested yet.
-	public double				endAngle;
-	public int					frameNum;									// 0, 1, 2 or 3
-	public int					points;
-	public double				timeLeft;
-	public double				damaging;
-	public final static int	lengthOfBeamImg	= 200, heightOfBeamImg = 40;
-	public double				range;										// The maximum range of this beam. Subsequent reflection-beams will have shorter range.
-	public double				size;
+	public Person			creator;
+	public boolean			isChild;
+	public Point3D			start, end;
+	public int				elementNum;
+	public int				endType;						// 0 = regular end, 1 = flat, -1 = not tested yet.
+	public double			endAngle;
+	public int				frameNum;						// 0, 1, 2 or 3
+	public int				points;
+	public double			timeLeft;
+	public double			damaging;
+	public final static int	lengthOfBeamImg	= 200,
+									heightOfBeamImg = 40;
+	public double			range;							// The maximum range of this beam. Subsequent reflection-beams will have shorter range.
+	public double			size;
 
 	public Beam(Person creator, Point3D start, Point3D end, int elementNum, int points, double range)
 	{
@@ -56,7 +58,7 @@ public class Beam extends Drawable
 		return 0.6 * points * 0.2 * Ability.elementalAttackNumbers[elementNum][2] * Ability.elementalAttackNumbers[elementNum][1];
 	}
 
-	//unused
+	// unused
 	public void rotate(double angle, double deltaTime)
 	{
 		final double lerp_constant = 7;
@@ -65,6 +67,11 @@ public class Beam extends Drawable
 		start.y = (int) (creator.y + 80 * Math.sin(rotation));
 		end.x = (int) (creator.x + 10000 * Math.cos(rotation));
 		end.y = (int) (creator.y + 10000 * Math.sin(rotation));
+	}
+
+	public double angle()
+	{
+		return Math.atan2(end.y - start.y, end.x - start.x);
 	}
 
 	public void drawShadow(Graphics2D buffer, double shadowX, double shadowY)
@@ -113,7 +120,7 @@ public class Beam extends Drawable
 		double angle = Math.atan2(end.y - start.y, end.x - start.x);
 		if (z <= cameraZed && endType != -1)
 		{
-			// end 
+			// end
 			if (endType == 0)
 			{
 				buffer.rotate(angle, end.x, end.y);

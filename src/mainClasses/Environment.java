@@ -25,13 +25,13 @@ public class Environment
 	public final double				TAU					= Math.PI * 2;
 	public final int				numOfClouds			= 0;
 	public final int				minCloudHeight		= 60,
-			maxCloudHeight = 400;
+											maxCloudHeight = 400;
 	public final static double[]	floorFriction		= new double[]
-			{ 0.6 };													// depending on floor type
+															{ 0.6 };													// depending on floor type
 	public final static double[]	poolFriction		= new double[]
-			{ -1, 0.3, -1, -1, 0.8, 0.2, -1, 0.6, 0.7, 0.3, 0.8, 0.6 };	// depending on pool type
+															{ -1, 0.3, -1, -1, 0.8, 0.2, -1, 0.6, 0.7, 0.3, 0.8, 0.6 };	// depending on pool type
 	public final static double[]	wallFriction		= new double[]
-			{ -1, 0.3, -1, -1, 0.8, 0.2, -1, 0.6, 0.7, 0.3, 0.8, 0.6 };	// depending on wall type
+															{ -1, 0.3, -1, -1, 0.8, 0.2, -1, 0.6, 0.7, 0.3, 0.8, 0.6 };	// depending on wall type
 	public boolean					devMode				= false;
 	public boolean					showDamageNumbers	= true;
 	public Point					windDirection;
@@ -129,7 +129,7 @@ public class Environment
 	}
 
 	private int			healthSum		= 0,
-			poolNum = 0;
+								poolNum = 0;
 	private boolean[][]	checkedSquares	= new boolean[width][height];
 
 	boolean moveBall(Ball b, double deltaTime)
@@ -252,72 +252,96 @@ public class Environment
 			// check collisions with arc force fields
 			for (ArcForceField aff : arcFFs)
 			{
-				if (aff.z + aff.height > b.z && aff.z < b.z + b.height)
-				{
-					double angleToBall = Math.atan2(b.y - aff.target.y, b.x - aff.target.x);
-					while (angleToBall < 0)
-						angleToBall += 2 * Math.PI;
-					double minAngle = (aff.rotation - (aff.arc + 2 * b.radius / aff.maxRadius) / 2);
-					double maxAngle = (aff.rotation + (aff.arc + 2 * b.radius / aff.maxRadius) / 2);
-					while (minAngle < 0)
-						minAngle += 2 * Math.PI;
-					while (minAngle >= 2 * Math.PI)
-						minAngle -= 2 * Math.PI;
-					while (maxAngle < 0)
-						maxAngle += 2 * Math.PI;
-					while (maxAngle >= 2 * Math.PI)
-						maxAngle -= 2 * Math.PI;
-					boolean withinAngles = false;
-					// Okay so here's a thing: I assume the circle is a point, and increase the aff's dimensions for the calculation, and it's almost precise!
-					if (minAngle < maxAngle)
+				if (!(b.creator.equals(aff.target) && aff.type.equals("Protective Bubble"))) //balls phase through protective bubbles of their owners
+					if (aff.z + aff.height > b.z && aff.z < b.z + b.height)
 					{
-						if (angleToBall > minAngle && angleToBall < maxAngle)
+						double angleToBall = Math.atan2(b.y - aff.target.y, b.x - aff.target.x);
+						while (angleToBall < 0)
+							angleToBall += 2 * Math.PI;
+						boolean withinAngles = false;
+						if (aff.arc >= TAU)
 							withinAngles = true;
-					} else if (angleToBall > minAngle || angleToBall > maxAngle)
-						withinAngles = true;
-					if (withinAngles)
-					{
-						double distance = Math.sqrt(Math.pow(aff.target.y - b.y, 2) + Math.pow(aff.target.x - b.x, 2));
-						if (distance > aff.minRadius - b.radius && distance < aff.maxRadius + b.radius)
-							// That's totally not a legit collision check, but honestly? it's pretty darn close, according to my intuition.
+						else
 						{
-							if (aff.elementNum == 6 && EP.damageType(b.elementNum) == 4) // electricity and energy balls bounce off of energy
+							double minAngle = (aff.rotation - (aff.arc + 2 * b.radius / aff.maxRadius) / 2);
+							double maxAngle = (aff.rotation + (aff.arc + 2 * b.radius / aff.maxRadius) / 2);
+							while (minAngle < 0)
+								minAngle += 2 * Math.PI;
+							while (minAngle >= 2 * Math.PI)
+								minAngle -= 2 * Math.PI;
+							while (maxAngle < 0)
+								maxAngle += 2 * Math.PI;
+							while (maxAngle >= 2 * Math.PI)
+								maxAngle -= 2 * Math.PI;
+							// Okay so here's a thing: I assume the circle is a point, and increase the aff's dimensions for the calculation, and it's almost precise!
+							if (minAngle < maxAngle)
 							{
-								double damage = (b.getDamage() + b.getPushback()) * 0.5; // half damage, because the ball bounces
-								damageArcForceField(aff, damage, new Point((int) (aff.target.x + aff.maxRadius * Math.cos(angleToBall)), (int) (aff.target.y + aff.maxRadius * Math.sin(angleToBall))),
-										EP.damageType(b.elementNum));
-								hitPerson(aff.target, 0, 0.5 * b.getPushback(), b.angle(), 0);
-								// TODO cool sparks
-								// PHYSICS
-								double angle = 2 * angleToBall - b.angle() + Math.PI;
-								// avoiding repeat-bounce immediately afterwards
-								moveQuantumX = Math.cos(angle);
-								moveQuantumY = Math.sin(angle);
-								double velocity = b.velocity();
-								b.xVel = velocity * moveQuantumX;
-								b.yVel = velocity * moveQuantumY;
-								// avoiding it some more
-								b.x += moveQuantumX;
-								b.y += moveQuantumY;
-							} else if (EP.damageType(aff.elementNum) > 1 && EP.damageType(aff.elementNum) != EP.damageType(b.elementNum)) // if damage resistance, and not a "normal" element
+								if (angleToBall > minAngle && angleToBall < maxAngle)
+									withinAngles = true;
+							} else if (angleToBall > minAngle || angleToBall > maxAngle)
+								withinAngles = true;
+						}
+						if (withinAngles)
+						{
+							double distancePow2 = Math.pow(aff.target.y - b.y, 2) + Math.pow(aff.target.x - b.x, 2);
+							if (distancePow2 > Math.pow(aff.minRadius - b.radius, 2) && distancePow2 < Math.pow(aff.maxRadius + b.radius, 2))
+							// That's totally not a legit collision check, but honestly? it's pretty darn close, according to my intuition.
 							{
-								Main.errorMessage("You need to write some code here!");
-							} else
-							{
-								// TODO damage depends on ball speed maybe?a
-								// TODO water strong against fire, electricity unblockable by some and entirely blockable by others, , bouncing from metal, etc.
-								double damage = b.getDamage() + b.getPushback();
-								damageArcForceField(aff, damage, new Point((int) (aff.target.x + aff.maxRadius * Math.cos(angleToBall)), (int) (aff.target.y + aff.maxRadius * Math.sin(angleToBall))),
-										EP.damageType(b.elementNum));
-								hitPerson(aff.target, 0, 0.5 * b.getPushback(), b.angle(), 0);
+								if (aff.elementNum == 6 && EP.damageType(b.elementNum) == 4) // electricity and energy balls bounce off of energy
+								{
+									double damage = (b.getDamage() + b.getPushback()) * 0.5; // half damage, because the ball bounces
+									damageArcForceField(aff, damage,
+											new Point((int) (aff.target.x + aff.maxRadius * Math.cos(angleToBall)), (int) (aff.target.y + aff.maxRadius * Math.sin(angleToBall))),
+											EP.damageType(b.elementNum));
+									hitPerson(aff.target, 0, 0.5 * b.getPushback(), b.angle(), 0);
+									// TODO cool sparks
+									// PHYSICS
+									double angle = 2 * angleToBall - b.angle() + Math.PI;
+									// avoiding repeat-bounce immediately afterwards
+									moveQuantumX = Math.cos(angle);
+									moveQuantumY = Math.sin(angle);
+									double velocity = b.velocity();
+									b.xVel = velocity * moveQuantumX;
+									b.yVel = velocity * moveQuantumY;
+									// avoiding it some more
+									b.x += moveQuantumX;
+									b.y += moveQuantumY;
+								} else if (distancePow2 > aff.maxRadius*aff.maxRadius && (aff.elementNum == 12 || (EP.damageType(aff.elementNum) > 1 && EP.damageType(aff.elementNum) == EP.damageType(b.elementNum)))) // if bubble, or damage resistance
+								{
+									// bounce
+									double ballAngle = b.angle();
+									double lineAngle = angleToBall + TAU / 4;
+									while (lineAngle < 0)
+										lineAngle += TAU;
+									while (lineAngle >= TAU)
+										lineAngle -= TAU;
+									while (ballAngle < 0)
+										ballAngle += TAU;
+									while (ballAngle >= TAU)
+										ballAngle -= TAU;
+									double newBallAngle = 2 * lineAngle - ballAngle; // math
+									double velocity = b.velocity();
+									b.xVel = velocity * Math.cos(newBallAngle);
+									b.yVel = velocity * Math.sin(newBallAngle);
+									b.x -= 4 * moveQuantumX; // avoid ball stickiness
+									b.y -= 4 * moveQuantumY;
+								} else
+								{
+									// TODO damage depends on ball speed maybe?a
+									// TODO water strong against fire, electricity unblockable by some and entirely blockable by others, , bouncing from metal, etc.
+									double damage = b.getDamage() + b.getPushback();
+									damageArcForceField(aff, damage,
+											new Point((int) (aff.target.x + aff.maxRadius * Math.cos(angleToBall)), (int) (aff.target.y + aff.maxRadius * Math.sin(angleToBall))),
+											EP.damageType(b.elementNum));
+									hitPerson(aff.target, 0, 0.5 * b.getPushback(), b.angle(), 0);
 
-								// Special effects! debris!
-								ballDebris(b, "arc force field", angleToBall);
-								return false;
+									// Special effects! debris!
+									ballDebris(b, "arc force field", angleToBall);
+									return false;
+								}
 							}
 						}
 					}
-				}
 			}
 
 			// Force Fields
@@ -343,7 +367,7 @@ public class Environment
 						 */
 						if (0 <= Methods.realDotProduct(ff.p[0], ballCenter, ff.p[1]) && Methods.realDotProduct(ff.p[0], ballCenter, ff.p[1]) <= ff.width * ff.width
 								&& 0 <= Methods.realDotProduct(ff.p[0], ballCenter, ff.p[3]) && Methods.realDotProduct(ff.p[0], ballCenter, ff.p[3]) <= ff.length * ff.length)
-							// circle center is within FF. This basically never ever should happen.
+						// circle center is within FF. This basically never ever should happen.
 						{
 							damageFF(ff, b.getDamage() + b.getPushback(), ballCenter);
 
@@ -707,43 +731,43 @@ public class Environment
 		if (personRect.intersects(affBox))
 		{
 			if (aff.z + aff.height > p.z && aff.z < p.z + p.height)
-			if (aff.arc < TAU) // if not bubble
-			{
-				// following code is copied from ball-aff collision
-				double angleToPerson = Math.atan2(p.y - aff.target.y, p.x - aff.target.x);
-				while (angleToPerson < 0)
-					angleToPerson += 2 * Math.PI;
-				double minAngle = aff.rotation - aff.arc/2 - Math.tan(p.radius / aff.maxRadius);
-				double maxAngle = aff.rotation + aff.arc/2 + Math.tan(p.radius / aff.maxRadius);
-				while (minAngle < 0)
-					minAngle += 2 * Math.PI;
-				while (minAngle >= 2 * Math.PI)
-					minAngle -= 2 * Math.PI;
-				while (maxAngle < 0)
-					maxAngle += 2 * Math.PI;
-				while (maxAngle >= 2 * Math.PI)
-					maxAngle -= 2 * Math.PI;
-				boolean withinAngles = false;
-				if (minAngle < maxAngle)
+				if (aff.arc < TAU) // if not bubble
 				{
-					if (angleToPerson > minAngle && angleToPerson < maxAngle)
+					// following code is copied from ball-aff collision
+					double angleToPerson = Math.atan2(p.y - aff.target.y, p.x - aff.target.x);
+					while (angleToPerson < 0)
+						angleToPerson += 2 * Math.PI;
+					double minAngle = aff.rotation - aff.arc / 2 - Math.tan(p.radius / aff.maxRadius);
+					double maxAngle = aff.rotation + aff.arc / 2 + Math.tan(p.radius / aff.maxRadius);
+					while (minAngle < 0)
+						minAngle += 2 * Math.PI;
+					while (minAngle >= 2 * Math.PI)
+						minAngle -= 2 * Math.PI;
+					while (maxAngle < 0)
+						maxAngle += 2 * Math.PI;
+					while (maxAngle >= 2 * Math.PI)
+						maxAngle -= 2 * Math.PI;
+					boolean withinAngles = false;
+					if (minAngle < maxAngle)
+					{
+						if (angleToPerson > minAngle && angleToPerson < maxAngle)
+							withinAngles = true;
+					} else if (angleToPerson > minAngle || angleToPerson < maxAngle)
 						withinAngles = true;
-				} else if (angleToPerson > minAngle || angleToPerson < maxAngle)
-					withinAngles = true;
-				if (withinAngles)
+					if (withinAngles)
+					{
+						double distance = Math.sqrt(Math.pow(aff.target.y - p.y, 2) + Math.pow(aff.target.x - p.x, 2));
+						if (distance > aff.minRadius - p.radius && distance < aff.maxRadius + p.radius)
+							return true;
+						return false;
+					}
+				} else // much easier
 				{
-					double distance = Math.sqrt(Math.pow(aff.target.y - p.y, 2) + Math.pow(aff.target.x - p.x, 2));
-					if (distance > aff.minRadius - p.radius && distance < aff.maxRadius + p.radius)
+					double distancePow2 = Methods.DistancePow2(aff.x, aff.y, p.x, p.y);
+					if (distancePow2 < Math.pow(p.radius + aff.maxRadius, 2))
 						return true;
 					return false;
 				}
-			} else // much easier
-			{
-				double distancePow2 = Methods.DistancePow2(aff.x, aff.y, p.x, p.y);
-				if (distancePow2 < Math.pow(p.radius + aff.maxRadius, 2))
-					return true;
-				return false;
-			}
 		}
 		return false;
 	}
@@ -1497,29 +1521,29 @@ public class Environment
 							lines.add(l2);
 							points.add(Methods.getSegmentIntersection(l2, beamLine));
 						} else // much easier
-							if (Methods.LineToPointDistancePow2(b.start.Point(), b.end.Point(), aff.target.Point()) < aff.maxRadius * aff.maxRadius)
+						if (Methods.LineToPointDistancePow2(b.start.Point(), b.end.Point(), aff.target.Point()) < aff.maxRadius * aff.maxRadius)
+						{
+							Point2D closestPointToSegment = Methods.getClosestPointOnSegment(beamLine.getX1(), beamLine.getY1(), beamLine.getX2(), beamLine.getY2(), aff.x, aff.y);
+
+							for (int k = -1; k < 2; k += 2) // intended to check both intersections of the line with the circle
 							{
-								Point2D closestPointToSegment = Methods.getClosestPointOnSegment(beamLine.getX1(), beamLine.getY1(), beamLine.getX2(), beamLine.getY2(), aff.x, aff.y);
+								double closestPointDistanceMax = Math.sqrt(Methods.DistancePow2(closestPointToSegment.getX(), closestPointToSegment.getY(), aff.x, aff.y));
+								double angleToCollisionPointMax = Math.atan2(closestPointToSegment.getY() - aff.y, closestPointToSegment.getX() - aff.x)
+										+ k * Math.acos(closestPointDistanceMax / aff.maxRadius);
 
-								for (int k = -1; k < 2; k += 2) // intended to check both intersections of the line with the circle
+								Point2D closestPointMax = new Point2D.Double(aff.x + aff.maxRadius * Math.cos(angleToCollisionPointMax), aff.y + aff.maxRadius * Math.sin(angleToCollisionPointMax));
+
+								// outer circle
+								if (closestPointDistanceMax < aff.maxRadius)
 								{
-									double closestPointDistanceMax = Math.sqrt(Methods.DistancePow2(closestPointToSegment.getX(), closestPointToSegment.getY(), aff.x, aff.y));
-									double angleToCollisionPointMax = Math.atan2(closestPointToSegment.getY() - aff.y, closestPointToSegment.getX() - aff.x)
-											+ k * Math.acos(closestPointDistanceMax / aff.maxRadius);
-
-									Point2D closestPointMax = new Point2D.Double(aff.x + aff.maxRadius * Math.cos(angleToCollisionPointMax), aff.y + aff.maxRadius * Math.sin(angleToCollisionPointMax));
-
-									// outer circle
-									if (closestPointDistanceMax < aff.maxRadius)
-									{
-										points.add(closestPointMax);
-										lines.add(new Line2D.Double(closestPointMax.getX() + 12 * Math.cos(angleToCollisionPointMax + Math.PI / 2),
-												closestPointMax.getY() + 12 * Math.sin(angleToCollisionPointMax + Math.PI / 2),
-												closestPointMax.getX() - 12 * Math.cos(angleToCollisionPointMax + Math.PI / 2),
-												closestPointMax.getY() - 12 * Math.sin(angleToCollisionPointMax + Math.PI / 2)));
-									}
+									points.add(closestPointMax);
+									lines.add(new Line2D.Double(closestPointMax.getX() + 12 * Math.cos(angleToCollisionPointMax + Math.PI / 2),
+											closestPointMax.getY() + 12 * Math.sin(angleToCollisionPointMax + Math.PI / 2),
+											closestPointMax.getX() - 12 * Math.cos(angleToCollisionPointMax + Math.PI / 2),
+											closestPointMax.getY() - 12 * Math.sin(angleToCollisionPointMax + Math.PI / 2)));
 								}
 							}
+						}
 						// finding closest point
 						Point2D intersectionP = null;
 						for (int i = 0; i < points.size(); i++)
@@ -2252,6 +2276,7 @@ public class Environment
 			Main.errorMessage("What's that? I can't hear you!");
 			return;
 		}
+		ongoingSounds.add(sound);
 		sound.play();
 	}
 
@@ -2487,6 +2512,8 @@ public class Environment
 						buffer.drawRect((int) (b.x - 1), (int) (b.y - 1), 3, 3);
 						buffer.setColor(Color.green);
 						buffer.drawOval((int) (b.x - b.radius), (int) (b.y - b.radius), (int) (2 * b.radius), (int) (2 * b.radius));
+						buffer.setColor(Color.red);
+						buffer.drawLine((int) (b.x), (int) (b.y), (int) (b.x + b.xVel * 0.1), (int) (b.y + b.yVel * 0.1));
 					}
 					if (d instanceof Player)
 					{

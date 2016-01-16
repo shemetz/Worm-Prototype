@@ -46,7 +46,6 @@ import javax.swing.JFrame;
 import javax.swing.Timer;
 
 import mainClasses.abilities.Protective_Bubble_I;
-import mainClasses.abilities.Punch;
 import mainClasses.abilities.Sense_Powers;
 import mainClasses.abilities.Shield_E;
 import mainClasses.abilities.Sprint;
@@ -235,7 +234,8 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		for (Person p : env.people)
 		{
 			if (p.getClass().equals(NPC.class))
-				frameAIupdate((NPC) p, deltaTime);
+				((NPC) (p)).frameAIupdate(deltaTime, frameNum, env, this);
+			;
 
 			// maintaining person abilities
 			for (Ability a : p.abilities)
@@ -367,21 +367,21 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 			{
 				aff.updateImage();
 			}
-			//push people within
-			for (Person p: env.people)
+			// push people within
+			for (Person p : env.people)
 				if (env.personAFFCollision(p, aff))
-					{
-						double angleToPerson = Math.atan2(p.y-aff.target.y,p.x-aff.target.x);
-						double pushStrength = 10000;
-						double xMax = 0.03*pushStrength * Math.cos(angleToPerson);
-						double yMax = 0.03*pushStrength * Math.sin(angleToPerson);
-						if ((xMax > 0 && p.xVel < xMax) || (xMax < 0 && p.xVel > xMax))
-							p.xVel += deltaTime*pushStrength * Math.cos(angleToPerson);
-						if ((yMax > 0 && p.yVel < yMax) || (yMax < 0 && p.yVel > yMax))
-							p.yVel += deltaTime*pushStrength * Math.sin(angleToPerson);
-						if (p instanceof NPC)
-							((NPC) p).justCollided = true;
-					}
+				{
+					double angleToPerson = Math.atan2(p.y - aff.target.y, p.x - aff.target.x);
+					double pushStrength = 10000;
+					double xMax = 0.03 * pushStrength * Math.cos(angleToPerson);
+					double yMax = 0.03 * pushStrength * Math.sin(angleToPerson);
+					if ((xMax > 0 && p.xVel < xMax) || (xMax < 0 && p.xVel > xMax))
+						p.xVel += deltaTime * pushStrength * Math.cos(angleToPerson);
+					if ((yMax > 0 && p.yVel < yMax) || (yMax < 0 && p.yVel > yMax))
+						p.yVel += deltaTime * pushStrength * Math.sin(angleToPerson);
+					if (p instanceof NPC)
+						((NPC) p).justCollided = true;
+				}
 			if (aff.life <= 0)
 			{
 				for (Person p : env.people)
@@ -509,227 +509,6 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 			errorMessage("They don't think it be like it is, but it do.");
 			break;
 		}
-	}
-
-	void frameAIupdate(NPC p, double deltaTime)
-	{
-		// choose target
-		if (frameNum % 25 == 0) // don't check a lot of times in a short period
-		{
-			p.targetID = -1;
-			switch (p.tactic)
-			{
-			case "retreat":
-			case "circle strafing":
-			case "punch chasing":
-				// Choose as target the closest enemy.
-				double shortestDistanceToTargetPow2 = Double.MAX_VALUE;
-				for (Person p2 : env.people)
-					if (p.viableTarget(p2))
-						if (Methods.DistancePow2(p.x, p.y, p2.x, p2.y) < shortestDistanceToTargetPow2)
-						{
-							shortestDistanceToTargetPow2 = Methods.DistancePow2(p.x, p.y, p2.x, p2.y);
-							p.targetID = p2.id;
-						}
-				break;
-			default:
-
-				break;
-			}
-		}
-		Person target = null;
-		if (p.targetID != -1 && p.tactic != "no target")
-			for (Person p2 : env.people)
-				if (p2.id == p.targetID)
-				{
-					target = p2;
-					break;
-				}
-		if (target != null)
-		{
-			double angleToTarget = Math.atan2(target.y - p.y, target.x - p.x);
-			double distanceToTargetPow2 = Methods.DistancePow2(p.x, p.y, target.x, target.y);
-			// target-type tactics
-			switch (p.tactic)
-			{
-			case "punch chasing":
-				// move towards target and punch them.
-				p.rotate(angleToTarget, deltaTime);
-				p.directionOfAttemptedMovement = angleToTarget;
-				p.strengthOfAttemptedMovement = 1;
-				p.target = new Point((int) target.x, (int) target.y);
-				Ability punch = null;
-				int index = -1;
-				for (int i = 0; i < p.abilities.size(); i++)
-					if (p.abilities.get(i) instanceof Punch)
-					{
-						index = i;
-						punch = p.abilities.get(index);
-					}
-				if (punch != null)
-					if (distanceToTargetPow2 < punch.range * punch.range)
-						pressAbilityKey(index, true, p);
-					else if (punch.cooldownLeft <= 0)
-						pressAbilityKey(index, false, p);
-				break;
-			case "circle strafing":
-				// move around target. Also, get close to it or away from it to get into the "circle strafing" range.
-				p.rotate(angleToTarget, deltaTime);
-
-				// Fucking fuck shit code is not fucking working and I have no bloody idea what's wrong with it and I rewrote it to something that looks different but does the same and guess what? yes the bug is still happening. gahhhhhhhhhhhhh,
-				// hopefully one day I will figure out what's wrong here.
-
-				// double diffAngleFromTarget = Math.asin(7097.42205 * globalDeltaTime * 0.5 / Math.sqrt(distanceToTargetPow2)); // KILL ME
-				// double newAngle = -Math.PI + angleToTarget + diffAngleFromTarget * (p.rightOrLeft ? 1 : -1);
-				// double newX = target.x + dist * Math.cos(newAngle);
-				// double newY = target.y + dist * Math.sin(newAngle);
-				// p.directionOfAttemptedMovement = Math.atan2(newY - p.y, newX - p.x);
-				// p.strengthOfAttemptedMovement = 1;
-				// if (random.nextDouble() < 0.01) // chance of switching direction mid-circle
-				// p.rightOrLeft = !p.rightOrLeft;
-				double deviationAngle = Math.acos(3062.332465 * deltaTime * 0.5 / Math.sqrt(distanceToTargetPow2)); // Haha I'm just throwing random numbers that make it stop growing
-				if (Double.isNaN(deviationAngle))
-				{
-					// ughhhhhhhhh
-					deviationAngle = Math.PI / 1;
-				}
-
-				p.directionOfAttemptedMovement = angleToTarget + deviationAngle * (p.rightOrLeft ? 1 : -1); // BUG - distance grows between p and target for some reason!!!! TODO
-				p.strengthOfAttemptedMovement = 1;
-
-				if (p.justGotHit || p.justCollided || random.nextDouble() < 0.005) // chance of switching direction mid-circle
-					p.rightOrLeft = !p.rightOrLeft;
-
-				// moving away or into range
-				// range is ALWAYS between 250 and 500 cm, because....because I said so
-				// TODO ....yeah...
-				if (distanceToTargetPow2 < 250 * 250)
-					p.directionOfAttemptedMovement = Methods.meanAngle(angleToTarget + Math.PI, p.directionOfAttemptedMovement);
-				if (distanceToTargetPow2 > 500 * 500)
-					p.directionOfAttemptedMovement = Methods.meanAngle(angleToTarget, p.directionOfAttemptedMovement);
-
-				// Attacking
-				for (int aIndex = 0; aIndex < p.abilities.size(); aIndex++)
-				{
-					Ability a = p.abilities.get(aIndex);
-					if (a.hasTag("projectile")) // ball
-						if (a.justName().equals("Ball"))
-						{
-							// aim the ball the right direction, taking into account the velocity addition caused by the person moving
-							double v = Ball.giveVelocity(a.points);
-							double xv = v * Math.cos(angleToTarget);
-							double yv = v * Math.sin(angleToTarget);
-							xv -= p.xVel;
-							yv -= p.yVel;
-							p.target = new Point((int) (p.x + xv), (int) (p.y + yv));
-							pressAbilityKey(aIndex, true, p);
-						}
-					if (a.hasTag("beam")) // beam
-						if (a.justName().equals("Beam"))
-						{
-							// aims the beam exactly at the target, so will miss often
-							p.target = new Point((int) (p.x), (int) (p.y));
-							pressAbilityKey(aIndex, true, p);
-						}
-				}
-				break;
-			case "retreat":
-				// Back away from any enemy nearby when low on health
-				p.strengthOfAttemptedMovement = 0; // stop if there's nobody to retreat from
-				double shortestSquaredDistance = 400000; // minimum distance to keep from enemies. About 7 tiles
-				if (distanceToTargetPow2 < shortestSquaredDistance)
-				{
-					p.directionOfAttemptedMovement = angleToTarget + Math.PI; // away from target
-					p.rotate(p.directionOfAttemptedMovement, deltaTime);
-					p.strengthOfAttemptedMovement = 1;
-				}
-				break;
-			default:
-				errorMessage("6j93k, no target-tactic - " + p.tactic);
-				break;
-			}
-		} else // no-target tactics
-			switch (p.tactic)
-			{
-			case "panic":
-				// run around aimlessly
-				if (frameNum % 40 == 0)
-					p.directionOfAttemptedMovement = p.rotation - 0.5 * Math.PI + random.nextDouble() * Math.PI; // random direction in 180 degree arc
-				p.rotate(p.directionOfAttemptedMovement, deltaTime);
-				p.strengthOfAttemptedMovement = 1;
-				break;
-			case "circle strafing":
-			case "punch chasing":
-				// waiting for tactic-switching
-				break;
-			case "no target":
-				// don't move
-				p.strengthOfAttemptedMovement = 0;
-				// try to switch tactics
-
-				if (p.strategy.equals("aggressive"))
-				{
-					// Choose as target the closest enemy.
-					double shortestDistanceToTargetPow2 = Double.MAX_VALUE;
-					for (Person p2 : env.people)
-						if (p.viableTarget(p2))
-							if (Methods.DistancePow2(p.x, p.y, p2.x, p2.y) < shortestDistanceToTargetPow2)
-							{
-								shortestDistanceToTargetPow2 = Methods.DistancePow2(p.x, p.y, p2.x, p2.y);
-								p.targetID = p2.id; // not necessary?
-								target = p2;
-							}
-					if (target != null)
-						if (Methods.DistancePow2(p.x, p.y, target.x, target.y) < 600 * 600) // 600 sounds like an OK number
-							if (p.mana > 0.4 * p.maxMana)
-								p.tactic = "circle strafing";
-							else if (p.stamina > 0.1 * p.maxStamina)
-								p.tactic = "punch chasing";
-							else
-								p.tactic = "retreat";
-				}
-				break;
-
-			default:
-				errorMessage("shpontzilontz. no no-target-tactic - " + p.tactic);
-				break;
-			}
-
-		// tactic-switching. TODO make sense?
-		String prevTactic = "" + p.tactic; // copy
-		if (p.panic)
-			p.tactic = "panic";
-		else if (p.life < 0.15 * p.maxLife)
-			p.tactic = "retreat";
-		else if (p.tactic.equals("retreat")) // stop retreating when uninjured
-			p.tactic = "no target";
-		else if (target == null)
-			p.tactic = "no target";
-		else if (p.strategy.equals("aggressive"))
-		{
-			if (p.tactic.equals("circle strafing") && p.mana <= 0.1 * p.maxMana)
-				p.tactic = "punch chasing";
-			else if (p.tactic.equals("punch chasing") && p.mana >= 0.9 * p.maxMana)
-				p.tactic = "circle strafing";
-		}
-		if (!prevTactic.equals(p.tactic))
-		{
-			if (p.abilityMaintaining != -1)
-				pressAbilityKey(p.abilityMaintaining, false, p);
-			p.abilityMaintaining = -1;
-			p.abilityAiming = -1;
-			p.abilityTryingToRepetitivelyUse = -1;
-		}
-		// resetting check-booleans
-		p.justCollided = false;
-		p.justGotHit = false;
-
-		if (Double.isNaN(p.directionOfAttemptedMovement))
-		{
-			p.directionOfAttemptedMovement = 0;
-			p.strengthOfAttemptedMovement = 0;
-		}
-
 	}
 
 	void tabFrame()
@@ -1010,13 +789,15 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		shmulik.abilities.add(Ability.ability("Ball <Earth>", 6));
 		shmulik.abilities.add(Ability.ability("Heal I", 3));
 		shmulik.name = "Shmulik";
-		env.people.add(shmulik);
+		// env.people.add(shmulik);
 
 		Person tzippi = new NPC(96 * 15, 96 * 25, "passive");
-		tzippi.trigger();
+		// tzippi.trigger();
+		tzippi.name = "TEST SUBJECT DELTA";
+		tzippi.abilities.add(Ability.ability("Protective Bubble I", 4));
 		env.people.add(tzippi);
 		Person aa = new NPC(96 * 17, 96 * 27, "passive");
-		aa.trigger();
+		// aa.trigger();
 		env.people.add(aa);
 		Person cc = new NPC(96 * 10, 96 * 25, "passive");
 		// cc.trigger();
@@ -1406,10 +1187,10 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 
 		// starting beyond window title bar
 		buffer.translate(8, 30);
-		//Name
+		// Name
 		buffer.setFont(new Font("Monospaced", Font.BOLD, (int) (20 * UIzoomLevel)));
 		buffer.setColor(Color.black);
-		buffer.drawString(player.name,(int)(20*UIzoomLevel), 25);
+		buffer.drawString(player.name, (int) (20 * UIzoomLevel), 25);
 		// Health, Mana, Stamina
 		buffer.setStroke(new BasicStroke(1));
 		// assuming neither of the following stats is too high (< x10 normal amount)
@@ -1990,6 +1771,24 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		buffy.translate(-xCenter, -yCenter);
 	}
 
+	void pauseAllSounds(Boolean pausePlay)
+	{
+		List<SoundEffect> sounds = new ArrayList<SoundEffect>();
+		sounds.addAll(env.ongoingSounds);
+		for (Person p : env.people)
+		{
+			for (Ability a : p.abilities)
+				sounds.addAll(a.sounds);
+			sounds.addAll(p.sounds);
+		}
+		
+		for (SoundEffect s : sounds)
+			if (pausePlay)
+				s.pause();
+			else
+				s.cont(); // inue
+	}
+
 	public void keyPressed(KeyEvent e)
 	{
 		switch (e.getKeyCode())
@@ -2163,6 +1962,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 			tooltip = "";
 			if (!tab)
 				tabHoverAbility = -1;
+			pauseAllSounds(tab);
 			break;
 
 		case KeyEvent.VK_SHIFT:
@@ -2658,7 +2458,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		updateNiceHotkeys();
 	}
 
-	static void print(Object whatever)
+	public static void print(Object whatever)
 	{
 		// Used for temporary debug messages
 		System.out.println(whatever);
