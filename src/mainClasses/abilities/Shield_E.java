@@ -39,7 +39,8 @@ public class Shield_E extends Ability
 			if (cost / 5 > user.mana || cooldownLeft > 0)
 				return;
 
-			final double arc = Math.PI / 2, minRadius = 80, maxRadius = 92;
+			arc = Math.PI / 2; //arc of shield
+			double minRadius = 80, maxRadius = 92;
 			shield = new ArcForceField(user, angle, arc, minRadius, maxRadius, (int) (points * 10), this.getElementNum(), "Shield <"+this.getElement()+">");
 			boolean nope = false;
 			for (Person p : env.people)

@@ -1,10 +1,13 @@
 package mainClasses.abilities;
 
 import java.awt.Point;
+import java.util.ArrayList;
+import java.util.List;
 
 import mainClasses.Ability;
 import mainClasses.Beam;
 import mainClasses.Environment;
+import mainClasses.Evasion;
 import mainClasses.Person;
 import mainClasses.Player;
 import mainClasses.Point3D;
@@ -13,10 +16,12 @@ import mainClasses.Vine;
 public class Beam_E extends Ability
 {
 
-	int beamFrameNum;
+	int						beamFrameNum;
+	public List<Evasion>	evasions;
+
 	public Beam_E(String elementName, int p)
 	{
-		super("Beam <"+elementName+">", p);
+		super("Beam <" + elementName + ">", p);
 		cost = 0;
 		costPerSecond = 5 / elementalAttackNumbers[getElementNum()][2] * 1.5;
 		costType = "mana";
@@ -30,11 +35,12 @@ public class Beam_E extends Ability
 		stopsMovement = false;
 		maintainable = true;
 		instant = true;
-		
+
 		frameNum = 0;
 		beamFrameNum = 0;
+		evasions = new ArrayList<Evasion>();
 	}
-	
+
 	public void use(Environment env, Person user, Point target)
 	{
 		double angle = Math.atan2(target.y - user.y, target.x - user.x);
@@ -68,6 +74,7 @@ public class Beam_E extends Ability
 				user.maintaining = true;
 				on = true;
 				user.switchAnimation(2);
+				evasions = new ArrayList<Evasion>();
 				sounds.get(0).loop();
 			}
 		} else
@@ -105,8 +112,17 @@ public class Beam_E extends Ability
 			}
 		}
 	}
+
 	public void maintain(Environment env, Person user, Point target, double deltaTime)
 	{
+		for (int j = 0; j < this.evasions.size(); j++)
+			if (this.evasions.get(j).timeLeft > 0)
+				this.evasions.get(j).timeLeft -= deltaTime;
+			else
+			{
+				this.evasions.remove(j);
+				j--;
+			}
 		double angle = Math.atan2(target.y - user.y, target.x - user.x);
 		final double beamExitDistance = 40;
 		if (!getElement().equals("Plant")) // non-plant
@@ -119,7 +135,7 @@ public class Beam_E extends Ability
 					Point3D start = new Point3D((int) (user.x + beamExitDistance * Math.cos(angle)), (int) (user.y + beamExitDistance * Math.sin(angle)), (int) user.z); // starts beamExitDistance pixels in front of the user
 					// TODO piercing beams, or electric lightning bolts
 					Point3D end = new Point3D((int) (user.x + range * Math.cos(angle)), (int) (user.y + range * Math.sin(angle)), (int) user.z);
-					Beam b = new Beam(user, start, end, getElementNum(), points, range);
+					Beam b = new Beam(user, this, start, end, getElementNum(), points, range);
 					frameNum++;
 					b.frameNum = beamFrameNum;
 					env.beams.add(b);
@@ -169,9 +185,14 @@ public class Beam_E extends Ability
 		}
 	}
 
+	public void evadedBy(Person p)
+	{
+		evasions.add(new Evasion(p.id));
+	}
+
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
 	{
-		double angle = Math.atan2(target.y-player.y, target.x-player.x);
+		double angle = Math.atan2(target.y - player.y, target.x - player.x);
 		player.targetType = "look";
 		if (!player.leftMousePressed && !player.holdingVine)
 			player.rotate(angle, 3.0 * deltaTime);

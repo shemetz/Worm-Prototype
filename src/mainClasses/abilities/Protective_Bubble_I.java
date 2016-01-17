@@ -16,7 +16,7 @@ public class Protective_Bubble_I extends Ability
 	public Protective_Bubble_I(int p)
 	{
 		super("Protective Bubble I", p);
-		cooldown = Math.max(6 - points, 0.3);
+		cooldown = 1;
 		costType = "mana";
 		cost = 3;
 		instant = true;
@@ -27,22 +27,24 @@ public class Protective_Bubble_I extends Ability
 	public void use(Environment env, Person user, Point target)
 	{
 		double angle = Math.atan2(target.y - user.y, target.x - user.x); // can be 0, honestly
-		// activating the bubble
-		if (this.on)
+		// deactivating the bubble
+		if (on && cooldownLeft == 0)
 		{
-			for (ArcForceField aff : env.arcFFs)
-				if (aff.equals(bubble))
+			for (int i = 0; i < env.arcFFs.size(); i++)
+				if (env.arcFFs.get(i).equals(bubble))
 				{
-					
+					env.shieldDebris(bubble, "bubble");
+					cooldownLeft = 0.5;
+					on = false;
+					env.arcFFs.remove(i);
+					i--;
 				}
-		}
-		else
-		if (!user.maintaining && !user.prone)
+		} else if (!user.maintaining && !user.prone) // activating bubble
 		{
 			if (cost > user.mana || cooldownLeft > 0)
 				return;
-			
-			//Remove any current protective bubble
+
+			// Remove any current protective bubble
 			for (int i = 0; i < env.arcFFs.size(); i++)
 				if (env.arcFFs.get(i).target.equals(user) && env.arcFFs.get(i).type.equals("Protective Bubble"))
 				{

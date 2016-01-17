@@ -165,7 +165,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		{
 			Debris d = env.debris.get(i);
 			d.update(deltaTime);
-			if (d.velocity <= 35)
+			if (d.velocity <= 35 && d.timeLeft <= 0)
 			{
 				env.debris.remove(i);
 				i--;
@@ -202,6 +202,14 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		for (int i = 0; i < env.vines.size(); i++)
 		{
 			Vine v = env.vines.get(i);
+			for (int j = 0; j < v.evasions.size(); j++)
+				if (v.evasions.get(j).timeLeft > 0)
+					v.evasions.get(j).timeLeft -= deltaTime;
+				else
+				{
+					v.evasions.remove(j);
+					j--;
+				}
 			env.moveVine(v, deltaTime);
 			v.fixPosition();
 			if (v.length < v.startDistance) // vine retracted and didn't hit anyone
@@ -215,6 +223,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		for (int i = 0; i < env.beams.size(); i++)
 		{
 			Beam b = env.beams.get(i);
+
 			env.moveBeam(b, !b.isChild, deltaTime);
 			if (frameNum % 15 == 0)
 				b.frameNum++;
@@ -234,8 +243,10 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		for (Person p : env.people)
 		{
 			if (p.getClass().equals(NPC.class))
-				((NPC) (p)).frameAIupdate(deltaTime, frameNum, env, this);
-			;
+			{
+				NPC npc = (NPC) p;
+				npc.frameAIupdate(deltaTime, frameNum, env, this);
+			}
 
 			// maintaining person abilities
 			for (Ability a : p.abilities)
@@ -335,10 +346,40 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 			}
 		}
 
+		// SPRAY DROPS
+		for (int i = 0; i < env.sprayDrops.size(); i++)
+		{
+			SprayDrop sd = env.sprayDrops.get(i);
+			for (int j = 0; j < sd.evasions.size(); j++)
+				if (sd.evasions.get(j).timeLeft > 0)
+					sd.evasions.get(j).timeLeft -= deltaTime;
+				else
+				{
+					sd.evasions.remove(j);
+					j--;
+				}
+			// gravity
+			sd.zVel -= 0.003 * gravity * deltaTime;
+			if (random.nextInt(100) <= 1)
+				env.sprayDropDebris(sd);
+			if (sd.xVel == 0 || sd.yVel == 0 || sd.mass <= 0 || !env.moveSD(sd, deltaTime)) // sd was destroyed, or sd stopped. Also, moves the sd
+			{
+				env.sprayDrops.remove(i);
+				i--;
+			}
+		}
 		// BALLS
 		for (int i = 0; i < env.balls.size(); i++)
 		{
 			Ball b = env.balls.get(i);
+			for (int j = 0; j < b.evasions.size(); j++)
+				if (b.evasions.get(j).timeLeft > 0)
+					b.evasions.get(j).timeLeft -= deltaTime;
+				else
+				{
+					b.evasions.remove(j);
+					j--;
+				}
 			// gravity
 			b.zVel -= 0.001 * gravity * deltaTime;
 			b.rotation += b.angularVelocity * deltaTime;
@@ -626,9 +667,22 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 			// // You must be wondering why I did this wacky hijink instead ofsimply drawing the ovals with buffer. Well, apparently the TexturePaint causes the process to be very slow when the camera is zoomed in (and buffer's scale is very big).
 
 			break;
+		case "cone":
+			buffer.setStroke(dashedStroke3);
+			buffer.setColor(new Color(255, 255, 255, 80)); // transparent white
+			buffer.drawLine((int) (player.x + 50 * Math.cos(player.rotation + ability.arc / 2)), (int) (player.y + 50 * Math.sin(player.rotation + ability.arc / 2)),
+					(int) (player.x + ability.range * Math.cos(player.rotation + ability.arc / 2)), (int) (player.y + ability.range * Math.sin(player.rotation + ability.arc / 2)));
+			buffer.drawLine((int) (player.x + 50 * Math.cos(player.rotation - ability.arc / 2)), (int) (player.y + 50 * Math.sin(player.rotation - ability.arc / 2)),
+					(int) (player.x + ability.range * Math.cos(player.rotation - ability.arc / 2)), (int) (player.y + ability.range * Math.sin(player.rotation - ability.arc / 2)));
+			buffer.drawArc((int) (player.x - ability.range), (int) (player.y - ability.range), ability.range * 2, ability.range * 2, (int) ((-player.rotation - ability.arc / 2) / Math.PI * 180),
+					(int) (ability.arc / Math.PI * 180));
+			buffer.drawArc((int) (player.x - 50), (int) (player.y - 50), 50 * 2, 50 * 2, (int) ((-player.rotation - ability.arc / 2) / Math.PI * 180), (int) (ability.arc / Math.PI * 180));
+			break;
 		case "Look":
 		case "":
+			break;
 		default:
+			errorMessage("No such range type, sir!");
 			break;
 		}
 	}
@@ -764,7 +818,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 
 		player = new Player(96 * 20, 96 * 20);
 		player.abilities.add(Ability.ability("Protective Bubble I", 5));
-		player.abilities.add(Ability.ability("Ball <Earth>", 5));
+		player.abilities.add(Ability.ability("Spray <Acid>", 5));
 		player.abilities.add(Ability.ability("Ball <Fire>", 5));
 		player.abilities.add(Ability.ability("Flight I", 5));
 		player.abilities.add(Ability.ability("Blink", 5));
@@ -1781,7 +1835,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 				sounds.addAll(a.sounds);
 			sounds.addAll(p.sounds);
 		}
-		
+
 		for (SoundEffect s : sounds)
 			if (pausePlay)
 				s.pause();

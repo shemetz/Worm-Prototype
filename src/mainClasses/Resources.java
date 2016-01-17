@@ -26,6 +26,7 @@ public class Resources
 	final static int								arcFFImageWidth	= 288;
 	static BufferedImage[]							balls;																// element
 	static BufferedImage[][]						beams;																// element, type (0,1,2,3 = start, 4,5,6,7 = middle, 8,9,10,11 = flat end, 12,13,14,15 regular end)
+	static BufferedImage[][]						sprayDrops;															// element, type
 	static BufferedImage[][]						debris;																// element, type. 12 = smoke, 13 = Force Field.
 	static BufferedImage[][]						debrisShadows;														// element, type. ^
 	final static int								debrisWidth		= 40;
@@ -51,6 +52,7 @@ public class Resources
 		icons = new HashMap<String, BufferedImage>();
 		arcForceFields = new BufferedImage[elementalNum + 1][4]; // 0-11 = elemental, 12 = Prot. Bubble
 		balls = new BufferedImage[elementalNum];
+		sprayDrops = new BufferedImage[elementalNum][3];
 		debris = new BufferedImage[elementalNum + 2][6];
 		debrisShadows = new BufferedImage[debris.length][6];
 		cracks = new BufferedImage[3][12]; // 11 is saved for the original wall, not corners
@@ -83,9 +85,11 @@ public class Resources
 			// TODO icons for Charged Ball and Charge Beam
 			balls[i] = ResourceLoader.getBufferedImage("elementalAbilities/" + EP.elementList[i] + "_Ball.png");
 			for (int j = 0; j < 3; j++)
-				debris[i][j] = ResourceLoader.getBufferedImage("elementalAbilities/" + EP.elementList[i] + "_debris_" + j + ".png");
+				sprayDrops[i][j] = ResourceLoader.getBufferedImage("elementalAbilities/" + EP.elementList[i] + "_Spray_" + j + ".png");
 			for (int j = 0; j < 3; j++)
-				debris[i][j + 3] = ResourceLoader.getBufferedImage("elementalAbilities/" + EP.elementList[i] + "_smalldebris_" + j + ".png");
+				debris[i][j] = ResourceLoader.getBufferedImage("debris/" + EP.elementList[i] + "_debris_" + j + ".png");
+			for (int j = 0; j < 3; j++)
+				debris[i][j + 3] = ResourceLoader.getBufferedImage("debris/" + EP.elementList[i] + "_smalldebris_" + j + ".png");
 			for (int j = 0; j < debris[0].length; j++)
 				if (debris[i][j] != null)
 					debrisShadows[i][j] = Drawable.createShadow(debris[i][j]);
@@ -177,16 +181,16 @@ public class Resources
 
 		// Smoke debris
 		for (int j = 0; j < 3; j++)
-			debris[12][j] = ResourceLoader.getBufferedImage("elementalAbilities/Smoke_debris_" + j + ".png");
+			debris[12][j] = ResourceLoader.getBufferedImage("debris/Smoke_debris_" + j + ".png");
 		for (int j = 0; j < 3; j++)
-			debris[12][j + 3] = ResourceLoader.getBufferedImage("elementalAbilities/Smoke_smalldebris_" + j + ".png");
+			debris[12][j + 3] = ResourceLoader.getBufferedImage("debris/Smoke_smalldebris_" + j + ".png");
 		for (int j = 0; j < debris[0].length; j++)
 			debrisShadows[12][j] = Drawable.createShadow(debris[12][j]);
 		// FF debris
 		for (int j = 0; j < 3; j++)
-			debris[13][j] = ResourceLoader.getBufferedImage("elementalAbilities/FF_debris_" + j + ".png");
+			debris[13][j] = ResourceLoader.getBufferedImage("debris/FF_debris_" + j + ".png");
 		for (int j = 0; j < 3; j++)
-			debris[13][j + 3] = ResourceLoader.getBufferedImage("elementalAbilities/FF_smalldebris_" + j + ".png");
+			debris[13][j + 3] = ResourceLoader.getBufferedImage("debris/FF_smalldebris_" + j + ".png");
 		for (int j = 0; j < debris[0].length; j++)
 			debrisShadows[13][j] = Drawable.createShadow(debris[12][j]);
 

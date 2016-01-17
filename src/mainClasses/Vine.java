@@ -1,25 +1,29 @@
 package mainClasses;
+
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Vine extends Drawable // Vines are plant beams, sort of
 {
 	public final static int	lengthOfVineImg	= 200,
-								heightOfVineImg = 40;
+									heightOfVineImg = 40;
 	public final static int	grabblingRange	= 45;
-	public Person				creator;
-	public RndPhysObj				grabbledThing;
-	public Point3D				start, end;
-	public int					state;							// -1 = none, 0 = flying in the air, 1 = grabbing onto something, 2 = retracting (like 0 but backwards)
-	public int					points;
-	public double				range;							// The maximum range of this vine. Measured from the PERSON to the END.
-	public double				size;							// currently unused; TODO
-	public double				startDistance, endDistance;		// distance from creator to start, and from creator to end
-	public double				length;							// only relevant, and fixed in size, when vine is grabbling something
-	public double				deltaLength;					// like a spring! the extra length a vine is pulled/pushed.
-	public double				rigidity;						// self-explanatory
-	public double				spinStrength;					// how strong can this be pulled sideways
-	public double				endPauseTimeLeft;
+	public Person			creator;
+	public RndPhysObj		grabbledThing;
+	public Point3D			start, end;
+	public int				state;							// -1 = none, 0 = flying in the air, 1 = grabbing onto something, 2 = retracting (like 0 but backwards)
+	public int				points;
+	public double			range;							// The maximum range of this vine. Measured from the PERSON to the END.
+	public double			size;							// currently unused; TODO
+	public double			startDistance, endDistance;		// distance from creator to start, and from creator to end
+	public double			length;							// only relevant, and fixed in size, when vine is grabbling something
+	public double			deltaLength;					// like a spring! the extra length a vine is pulled/pushed.
+	public double			rigidity;						// self-explanatory
+	public double			spinStrength;					// how strong can this be pulled sideways
+	public double			endPauseTimeLeft;
+	List<Evasion>			evasions;
 
 	public Vine(Person creator, Point3D start, Point3D end, int points, double range)
 	{
@@ -43,11 +47,17 @@ public class Vine extends Drawable // Vines are plant beams, sort of
 		length = endDistance - startDistance;
 		deltaLength = 0;
 		endPauseTimeLeft = 0;
+		evasions = new ArrayList<Evasion>();
 
 		size = 1; // temp
 		height = size / 2 + 0.1; // temp
 		rigidity = 25 * points; // temp
 		spinStrength = 100000 * points;
+	}
+
+	public void evadedBy(Person p)
+	{
+		evasions.add(new Evasion(p.id));
 	}
 
 	public void retract()
@@ -64,7 +74,7 @@ public class Vine extends Drawable // Vines are plant beams, sort of
 		retract();
 		endPauseTimeLeft = 0;
 	}
-	
+
 	public double getDamage()
 	{
 		// 0.6 * points * 0.2 * attackRate * damage

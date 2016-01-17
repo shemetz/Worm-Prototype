@@ -3,6 +3,8 @@ package mainClasses;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
+import mainClasses.abilities.Beam_E;
+
 public class Beam extends Drawable
 {
 	public Person			creator;
@@ -19,9 +21,11 @@ public class Beam extends Drawable
 									heightOfBeamImg = 40;
 	public double			range;							// The maximum range of this beam. Subsequent reflection-beams will have shorter range.
 	public double			size;
+	public Beam_E			theAbility;
 
-	public Beam(Person creator, Point3D start, Point3D end, int elementNum, int points, double range)
+	public Beam(Person creator, Beam_E theAbility, Point3D start, Point3D end, int elementNum, int points, double range)
 	{
+		this.theAbility = theAbility;
 		this.creator = creator;
 		this.start = start;
 		this.end = end;

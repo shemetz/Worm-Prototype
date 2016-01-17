@@ -19,6 +19,9 @@ public class NPC extends Person
 	boolean	rightOrLeft;			// true = right or CW. false = left or CCW.
 	boolean	justCollided	= false;
 	boolean	justGotHit		= false;
+	double	instinctDelayTime;
+	double	timeSinceLastInstinct;
+	double	angleOfLastInstinct;
 
 	public NPC(int x1, int y1, String s1)
 	{
@@ -28,7 +31,15 @@ public class NPC extends Person
 		strategy = s1;
 		tactic = "no target";
 		rightOrLeft = true;
+		timeSinceLastInstinct = instinctDelayTime;
+		angleOfLastInstinct = 0;
 		rename(); // random npc name - no abilities yet
+	}
+
+	public void updateSubStats()
+	{
+		basicUpdateSubStats();
+		instinctDelayTime = Math.max(0.15 - 0.015 * WITS, 0); // average is 0.35 secs
 	}
 
 	public void setCommander(int comID)
@@ -278,13 +289,39 @@ public class NPC extends Person
 		}
 
 		// Instincts - move away from dangerous objects
+		if (this.timeSinceLastInstinct < 0)
+			this.timeSinceLastInstinct += deltaTime;
 		if (moveAwayFromDangerousObjects(env))
 			this.rotate(this.directionOfAttemptedMovement, deltaTime);
+		else if (this.timeSinceLastInstinct >= 0 && this.timeSinceLastInstinct < this.instinctDelayTime)
+		{
+			// for a period of instinctDelayTime after finishing with instincts, keep moving
+			this.directionOfAttemptedMovement = this.angleOfLastInstinct;
+			this.strengthOfAttemptedMovement = 1;
+			this.timeSinceLastInstinct += deltaTime;
+		}
 	}
 
 	boolean moveAwayFromDangerousObjects(Environment env)
 	{
-		final double maximumDistanceICareAboutPow2 = Math.pow(WITS*70, 2); // TODO
+		/*
+		 * INSTINCTS
+		 * 
+		 * Every NPC has an instinct delay (instinctDelayTime, IDT), and a timer (timeSinceLastInstinct, TSLI).
+		 * 
+		 * When there's a danger, TSLI will start counting for IDT seconds by becoming -IDT and growing by deltaTime per frame.
+		 * 
+		 * When TSLI reaches 0, it stops and the person starts instinct-ing as normal.
+		 * 
+		 * When a person is no longer under instincts - no danger nearby - TSLI will begin counting again, upwards
+		 * 
+		 * While it's counting again, the person is under the instinct delay influence - moving in the direction of last instinct.
+		 * 
+		 * After it reaches the value of IDT, it stops and the person returns to normal, until new danger is detected.
+		 * 
+		 * Functionally, a person's reactions to danger are delayed by IDT (but not while reacting - not that it matters much).
+		 */
+		final double maximumDistanceICareAboutPow2 = Math.pow(WITS * 70, 2); // TODO
 
 		double xElement = 0;
 		double yElement = 0;
@@ -298,10 +335,10 @@ public class NPC extends Person
 				double distanceToLinePow2 = Methods.DistancePow2(this.x, this.y, closestPointOnLine.getX(), closestPointOnLine.getY());
 				if (distanceToLinePow2 < Math.pow(this.radius + b.radius + 10, 2)) // if it can hit
 				{
-					boolean clockwise = (b.x - this.x) * Math.sin(b.angle()) > (b.y - this.y) * Math.cos(b.angle());
-					double peakAngleToPerson = b.angle() + (clockwise ? Math.PI / 2 : -Math.PI / 2);
 					if ((b.x > closestPointOnLine.getX()) != (b.xVel > 0)) // could also do the same with yVel
 					{
+						boolean clockwise = (b.x - this.x) * Math.sin(b.angle()) > (b.y - this.y) * Math.cos(b.angle());
+						double peakAngleToPerson = b.angle() + (clockwise ? Math.PI / 2 : -Math.PI / 2);
 						xElement += Math.cos(peakAngleToPerson) * b.getDamage() / distancePow2;
 						yElement += Math.sin(peakAngleToPerson) * b.getDamage() / distancePow2;
 					}
@@ -312,20 +349,44 @@ public class NPC extends Person
 		{
 			Point2D closestPointOnLine = Methods.getClosestPointOnLine(b.start.x, b.start.y, b.end.x, b.end.y, this.x, this.y);
 			if (closestPointOnLine == null)
-				continue; //no point in trying to escape null beams
+				continue; // no point in trying to escape null beams
 			double distanceToLinePow2 = Methods.DistancePow2(this.x, this.y, closestPointOnLine.getX(), closestPointOnLine.getY());
 			if (distanceToLinePow2 < maximumDistanceICareAboutPow2)
 			{
-				boolean clockwise = (b.start.x - this.x) * Math.sin(b.angle()) > (b.start.y - this.y) * Math.cos(b.angle());
-				double peakAngleToPerson = b.angle() + (clockwise ? Math.PI / 2 : -Math.PI / 2);
-				xElement += Math.cos(peakAngleToPerson) * b.getDamage() / distanceToLinePow2;
-				yElement += Math.sin(peakAngleToPerson) * b.getDamage() / distanceToLinePow2;
+				if ((b.start.x > closestPointOnLine.getX()) != (b.end.x - b.start.x > 0))
+				{
+					boolean clockwise = (b.start.x - this.x) * Math.sin(b.angle()) > (b.start.y - this.y) * Math.cos(b.angle());
+					double peakAngleToPerson = b.angle() + (clockwise ? Math.PI / 2 : -Math.PI / 2);
+					xElement += Math.cos(peakAngleToPerson) * b.getDamage() / distanceToLinePow2;
+					yElement += Math.sin(peakAngleToPerson) * b.getDamage() / distanceToLinePow2;
+				}
+			}
+		}
+		for (SprayDrop sd : env.sprayDrops)
+		{
+			double distancePow2 = Methods.DistancePow2(this.x, this.y, sd.x, sd.y);
+			if (distancePow2 < maximumDistanceICareAboutPow2)
+			{
+				boolean clockwise = (sd.x - this.x) * Math.sin(sd.angle()) > (sd.y - this.y) * Math.cos(sd.angle());
+				double peakAngleToPerson = sd.angle() + (clockwise ? Math.PI / 2 : -Math.PI / 2);
+				xElement += Math.cos(peakAngleToPerson) * sd.getDamage() / distancePow2;
+				yElement += Math.sin(peakAngleToPerson) * sd.getDamage() / distancePow2;
 			}
 		}
 		if (xElement == 0 && yElement == 0)
 			return false;
+		if (this.timeSinceLastInstinct >= this.instinctDelayTime)
+		{
+			this.timeSinceLastInstinct = -this.instinctDelayTime;
+			return false;
+		}
+		if (this.timeSinceLastInstinct < 0)
+			return false;
+		// while under instincts, timeSinceLastInstinct == 0
 		this.directionOfAttemptedMovement = Math.atan2(yElement, xElement);
+		this.angleOfLastInstinct = this.directionOfAttemptedMovement;
 		this.strengthOfAttemptedMovement = 1;
+		this.timeSinceLastInstinct = 0;
 		return true;
 	}
 

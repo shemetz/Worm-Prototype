@@ -50,6 +50,7 @@ public class Person extends RndPhysObj
 	public double						missAngle;
 	public double						runningStaminaCost;													// per second
 	public double						sprintingStaminaCost;												// ^
+	public double						evasion;															// chance of an attack missing you
 
 	// Rest of the variables
 	public double						life;
@@ -70,7 +71,7 @@ public class Person extends RndPhysObj
 	public Point						target;
 	public Area							rangeArea;
 	public boolean						lastHandUsedIsRight					= false;
-	public boolean						punchedSomething						= false;
+	public boolean						punchedSomething					= false;
 	public boolean						notMoving							= false;
 	public boolean						notAnimating						= false;
 	public double						directionOfAttemptedMovement		= 0;
@@ -232,10 +233,17 @@ public class Person extends RndPhysObj
 
 		// Natural abilities
 		abilities.add(Ability.ability("Punch", 0));
+		abilities.get(0).range = (int) (1.15 * radius);
 		abilities.add(Ability.ability("Sprint", 0));
 	}
 
 	public void updateSubStats()
+	{
+		// should always be overridden.
+		Main.errorMessage("WHO IS THIS PERSON");
+	}
+
+	public void basicUpdateSubStats()
 	{
 		maxStamina = 4 + 2 * FITNESS;
 		naturalArmor = (int) (0.7 * STRENGTH + 0.3 * FITNESS);
@@ -249,6 +257,7 @@ public class Person extends RndPhysObj
 		missAngle = (1 - accuracy) * Math.PI / 3; // DEX 0 = 60 degree miss, DEX 3 = 15.
 		runningStaminaCost = 0.6;
 		sprintingStaminaCost = 1.8;
+		evasion = 1 - Math.pow(0.99431695501, (DEXTERITY * WITS)); // average is EXACTLY 5%!
 	}
 
 	public void initSounds()

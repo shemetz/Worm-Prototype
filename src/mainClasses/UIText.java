@@ -1,13 +1,14 @@
 package mainClasses;
+
 import java.awt.Color;
 
 public class UIText
 {
-	int x, y;
-	String text;
-	Color color;
-	int fontSize;
-	int transparency;
+	int		x, y;
+	String	text;
+	Color	color;
+	int		fontSize;
+	int		transparency;
 
 	public UIText(int x1, int y1, String t1, Color c1)
 	{
@@ -19,11 +20,11 @@ public class UIText
 		transparency = 255;
 	}
 
-	public UIText(int x1, int y1, String t1, int type)
+	public UIText(int x1, int y1, String text1, int type)
 	{
 		x = x1;
 		y = y1;
-		text = t1;
+		text = text1;
 		transparency = 255;
 		switch (type)
 		{
@@ -37,20 +38,23 @@ public class UIText
 			color = Color.green;
 			break;
 		case 3: // shield / Force Field damage text
-			color = new Color(0, 220, 255); //cyan-ish
+			color = new Color(0, 220, 255); // cyan-ish
 			break;
 		case 4: // armor damage text
 			color = Color.yellow;
 			break;
 		case 5: // object damage text (e.g. walls)
-			color = new Color(80, 80, 80); //dark gray
+			color = new Color(80, 80, 80); // dark gray
+			break;
+		case 6: // evasion text
+			color = new Color(255, 255, 255); // dark gray
 			break;
 		default:
 			Main.errorMessage("Unknown UItext damage type number: " + type);
 			color = Color.white;
 			break;
 		}
-		//TODO make it different
+		// TODO make it different
 		fontSize = 16;
 	}
 }

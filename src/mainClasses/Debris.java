@@ -1,18 +1,20 @@
 package mainClasses;
+
 import java.awt.Graphics2D;
 
 public class Debris extends Drawable
 {
-	double velocity;
-	double angle;
-	int elementNum; //13 = smoke
-	int type;
+	double	velocity;
+	double	angle;
+	int		elementNum;	// 13 = smoke
+	int		type;
+	double	timeLeft;
 
 	public Debris(double x1, double y1, double z1, double a1, int e1, double v1)
 	{
 		x = x1;
 		y = y1;
-		z = z1; //debris doesn't fall, by the way. I think.
+		z = z1; // debris doesn't fall, by the way. I think.
 		angle = a1;
 		rotation = a1; // yes yes
 		elementNum = e1;
@@ -23,16 +25,50 @@ public class Debris extends Drawable
 		shadow = Resources.debrisShadows[elementNum][type];
 	}
 
+	public Debris(double x1, double y1, double z1, double a1, int e1, boolean unMoving, double timeLeft1)
+	{
+		if (unMoving)
+		{
+			x = x1;
+			y = y1;
+			z = z1; // debris doesn't fall, by the way. I think.
+			angle = a1;
+			rotation = a1; // yes yes
+			elementNum = e1;
+			type = Main.random.nextInt(6);
+			if (type >= 3)
+				timeLeft1 /= 2;
+			velocity = 0;
+			image = Resources.debris[elementNum][type];
+			shadow = Resources.debrisShadows[elementNum][type];
+
+			timeLeft = timeLeft1;
+		} else
+			Main.errorMessage("wtf? @ Debris");
+	}
+
 	public void update(double deltaTime)
 	{
-		x += velocity * Math.cos(angle) * deltaTime;
-		y += velocity * Math.sin(angle) * deltaTime;
-		velocity -= 2.4 * deltaTime * velocity;
-		if (type == 1 || type == 4)
-			rotation += 4 * Math.PI * deltaTime; // temp ?
-		else
-			// just to make them not all rotate to same direction.
-			rotation -= 4 * Math.PI * deltaTime; // temp ?
+		if (timeLeft > 0)
+		{
+			timeLeft -= deltaTime;
+			if (type < 3 && timeLeft < 0.25)
+			{
+				type += 3;
+				image = Resources.debris[elementNum][type];
+				shadow = Resources.debrisShadows[elementNum][type];
+			}
+		} else
+		{
+			x += velocity * Math.cos(angle) * deltaTime;
+			y += velocity * Math.sin(angle) * deltaTime;
+			velocity -= 2.4 * deltaTime * velocity;
+			if (type == 1 || type == 4)
+				rotation += 4 * Math.PI * deltaTime; // temp ?
+			else
+				// just to make them not all rotate to same direction.
+				rotation -= 4 * Math.PI * deltaTime; // temp ?
+		}
 	}
 
 	public void addVelocity(double xVel, double yVel)
@@ -52,6 +88,7 @@ public class Debris extends Drawable
 			buffer.rotate(-rotation, (int) (x + shadowX * z), (int) (y + shadowY * z));
 		}
 	}
+
 	public void draw(Graphics2D buffer, double cameraZed)
 	{
 		if (z <= cameraZed)

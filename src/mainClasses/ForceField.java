@@ -1,4 +1,5 @@
 package mainClasses;
+
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -11,13 +12,14 @@ import mainResourcesPackage.SoundEffect;
 
 public class ForceField extends Drawable
 {
-	public int		length, width;
-	public double	life;
-	public int		maxLife;
-	public int		armor;
-	public Point[]	p;
-	public int		type;
-	public List<SoundEffect> sounds = new ArrayList<SoundEffect>();
+	public int					length, width;
+	public double				life;
+	public int					maxLife;
+	public int					armor;
+	public Point[]				p;
+	public int					type;
+	public List<SoundEffect>	sounds	= new ArrayList<SoundEffect>();
+
 	// TODO type
 	public ForceField(double x1, double y1, double z1, int l1, int w1, double rotation1, int life1, int t1)
 	{
@@ -33,11 +35,11 @@ public class ForceField extends Drawable
 
 		initializePoints();
 		initSounds();
-		
+
 		// for the Drawable stuff
 		image = new BufferedImage(length, length, BufferedImage.TYPE_INT_ARGB);
 		shadow = image;
-		
+
 		// TEMP?
 		armor = 0;
 		height = 1;
@@ -58,7 +60,7 @@ public class ForceField extends Drawable
 
 	void initSounds()
 	{
-		sounds.add(new SoundEffect("Reflect.wav", "Reflect")); //0 - when a beam hits the FF and is reflected
+		sounds.add(new SoundEffect("Reflect.wav", "Reflect")); // 0 - when a beam hits the FF and is reflected
 	}
 
 	public void stopAllSounds()
@@ -66,7 +68,7 @@ public class ForceField extends Drawable
 		for (int i = 0; i < sounds.size(); i++)
 			sounds.get(i).stop();
 	}
-	
+
 	public void drawShadow(Graphics2D buffer, double shadowX, double shadowY)
 	{
 		if (z > 1)
@@ -93,7 +95,10 @@ public class ForceField extends Drawable
 				{ 4.0f }, 0.0f));
 			else
 				buffer.setStroke(new BasicStroke(4));
-			buffer.setColor(new Color(0, 236, 0, 64 + 110 * (int) life / maxLife)); // outline color
+			if (life < 0)
+				buffer.setColor(new Color(0, 236, 0, 64));
+			else
+				buffer.setColor(new Color(0, 236, 0, 64 + 110 * (int) life / maxLife)); // outline color
 			buffer.drawRect((int) (x - 0.5 * length), (int) (y - 0.5 * width), length, width);
 			buffer.rotate(-rotation, (int) (x), (int) (y));
 			buffer.translate(x, y);

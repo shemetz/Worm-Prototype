@@ -24,6 +24,12 @@ public class Player extends Person
 			hotkeys[i] = -1;
 	}
 
+	public void updateSubStats()
+	{
+		basicUpdateSubStats();
+		//TODO evasion
+	}
+	
 	public void updateAbilities()
 	{
 		selfFrame(0);

@@ -26,11 +26,10 @@ public class Punch extends Ability
 		cost = 1;
 		costType = "stamina";
 		cooldown = 0.55; // is actually 0.55 - Math.min(0.02*FITNESS, 0.15);
-		rangeType = "Look";
+		rangeType = "Exact range";
 		stopsMovement = true;
 		instant = true;
-		range = (int) (1.15 * 70); // TODO move this into the part in Person and make it depend on radius:
-		// range = (int) (1.15 * radius);
+		// range = (int) (1.15 * radius); //in person's
 	}
 
 	public void use(Environment env, Person user, Point target)
@@ -247,6 +246,8 @@ public class Punch extends Ability
 				}
 			}
 		}
+		//restore range to normal
+		range = (int) (1.15 * user.radius);
 		if (user.punchedSomething)
 		{
 			// backwards pushback

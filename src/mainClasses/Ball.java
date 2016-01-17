@@ -1,6 +1,8 @@
 package mainClasses;
 
 import java.awt.Graphics2D;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Ball extends RndPhysObj
 {
@@ -8,6 +10,7 @@ public class Ball extends RndPhysObj
 	public int		points;
 	final int ballMass = 10;
 	public Person creator;
+	public List<Evasion> evasions;
 
 	public Ball(int en, int p1, double angle, Person creator1)
 	{
@@ -26,8 +29,14 @@ public class Ball extends RndPhysObj
 		xVel = Math.cos(angle) * velocity;
 		yVel = Math.sin(angle) * velocity;
 		angularVelocity = 1.8 * Math.PI;
+		evasions = new ArrayList<Evasion>();
 	}
 
+	public void evadedBy(Person p)
+	{
+		evasions.add(new Evasion(p.id));
+	}
+	
 	public static double giveVelocity(int pnts)
 	{
 		// TODO perhaps give different speeds to different elements.

@@ -66,6 +66,7 @@ public class Ability
 																																	// abilities).
 	protected boolean				stopsMovement;																					// Does the power stop the person from moving?
 	protected String				costType;																						// "none", "mana", "stamina", "charge" or "life". Abilities that use multiple don't exist, I think.
+	public double					arc;																							// used for abilities with an arc - the Spray ability
 
 	// changing variables of the ability
 	protected double				timeLeft;																						// how much time the ability has been on.
@@ -581,10 +582,10 @@ public class Ability
 		case "Elemental Combat II":
 			return new Elemental_Combat_II_E(element, pnts);
 		default:
-			 Main.errorMessage("Donald trump peninsula error - " + abilityName);
+			Main.errorMessage("Donald trump peninsula error - " + abilityName);
 
-			 return null;
-			// Just because the game isn't finished yet and I still haven't made all 151 ability methods:
+			return null;
+		// Just because the game isn't finished yet and I still haven't made all 151 ability methods:
 		}
 	}
 }
