@@ -8,6 +8,7 @@ import mainClasses.Environment;
 import mainClasses.Person;
 import mainClasses.Player;
 import mainClasses.SprayDrop;
+import mainResourcesPackage.SoundEffect;
 
 public class Spray_E extends Ability
 {
@@ -25,6 +26,8 @@ public class Spray_E extends Ability
 		maintainable = true;
 		instant = true;
 		arc = Math.PI * 1 / 2; // not really
+
+		sounds.add(new SoundEffect(elementName + "_beam.wav"));
 	}
 
 	public void use(Environment env, Person user, Point target)
@@ -43,7 +46,7 @@ public class Spray_E extends Ability
 			user.maintaining = true;
 			on = true;
 			user.switchAnimation(2);
-			// TODO sound
+			sounds.get(0).loop();
 		}
 	}
 
@@ -55,6 +58,7 @@ public class Spray_E extends Ability
 		if (cooldownLeft == 0)
 			if (user.mana >= costPerSecond * deltaTime)
 			{
+				sounds.get(0).cont();
 				double velocity = range * 1.4;
 				double z = (user.z + 0.35) * (Math.random() * 0.95 + 0.05); // anywhere between 100% and 5% range
 				double randomAngle = (Math.random() - 0.5) * arc + angle; // random angle within spray arc
@@ -64,6 +68,7 @@ public class Spray_E extends Ability
 				user.mana -= costPerSecond * deltaTime;
 			} else
 			{
+				sounds.get(0).pause();
 				cooldownLeft = cooldown;
 			}
 	}

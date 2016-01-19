@@ -132,7 +132,6 @@ public class Ability
 		timeLeft = 0;
 
 		addTags();
-		addSounds();
 		elementNum = getElementNum();
 	}
 
@@ -204,79 +203,6 @@ public class Ability
 	{
 		for (int i = 0; i < sounds.size(); i++)
 			sounds.get(i).stop();
-	}
-
-	public void playSound(String s)
-	{
-		updateSound(s, true);
-	}
-
-	public void stopSound(String s)
-	{
-		updateSound(s, false);
-	}
-
-	public void updateSound(String s, boolean start)
-	{
-		boolean loop = false; // or just play once - play().
-		SoundEffect sound = null;
-		switch (s)
-		{
-		case "Beam":
-			sound = sounds.get(0);
-			loop = true;
-			break;
-		case "Punch hit":
-			sound = sounds.get(Main.random.nextInt(3));
-			loop = false;
-			break;
-		case "Punch miss":
-			sound = sounds.get(Main.random.nextInt(3) + 4);
-			loop = false;
-			break;
-		case "Blink success":
-			sound = sounds.get(0);
-			loop = false;
-			break;
-		case "Blink fail":
-			sound = sounds.get(1);
-			loop = false;
-			break;
-		default:
-			Main.errorMessage("What's that? I can't hear you!");
-			break;
-		}
-		if (!start)
-			sound.stop();
-		else if (loop)
-			sound.loop();
-		else
-			sound.play();
-	}
-
-	public void addSounds()
-	{
-		switch (justName())
-		{
-		case "Beam":
-			sounds.add(new SoundEffect("Beam.wav", "Beam"));
-			break;
-		case "Punch":
-			sounds.add(new SoundEffect("punch_1.wav", "Punch"));
-			sounds.add(new SoundEffect("punch_2.wav", "Punch"));
-			sounds.add(new SoundEffect("punch_3.wav", "Punch"));
-			sounds.add(new SoundEffect("punch-miss_1.wav", "Punch"));
-			sounds.add(new SoundEffect("punch-miss_2.wav", "Punch"));
-			sounds.add(new SoundEffect("punch-miss_3.wav", "Punch"));
-			sounds.add(new SoundEffect("punch-miss_4.wav", "Punch"));
-			break;
-		case "Blink":
-			sounds.add(new SoundEffect("Blink-success.wav", "Blink"));
-			sounds.add(new SoundEffect("Blink-fail.wav", "Blink"));
-			break;
-		default:
-			break;
-		}
 	}
 
 	public static String getName(String text)

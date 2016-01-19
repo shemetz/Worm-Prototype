@@ -1071,6 +1071,11 @@ public class Environment
 			v.rotate(desiredAngle, deltaTime);
 			if (v.endPauseTimeLeft == 0)
 			{
+				if (!v.retractionSound)
+				{
+					v.creatorAbility.sounds.get(1).play();
+					v.retractionSound = true;
+				}
 				double angle = Math.atan2(v.end.y - v.start.y, v.end.x - v.start.x);
 				v.end.x += vineSpeed * Math.cos(angle);
 				v.end.y += vineSpeed * Math.sin(angle);
@@ -1415,21 +1420,24 @@ public class Environment
 
 			v.end.x = roundedIntersectionPoint.x;
 			v.end.y = roundedIntersectionPoint.y;
-			v.retract();
+			if (v.state != 2)
+				v.retract();
 			v.fixPosition();
 			damageWall(collidedWall.x, collidedWall.y, v.getDamage() + v.getPushback(), EP.damageType(EP.toInt("Plant")));
 			break;
 		case 1: // force field
 			v.end.x = roundedIntersectionPoint.x;
 			v.end.y = roundedIntersectionPoint.y;
-			v.retract();
+			if (v.state != 2)
+				v.retract();
 			v.fixPosition();
 			damageFF(collidedFF, v.getDamage() + v.getPushback(), roundedIntersectionPoint);
 			break;
 		case 2: // arc force field
 			v.end.x = roundedIntersectionPoint.x;
 			v.end.y = roundedIntersectionPoint.y;
-			v.retract();
+			if (v.state != 2)
+				v.retract();
 			v.fixPosition();
 			damageArcForceField(collidedAFF, v.getDamage() + v.getPushback(), roundedIntersectionPoint, EP.damageType("Plant"));
 			break;
@@ -2520,7 +2528,7 @@ public class Environment
 		switch (s)
 		{
 		case "Rock Smash":
-			sound = (new SoundEffect("rock-smash.wav", s));
+			sound = (new SoundEffect("rock-smash.wav"));
 			break;
 		default:
 			Main.errorMessage("What's that? I can't hear you!");
@@ -2713,11 +2721,6 @@ public class Environment
 					Person p = (Person) d;
 					if (showDamageNumbers)
 						p.drawUITexts(buffer, cameraZed, cameraRotation);
-				}
-				if (d instanceof NPC)
-				{
-					Person p = (Person) d;
-					p.drawName(buffer);
 				}
 				if (d instanceof Beam)
 				{

@@ -5,12 +5,15 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
+import abilities.Beam_E;
+
 public class Vine extends Drawable // Vines are plant beams, sort of
 {
 	public final static int	lengthOfVineImg	= 200,
 									heightOfVineImg = 40;
 	public final static int	grabblingRange	= 45;
 	public Person			creator;
+	Beam_E					creatorAbility;
 	public RndPhysObj		grabbledThing;
 	public Point3D			start, end;
 	public int				state;							// -1 = none, 0 = flying in the air, 1 = grabbing onto something, 2 = retracting (like 0 but backwards)
@@ -23,12 +26,16 @@ public class Vine extends Drawable // Vines are plant beams, sort of
 	public double			rigidity;						// self-explanatory
 	public double			spinStrength;					// how strong can this be pulled sideways
 	public double			endPauseTimeLeft;
+	boolean retractionSound;
 	public double			life;
 	public List<Evasion>	evasions;
 
 	public Vine(Person creator, Point3D start, Point3D end, int points, double range)
 	{
 		creator.holdingVine = true;
+		for (Ability a: creator.abilities)
+			if (a instanceof Beam_E && a.getElement().equals("Plant"))
+				creatorAbility = (Beam_E)a;
 		this.creator = creator;
 		this.start = start;
 		this.end = end;
@@ -48,6 +55,7 @@ public class Vine extends Drawable // Vines are plant beams, sort of
 		length = endDistance - startDistance;
 		deltaLength = 0;
 		endPauseTimeLeft = 0;
+		retractionSound = true;
 		evasions = new ArrayList<Evasion>();
 
 		size = 1; // temp
@@ -69,6 +77,7 @@ public class Vine extends Drawable // Vines are plant beams, sort of
 		state = 2; // was 0. or maybe 1
 		if (endPauseTimeLeft == 0)
 			endPauseTimeLeft = 0.2;
+		retractionSound = false;
 	}
 
 	public void quickRetract()

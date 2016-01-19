@@ -468,6 +468,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 								if (aff.equals(ability.bubble))
 								{
 									ability.on = false;
+									ability.sounds.get(1).play();
 									ability.cooldownLeft = ability.cooldown;
 									env.shieldDebris(aff, "bubble");
 									env.arcFFs.remove(i);
@@ -537,19 +538,8 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 
 		// Stopping sounds that should stop looping
 		for (SoundEffect s : allSounds)
-		{
-			if (!s.justActivated && s.active)
-				switch (s.type)
-				{
-				case "Beam":
-				case "Reflect":
-				case "Scorched":
-					s.stop();
-					break;
-				default:
-					break;
-				}
-		}
+			if (!s.justActivated && s.active && s.endUnlessMaintained)
+				s.stop();
 
 		if (timeSinceLastScreenshot <= 2)
 			timeSinceLastScreenshot += deltaTime;
@@ -680,7 +670,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 			// // NOTE: This uses TexturePaint, and will always look slightly or very weird. Worth it though.
 			// BufferedImage image = new BufferedImage(2 * ability.range + 18, 2 * ability.range + 18, BufferedImage.TYPE_INT_ARGB);
 			// Graphics2D shreodinger = image.createGraphics(); // name is irrelevant
-			// shreodinger.setPaint(new TexturePaint(Resources.range_net, new Rectangle(0, 0, 90, 90)));
+			// shreodinger.setPaint(new TexturePaint(Resources.range_net, new Rectangle(0, 0, 90, 90))); //range_net was an image, very simple one
 			// shreodinger.fillOval(0 + (int) (player.x) % 18, 0 + (int) (player.y) % 18, 2 * ability.range, 2 * ability.range);
 			// shreodinger.setColor(new Color(182, 255, 0)); // greenish
 			// shreodinger.setStroke(new BasicStroke(1));
@@ -866,7 +856,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		shmulik.abilities.add(Ability.ability("Ball <Earth>", 6));
 		shmulik.abilities.add(Ability.ability("Heal I", 3));
 		shmulik.name = "Shmulik";
-		//env.people.add(shmulik);
+		// env.people.add(shmulik);
 
 		Person tzippi = new NPC(96 * 15, 96 * 25, "passive");
 		// tzippi.trigger();
@@ -1112,7 +1102,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		if (drawRect != null)
 			buffer.drawRect((int) (drawRect.getX()), (int) (drawRect.getY()), (int) (drawRect.getWidth()), (int) (drawRect.getHeight()));
 
-		drawSenseAbilities(buffer);
+		drawExtraPeopleInfo(buffer);
 
 		// Move camera back
 		buffer.rotate(cameraRotation, camera.x, camera.y);
@@ -1131,7 +1121,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 			drawScreenshot(buffer);
 	}
 
-	void drawSenseAbilities(Graphics2D buffer)
+	void drawExtraPeopleInfo(Graphics2D buffer)
 	{
 		// exists after coordinate shift
 		double drawLifeDistancePow2 = 0, drawManaDistancePow2 = 0, drawStaminaDistancePow2 = 0;
@@ -1185,8 +1175,10 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 				default:
 					break;
 				}
+
 		for (Person p : env.people)
 		{
+			// does not draw info above player
 			if (!p.equals(player) && p.z <= camera.z)
 			{
 				double distancePow2 = Methods.DistancePow2(player.x, player.y, p.x, p.y);
