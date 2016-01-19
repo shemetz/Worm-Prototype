@@ -26,8 +26,8 @@ public class Blink extends Ability
 		range = points * 100;
 		rangeType = "Exact range"; // maybe change it to up-to range?
 
-		sounds.add(new SoundEffect("blink-success.wav"));
-		sounds.add(new SoundEffect("blink-fail.wav"));
+		sounds.add(new SoundEffect("Blink_success.wav"));
+		sounds.add(new SoundEffect("Blink_fail.wav"));
 	}
 
 	public void use(Environment env, Person user, Point target)

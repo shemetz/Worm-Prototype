@@ -8,6 +8,7 @@ import mainClasses.ForceField;
 import mainClasses.Methods;
 import mainClasses.Person;
 import mainClasses.Player;
+import mainResourcesPackage.SoundEffect;
 
 public class Ball_E extends Ability
 {
@@ -23,6 +24,9 @@ public class Ball_E extends Ability
 		stopsMovement = false;
 		maintainable = true;
 		instant = true;
+		
+		for (int i = 1; i < 6; i++)
+			sounds.add(new SoundEffect("Ball_"+i+".wav"));
 	}
 	
 	public void use(Environment env, Person user, Point target)
@@ -80,7 +84,10 @@ public class Ball_E extends Ability
 							env.damageFF(ff, damage, ballCenter);
 						}
 				if (ballCreationSuccess)
+				{
 					env.balls.add(b);
+					sounds.get((int)(Math.random()*5)).play();
+				}
 				else
 					env.ballDebris(b, "shatter", b.angle());
 				user.mana -= cost;

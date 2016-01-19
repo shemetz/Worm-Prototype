@@ -2049,8 +2049,8 @@ public class Environment
 				// 3 pieces of debris on every side, spread angle is 20*3 degrees (180/9) on every side
 				debris.add(new Debris(b.x, b.y, b.z, angle - 0.5 * Math.PI + k * Math.PI / 9, b.elementNum, b.velocity() * 0.9));
 				debris.add(new Debris(b.x, b.y, b.z, angle + 0.5 * Math.PI - k * Math.PI / 9, b.elementNum, b.velocity() * 0.9));
-				playSound("Rock Smash");
 			}
+			playSound(EP.elementList[b.elementNum] + " Smash.wav");
 			break;
 		case "shatter":
 			for (int i = 0; i < 7; i++)
@@ -2058,6 +2058,7 @@ public class Environment
 				// I'm not sure what I did here with the angles but it looks OK
 				debris.add(new Debris(b.x, b.y, b.z, angle + 4 + i * (4) / 6, b.elementNum, 500));
 			}
+			playSound(EP.elementList[b.elementNum] + " Smash.wav");
 			break;
 		case "arc force field":
 			for (int i = 0; i < 3; i++)
@@ -2066,11 +2067,13 @@ public class Environment
 				debris.add(new Debris(b.x, b.y, b.z, angle + 0.5 * Math.PI + i * Math.PI / 9, b.elementNum, b.velocity() * 0.9));
 				debris.add(new Debris(b.x, b.y, b.z, angle - 0.5 * Math.PI - i * Math.PI / 9, b.elementNum, b.velocity() * 0.9));
 			}
+			playSound(EP.elementList[b.elementNum] + " Smash.wav");
 			break;
 		case "punch":
 			// effects
 			for (int k = 0; k < 7; k++) // epicness
 				debris.add(new Debris(b.x, b.y, b.z, angle - 3 * 0.3 + k * 0.3, b.elementNum, 600));
+			playSound(EP.elementList[b.elementNum] + " Smash.wav");
 			break;
 		case "beam hit":
 			debris.add(new Debris(b.x, b.y, b.z, Math.random() * 2 * Math.PI, b.elementNum, 500));
@@ -2524,16 +2527,7 @@ public class Environment
 
 	public void playSound(String s)
 	{
-		SoundEffect sound = null;
-		switch (s)
-		{
-		case "Rock Smash":
-			sound = (new SoundEffect("rock-smash.wav"));
-			break;
-		default:
-			Main.errorMessage("What's that? I can't hear you!");
-			return;
-		}
+		SoundEffect sound = new SoundEffect(s);
 		ongoingSounds.add(sound);
 		sound.play();
 	}

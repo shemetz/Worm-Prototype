@@ -32,12 +32,12 @@ public class Punch extends Ability
 		instant = true;
 		// range = (int) (1.15 * radius); //in person's
 
-		sounds.add(new SoundEffect("punch_1.wav"));
-		sounds.add(new SoundEffect("punch_2.wav"));
-		sounds.add(new SoundEffect("punch_3.wav"));
-		sounds.add(new SoundEffect("punch-miss_1.wav"));
-		sounds.add(new SoundEffect("punch-miss_2.wav"));
-		sounds.add(new SoundEffect("punch-miss_3.wav"));
+		sounds.add(new SoundEffect("Punch_hit_1.wav"));
+		sounds.add(new SoundEffect("Punch_hit_2.wav"));
+		sounds.add(new SoundEffect("Punch_hit_3.wav"));
+		sounds.add(new SoundEffect("Punch_miss_1.wav"));
+		sounds.add(new SoundEffect("Punch_miss_2.wav"));
+		sounds.add(new SoundEffect("Punch_miss_3.wav"));
 	}
 
 	public void use(Environment env, Person user, Point target)
@@ -138,7 +138,7 @@ public class Punch extends Ability
 		int damageType = 0; // TODO other punch types that aren't blunt?
 		int timesTested = 2; // number of checks; number of parts the range is divided into.
 		double extraVerticalHeight = 0.4;
-		final double extraAimingAngle = user.flySpeed == -1 ? 0.3 : 0.8; // If the user is flying the arc of punch-testing is larger, because it's more difficult to aim with the keyboard and while moving.
+		final double extraAimingAngle = user.flySpeed == -1 ? 0.3 : 0.8; // If the user is flying the arc of Punch-testing is larger, because it's more difficult to aim with the keyboard and while moving.
 		for (int l = 0; l < timesTested; l++)
 		{
 			range = (int) (user.radius * 1.15 * (1 - (double) l / timesTested));
@@ -241,7 +241,7 @@ public class Punch extends Ability
 								}
 					}
 					for (Person p : env.people)
-						// allowing higher vertical range, for flying people? //TODO leave it as it is or remove it and lower punch-flight height to about 0.6
+						// allowing higher vertical range, for flying people? //TODO leave it as it is or remove it and lower Punch-flight height to about 0.6
 						if (p.z + p.height > user.z - extraVerticalHeight && p.z < user.z + user.height + extraVerticalHeight)
 							// This is actually the purpose of the punches, by the way
 							if (!p.equals(user)) // TODO find a better way (not two double-number comparisons) to make sure they aren't the same. Maybe with person.equals()?

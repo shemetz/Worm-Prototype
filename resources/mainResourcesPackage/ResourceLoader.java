@@ -17,11 +17,9 @@ public class ResourceLoader
 		try
 		{
 			b = ImageIO.read(rl.getClass().getResource("images/" + fileName));
-			// Make sure to update the fileName parameter to make it work with
-			// your directory setup
 		} catch (Exception e)
 		{
-			 //e.printStackTrace(System.err); //TODO
+			 //e.printStackTrace(System.err); //TODO remove when all is done
 		}
 		return b;
 	}
@@ -33,12 +31,8 @@ public class ResourceLoader
 		{
 			Clip c = AudioSystem.getClip();
 			AudioInputStream input = AudioSystem.getAudioInputStream(rl.getClass().getResource("sounds/" + fileName));
-			if (input == null)
-				System.out.println("No audio clip found - "+fileName);
 			c.open(input);
 			return c;
-			// Make sure to update the fileName parameter to make it work with
-			// your directory setup
 		} catch (Exception e)
 		{
 			e.printStackTrace(System.err);

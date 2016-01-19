@@ -47,7 +47,7 @@ public class Beam_E extends Ability
 			sounds.add(new SoundEffect("Vine_retrieve.wav"));
 		} else
 		{
-			sounds.add(new SoundEffect(elementName + "_beam.wav"));
+			sounds.add(new SoundEffect(elementName + " Beam.wav"));
 			sounds.get(0).endUnlessMaintained = true;
 		}
 	}

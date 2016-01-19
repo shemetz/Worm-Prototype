@@ -21,13 +21,13 @@ public class Spray_E extends Ability
 		costType = "mana";
 		rangeType = "cone";
 		cooldown = 1; // after running out of mana
-		range = 500; // TODO make range depend on points, and drops' gravity/velocity depend on range
+		range = 500; // TODO make range depend on points
 		stopsMovement = false;
 		maintainable = true;
 		instant = true;
 		arc = Math.PI * 1 / 2; // not really
 
-		sounds.add(new SoundEffect(elementName + "_beam.wav"));
+		sounds.add(new SoundEffect(elementName + " Beam.wav"));
 	}
 
 	public void use(Environment env, Person user, Point target)
