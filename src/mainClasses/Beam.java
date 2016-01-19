@@ -3,7 +3,7 @@ package mainClasses;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
-import mainClasses.abilities.Beam_E;
+import abilities.Beam_E;
 
 public class Beam extends Drawable
 {

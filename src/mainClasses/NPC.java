@@ -3,7 +3,7 @@ package mainClasses;
 import java.awt.Point;
 import java.awt.geom.Point2D;
 
-import mainClasses.abilities.Punch;
+import abilities.Punch;
 
 public class NPC extends Person
 {

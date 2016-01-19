@@ -11,7 +11,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
-import mainClasses.abilities.Sprint;
+import abilities.Sprint;
 import mainResourcesPackage.SoundEffect;
 
 public class Person extends RndPhysObj

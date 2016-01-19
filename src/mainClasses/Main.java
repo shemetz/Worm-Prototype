@@ -45,10 +45,10 @@ import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.Timer;
 
-import mainClasses.abilities.Protective_Bubble_I;
-import mainClasses.abilities.Sense_Powers;
-import mainClasses.abilities.Shield_E;
-import mainClasses.abilities.Sprint;
+import abilities.Protective_Bubble_I;
+import abilities.Sense_Powers;
+import abilities.Shield_E;
+import abilities.Sprint;
 import mainResourcesPackage.SoundEffect;
 
 public class Main extends JFrame implements KeyListener, MouseListener, MouseMotionListener, MouseWheelListener, ComponentListener, WindowFocusListener
