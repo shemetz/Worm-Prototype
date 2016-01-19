@@ -152,13 +152,18 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		for (ForceField ff : env.FFs)
 			for (SoundEffect s : ff.sounds)
 				allSounds.add(s);
+		allSounds.addAll(env.ongoingSounds);
 		// TODO make the above lines only happen once, and make allSounds part of Main, and also update it whenever adding abilities/people/forcefields
 		// SOUND EFFECTS (2)
 		for (SoundEffect s : allSounds)
 		{
 			s.justActivated = false;
 			if (s.active)
+			{
+				//s.updateVolume(player.x, player.y);
 				s.stopIfEnded();
+			}
+
 		}
 		// DEBRIS
 		for (int i = 0; i < env.debris.size(); i++)
@@ -856,7 +861,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		shmulik.abilities.add(Ability.ability("Ball <Earth>", 6));
 		shmulik.abilities.add(Ability.ability("Heal I", 3));
 		shmulik.name = "Shmulik";
-		// env.people.add(shmulik);
+		env.people.add(shmulik);
 
 		Person tzippi = new NPC(96 * 15, 96 * 25, "passive");
 		// tzippi.trigger();

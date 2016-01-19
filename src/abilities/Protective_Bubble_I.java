@@ -30,6 +30,7 @@ public class Protective_Bubble_I extends Ability
 
 	public void use(Environment env, Person user, Point target)
 	{
+		setSounds(user.Point());
 		double angle = Math.atan2(target.y - user.y, target.x - user.x); // can be 0, honestly
 		// deactivating the bubble
 		if (on && cooldownLeft == 0)

@@ -347,6 +347,12 @@ public class Ability
 		return text;
 	}
 
+	public void setSounds(Point point)
+	{
+		for (SoundEffect s: sounds)
+			s.setPosition(point);
+	}
+	
 	public static void initializeDescriptions()
 	{
 		try

@@ -1,25 +1,30 @@
 package mainResourcesPackage;
 
+import java.awt.Point;
+
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.FloatControl;
+
+import mainClasses.Methods;
 
 public class SoundEffect
 {
 	public Clip			sound;
 	public FloatControl	volumeControl;
-	public double			volume;
-	public double			length;						// in seconds
-	public boolean	active;
-	public boolean	justActivated;				// becomes false at the beginning of every frame, if it's false at the end the sound is stopped in certain cases
-	public boolean	paused				= false;
-	public boolean			loopOrPlay			= false;
-	public boolean	endUnlessMaintained	= false;
+	public double		volume;						// 0 = mute, 1 = full volume. (default is 1)
+	public double		length;						// in seconds
+	public boolean		active;
+	public boolean		justActivated;				// becomes false at the beginning of every frame, if it's false at the end the sound is stopped in certain cases
+	public boolean		paused				= false;
+	public boolean		loopOrPlay			= false;
+	public boolean		endUnlessMaintained	= false;
+	double				x, y;						// position of sound
 
 	public SoundEffect(String fileName)
 	{
 		sound = ResourceLoader.getClip(fileName);
-		volumeControl = (FloatControl) sound.getControl(FloatControl.Type.MASTER_GAIN);
-		volume = volumeControl.getValue(); // default is 0, can be between -80 and 6.02 for some reason (dB). Logarithmic. ~-25 is unheardable, and there seems to be no difference between 0 and 6.
+		volumeControl = (FloatControl) sound.getControl(FloatControl.Type.MASTER_GAIN);// default is 0, can be between -80 and 6.02 for some reason (dB). Logarithmic. ~-50 is unheardable, and there's barely any difference between 0 and 6.
+		volume = 1;
 		active = false;
 		justActivated = false;
 		length = (double) sound.getMicrosecondLength() / 1000000; // important that it's a double
@@ -34,6 +39,17 @@ public class SoundEffect
 		// }
 	}
 
+	public void setPosition(Point p)
+	{
+		setPosition(p.x, p.y);
+	}
+
+	public void setPosition(double x1, double y1)
+	{
+		x = x1;
+		y = y1;
+	}
+
 	public void stopIfEnded()
 	{
 		if (sound.getFramePosition() == sound.getFrameLength())
@@ -42,12 +58,27 @@ public class SoundEffect
 		}
 	}
 
+	public void updateVolume(Point camera)
+	{
+		double distancePow2 = Methods.DistancePow2(camera, this.Point());
+		setVolume(100000 / distancePow2);
+	}
+
+	public void updateVolume(double x2, double y2)
+	{
+		double distancePow2 = Methods.DistancePow2(x2, y2, x, y);
+		setVolume(100000 / distancePow2);
+	}
+
 	public void setVolume(double newVolume)
 	{
-		// between 0 and 1.
-		// actually between -infinity and 2, apparently? TODO ?
+		// value should be between 0 and 1. Let's make sure.
+		newVolume = Math.min(newVolume, 1);
+		newVolume = Math.max(newVolume, 0);
+
 		volume = newVolume;
-		volumeControl.setValue((float) (Math.log(newVolume) / Math.log(10.0) * 20.0));
+		volumeControl.setValue(volumeControl.getMinimum() + ((float) volume) * (volumeControl.getMaximum() - volumeControl.getMinimum()));
+		// volumeControl.setValue((float) (Math.log(newVolume) / Math.log(10.0) * 20.0));
 	}
 
 	public void loop()
@@ -96,5 +127,10 @@ public class SoundEffect
 				play();
 			paused = false;
 		}
+	}
+
+	public Point Point()
+	{
+		return new Point((int) x, (int) y);
 	}
 }

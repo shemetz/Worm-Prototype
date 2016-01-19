@@ -32,6 +32,7 @@ public class Blink extends Ability
 
 	public void use(Environment env, Person user, Point target)
 	{
+		setSounds(user.Point());
 		double angle = Math.atan2(target.y - user.y, target.x - user.x);
 		/*
 		 * Teleport ahead to target direction

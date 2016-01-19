@@ -31,6 +31,7 @@ public class Ball_E extends Ability
 	
 	public void use(Environment env, Person user, Point target)
 	{
+		setSounds(user.Point());
 		if (on)
 		{
 			on = false;
@@ -50,6 +51,7 @@ public class Ball_E extends Ability
 	
 	public void maintain(Environment env, Person user, Point target, double deltaTime)
 	{
+		setSounds(user.Point());
 		if (cooldownLeft == 0)
 			if (user.mana >= cost)
 			{

@@ -54,6 +54,7 @@ public class Beam_E extends Ability
 
 	public void use(Environment env, Person user, Point target)
 	{
+		setSounds(user.Point());
 		double angle = Math.atan2(target.y - user.y, target.x - user.x);
 
 		/*
@@ -123,6 +124,7 @@ public class Beam_E extends Ability
 
 	public void maintain(Environment env, Person user, Point target, double deltaTime)
 	{
+		setSounds(user.Point());
 		for (int j = 0; j < this.evasions.size(); j++)
 			if (this.evasions.get(j).timeLeft > 0)
 				this.evasions.get(j).timeLeft -= deltaTime;

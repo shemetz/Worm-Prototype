@@ -611,6 +611,8 @@ public class Person extends RndPhysObj
 
 	public void selfFrame(double deltaTime)
 	{
+		for (SoundEffect s : sounds)
+			s.setPosition(x, y);
 		// this method is activated 1/deltaTime times per second
 		// If it's called with deltaTime == 0, it should only clamp the boundaries of health, mana, etc. and use unactivated passive abilities.
 		if (timeSinceLastHit < 60)
@@ -770,7 +772,7 @@ public class Person extends RndPhysObj
 	public void drawData(Graphics2D buffer, boolean drawLife, boolean drawMana, boolean drawStamina, double cameraRotation)
 	{
 		buffer.rotate(cameraRotation, x, y);
-		
+
 		// name
 		buffer.setFont(new Font(Font.MONOSPACED, Font.BOLD, 16));
 		buffer.setColor(Color.black);

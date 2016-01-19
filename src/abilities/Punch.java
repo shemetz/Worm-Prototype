@@ -42,6 +42,7 @@ public class Punch extends Ability
 
 	public void use(Environment env, Person user, Point target)
 	{
+		setSounds(user.Point());
 		range = (int) (1.15 * user.radius);
 
 		/*

@@ -32,6 +32,7 @@ public class Spray_E extends Ability
 
 	public void use(Environment env, Person user, Point target)
 	{
+		setSounds(user.Point());
 		if (on) // deactivate
 		{
 			user.notAnimating = false;
@@ -52,6 +53,7 @@ public class Spray_E extends Ability
 
 	public void maintain(Environment env, Person user, Point target, double deltaTime)
 	{
+		setSounds(user.Point());
 		double angle = user.rotation;
 		arc = 10 * (1 - user.accuracy); // user accuracy is 0.85 for average person.
 		final double sprayExitDistance = 50;
