@@ -423,6 +423,29 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 					if (p instanceof NPC)
 						((NPC) p).justCollided = true;
 				}
+			// push away from walls
+			for (int x = (int) ((aff.x - aff.maxRadius) / squareSize); x < (int) ((aff.x + aff.maxRadius) / squareSize) + 1; x++)
+				for (int y = (int) ((aff.y - aff.maxRadius) / squareSize); y < (int) ((aff.y + aff.maxRadius) / squareSize) + 1; y++)
+					if (env.wallTypes[x][y] != -1)
+						for (int x2 = x; x2 < x + 2; x2++)
+							for (int y2 = y; y2 < y + 2; y2++)
+							{
+								double distanceToWallPow2 = Math.pow(squareSize * (y2) - aff.target.y, 2) + Math.pow(squareSize * (x2) - aff.target.x, 2);
+								if (distanceToWallPow2 < aff.maxRadius * aff.maxRadius)
+								{
+									double angleToWall = Math.atan2(squareSize * (y2) - aff.target.y, squareSize * (x2) - aff.target.x);
+									double pushStrength = 10000;
+									double xMax = 10.03 * pushStrength * Math.cos(angleToWall);
+									double yMax = 10.03 * pushStrength * Math.sin(angleToWall);
+									Person p = aff.target;
+									if ((xMax > 0 && p.xVel < xMax) || (xMax < 0 && p.xVel > xMax))
+										p.xVel -= deltaTime * pushStrength * Math.cos(angleToWall);
+									if ((yMax > 0 && p.yVel < yMax) || (yMax < 0 && p.yVel > yMax))
+										p.yVel -= deltaTime * pushStrength * Math.sin(angleToWall);
+									if (p instanceof NPC)
+										((NPC) p).justCollided = true;
+								}
+							}
 			if (aff.life <= 0)
 			{
 				for (Person p : env.people)
@@ -843,7 +866,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		shmulik.abilities.add(Ability.ability("Ball <Earth>", 6));
 		shmulik.abilities.add(Ability.ability("Heal I", 3));
 		shmulik.name = "Shmulik";
-		// env.people.add(shmulik);
+		//env.people.add(shmulik);
 
 		Person tzippi = new NPC(96 * 15, 96 * 25, "passive");
 		// tzippi.trigger();

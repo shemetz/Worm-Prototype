@@ -115,6 +115,8 @@ public class Beam extends Drawable
 			buffer.translate(x, y);
 			buffer.scale(1 / (z * Main.heightZoomRatio + 1), 1 / (z * Main.heightZoomRatio + 1));
 			buffer.translate(-x, -y);
+			
+			// end is in the next method
 		}
 	}
 

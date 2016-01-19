@@ -199,9 +199,8 @@ public class Methods
 	}
 
 	/**
-	 * test.
+	 * Returns the Point2D of intersection if two segments intersect. Otherwise, returns null.
 	 * 
-	 * blah
 	 * 
 	 * @param l1
 	 * @param l2
@@ -223,13 +222,13 @@ public class Methods
 
 		if (s >= 0 && s <= 1 && t >= 0 && t <= 1)
 		{
-			// Collision detected
+			// Intersection detected
 			double i_x = p0_x + (t * s1_x);
 			double i_y = p0_y + (t * s1_y);
 			return new Point2D.Double(i_x, i_y);
 		}
 
-		return null; // No collision
+		return null; // No intersection
 	}
 
 	public static Point2D getLineLineIntersection(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4)

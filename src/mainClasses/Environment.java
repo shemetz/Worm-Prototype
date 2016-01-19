@@ -1337,10 +1337,13 @@ public class Environment
 
 		// 3,4 persons
 		Person collidedPerson = null;
-		for (Person p : people)
+		peopleLoop: for (Person p : people)
 			if (p.id != v.creator.id)
 				if (!p.prone)
 				{
+					for (Evasion e : v.evasions)
+						if (e.id == p.id)
+							continue peopleLoop;
 					// grabbling test
 					if (v.state == 0 || v.state == 2)
 						if (Math.abs(p.z - v.end.z) < 2 && Methods.DistancePow2(p.x, p.y, v.end.x, v.end.y) < Vine.grabblingRange * Vine.grabblingRange)
@@ -1431,29 +1434,39 @@ public class Environment
 			damageArcForceField(collidedAFF, v.getDamage() + v.getPushback(), roundedIntersectionPoint, EP.damageType("Plant"));
 			break;
 		case 3: // person (grabbled)
-			v.end = new Point3D((int) collidedPerson.x, (int) collidedPerson.y, (int) collidedPerson.z);
-			v.grabbledThing = collidedPerson;
-			v.state = 1;
-			v.fixPosition();
+			if (checkForEvasion(collidedPerson))
+				v.evadedBy(collidedPerson);
+			else
+			{
+				v.end = new Point3D((int) collidedPerson.x, (int) collidedPerson.y, (int) collidedPerson.z);
+				v.grabbledThing = collidedPerson;
+				v.state = 1;
+				v.fixPosition();
+			}
 			break;
 		case 4: // person (intersected)
-			v.rotate(originalAngle, deltaTime * 2);
-			if (v.state == 1)
+			if (checkForEvasion(collidedPerson))
+				v.evadedBy(collidedPerson);
+			else
 			{
-				double difference = desiredAngle - v.rotation;
-				while (difference < -TAU / 2)
-					difference += TAU;
-				while (difference > TAU / 2)
-					difference -= TAU;
-				double hitAngle = v.rotation + (difference > 0 ? TAU / 4 : -TAU / 4);
-				double vineCollisionPercentage = 0.01;
-				double push = Math.min(Math.sqrt(Math.pow(v.grabbledThing.xVel, 2) + Math.pow(v.grabbledThing.yVel, 2)) * vineCollisionPercentage, v.getCollisionPushback());
-				hitPerson(collidedPerson, v.getCollisionDamage(), push, hitAngle, 0);
-				collidedPerson.rotation = hitAngle;
-				collidedPerson.slippedTimeLeft = 3;
-				collidedPerson.prone = true;
+				v.rotate(originalAngle, deltaTime * 2);
+				if (v.state == 1)
+				{
+					double difference = desiredAngle - v.rotation;
+					while (difference < -TAU / 2)
+						difference += TAU;
+					while (difference > TAU / 2)
+						difference -= TAU;
+					double hitAngle = v.rotation + (difference > 0 ? TAU / 4 : -TAU / 4);
+					double vineCollisionPercentage = 0.01;
+					double push = Math.min(Math.sqrt(Math.pow(v.grabbledThing.xVel, 2) + Math.pow(v.grabbledThing.yVel, 2)) * vineCollisionPercentage, v.getCollisionPushback());
+					hitPerson(collidedPerson, v.getCollisionDamage(), push, hitAngle, 0);
+					collidedPerson.rotation = hitAngle;
+					collidedPerson.slippedTimeLeft = 3;
+					collidedPerson.prone = true;
+				}
+				v.fixPosition();
 			}
-			v.fixPosition();
 			break;
 		case 5: // ball (grabbled)
 			v.end = new Point3D((int) collidedBall.x, (int) collidedBall.y, (int) collidedBall.z);
@@ -1478,7 +1491,6 @@ public class Environment
 		b.end.x += 3 * Math.cos(angle);
 		b.end.y += 3 * Math.sin(angle);
 		Line2D beamLine = new Line2D.Double(b.start.x, b.start.y, b.end.x, b.end.y);
-		boolean flatEnd = false;
 
 		// Preliminary collision testing, in order to reduce the number of collisions to 1
 		double shortestDistancePow2 = Double.MAX_VALUE;
@@ -1760,6 +1772,7 @@ public class Environment
 				}
 		}
 
+		// People
 		Person collidedPerson = null;
 		peopleLoop: for (Person p : people)
 		{
@@ -1819,6 +1832,7 @@ public class Environment
 			}
 		}
 
+		// Balls - 4
 		Ball collidedBall = null;
 		for (Ball ball : balls)
 		{
@@ -1845,6 +1859,25 @@ public class Environment
 				}
 			}
 		}
+
+		// Vines - 5
+		Vine collidedVine = null;
+		for (Vine v : vines)
+		{
+			if (b.z + b.height / 2 > v.z - b.height / 2 && b.z - b.height / 2 < v.z + b.height / 2)
+			{
+				Line2D vineLine = new Line2D.Double(v.start.x, v.start.y, v.end.x, v.end.y);
+				Point2D intersection = Methods.getSegmentIntersection(beamLine, vineLine);
+				if (intersection != null) // easiest collision detection so far! \o/
+				{
+					collisionLine = new Line2D.Double(intersection.getX() + 100 * Math.cos(angle + Math.PI / 2), intersection.getY() + 100 * Math.sin(angle + Math.PI / 2),
+							intersection.getX() - 100 * Math.cos(angle + Math.PI / 2), intersection.getY() - 100 * Math.sin(angle + Math.PI / 2));
+					collisionType = 5;
+					collidedVine = v;
+				}
+			}
+		}
+
 		if (collisionType == -1)
 		{
 			b.endType = 0;
@@ -1868,7 +1901,6 @@ public class Environment
 			b.end.x = roundedIntersectionPoint.x;
 			b.end.y = roundedIntersectionPoint.y;
 			b.endType = 1;
-			flatEnd = true;
 			if (roundedIntersectionPoint.x == collidedWall.x * squareSize) // left
 				b.endAngle = 0;
 			if (roundedIntersectionPoint.y == collidedWall.y * squareSize) // up
@@ -1883,7 +1915,6 @@ public class Environment
 			b.end.x = roundedIntersectionPoint.x;
 			b.end.y = roundedIntersectionPoint.y;
 			b.endType = 1;
-			flatEnd = true;
 
 			// if the new beam is within the FF...
 			if (recursive)
@@ -1959,16 +1990,23 @@ public class Environment
 			if (collidedBall.mass < 0) // additional debris for destruction
 				ballDebris(collidedBall, "shatter", collidedBall.angle());
 			break;
+		case 5: // Vine
+			b.end.x = roundedIntersectionPoint.x;
+			b.end.y = roundedIntersectionPoint.y;
+			b.endType = 1;
+			boolean sideOfVine = (b.x - collidedVine.start.x) * Math.sin(b.angle()) > (b.y - collidedVine.y) * Math.cos(b.angle());
+			b.endAngle = collidedVine.rotation + (sideOfVine ? TAU / 4 : -TAU / 4);
+
+			collidedVine.life -= b.getDamage();
+			// TODO vine plant debris
+			break;
 		default:
 			Main.errorMessage("Dragon and Defiant, sitting in a tree, K-I-S-S-I-S-S-I-P-P-I");
 			break;
 		}
 
-		if (!flatEnd)
-		{
-			b.endType = 0;
+		if (b.endType != 1)
 			b.endAngle = angle;
-		}
 
 	}
 
@@ -2301,8 +2339,9 @@ public class Environment
 						damage *= Math.pow(0.75, e.strength); // maybe change it to 1-0.15*e.strength ?
 				}
 
-			if (p instanceof NPC && damage >= 1) // beams don't trigger this. If they did it would have made NPCs stop and change direction every single frame.
-				((NPC) p).justGotHit = true;
+			if (p instanceof NPC)
+				if (damage >= 1 || Math.random() < 0.01) // so that beams don't always trigger this
+					((NPC) p).justGotHit = true;
 
 			// dealing the actual damage!
 			p.damage(damage);

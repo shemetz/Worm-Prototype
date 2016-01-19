@@ -23,7 +23,8 @@ public class Vine extends Drawable // Vines are plant beams, sort of
 	public double			rigidity;						// self-explanatory
 	public double			spinStrength;					// how strong can this be pulled sideways
 	public double			endPauseTimeLeft;
-	List<Evasion>			evasions;
+	public double			life;
+	public List<Evasion>	evasions;
 
 	public Vine(Person creator, Point3D start, Point3D end, int points, double range)
 	{
@@ -52,7 +53,8 @@ public class Vine extends Drawable // Vines are plant beams, sort of
 		size = 1; // temp
 		height = size / 2 + 0.1; // temp
 		rigidity = 25 * points; // temp
-		spinStrength = 100000 * points;
+		life = 100; // temp
+		spinStrength = 100000 * points; // temp
 	}
 
 	public void evadedBy(Person p)

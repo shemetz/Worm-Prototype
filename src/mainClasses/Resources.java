@@ -406,11 +406,11 @@ public class Resources
 			icons.put(s, ResourceLoader.getBufferedImage("icons/effects/" + s + ".png"));
 
 		// Clouds
-		// for (int i = 0; i < 5; i++) // the number is the number of cloud images available
-		// {
-		// clouds.add(Methods.optimizeImage(ResourceLoader.getBufferedImage("clouds/cloud_" + i + ".png")));
-		// cloudShadows.add(Cloud.cloudShadow(clouds.get(i)));
-		// }
+		for (int i = 0; i < 5; i++) // the number is the number of cloud images available
+		{
+			clouds.add(Methods.optimizeImage(ResourceLoader.getBufferedImage("clouds/cloud_" + i + ".png")));
+			cloudShadows.add(Cloud.cloudShadow(clouds.get(i)));
+		}
 
 		// Effects
 		effects.add(new ArrayList<BufferedImage>()); // Burning
