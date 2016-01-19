@@ -14,6 +14,7 @@ import mainClasses.ForceField;
 import mainClasses.Methods;
 import mainClasses.Person;
 import mainClasses.Player;
+import mainResourcesPackage.SoundEffect;
 
 public class Punch extends Ability
 {
@@ -30,6 +31,13 @@ public class Punch extends Ability
 		stopsMovement = true;
 		instant = true;
 		// range = (int) (1.15 * radius); //in person's
+
+		sounds.add(new SoundEffect("punch_1.wav"));
+		sounds.add(new SoundEffect("punch_2.wav"));
+		sounds.add(new SoundEffect("punch_3.wav"));
+		sounds.add(new SoundEffect("punch-miss_1.wav"));
+		sounds.add(new SoundEffect("punch-miss_2.wav"));
+		sounds.add(new SoundEffect("punch-miss_3.wav"));
 	}
 
 	public void use(Environment env, Person user, Point target)
@@ -246,19 +254,19 @@ public class Punch extends Ability
 				}
 			}
 		}
-		//restore range to normal
+		// restore range to normal
 		range = (int) (1.15 * user.radius);
 		if (user.punchedSomething)
 		{
 			// backwards pushback
 			env.hitPerson(user, 0, pushback * 0.6, user.rotation + Math.PI, 0);
 			// Sound effect of hit
-			playSound("Punch hit");
+			sounds.get((int) (Math.random() * 3)).play();
 			return true;
 		} else
 		{
-			if (missSound)
-				playSound("Punch miss");
+			if (missSound) // sound efect of miss
+				sounds.get((int) (Math.random() * 3) + 3).play();
 			return false;
 		}
 	}

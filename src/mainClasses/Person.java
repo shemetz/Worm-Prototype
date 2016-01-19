@@ -262,7 +262,8 @@ public class Person extends RndPhysObj
 
 	public void initSounds()
 	{
-		sounds.add(new SoundEffect("Scorched.wav", "Scorched")); // 0 - when a beam hits you
+		sounds.add(new SoundEffect("scorched.wav")); // 0 - when a beam hits you
+		sounds.get(0).endUnlessMaintained = true;
 	}
 
 	public void stopAllSounds()
@@ -769,6 +770,12 @@ public class Person extends RndPhysObj
 	public void drawData(Graphics2D buffer, boolean drawLife, boolean drawMana, boolean drawStamina, double cameraRotation)
 	{
 		buffer.rotate(cameraRotation, x, y);
+		
+		// name
+		buffer.setFont(new Font(Font.MONOSPACED, Font.BOLD, 16));
+		buffer.setColor(Color.black);
+		buffer.drawString(name, (int) (x - name.length() / 2 * 11), (int) (y - radius - 18));
+
 		if (drawLife)
 			drawLife(buffer);
 		if (drawMana)
@@ -776,13 +783,6 @@ public class Person extends RndPhysObj
 		if (drawStamina)
 			drawStamina(buffer);
 		buffer.rotate(-cameraRotation, x, y);
-	}
-
-	public void drawName(Graphics2D buffer)
-	{
-		buffer.setFont(new Font(Font.MONOSPACED, Font.BOLD, 16));
-		buffer.setColor(Color.black);
-		buffer.drawString(name, (int) (x - name.length() / 2 * 11), (int) (y - radius - 18));
 	}
 
 	public void drawLife(Graphics2D buffer)

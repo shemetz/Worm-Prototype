@@ -12,6 +12,7 @@ import mainClasses.Person;
 import mainClasses.Player;
 import mainClasses.Point3D;
 import mainClasses.Vine;
+import mainResourcesPackage.SoundEffect;
 
 public class Beam_E extends Ability
 {
@@ -39,6 +40,16 @@ public class Beam_E extends Ability
 		frameNum = 0;
 		beamFrameNum = 0;
 		evasions = new ArrayList<Evasion>();
+
+		if (elementName.equals("Plant"))
+		{
+			sounds.add(new SoundEffect("Vine_send.wav"));
+			sounds.add(new SoundEffect("Vine_retrieve.wav"));
+		} else
+		{
+			sounds.add(new SoundEffect(elementName + "_beam.wav"));
+			sounds.get(0).endUnlessMaintained = true;
+		}
 	}
 
 	public void use(Environment env, Person user, Point target)
@@ -67,7 +78,6 @@ public class Beam_E extends Ability
 						env.beams.remove(i);
 						i--;
 					}
-				stopAllSounds();
 			} else if (!user.prone && !user.maintaining && cooldownLeft <= 0)
 			{
 				user.notAnimating = true;
@@ -93,7 +103,6 @@ public class Beam_E extends Ability
 						env.vines.remove(i);
 						i--;
 					}
-				stopAllSounds();
 			} else if (!user.prone && !user.maintaining && cooldownLeft <= 0)
 			{
 				user.notAnimating = true;
@@ -101,14 +110,13 @@ public class Beam_E extends Ability
 				on = true;
 				// create vine
 				final double vineExitDistance = 40;
-				playSound("Beam");
 				angle = angle + user.inaccuracyAngle; // rotation changes in updateTargeting
 				Point3D start = new Point3D((int) (user.x + vineExitDistance * Math.cos(angle)), (int) (user.y + vineExitDistance * Math.sin(angle)), (int) user.z); // starts beamExitDistance pixels in front of the user
 				Point3D end = new Point3D((int) (user.x + 2 * vineExitDistance * Math.cos(angle)), (int) (user.y + 2 * vineExitDistance * Math.sin(angle)), (int) user.z);
 				Vine v = new Vine(user, start, end, points, range);
 				env.vines.add(v);
 				user.switchAnimation(2);
-				sounds.get(0).loop();
+				sounds.get(0).play();
 			}
 		}
 	}
@@ -130,7 +138,7 @@ public class Beam_E extends Ability
 			if (cooldownLeft == 0)
 				if (user.mana >= costPerSecond * deltaTime)
 				{
-					playSound("Beam");
+					sounds.get(0).loop();
 					angle = user.rotation + user.inaccuracyAngle; // rotation changes in updateTargeting
 					Point3D start = new Point3D((int) (user.x + beamExitDistance * Math.cos(angle)), (int) (user.y + beamExitDistance * Math.sin(angle)), (int) user.z); // starts beamExitDistance pixels in front of the user
 					// TODO piercing beams, or electric lightning bolts
@@ -151,7 +159,6 @@ public class Beam_E extends Ability
 					}
 				} else
 				{
-					stopSound("Beam");
 					cooldownLeft = cooldown;
 				}
 		} else // plant vines
@@ -163,7 +170,7 @@ public class Beam_E extends Ability
 					{
 						// create vine
 						final double vineExitDistance = 40;
-						playSound("Beam");
+						sounds.get(0).play();
 						angle = angle + user.inaccuracyAngle; // rotation changes in updateTargeting
 						Point3D start = new Point3D((int) (user.x + vineExitDistance * Math.cos(angle)), (int) (user.y + vineExitDistance * Math.sin(angle)), (int) user.z); // starts beamExitDistance pixels in front of the user
 						Point3D end = new Point3D((int) (user.x + 2 * vineExitDistance * Math.cos(angle)), (int) (user.y + 2 * vineExitDistance * Math.sin(angle)), (int) user.z);

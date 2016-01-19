@@ -5,19 +5,18 @@ import javax.sound.sampled.FloatControl;
 
 public class SoundEffect
 {
-	Clip			sound;
-	FloatControl	volumeControl;
-	double			volume;
-	double			length;				// in seconds
+	public Clip			sound;
+	public FloatControl	volumeControl;
+	public double			volume;
+	public double			length;						// in seconds
 	public boolean	active;
-	public boolean	justActivated;		// becomes false at the beginning of every frame, if it's false at the end the sound is stopped in certain cases
-	public String	type;
-	public boolean	paused		= false;
-	boolean			loopOrPlay	= false;
+	public boolean	justActivated;				// becomes false at the beginning of every frame, if it's false at the end the sound is stopped in certain cases
+	public boolean	paused				= false;
+	public boolean			loopOrPlay			= false;
+	public boolean	endUnlessMaintained	= false;
 
-	public SoundEffect(String fileName, String type1)
+	public SoundEffect(String fileName)
 	{
-		type = type1;
 		sound = ResourceLoader.getClip(fileName);
 		volumeControl = (FloatControl) sound.getControl(FloatControl.Type.MASTER_GAIN);
 		volume = volumeControl.getValue(); // default is 0, can be between -80 and 6.02 for some reason (dB). Logarithmic. ~-25 is unheardable, and there seems to be no difference between 0 and 6.

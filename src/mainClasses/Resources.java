@@ -419,7 +419,7 @@ public class Resources
 		effects.get(0).add(ResourceLoader.getBufferedImage("people/burning_3.png"));
 
 		for (int i = 0; i < 4; i++)
-			healingBeam[i] = ResourceLoader.getBufferedImage("beams/heal" + "_" + i + ".png");
+			healingBeam[i] = ResourceLoader.getBufferedImage("heal/heal" + "_" + i + ".png");
 
 		explosions.add(new ArrayList<BufferedImage>());
 		for (int i = 0; i < 8; i++)

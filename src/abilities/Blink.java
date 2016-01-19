@@ -8,6 +8,7 @@ import mainClasses.Methods;
 import mainClasses.Person;
 import mainClasses.Player;
 import mainClasses.VisualEffect;
+import mainResourcesPackage.SoundEffect;
 
 public class Blink extends Ability
 {
@@ -24,6 +25,9 @@ public class Blink extends Ability
 		targetEffect3 = 4;
 		range = points * 100;
 		rangeType = "Exact range"; // maybe change it to up-to range?
+
+		sounds.add(new SoundEffect("blink-success.wav"));
+		sounds.add(new SoundEffect("blink-fail.wav"));
 	}
 
 	public void use(Environment env, Person user, Point target)
@@ -65,7 +69,7 @@ public class Blink extends Ability
 				env.effects.add(eff);
 			}
 			// SFX
-			playSound("Blink success");
+			sounds.get(0).play();
 		} else
 		// tried to blink into something
 		{
@@ -86,7 +90,7 @@ public class Blink extends Ability
 			}
 
 			// SFX
-			playSound("Blink fail");
+			sounds.get(1).play();
 		}
 	}
 

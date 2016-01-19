@@ -8,6 +8,7 @@ import mainClasses.Environment;
 import mainClasses.Methods;
 import mainClasses.Person;
 import mainClasses.Player;
+import mainResourcesPackage.SoundEffect;
 
 public class Protective_Bubble_I extends Ability
 {
@@ -22,6 +23,9 @@ public class Protective_Bubble_I extends Ability
 		instant = true;
 
 		bubble = null;
+
+		sounds.add(new SoundEffect("Protective Bubble_appear.wav"));
+		sounds.add(new SoundEffect("Protective Bubble_pop.wav"));
 	}
 
 	public void use(Environment env, Person user, Point target)
@@ -38,6 +42,7 @@ public class Protective_Bubble_I extends Ability
 					on = false;
 					env.arcFFs.remove(i);
 					i--;
+					sounds.get(1).play();
 				}
 		} else if (!user.maintaining && !user.prone) // activating bubble
 		{
@@ -58,7 +63,7 @@ public class Protective_Bubble_I extends Ability
 			user.mana -= this.cost;
 			this.cooldownLeft = this.cooldown;
 			this.on = true;
-			// TODO sound effects
+			sounds.get(0).play();
 		}
 	}
 
