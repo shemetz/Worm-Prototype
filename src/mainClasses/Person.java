@@ -51,6 +51,7 @@ public class Person extends RndPhysObj
 	public double						runningStaminaCost;													// per second
 	public double						sprintingStaminaCost;												// ^
 	public double						evasion;															// chance of an attack missing you
+	public double						criticalChance;														// chance of a critical hit
 
 	// Rest of the variables
 	public double						life;
@@ -258,6 +259,7 @@ public class Person extends RndPhysObj
 		runningStaminaCost = 0.6;
 		sprintingStaminaCost = 1.8;
 		evasion = 1 - Math.pow(0.99431695501, (DEXTERITY * WITS)); // average is EXACTLY 5%!
+		criticalChance = 1 - Math.pow(0.99431695501, (DEXTERITY * WITS)); // 
 	}
 
 	public void initSounds()
@@ -630,8 +632,7 @@ public class Person extends RndPhysObj
 				switchAnimation(4); // getting up
 			if (slippedTimeLeft <= 0)
 			{
-				slippedTimeLeft = 0;
-				prone = false;
+				slip(false);
 			}
 		}
 
@@ -703,6 +704,21 @@ public class Person extends RndPhysObj
 					affect(e, false);
 					eNum--;
 				}
+		}
+	}
+
+	public void slip(boolean yes)
+	{
+		if (yes)
+		{
+			slippedTimeLeft = 3;
+			prone = true;
+			evasion = 0.8 * evasion; // reducing evasion
+		} else
+		{
+			slippedTimeLeft = 0;
+			prone = false;
+			evasion = evasion / 0.8; // Undo the anti-bonus to evasion
 		}
 	}
 

@@ -50,7 +50,7 @@ public class Shield_E extends Ability
 				}
 			if (!nope)
 			{
-				env.arcFFs.add(shield);
+				env.AFFs.add(shield);
 				user.maintaining = true;
 				user.rotation = angle;
 				on = true;
@@ -67,12 +67,12 @@ public class Shield_E extends Ability
 		// deactivating the shield
 		{
 			double remainingFFhealth = 0;
-			for (int i = 0; i < env.arcFFs.size(); i++)
-				if (env.arcFFs.get(i).equals(shield))
+			for (int i = 0; i < env.AFFs.size(); i++)
+				if (env.AFFs.get(i).equals(shield))
 				{
-					remainingFFhealth = env.arcFFs.get(i).life + env.arcFFs.get(i).extraLife;
-					env.shieldDebris(env.arcFFs.get(i), "deactivate");
-					env.arcFFs.remove(i);
+					remainingFFhealth = env.AFFs.get(i).life + env.AFFs.get(i).extraLife;
+					env.shieldDebris(env.AFFs.get(i), "deactivate");
+					env.AFFs.remove(i);
 					i--;
 				}
 			cooldownLeft = 1 + 0.8 * cooldown - 0.8 * cooldown * remainingFFhealth / (points * 10); // if shield had full HP, 1 cooldown. if had no HP, full
@@ -91,7 +91,7 @@ public class Shield_E extends Ability
 		else
 		{
 			user.mana -= costPerSecond * deltaTime;
-			for (ArcForceField a : env.arcFFs)
+			for (ArcForceField a : env.AFFs)
 				if (a.target.equals(user))
 				{
 					a.rotation = user.rotation;

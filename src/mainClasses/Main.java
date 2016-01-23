@@ -160,7 +160,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 			s.justActivated = false;
 			if (s.active)
 			{
-				//s.updateVolume(player.x, player.y);
+				s.updateVolume(player.x - 1000, player.y - 1000, player.x + 1000, player.y + 1000); // bounds in which sounds won't be muted
 				s.stopIfEnded();
 			}
 
@@ -312,22 +312,20 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 								slipChance += 0.1;
 							if (random.nextDouble() < slipChance && !p.prone) // slip chance is 30% in water and ice and blood
 							{
-								p.prone = true;
-								p.slippedTimeLeft = 3; // If you change this, change stuff in Person.selfFrame() and Player.nextFrame()
+								p.slip(true);
 							}
 						}
 						break;
 					case 7: // acid
-						env.hitPerson(p, 25, 0, 0, 3, deltaTime); // acid damage
+						env.hitPerson(p, 25, 0, 0, 7, deltaTime); // acid damage
 						break;
 					case 8: // lava
-						env.hitPerson(p, 20, 0, 0, 2, deltaTime); // burn damage
+						env.hitPerson(p, 20, 0, 0, 8, deltaTime); // burn damage
 						if (frameNum % 50 == 0 && random.nextDouble() < 0.7) // burn chance is 70% in lava
 							p.affect(new Effect("Burning", 5), true);
 						break;
 					case 10: // earth spikes
-						// TEMP spikes deal 30 damage per second
-						env.hitPerson(p, 25, 0, 0, 1, deltaTime);
+						env.hitPerson(p, 25, 0, 0, 10, deltaTime);
 						break;
 					default:
 						errorMessage("Unknown pool type: " + type);
@@ -367,7 +365,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 			sd.zVel -= 0.003 * gravity * deltaTime;
 			if (random.nextInt(100) <= 1)
 				env.sprayDropDebris(sd);
-			if (sd.xVel == 0 || sd.yVel == 0 || sd.mass <= 0 || !env.moveSD(sd, deltaTime)) // sd was destroyed, or sd stopped. Also, moves the sd
+			if (sd.xVel == 0 || sd.yVel == 0 || sd.mass <= 0 || !env.moveSprayDrop(sd, deltaTime)) // sd was destroyed, or sd stopped. Also, moves the sd
 			{
 				env.sprayDrops.remove(i);
 				i--;
@@ -405,9 +403,9 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 			}
 		}
 		// ARC FORCE FIELDS
-		affloop: for (int i = 0; i < env.arcFFs.size(); i++)
+		affloop: for (int i = 0; i < env.AFFs.size(); i++)
 		{
-			ArcForceField aff = env.arcFFs.get(i);
+			ArcForceField aff = env.AFFs.get(i);
 			aff.update(deltaTime);
 			if (frameNum % 10 == 0) // check for next AFF frame 5 times per second, because the check includes drawing an image
 			{
@@ -476,7 +474,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 									ability.sounds.get(1).play();
 									ability.cooldownLeft = ability.cooldown;
 									env.shieldDebris(aff, "bubble");
-									env.arcFFs.remove(i);
+									env.AFFs.remove(i);
 									i--;
 									continue affloop;
 								}
@@ -529,14 +527,14 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 
 		frameNum++;
 
-		for (int i = 0; i < env.effects.size(); i++)
+		for (int i = 0; i < env.visualEffects.size(); i++)
 		{
-			VisualEffect eff = env.effects.get(i);
+			VisualEffect eff = env.visualEffects.get(i);
 			eff.update(frameNum);
 			eff.timeLeft -= deltaTime;
 			if (eff.timeLeft <= 0)
 			{
-				env.effects.remove(i);
+				env.visualEffects.remove(i);
 				i--;
 			}
 		}
@@ -1239,7 +1237,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 
 	void drawBottomEffects(Graphics2D buffer)
 	{
-		for (VisualEffect eff : env.effects)
+		for (VisualEffect eff : env.visualEffects)
 			if (!eff.onTop)
 			{
 				eff.draw(buffer);
@@ -1248,7 +1246,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 
 	void drawTopEffects(Graphics2D buffer)
 	{
-		for (VisualEffect eff : env.effects)
+		for (VisualEffect eff : env.visualEffects)
 			if (eff.onTop)
 			{
 				eff.draw(buffer);
@@ -1581,6 +1579,12 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		{
 			player.strengthOfAttemptedMovement = 0;
 			player.flyDirection = 0;
+			if (player.leftMousePressed && !player.maintaining)
+			{
+				//rotate to where mouse point is
+				double angle = Math.atan2(my-player.y, mx-player.x);
+				player.rotate(angle, globalDeltaTime);
+			}
 		} else
 		{
 			player.strengthOfAttemptedMovement = 1;

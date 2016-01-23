@@ -11,6 +11,7 @@ public class Ball extends RndPhysObj
 	final int ballMass = 10;
 	public Person creator;
 	public List<Evasion> evasions;
+	public boolean critical = false;
 
 	public Ball(int en, int p1, double angle, Person creator1)
 	{

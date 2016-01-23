@@ -42,8 +42,8 @@ public class Environment
 	// All of these shouldn't be ints, they range from -1 to 12. :/
 	public int[][]					wallHealths;																		// 2D array of wall healths. -1 = no wall. 100 = full health wall.
 	public int[][]					wallTypes;																			// 2D array of wall types. Types are equal to the wall's element. -1 = no wall.
-	public int[][]					poolHealths;
-	public int[][]					poolTypes;
+	public int[][]					poolHealths;																		// ditto, for pools
+	public int[][]					poolTypes;																			// ditto, for pools
 	public BufferedImage[][]		poolImages;																			// cropped images, to join the pool corners
 	public int[][]					cornerCracks;
 	public int[][][]				wCornerStyles;																		// x, y, element; corners on the *UP-LEFT* corner of the corresponding square. +1 = +90 degrees clockwise
@@ -54,13 +54,13 @@ public class Environment
 	// 0 1 2 3 4 5 6 7 8 9 10 11
 	// "Fire", "Water", "Wind", "Electricity", "Metal", "Ice", "Energy", "Acid", "Lava", "Flesh", "Earth", "Plant"
 
-	public List<VisualEffect>		effects;
-	public List<ArcForceField>		arcFFs;
+	public List<VisualEffect>		visualEffects;
+	public List<ArcForceField>		AFFs;																				// Arc Force Fields
 	public List<Person>				people;
 	public List<Ball>				balls;
 	public List<Debris>				debris;
 	public List<UIText>				uitexts;
-	public List<ForceField>			FFs;
+	public List<ForceField>			FFs;																				// Force Fields
 	public List<Cloud>				clouds;
 	public List<Beam>				beams;
 	public List<Vine>				vines;
@@ -89,9 +89,9 @@ public class Environment
 		// default shadow position is directly below.
 		shadowX = 0;
 		shadowY = 0;
-		effects = new ArrayList<VisualEffect>();
+		visualEffects = new ArrayList<VisualEffect>();
 		people = new ArrayList<Person>();
-		arcFFs = new ArrayList<ArcForceField>();
+		AFFs = new ArrayList<ArcForceField>();
 		balls = new ArrayList<Ball>();
 		debris = new ArrayList<Debris>();
 		uitexts = new ArrayList<UIText>();
@@ -247,7 +247,7 @@ public class Environment
 									b.evadedBy(p);
 								else
 								{
-									hitPerson(p, b.getDamage(), b.getPushback(), b.angle(), EP.damageType(b.elementNum));
+									hitPerson(p, b.getDamage(), b.getPushback(), b.angle(), b.elementNum);
 									if (p instanceof NPC)
 										((NPC) p).justCollided = true;
 									ballDebris(b, "shatter", b.angle());
@@ -259,7 +259,7 @@ public class Environment
 			}
 
 			// check collisions with arc force fields
-			for (ArcForceField aff : arcFFs)
+			for (ArcForceField aff : AFFs)
 			{
 				if (!(b.creator.equals(aff.target) && aff.type.equals("Protective Bubble"))) // balls phase through protective bubbles of their owners
 					if (aff.z + aff.height > b.z && aff.z < b.z + b.height)
@@ -302,7 +302,7 @@ public class Environment
 									damageArcForceField(aff, damage,
 											new Point((int) (aff.target.x + aff.maxRadius * Math.cos(angleToBall)), (int) (aff.target.y + aff.maxRadius * Math.sin(angleToBall))),
 											EP.damageType(b.elementNum));
-									hitPerson(aff.target, 0, 0.5 * b.getPushback(), b.angle(), 0); // push, not harm
+									hitPerson(aff.target, 0, 0.5 * b.getPushback(), b.angle(), b.elementNum); // push, not harm
 									// TODO cool sparks
 									// PHYSICS
 									double angle = 2 * angleToBall - b.angle() + Math.PI;
@@ -343,7 +343,7 @@ public class Environment
 									damageArcForceField(aff, damage,
 											new Point((int) (aff.target.x + aff.maxRadius * Math.cos(angleToBall)), (int) (aff.target.y + aff.maxRadius * Math.sin(angleToBall))),
 											EP.damageType(b.elementNum));
-									hitPerson(aff.target, 0, 0.5 * b.getPushback(), b.angle(), 0); // push, nor harm
+									hitPerson(aff.target, 0, 0.5 * b.getPushback(), b.angle(), b.elementNum); // push, nor harm
 
 									// Special effects! debris!
 									ballDebris(b, "arc force field", angleToBall);
@@ -379,7 +379,7 @@ public class Environment
 								&& 0 <= Methods.realDotProduct(ff.p[0], ballCenter, ff.p[3]) && Methods.realDotProduct(ff.p[0], ballCenter, ff.p[3]) <= ff.length * ff.length)
 						// circle center is within FF. This basically never ever should happen.
 						{
-							damageFF(ff, b.getDamage() + b.getPushback(), ballCenter);
+							damageForceField(ff, b.getDamage() + b.getPushback(), ballCenter);
 
 							// FX
 							for (int i = 0; i < 7; i++)
@@ -513,7 +513,7 @@ public class Environment
 		return true;
 	}
 
-	boolean moveSD(SprayDrop sd, double deltaTime)
+	boolean moveSprayDrop(SprayDrop sd, double deltaTime)
 	{
 		sd.x += sd.xVel * deltaTime;
 		sd.y += sd.yVel * deltaTime;
@@ -571,7 +571,7 @@ public class Environment
 						else
 						{
 							// damage person
-							hitPerson(p, sd.getDamage(), sd.getPushback(), sd.angle(), EP.damageType(sd.elementNum));
+							hitPerson(p, sd.getDamage(), sd.getPushback(), sd.angle(), sd.elementNum);
 							sprayDropDebris(sd);
 							// destroy this
 							return false;
@@ -580,7 +580,7 @@ public class Environment
 		}
 
 		// check collisions with arc force fields
-		for (ArcForceField aff : arcFFs)
+		for (ArcForceField aff : AFFs)
 		{
 			if (!(sd.creator.equals(aff.target) && aff.type.equals("Protective Bubble"))) // phase through protective bubbles of owners
 				if (aff.z + aff.height > sd.z && aff.z < sd.z + sd.height)
@@ -619,7 +619,7 @@ public class Environment
 							damageArcForceField(aff, sd.getDamage(),
 									new Point((int) (aff.target.x + aff.maxRadius * Math.cos(angleToDrop)), (int) (aff.target.y + aff.maxRadius * Math.sin(angleToDrop))),
 									EP.damageType(sd.elementNum));
-							hitPerson(aff.target, 0, 0.5 * sd.getPushback(), sd.angle(), 0);
+							hitPerson(aff.target, 0, 0.5 * sd.getPushback(), sd.angle(), sd.elementNum);
 
 							sprayDropDebris(sd);
 							return false;
@@ -648,7 +648,7 @@ public class Environment
 							&& 0 <= Methods.realDotProduct(ff.p[0], dropCenter, ff.p[3]) && Methods.realDotProduct(ff.p[0], dropCenter, ff.p[3]) <= ff.length * ff.length)
 					// circle center is within FF?
 					{
-						damageFF(ff, sd.getDamage() + sd.getPushback(), dropCenter);
+						damageForceField(ff, sd.getDamage() + sd.getPushback(), dropCenter);
 
 						sprayDropDebris(sd);
 						return false;
@@ -665,7 +665,7 @@ public class Environment
 							yes = true;
 						if (yes)
 						{
-							damageFF(ff, sd.getDamage(), dropCenter);
+							damageForceField(ff, sd.getDamage(), dropCenter);
 							sprayDropDebris(sd);
 							return false;
 						}
@@ -823,7 +823,7 @@ public class Environment
 							p.yVel = -p.yVel;
 							p.x += deltaTime * p.xVel;
 							p.y += deltaTime * p.yVel;
-							hitPerson(p, 5 * deltaTime, 0, 0, 4);
+							hitPerson(p, 5 * deltaTime, 0, 0, 6);// energy
 							if (p instanceof NPC)
 								((NPC) p).justCollided = true;
 						}
@@ -873,7 +873,7 @@ public class Environment
 							p.x += 80 * moveQuantumX;
 							p.y += 80 * moveQuantumY;
 							// zap
-							hitPerson(p, 5 * deltaTime, 0, 0, 4);
+							hitPerson(p, 5 * deltaTime, 0, 0, 6); // energy
 							if (p instanceof NPC)
 								((NPC) p).justCollided = true;
 						}
@@ -964,7 +964,7 @@ public class Environment
 				.intersection(new Rectangle((int) (p.x - 0.5 * p.radius), (int) (p.y - 0.5 * p.radius), (int) (p.radius), (int) (p.radius)));
 		// Damage to walls is mass of person * velocity * 0.00005; (kg * cm/s)
 		// Damage to people is velocity * wall health * 0.00001;
-		hitPerson(p, wallHealths[x][y] * p.velocity() * 0.00004, 0, p.angle() + TAU / 2, 0); // blunt damage
+		hitPerson(p, wallHealths[x][y] * p.velocity() * 0.00004, 0, p.angle() + TAU / 2, 10); // earth damage
 		damageWall(x, y, p.mass * p.velocity() * 0.0005, 0); // blunt damage
 		if (wallHealths[x][y] > 0) // if wall survives the collision, it deflects the person
 		{
@@ -993,22 +993,22 @@ public class Environment
 
 	}
 
-	void collideWithWall(RndPhysObj b, int x, int y, int px, int py) // x and y in grid
+	void collideWithWall(RndPhysObj o, int x, int y, int px, int py) // x and y in grid
 	{
 		final double bounceEfficiency = 1;
 		// assumes walls have no angle, of course (they don't)
 
-		if (px == x * squareSize && (b.angle() < Math.PI / 2 || b.angle() >= Math.PI * 3 / 2)) // left side, moving right
-			b.xVel = -b.xVel;
-		if (px == (x + 1) * squareSize && b.angle() >= Math.PI / 2 && b.angle() < Math.PI * 3 / 2) // right side, moving left
-			b.xVel = -b.xVel;
-		if (py == y * squareSize && b.angle() < Math.PI) // up side, moving down
-			b.yVel = -b.yVel;
-		if (py == (y + 1) * squareSize && b.angle() >= Math.PI) // down side, moving up
-			b.yVel = -b.yVel;
+		if (px == x * squareSize && (o.angle() < Math.PI / 2 || o.angle() >= Math.PI * 3 / 2)) // left side, moving right
+			o.xVel = -o.xVel;
+		if (px == (x + 1) * squareSize && o.angle() >= Math.PI / 2 && o.angle() < Math.PI * 3 / 2) // right side, moving left
+			o.xVel = -o.xVel;
+		if (py == y * squareSize && o.angle() < Math.PI) // up side, moving down
+			o.yVel = -o.yVel;
+		if (py == (y + 1) * squareSize && o.angle() >= Math.PI) // down side, moving up
+			o.yVel = -o.yVel;
 
-		b.xVel *= bounceEfficiency;
-		b.yVel *= bounceEfficiency;
+		o.xVel *= bounceEfficiency;
+		o.yVel *= bounceEfficiency;
 	}
 
 	public void moveVine(Vine v, double deltaTime)
@@ -1207,7 +1207,7 @@ public class Environment
 
 		// 2 arcffs/
 		ArcForceField collidedAFF = null;
-		for (ArcForceField aff : arcFFs)
+		for (ArcForceField aff : AFFs)
 			if (v.z - v.height / 2 < aff.z + aff.height || v.z + v.height / 2 > aff.z)
 			{
 
@@ -1431,7 +1431,7 @@ public class Environment
 			if (v.state != 2)
 				v.retract();
 			v.fixPosition();
-			damageFF(collidedFF, v.getDamage() + v.getPushback(), roundedIntersectionPoint);
+			damageForceField(collidedFF, v.getDamage() + v.getPushback(), roundedIntersectionPoint);
 			break;
 		case 2: // arc force field
 			v.end.x = roundedIntersectionPoint.x;
@@ -1468,10 +1468,9 @@ public class Environment
 					double hitAngle = v.rotation + (difference > 0 ? TAU / 4 : -TAU / 4);
 					double vineCollisionPercentage = 0.01;
 					double push = Math.min(Math.sqrt(Math.pow(v.grabbledThing.xVel, 2) + Math.pow(v.grabbledThing.yVel, 2)) * vineCollisionPercentage, v.getCollisionPushback());
-					hitPerson(collidedPerson, v.getCollisionDamage(), push, hitAngle, 0);
+					hitPerson(collidedPerson, v.getCollisionDamage(), push, hitAngle, 11);
 					collidedPerson.rotation = hitAngle;
-					collidedPerson.slippedTimeLeft = 3;
-					collidedPerson.prone = true;
+					collidedPerson.slip(true);
 				}
 				v.fixPosition();
 			}
@@ -1619,7 +1618,7 @@ public class Environment
 
 		// arc force fields
 		ArcForceField collidedAFF = null;
-		for (ArcForceField aff : arcFFs)
+		for (ArcForceField aff : AFFs)
 		{
 			if (b.z - b.height / 2 < aff.z + aff.height && b.z + b.height / 2 > aff.z) // height check
 				if (Methods.DistancePow2(b.start, aff.target.Point()) > aff.maxRadius * aff.maxRadius) // if beam did not originate inside arc force field.
@@ -1978,7 +1977,7 @@ public class Environment
 			else
 			{
 				// damaging the person
-				hitPerson(collidedPerson, b.getDamage(), b.getPushback(), angle, EP.damageType(b.elementNum), deltaTime);
+				hitPerson(collidedPerson, b.getDamage(), b.getPushback(), angle, b.elementNum, deltaTime);
 				// sound effect (scorched flesh)
 				if (!collidedPerson.sounds.get(0).active)
 					collidedPerson.sounds.get(0).loop();
@@ -2132,7 +2131,7 @@ public class Environment
 		connectWall(i, j); // update cracks
 	}
 
-	public void damageFF(ForceField ff, double damage, Point point)
+	public void damageForceField(ForceField ff, double damage, Point point)
 	{
 		damage -= ff.armor;
 		if (damage > 0)
@@ -2204,14 +2203,14 @@ public class Environment
 		explosionEffect.p2.x = (int) (0.5 * Resources.explosions.get(explosionEffect.subtype).get(0).getWidth());
 		explosionEffect.p2.y = (int) (0.5 * Resources.explosions.get(explosionEffect.subtype).get(0).getHeight());
 		explosionEffect.size = radius * 2;
-		effects.add(explosionEffect);
+		visualEffects.add(explosionEffect);
 		for (Person p : people)
 			if (p.z < z + explosionHeight / 2 && p.z + p.height > z - explosionHeight / 2)
 				if (Methods.DistancePow2(p.x, p.y, x, y) < radius * radius)
 				{
 					double distance = Math.sqrt(Methods.DistancePow2(p.x, p.y, x, y));
 					if (!checkForEvasion(p))
-						hitPerson(p, damage * (radius - distance) / radius, pushback * (radius - distance) / radius, Math.atan2(p.y - y, p.x - x), type == -1 ? 0 : EP.damageType(type));
+						hitPerson(p, damage * (radius - distance) / radius, pushback * (radius - distance) / radius, Math.atan2(p.y - y, p.x - x), type == -1 ? 0 : type);
 				}
 		for (ForceField ff : FFs)
 			if (ff.z < z + explosionHeight / 2 && ff.z + ff.height > z - explosionHeight / 2)
@@ -2221,9 +2220,9 @@ public class Environment
 					if (Methods.DistancePow2(p.x, p.y, x, y) < radius * radius)
 						withinRange = true;
 				if (withinRange)
-					damageFF(ff, (damage + pushback) * (radius - Math.sqrt(Methods.DistancePow2(ff.x, ff.y, x, y))), new Point((int) ff.x, (int) ff.y));
+					damageForceField(ff, (damage + pushback) * (radius - Math.sqrt(Methods.DistancePow2(ff.x, ff.y, x, y))), new Point((int) ff.x, (int) ff.y));
 			}
-		for (ArcForceField aff : arcFFs)
+		for (ArcForceField aff : AFFs)
 			if (aff.z < z + explosionHeight / 2 && aff.z + aff.height > z - explosionHeight / 2)
 			{
 				List<Point2D> affCorners = new ArrayList<Point2D>();
@@ -2312,13 +2311,19 @@ public class Environment
 	/**
 	 * 
 	 * @param p
+	 *            - the person being hit
 	 * @param damage
+	 *            - amount of damage
 	 * @param pushback
+	 *            - amount of pushback
 	 * @param angle
-	 * @param damageType
+	 *            - angle in which the person might be pushed
+	 * @param elementNum
+	 *            - element of the damage. Not damage type!
 	 * @param percentageOfTheDamage
+	 *            - out of a second of damage. This is usually equal to deltaTime or 1.
 	 */
-	public void hitPerson(Person p, double damage, double pushback, double angle, int damageType, double percentageOfTheDamage)
+	public void hitPerson(Person p, double damage, double pushback, double angle, int elementNum, double percentageOfTheDamage)
 	{
 		p.inCombat = true; // TODO
 		damage *= percentageOfTheDamage;
@@ -2329,26 +2334,83 @@ public class Environment
 			damage *= 0.9 + Math.random() * 0.2;
 
 			// TODO all damage-related powers
-			damage = p.damageAfterHittingArmor(damage, damageType, percentageOfTheDamage);
-			if (p.ghostMode && damageType != 9) // damageType 9 is ghost wall-clipping
-				if (damageType != 2 && damageType != 4)
+			damage = p.damageAfterHittingArmor(damage, elementNum, percentageOfTheDamage);
+			if (p.ghostMode && elementNum != 9) // damageType 9 is ghost wall-clipping
+				if (elementNum != 2 && elementNum != 4)
 				{
 					damage = 0;
 					pushback = 0;
-				} else // burn or shock damage
+				} else // burn or shock damage deal more while ethereal
 				{
 					damage *= 3;
 					pushback = 0;
 				}
 			// Elemental resistance
 			for (Effect e : p.effects)
-				if (e.name.equals("Elemental Resistance <" + EP.nameOfDamageType(damageType) + ">"))
+				if (e.name.equals("Elemental Resistance <" + EP.nameOfDamageType(elementNum) + ">"))
 				{
 					if (e.strength >= 5)
 						damage = 0;
 					else
 						damage *= Math.pow(0.75, e.strength); // maybe change it to 1-0.15*e.strength ?
 				}
+
+			double randomNumber = Math.random(); // for elemental effect checks
+
+			// Elemental effects!
+			if (percentageOfTheDamage == 0.02) // as it does whenever it is not 1, most likely
+				randomNumber *= 4.1; // This is roughly the right amount to keep it a 15% chance per second
+			switch (elementNum)
+			{
+			case 0: // fire
+			case 8: // lava
+				// Burn
+				if (randomNumber < 0.15) // 15% chance
+					p.affect(new Effect("Burning", 5), true);
+				break;
+			case 1: // water
+				// Slip
+				if (randomNumber < 0.15) // 15% chance
+					p.slip(true);
+			case 3: // electricity
+				// Stun
+				if (randomNumber < 0.15) // 15% chance
+					;// TODO
+			case 5: // ice
+				// Freeze
+				if (randomNumber < 0.15) // 15% chance
+					;// TODO
+			case 11: // plant
+				// Tangle
+				if (randomNumber < 0.50) // 50% chance
+					;// TODO
+			case 2: // wind
+			case 4: // metal
+				// +50% pushback
+				if (randomNumber < 0.15) // 15% chance
+					pushback *= 1.5;
+			case 6: // energy
+			case 7: // acid
+			case 9: // flesh
+				// +25% damage
+				if (randomNumber < 0.15) // 15% chance
+					damage *= 1.25;
+			case 10: // earth
+				// +25% damage or +50% pushback
+				if (randomNumber < 0.15) // 15% chance
+					if (randomNumber < 0.075)
+						damage *= 1.25;
+					else
+						pushback *= 1.5;
+			case -1: // blunt damage (punches do this)
+				// +25% damage
+				if (randomNumber < 0.15) // 15% chance
+					damage *= 1.25;
+				break;
+			default:
+				Main.errorMessage("It's elementary! " + elementNum + "...?");
+				break;
+			}
 
 			if (p instanceof NPC)
 				if (damage >= 1 || Math.random() < 0.01) // so that beams don't always trigger this
@@ -2384,14 +2446,19 @@ public class Environment
 	 * Single-time damage.
 	 * 
 	 * @param p
+	 *            - the person being hit
 	 * @param damage
+	 *            - amount of damage
 	 * @param pushback
+	 *            - amount of pushback
 	 * @param angle
-	 * @param damageType
+	 *            - angle in which the person might be pushed
+	 * @param elementNum
+	 *            - element of the damage. Not damage type!
 	 */
-	public void hitPerson(Person p, double damage, double pushback, double angle, int damageType)
+	public void hitPerson(Person p, double damage, double pushback, double angle, int elementNum)
 	{
-		hitPerson(p, damage, pushback, angle, damageType, 1);
+		hitPerson(p, damage, pushback, angle, elementNum, 1);
 	}
 
 	public boolean checkForEvasion(Person p)
@@ -2573,7 +2640,7 @@ public class Environment
 		drawableThings.addAll(balls);
 		drawableThings.addAll(FFs);
 		drawableThings.addAll(debris);
-		drawableThings.addAll(arcFFs);
+		drawableThings.addAll(AFFs);
 		drawableThings.addAll(beams);
 		drawableThings.addAll(vines);
 		drawableThings.addAll(sprayDrops);

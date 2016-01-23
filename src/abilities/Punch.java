@@ -8,7 +8,6 @@ import java.awt.geom.Rectangle2D;
 import mainClasses.Ability;
 import mainClasses.ArcForceField;
 import mainClasses.Ball;
-import mainClasses.EP;
 import mainClasses.Environment;
 import mainClasses.ForceField;
 import mainClasses.Methods;
@@ -136,7 +135,8 @@ public class Punch extends Ability
 		damage += 0.2 * pushback;
 		pushback -= 0.2 * pushback;
 
-		int damageType = 0; // TODO other punch types that aren't blunt?
+		int punchElement = -1; // TODO other punch types that aren't blunt?
+		int punchDamageType = 0;
 		int timesTested = 2; // number of checks; number of parts the range is divided into.
 		double extraVerticalHeight = 0.4;
 		final double extraAimingAngle = user.flySpeed == -1 ? 0.3 : 0.8; // If the user is flying the arc of Punch-testing is larger, because it's more difficult to aim with the keyboard and while moving.
@@ -156,8 +156,8 @@ public class Punch extends Ability
 						{
 							int wallHealth = env.wallHealths[i][j];
 							double leftoverPushback = wallHealth > damage + pushback ? pushback : Math.min(wallHealth, pushback);
-							env.damageWall(i, j, damage + pushback, damageType);
-							env.hitPerson(user, Math.max(0, 7 - 0.5 * user.STRENGTH), leftoverPushback, user.rotation - Math.PI, 0); // When punching walls, you damage yourself by 7 damage points.
+							env.damageWall(i, j, damage + pushback, punchDamageType);
+							env.hitPerson(user, Math.max(0, 7 - 0.5 * user.STRENGTH), leftoverPushback, user.rotation - Math.PI, env.wallTypes[i][j]); // When punching walls, you damage yourself by 7 damage points.
 							user.punchedSomething = true;
 							break collisionCheck;
 						}
@@ -176,15 +176,15 @@ public class Punch extends Ability
 									if (forcefieldArea.contains(user.target))
 									{
 										double leftoverPushback = ff.life > damage + pushback ? pushback : Math.min(env.wallHealths[i][j], pushback);
-										env.damageFF(ff, damage + pushback, user.target);
-										env.hitPerson(user, ff.armor, leftoverPushback, user.rotation - Math.PI, 4); // Shock damage, equal to the armor of the force field.
+										env.damageForceField(ff, damage + pushback, user.target);
+										env.hitPerson(user, ff.armor, leftoverPushback, user.rotation - Math.PI, 6); // Energy damage, equal to the armor of the force field.
 										user.punchedSomething = true;
 										break collisionCheck;
 									}
 								}
 							}
-						// TODO arcforcefields
-						for (ArcForceField aff : env.arcFFs)
+
+						for (ArcForceField aff : env.AFFs)
 						{
 							if (aff.target.equals(user) && aff.type != "Bubble")
 								continue;
@@ -221,7 +221,7 @@ public class Punch extends Ability
 							{
 								double leftoverPushback = aff.life > damage + pushback ? pushback : Math.min(env.wallHealths[i][j], pushback);
 								env.damageArcForceField(aff, damage + pushback, user.target, 0);
-								env.hitPerson(user, 5, leftoverPushback, user.rotation - Math.PI, aff.damageType()); // 5 damage. TODO
+								env.hitPerson(user, 5, leftoverPushback, user.rotation - Math.PI, aff.elementNum); // 5 damage. TODO
 								user.punchedSomething = true;
 								break collisionCheck;
 							}
@@ -234,7 +234,7 @@ public class Punch extends Ability
 									// TODO add ball reflecting using fists (so epic!)
 									b.xVel = 0; // destroys ball
 									b.yVel = 0; //
-									env.hitPerson(user, b.getDamage(), pushback, user.rotation - Math.PI, EP.damageType(b.elementNum));
+									env.hitPerson(user, b.getDamage(), pushback, user.rotation - Math.PI, b.elementNum);
 									// epicness
 									env.ballDebris(b, "punch", b.angle());
 									user.punchedSomething = true;
@@ -248,7 +248,7 @@ public class Punch extends Ability
 							if (!p.equals(user)) // TODO find a better way (not two double-number comparisons) to make sure they aren't the same. Maybe with person.equals()?
 								if (p.x - p.radius / 2 < user.target.x && p.y - p.radius / 2 < user.target.y && p.x + p.radius / 2 > user.target.x && p.y + p.radius / 2 > user.target.y)
 								{
-									env.hitPerson(p, damage, pushback, user.rotation, damageType); // This is such an elegant line of code :3
+									env.hitPerson(p, damage, pushback, user.rotation, punchElement); // This is such an elegant line of code :3
 									user.punchedSomething = true;
 									break collisionCheck;
 								}

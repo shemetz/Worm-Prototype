@@ -64,10 +64,12 @@ public class SoundEffect
 		setVolume(100000 / distancePow2);
 	}
 
-	public void updateVolume(double x2, double y2)
+	public void updateVolume(double x1, double y1, double x2, double y2)
 	{
-		double distancePow2 = Methods.DistancePow2(x2, y2, x, y);
-		setVolume(100000 / distancePow2);
+		if (x > x1 && y > y1 && x < x2 && y < y2)
+			setVolume(1);
+		else
+			setVolume(0);
 	}
 
 	public void setVolume(double newVolume)

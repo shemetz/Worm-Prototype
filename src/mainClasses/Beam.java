@@ -22,6 +22,7 @@ public class Beam extends Drawable
 	public double			range;							// The maximum range of this beam. Subsequent reflection-beams will have shorter range.
 	public double			size;
 	public Beam_E			theAbility;
+	public boolean critical = false;
 
 	public Beam(Person creator, Beam_E theAbility, Point3D start, Point3D end, int elementNum, int points, double range)
 	{

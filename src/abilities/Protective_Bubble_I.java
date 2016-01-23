@@ -35,13 +35,13 @@ public class Protective_Bubble_I extends Ability
 		// deactivating the bubble
 		if (on && cooldownLeft == 0)
 		{
-			for (int i = 0; i < env.arcFFs.size(); i++)
-				if (env.arcFFs.get(i).equals(bubble))
+			for (int i = 0; i < env.AFFs.size(); i++)
+				if (env.AFFs.get(i).equals(bubble))
 				{
 					env.shieldDebris(bubble, "bubble");
 					cooldownLeft = 0.5;
 					on = false;
-					env.arcFFs.remove(i);
+					env.AFFs.remove(i);
 					i--;
 					sounds.get(1).play();
 				}
@@ -51,16 +51,16 @@ public class Protective_Bubble_I extends Ability
 				return;
 
 			// Remove any current protective bubble
-			for (int i = 0; i < env.arcFFs.size(); i++)
-				if (env.arcFFs.get(i).target.equals(user) && env.arcFFs.get(i).type.equals("Protective Bubble"))
+			for (int i = 0; i < env.AFFs.size(); i++)
+				if (env.AFFs.get(i).target.equals(user) && env.AFFs.get(i).type.equals("Protective Bubble"))
 				{
-					env.shieldDebris(env.arcFFs.get(i), "bubble");
-					env.arcFFs.remove(i);
+					env.shieldDebris(env.AFFs.get(i), "bubble");
+					env.AFFs.remove(i);
 					i--;
 				}
 			double AFFwidth = 5;// 5 + 5*points; //should be
 			bubble = new ArcForceField(user, angle, 2 * Math.PI, 100, 100 + AFFwidth, 10 * points, 12, "Protective Bubble");
-			env.arcFFs.add(bubble);
+			env.AFFs.add(bubble);
 			user.mana -= this.cost;
 			this.cooldownLeft = this.cooldown;
 			this.on = true;

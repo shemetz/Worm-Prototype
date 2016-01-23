@@ -40,6 +40,7 @@ public class Effect
 				animFrame = 0;
 			break;
 		default:
+			// error message
 			Main.errorMessage(
 					"They call me 'Bell',\nThey call me 'Stacey',\nThey call me 'her',\nThey call me 'Jane',\nThat's not my name!\nThat's not my name!\nThat's not my name!\nThat's not my...name!\n");
 			Main.errorMessage();

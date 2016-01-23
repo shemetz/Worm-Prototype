@@ -19,6 +19,7 @@ public class Beam_E extends Ability
 
 	int						beamFrameNum;
 	public List<Evasion>	evasions;
+	public double			criticalTimeLeft	= 0;
 
 	public Beam_E(String elementName, int p)
 	{
@@ -79,6 +80,7 @@ public class Beam_E extends Ability
 						env.beams.remove(i);
 						i--;
 					}
+				criticalTimeLeft = 0;
 			} else if (!user.prone && !user.maintaining && cooldownLeft <= 0)
 			{
 				user.notAnimating = true;
@@ -133,6 +135,8 @@ public class Beam_E extends Ability
 				this.evasions.remove(j);
 				j--;
 			}
+		if (criticalTimeLeft > 0)
+			criticalTimeLeft -= deltaTime;
 		double angle = Math.atan2(target.y - user.y, target.x - user.x);
 		final double beamExitDistance = 40;
 		if (!getElement().equals("Plant")) // non-plant
@@ -140,6 +144,8 @@ public class Beam_E extends Ability
 			if (cooldownLeft == 0)
 				if (user.mana >= costPerSecond * deltaTime)
 				{
+					if (Math.random() * 0.24 < user.criticalChance) //I hope this 0.24 makes sense
+						criticalTimeLeft = 1;
 					sounds.get(0).loop();
 					angle = user.rotation + user.inaccuracyAngle; // rotation changes in updateTargeting
 					Point3D start = new Point3D((int) (user.x + beamExitDistance * Math.cos(angle)), (int) (user.y + beamExitDistance * Math.sin(angle)), (int) user.z); // starts beamExitDistance pixels in front of the user
@@ -148,6 +154,9 @@ public class Beam_E extends Ability
 					Beam b = new Beam(user, this, start, end, getElementNum(), points, range);
 					frameNum++;
 					b.frameNum = beamFrameNum;
+					//critical chance
+					if (criticalTimeLeft > 0)
+						b.critical = true;
 					env.beams.add(b);
 					env.moveBeam(b, true, deltaTime);
 					user.mana -= costPerSecond * deltaTime;

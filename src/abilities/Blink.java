@@ -67,7 +67,7 @@ public class Blink extends Ability
 				eff.p1 = new Point((int) (user.x - range * Math.cos(angle)), (int) (user.y - range * Math.sin(angle)));
 				eff.p2 = new Point((int) (user.x), (int) (user.y));
 				eff.onTop = false;
-				env.effects.add(eff);
+				env.visualEffects.add(eff);
 			}
 			// SFX
 			sounds.get(0).play();
@@ -87,7 +87,7 @@ public class Blink extends Ability
 				eff.p1 = new Point((int) (user.x + range * Math.cos(angle)), (int) (user.y + range * Math.sin(angle)));
 				eff.p2 = new Point((int) (user.x), (int) (user.y));
 				eff.onTop = true;
-				env.effects.add(eff);
+				env.visualEffects.add(eff);
 			}
 
 			// SFX

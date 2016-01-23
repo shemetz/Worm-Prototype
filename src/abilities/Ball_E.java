@@ -3,6 +3,7 @@ package abilities;
 import java.awt.Point;
 
 import mainClasses.Ability;
+import mainClasses.Ball;
 import mainClasses.Environment;
 import mainClasses.ForceField;
 import mainClasses.Methods;
@@ -58,12 +59,16 @@ public class Ball_E extends Ability
 				double angle = Math.atan2(target.y - user.y, target.x - user.x);
 				angle = angle + user.missAngle * (2 * Math.random() - 1);
 				cooldownLeft = cooldown;
-				mainClasses.Ball b = new mainClasses.Ball(getElementNum(), points, angle, user);
+				Ball b = new Ball(getElementNum(), points, angle, user);
 				b.x = user.x + range * Math.cos(angle);
 				b.y = user.y + range * Math.sin(angle);
 				b.z = user.z + 0.9;
 				b.xVel += user.xVel;
 				b.yVel += user.yVel;
+				
+				//critical chance
+				if (Math.random() < user.criticalChance)
+					b.critical = true;
 
 				// TODO move this to a new method in Environment?
 				boolean ballCreationSuccess = true;
@@ -83,7 +88,7 @@ public class Ball_E extends Ability
 							ballCreationSuccess = false;
 							// damage FF
 							double damage = (b.getDamage() + b.getPushback()) * 0.5; // half damage, because the ball "bounces"
-							env.damageFF(ff, damage, ballCenter);
+							env.damageForceField(ff, damage, ballCenter);
 						}
 				if (ballCreationSuccess)
 				{

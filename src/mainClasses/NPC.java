@@ -60,15 +60,14 @@ public class NPC extends Person
 	void frameAIupdate(double deltaTime, int frameNum, Environment env, Main main)
 	{
 		// choose target
-		if (frameNum % 25 == 0) // don't check a lot of times in a short period
+		switch (this.tactic)
 		{
-			this.targetID = -1;
-			switch (this.tactic)
+		case "retreat":
+		case "circle strafing":
+		case "punch chasing":
+			if (frameNum % 25 == 0) // don't check a lot of times in a short period
 			{
-			case "retreat":
-			case "circle strafing":
-			case "punch chasing":
-				// Choose as target the closest enemy.
+				// Choose as target the closest enemy. There's no range limit to this. TODO
 				double shortestDistanceToTargetPow2 = Double.MAX_VALUE;
 				for (Person p2 : env.people)
 					if (this.viableTarget(p2))
@@ -77,24 +76,26 @@ public class NPC extends Person
 							shortestDistanceToTargetPow2 = Methods.DistancePow2(this.x, this.y, p2.x, p2.y);
 							this.targetID = p2.id;
 						}
-				break;
-			default:
-
-				break;
 			}
+			break;
+		case "no target":
+		case "panic":
+		default:
+			this.targetID = -1;
+			break;
 		}
-		Person target2 = null;
+		Person targetPerson = null;
 		if (this.targetID != -1 && this.tactic != "no target")
 			for (Person p2 : env.people)
 				if (p2.id == this.targetID)
 				{
-					target2 = p2;
+					targetPerson = p2;
 					break;
 				}
-		if (target2 != null)
+		if (targetPerson != null)
 		{
-			double angleToTarget = Math.atan2(target2.y - this.y, target2.x - this.x);
-			double distanceToTargetPow2 = Methods.DistancePow2(this.x, this.y, target2.x, target2.y);
+			double angleToTarget = Math.atan2(targetPerson.y - this.y, targetPerson.x - this.x);
+			double distanceToTargetPow2 = Methods.DistancePow2(this.x, this.y, targetPerson.x, targetPerson.y);
 			// target-type tactics
 			switch (this.tactic)
 			{
@@ -103,7 +104,7 @@ public class NPC extends Person
 				this.rotate(angleToTarget, deltaTime);
 				this.directionOfAttemptedMovement = angleToTarget;
 				this.strengthOfAttemptedMovement = 1;
-				this.target = new Point((int) target2.x, (int) target2.y);
+				this.target = new Point((int) targetPerson.x, (int) targetPerson.y);
 				Ability punch = null;
 				int index = -1;
 				for (int i = 0; i < this.abilities.size(); i++)
@@ -113,7 +114,7 @@ public class NPC extends Person
 						punch = this.abilities.get(index);
 					}
 				if (punch != null)
-					if (distanceToTargetPow2 < punch.range * punch.range)
+					if (distanceToTargetPow2 < Math.pow(punch.range + targetPerson.radius / 2, 2))
 						main.pressAbilityKey(index, true, this);
 					else if (punch.cooldownLeft <= 0)
 						main.pressAbilityKey(index, false, this);
@@ -223,10 +224,10 @@ public class NPC extends Person
 							{
 								shortestDistanceToTargetPow2 = Methods.DistancePow2(this.x, this.y, p2.x, p2.y);
 								this.targetID = p2.id; // not necessary?
-								target2 = p2;
+								targetPerson = p2;
 							}
-					if (target2 != null)
-						if (Methods.DistancePow2(this.x, this.y, target2.x, target2.y) < 600 * 600) // 600 sounds like an OK number
+					if (targetPerson != null)
+						if (Methods.DistancePow2(this.x, this.y, targetPerson.x, targetPerson.y) < 600 * 600) // 600 sounds like an OK number
 							if (this.mana > 0.4 * this.maxMana)
 								this.tactic = "circle strafing";
 							else if (this.stamina > 0.1 * this.maxStamina)
@@ -253,15 +254,13 @@ public class NPC extends Person
 				Main.errorMessage("shpontzilontz. no no-target-tactic - " + this.tactic);
 				break;
 			}
-		// tactic-switching. TODO make sense?
+		// tactic-switching decisions. TODO make it make sense
 		String prevTactic = "" + this.tactic; // copy
 		if (this.panic)
 			this.tactic = "panic";
 		else if (this.life < 0.15 * this.maxLife)
 			this.tactic = "retreat";
 		else if (this.tactic.equals("retreat")) // stop retreating when uninjured
-			this.tactic = "no target";
-		else if (target2 == null)
 			this.tactic = "no target";
 		else if (this.strategy.equals("aggressive"))
 		{
@@ -287,22 +286,27 @@ public class NPC extends Person
 			this.directionOfAttemptedMovement = 0;
 			this.strengthOfAttemptedMovement = 0;
 		}
+		boolean nothingToDo = false;
+		if (this.strengthOfAttemptedMovement == 0)
+			nothingToDo = true;
 
 		// Instincts - move away from dangerous objects
 		if (this.timeSinceLastInstinct < 0)
 			this.timeSinceLastInstinct += deltaTime;
-		if (moveAwayFromDangerousObjects(env))
-			this.rotate(this.directionOfAttemptedMovement, deltaTime);
-		else if (this.timeSinceLastInstinct >= 0 && this.timeSinceLastInstinct < this.instinctDelayTime)
-		{
-			// for a period of instinctDelayTime after finishing with instincts, keep moving
-			this.directionOfAttemptedMovement = this.angleOfLastInstinct;
-			this.strengthOfAttemptedMovement = 1;
-			this.timeSinceLastInstinct += deltaTime;
-		}
+		if (moveAwayFromDangerousObjects(env, !nothingToDo))
+			if (nothingToDo)
+				this.rotate(this.directionOfAttemptedMovement, deltaTime);
+			else if (this.timeSinceLastInstinct >= 0 && this.timeSinceLastInstinct < this.instinctDelayTime)
+			{
+				// for a period of instinctDelayTime after finishing with instincts, keep moving
+				if (nothingToDo)
+					this.directionOfAttemptedMovement = this.angleOfLastInstinct;
+				this.strengthOfAttemptedMovement = 1;
+				this.timeSinceLastInstinct += deltaTime;
+			}
 	}
 
-	boolean moveAwayFromDangerousObjects(Environment env)
+	boolean moveAwayFromDangerousObjects(Environment env, boolean considerAttempt)
 	{
 		/*
 		 * INSTINCTS
@@ -383,8 +387,15 @@ public class NPC extends Person
 		if (this.timeSinceLastInstinct < 0)
 			return false;
 		// while under instincts, timeSinceLastInstinct == 0
-		this.directionOfAttemptedMovement = Math.atan2(yElement, xElement);
-		this.angleOfLastInstinct = this.directionOfAttemptedMovement;
+		if (!considerAttempt)
+		{
+			this.directionOfAttemptedMovement = Math.atan2(yElement, xElement);
+			this.angleOfLastInstinct = this.directionOfAttemptedMovement;
+		} else // attempted movement would be half-decided by attempt
+		{
+			this.directionOfAttemptedMovement = Methods.meanAngle(Math.atan2(yElement, xElement), this.directionOfAttemptedMovement);
+			this.angleOfLastInstinct = this.directionOfAttemptedMovement;
+		}
 		this.strengthOfAttemptedMovement = 1;
 		this.timeSinceLastInstinct = 0;
 		return true;

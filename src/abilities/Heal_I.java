@@ -79,7 +79,7 @@ public class Heal_I extends Ability
 				healingEffect.type = 3;
 				healingEffect.angle = Math.atan2(healingTarget.y - user.y, healingTarget.x - user.x);
 
-				env.effects.add(healingEffect);
+				env.visualEffects.add(healingEffect);
 			}
 			user.mana -= deltaTime * costPerSecond;
 		}
