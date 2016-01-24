@@ -27,7 +27,7 @@ public class Flight_I extends Ability
 			on = true;
 			if (user.z == 0)
 				user.z += 0.1;
-			user.flySpeed = 100 * points; // 100 to 300 pixels per second
+			user.flySpeed = 100 * points; // 100 pixels per second
 			cooldownLeft = 0.5; // constant activation cooldown - to fix keys being stuck, etc.
 		} else if (on && cooldownLeft == 0)
 		{

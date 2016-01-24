@@ -2330,8 +2330,11 @@ public class Environment
 		pushback *= percentageOfTheDamage;
 		if (damage > 0)
 		{
-			// multiplied by 0.9 to 1.1
+			// damage is multiplied by 0.9 to 1.1
 			damage *= 0.9 + Math.random() * 0.2;
+			
+			//pushback takes into account pushback resistance
+			pushback -= pushback*p.pushbackResistance;
 
 			// TODO all damage-related powers
 			damage = p.damageAfterHittingArmor(damage, elementNum, percentageOfTheDamage);

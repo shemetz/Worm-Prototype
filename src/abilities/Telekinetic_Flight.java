@@ -9,7 +9,7 @@ import mainClasses.Player;
 
 public class Telekinetic_Flight extends Ability
 {
-
+	boolean gaveBonuses;
 	public Telekinetic_Flight(int p)
 	{
 		super("Telekinetic Flight", p);
@@ -17,6 +17,7 @@ public class Telekinetic_Flight extends Ability
 		cooldown = 1;
 		cost = 0;
 		instant = true;
+		gaveBonuses = false;
 	}
 
 	public void use(Environment env, Person user, Point target)
@@ -25,9 +26,17 @@ public class Telekinetic_Flight extends Ability
 		{
 			on = true;
 			if (user.z == 0)
-				user.z += 0.1;
-			user.flySpeed = 200 * points; // 800 to 1200 pixels per second
+				user.z += 0.2;
+			user.flySpeed = 900 * points; // 
 			cooldownLeft = 0.5; // constant activation cooldown - to fix keys being stuck, etc.
+			
+			if (!gaveBonuses)
+			{
+				gaveBonuses = true;
+				user.STRENGTH += 2;
+				user.pushbackResistance += 0.5*(1 - user.pushbackResistance); //+50% pushback immunity
+				user.evasion += 0.2*(1-user.evasion); //+20% evasion
+			}
 		} else if (on && cooldownLeft == 0)
 		{
 			on = false;

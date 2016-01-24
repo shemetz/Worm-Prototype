@@ -52,6 +52,7 @@ public class Person extends RndPhysObj
 	public double						sprintingStaminaCost;												// ^
 	public double						evasion;															// chance of an attack missing you
 	public double						criticalChance;														// chance of a critical hit
+	public double						pushbackResistance;													// pushback immunity
 
 	// Rest of the variables
 	public double						life;
@@ -259,7 +260,8 @@ public class Person extends RndPhysObj
 		runningStaminaCost = 0.6;
 		sprintingStaminaCost = 1.8;
 		evasion = 1 - Math.pow(0.99431695501, (DEXTERITY * WITS)); // average is EXACTLY 5%!
-		criticalChance = 1 - Math.pow(0.99431695501, (DEXTERITY * WITS)); // 
+		criticalChance = 1 - Math.pow(0.99431695501, (DEXTERITY * WITS)); //
+		pushbackResistance = 0;
 	}
 
 	public void initSounds()

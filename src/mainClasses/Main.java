@@ -836,7 +836,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		player.abilities.add(Ability.ability("Protective Bubble I", 5));
 		player.abilities.add(Ability.ability("Spray <Acid>", 5));
 		player.abilities.add(Ability.ability("Ball <Fire>", 5));
-		player.abilities.add(Ability.ability("Flight I", 5));
+		player.abilities.add(Ability.ability("Telekinetic Flight", 7));
 		player.abilities.add(Ability.ability("Blink", 5));
 		player.abilities.add(Ability.ability("Beam <Energy>", 5));
 		player.abilities.add(Ability.ability("Ghost Mode I", 5));

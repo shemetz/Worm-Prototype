@@ -38,6 +38,7 @@ import abilities.Strength_II;
 import abilities.Strength_III;
 import abilities.Strike_E;
 import abilities.Strong_Force_Field;
+import abilities.Telekinetic_Flight;
 import abilities.Toughness_III;
 import abilities.Wall_E;
 import mainResourcesPackage.SoundEffect;
@@ -473,6 +474,8 @@ public class Ability
 			return new Flight_I(pnts);
 		case "Flight II":
 			return new Flight_II(pnts);
+		case "Telekinetic Flight":
+			return new Telekinetic_Flight(pnts);
 		case "Blink":
 			return new Blink(pnts);
 		case "Ghost Mode I":
