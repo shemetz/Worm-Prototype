@@ -12,7 +12,7 @@ public class Sense_Life extends Ability
 	public Sense_Life(int p)
 	{
 		super("Sense Life", p);
-		range = (int) (50 * Math.pow(2, points));
+		range = (int) (50 * Math.pow(2, level));
 		rangeType = "Circle area";
 	}
 	

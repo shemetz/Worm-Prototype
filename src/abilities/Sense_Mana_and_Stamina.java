@@ -12,7 +12,7 @@ public class Sense_Mana_and_Stamina extends Ability
 	public Sense_Mana_and_Stamina(int p)
 	{
 		super("Sense Mana and Stamina", p);
-		range = (int) (50 * Math.pow(2, points));
+		range = (int) (50 * Math.pow(2, level));
 		rangeType = "Circle area";
 	}
 	

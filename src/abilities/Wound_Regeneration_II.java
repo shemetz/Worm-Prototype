@@ -17,6 +17,6 @@ public class Wound_Regeneration_II extends Ability
 	public void use(Environment env, Person user, Point target)
 	{
 		int val = on ? -1 : 1;
-		user.lifeRegen += val * 2 * points;
+		user.lifeRegen += val * 2 * level;
 	}
 }

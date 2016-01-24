@@ -13,7 +13,7 @@ public class Ghost_Mode_I extends Ability
 	public Ghost_Mode_I(int p)
 	{
 		super("Ghost Mode I", p);
-		cost = 2 * points;
+		cost = 2 * level;
 		costType = "mana";
 		costPerSecond = 0.3;
 		cooldown = 5;
@@ -35,7 +35,7 @@ public class Ghost_Mode_I extends Ability
 			// TODO some kind of visual effect maybe?
 			user.ghostMode = true;
 			user.mana -= cost;
-			timeLeft = points;
+			timeLeft = level;
 			cooldownLeft = 0.5;
 		} else if (cooldownLeft == 0)
 		{

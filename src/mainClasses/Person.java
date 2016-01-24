@@ -256,12 +256,17 @@ public class Person extends RndPhysObj
 		runAccel = 1000 * FITNESS;
 		runSpeed = 100 * FITNESS;
 		accuracy = 1 - 0.6 / ((double) DEXTERITY + 1);
-		missAngle = (1 - accuracy) * Math.PI / 3; // DEX 0 = 60 degree miss, DEX 3 = 15.
+		updateAccuracy();
 		runningStaminaCost = 0.6;
 		sprintingStaminaCost = 1.8;
 		evasion = 1 - Math.pow(0.99431695501, (DEXTERITY * WITS)); // average is EXACTLY 5%!
 		criticalChance = 1 - Math.pow(0.99431695501, (DEXTERITY * WITS)); //
 		pushbackResistance = 0;
+	}
+
+	public void updateAccuracy()
+	{
+		missAngle = (1 - accuracy) * Math.PI / 3; // DEX 0 = 60 degree miss, DEX 3 = 15.
 	}
 
 	public void initSounds()

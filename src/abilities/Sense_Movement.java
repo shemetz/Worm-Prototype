@@ -12,7 +12,7 @@ public class Sense_Movement extends Ability
 	public Sense_Movement(int p)
 	{
 		super("Sense Movement", p);
-		range = (int) Math.pow(3, points);
+		range = (int) Math.pow(3, level);
 	}
 	
 	

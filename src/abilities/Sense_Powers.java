@@ -24,7 +24,7 @@ public class Sense_Powers extends Ability
 		cost = 0;
 		costType = "none";
 		cooldown = 1;
-		range = (int) (50 * Math.pow(2, points));
+		range = (int) (50 * Math.pow(2, level));
 		rangeType = "Circle area";
 		instant = true;
 		
@@ -32,7 +32,7 @@ public class Sense_Powers extends Ability
 		for (int i = 0; i < details.length; i++)
 			details[i] = 0;
 		timer = 0;
-		updatePeriod = 10-points;
+		updatePeriod = 10-level;
 	}
 
 	public void use(Environment env, Person user, Point target)

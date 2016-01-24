@@ -41,7 +41,7 @@ public class Shield_E extends Ability
 
 			arc = Math.PI / 2; //arc of shield
 			double minRadius = 80, maxRadius = 92;
-			shield = new ArcForceField(user, angle, arc, minRadius, maxRadius, (int) (points * 10), this.getElementNum(), "Shield <"+this.getElement()+">");
+			shield = new ArcForceField(user, angle, arc, minRadius, maxRadius, (int) (level * 10), this.getElementNum(), "Shield <"+this.getElement()+">");
 			boolean nope = false;
 			for (Person p : env.people)
 				if (env.personAFFCollision(p, shield))
@@ -75,7 +75,7 @@ public class Shield_E extends Ability
 					env.AFFs.remove(i);
 					i--;
 				}
-			cooldownLeft = 1 + 0.8 * cooldown - 0.8 * cooldown * remainingFFhealth / (points * 10); // if shield had full HP, 1 cooldown. if had no HP, full
+			cooldownLeft = 1 + 0.8 * cooldown - 0.8 * cooldown * remainingFFhealth / (level * 10); // if shield had full HP, 1 cooldown. if had no HP, full
 																									// cooldown.
 			user.maintaining = false;
 			on = false;

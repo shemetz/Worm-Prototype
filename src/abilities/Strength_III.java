@@ -18,8 +18,8 @@ public class Strength_III extends Ability
 	public void use(Environment env, Person user, Point target)
 	{
 		int v = on ? -1 : 1;
-		user.STRENGTH += v * Math.pow(2, points);
-		user.FITNESS += 0.5 * v * points;
+		user.STRENGTH += v * Math.pow(2, level);
+		user.FITNESS += 0.5 * v * level;
 		on = !on;
 	}
 

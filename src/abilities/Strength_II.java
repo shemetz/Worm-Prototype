@@ -18,7 +18,7 @@ public class Strength_II extends Ability
 	public void use(Environment env, Person user, Point target)
 	{
 		int v = on ? -1 : 1;
-		user.STRENGTH += 2 * v * points;
+		user.STRENGTH += 2 * v * level;
 		user.FITNESS += v * 2;
 		on = !on;
 	}

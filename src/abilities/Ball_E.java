@@ -59,7 +59,7 @@ public class Ball_E extends Ability
 				double angle = Math.atan2(target.y - user.y, target.x - user.x);
 				angle = angle + user.missAngle * (2 * Math.random() - 1);
 				cooldownLeft = cooldown;
-				Ball b = new Ball(getElementNum(), points, angle, user);
+				Ball b = new Ball(getElementNum(), level, angle, user);
 				b.x = user.x + range * Math.cos(angle);
 				b.y = user.y + range * Math.sin(angle);
 				b.z = user.z + 0.9;

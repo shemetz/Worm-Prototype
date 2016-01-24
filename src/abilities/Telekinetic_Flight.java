@@ -27,7 +27,7 @@ public class Telekinetic_Flight extends Ability
 			on = true;
 			if (user.z == 0)
 				user.z += 0.2;
-			user.flySpeed = 900 * points; // 
+			user.flySpeed = 900 * level; // 
 			cooldownLeft = 0.5; // constant activation cooldown - to fix keys being stuck, etc.
 			
 			if (!gaveBonuses)

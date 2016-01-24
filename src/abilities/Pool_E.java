@@ -17,10 +17,10 @@ public class Pool_E extends Ability
 	public Pool_E(String elementName, int p)
 	{
 		super("Pool <" + elementName + ">", p);
-		cost = Math.max(3 - 0.3 * points, 0.8); // reduced cost is that minus 1.5
+		cost = Math.max(3 - 0.3 * level, 0.8); // reduced cost is that minus 1.5
 		costPerSecond = 1;
 		costType = "mana";
-		cooldown = Math.max(3 - 0.3 * points, 0.3); // is used for creating the pool
+		cooldown = Math.max(3 - 0.3 * level, 0.3); // is used for creating the pool
 		targetEffect1 = -1; // x grid position
 		targetEffect2 = -1; // y grid position
 		range = 600;
@@ -100,7 +100,7 @@ public class Pool_E extends Ability
 		{
 			// effects
 			env.otherDebris((targetEffect1 + 0.5) * squareSize, (targetEffect2 + 0.5) * squareSize, getElementNum(), "pool heal", frameNum);
-			env.poolHealths[(int) targetEffect1][(int) targetEffect2] += points;
+			env.poolHealths[(int) targetEffect1][(int) targetEffect2] += level;
 			if (env.poolHealths[(int) targetEffect1][(int) targetEffect2] >= 100)
 				env.poolHealths[(int) targetEffect1][(int) targetEffect2] = 100;
 			// Might be resource-costly:

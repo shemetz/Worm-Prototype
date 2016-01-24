@@ -19,7 +19,7 @@ public class Sprint extends Ability
 		rangeType = "";
 		maintainable = true;
 		instant = true;
-		costPerSecond = 3 - 0.3 * points;
+		costPerSecond = 3 - 0.3 * level;
 	}
 
 	public void use(Environment env, Person user, Point target)

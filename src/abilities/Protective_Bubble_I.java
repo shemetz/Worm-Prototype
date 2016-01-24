@@ -59,7 +59,7 @@ public class Protective_Bubble_I extends Ability
 					i--;
 				}
 			double AFFwidth = 5;// 5 + 5*points; //should be
-			bubble = new ArcForceField(user, angle, 2 * Math.PI, 100, 100 + AFFwidth, 10 * points, 12, "Protective Bubble");
+			bubble = new ArcForceField(user, angle, 2 * Math.PI, 100, 100 + AFFwidth, 10 * level, 12, "Protective Bubble");
 			env.AFFs.add(bubble);
 			user.mana -= this.cost;
 			this.cooldownLeft = this.cooldown;

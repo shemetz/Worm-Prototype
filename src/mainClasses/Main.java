@@ -835,13 +835,13 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		player = new Player(96 * 20, 96 * 20);
 		player.abilities.add(Ability.ability("Protective Bubble I", 5));
 		player.abilities.add(Ability.ability("Spray <Acid>", 5));
+		player.abilities.add(Ability.ability("Elemental Combat II <Earth>", 5));
 		player.abilities.add(Ability.ability("Ball <Fire>", 5));
-		player.abilities.add(Ability.ability("Telekinetic Flight", 7));
+		player.abilities.add(Ability.ability("Flight I", 5));
 		player.abilities.add(Ability.ability("Blink", 5));
 		player.abilities.add(Ability.ability("Beam <Energy>", 5));
 		player.abilities.add(Ability.ability("Ghost Mode I", 5));
 		player.abilities.add(Ability.ability("Sense Life", 5));
-		player.abilities.add(Ability.ability("Elemental Combat II <Earth>", 5));
 		player.updateAbilities(); // for the elemental combat
 		player.abilities.add(Ability.ability("Beam <Plant>", 5));
 		player.abilities.add(Ability.ability("Sense Powers", 4));
@@ -2400,7 +2400,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 					tooltip = player.abilities.get(player.hotkeys[i]).niceName();
 					if (player.rightMousePressed)
 					{
-						tooltip += " " + player.abilities.get(player.hotkeys[i]).points + "\n" + player.abilities.get(player.hotkeys[i]).getFluff();
+						tooltip += " " + player.abilities.get(player.hotkeys[i]).level + "\n" + player.abilities.get(player.hotkeys[i]).getFluff();
 						tooltipPoint.y -= 30;
 					}
 				}
@@ -2441,7 +2441,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 					tooltip = player.abilities.get(i).niceName();
 					if (player.rightMousePressed)
 					{
-						tooltip += " " + player.abilities.get(i).points + "\n" + player.abilities.get(i).getFluff();
+						tooltip += " " + player.abilities.get(i).level + "\n" + player.abilities.get(i).getFluff();
 						tooltipPoint.y -= 30;
 					}
 				}

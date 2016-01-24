@@ -14,7 +14,7 @@ public class Strong_Force_Field extends Ability
 	public Strong_Force_Field(int p)
 	{
 		super("Strong Force Field", p);
-		cooldown = Math.max(7 - points, 0.3);
+		cooldown = Math.max(7 - level, 0.3);
 		targetEffect1 = -1;
 		targetEffect2 = 0; // length
 		targetEffect3 = 0; // width
@@ -33,9 +33,9 @@ public class Strong_Force_Field extends Ability
 		if (!user.maintaining && cost <= user.mana && cooldownLeft == 0)
 		{
 			// TODO check collisions
-			ForceField forcey = new ForceField(user.x + range * Math.cos(angle), user.y + range * Math.sin(angle), user.z, 100 + 50 * points, 5 + points * 7,
-					angle + 0.5 * Math.PI, 80 * points, 1);
-			forcey.armor = points;
+			ForceField forcey = new ForceField(user.x + range * Math.cos(angle), user.y + range * Math.sin(angle), user.z, 100 + 50 * level, 5 + level * 7,
+					angle + 0.5 * Math.PI, 80 * level, 1);
+			forcey.armor = level;
 			env.FFs.add(forcey);
 			user.mana -= cost;
 			cooldownLeft = cooldown;
@@ -48,9 +48,9 @@ public class Strong_Force_Field extends Ability
 		player.targetType = "createFF";
 		player.target = new Point((int) (player.x + range * Math.cos(angle)), (int) (player.y + range * Math.sin(angle)));
 		// length
-		targetEffect2 = 100 + 50 * (int) points;
+		targetEffect2 = 100 + 50 * (int) level;
 		// width
-		targetEffect3 = 5 + 7 * points;
+		targetEffect3 = 5 + 7 * level;
 
 		if (!player.leftMousePressed)
 			player.rotate(angle, 3.0 * deltaTime);

@@ -33,7 +33,7 @@ public class Force_Shield extends Ability
 		if (!user.maintaining && cost <= user.mana && cooldownLeft == 0)
 		{
 			// TODO check collisions
-			env.FFs.add(new ForceField(user.x + range * Math.cos(angle), user.y + range * Math.sin(angle), user.z, 100 + 100 * points / 3, 10 + points * 1, angle + 0.5 * Math.PI, 20 * points, 0));
+			env.FFs.add(new ForceField(user.x + range * Math.cos(angle), user.y + range * Math.sin(angle), user.z, 100 + 100 * level / 3, 10 + level * 1, angle + 0.5 * Math.PI, 20 * level, 0));
 			user.mana -= cost;
 			cooldownLeft = cooldown;
 		}
@@ -46,9 +46,9 @@ public class Force_Shield extends Ability
 		player.targetType = "createFF";
 		player.target = new Point((int) (player.x + range * Math.cos(angle)), (int) (player.y + range * Math.sin(angle)));
 		// length
-		targetEffect2 = 100 + 100 * (int) points / 3;
+		targetEffect2 = 100 + 100 * (int) level / 3;
 		// width
-		targetEffect3 = 10 + (int) points * 1;
+		targetEffect3 = 10 + (int) level * 1;
 
 		if (!player.leftMousePressed)
 			player.rotate(angle, 3.0 * deltaTime);

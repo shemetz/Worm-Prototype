@@ -20,6 +20,7 @@ import abilities.Ghost_Mode_I;
 import abilities.Heal_I;
 import abilities.Heal_II;
 import abilities.Pool_E;
+import abilities.Precision_I;
 import abilities.Protective_Bubble_I;
 import abilities.Punch;
 import abilities.Ranged_Explosion;
@@ -53,7 +54,7 @@ public class Ability
 
 	// permanent variables of the ability
 	protected String				name;																							// name of the ability
-	protected int					points;																							// 1-10. AKA "level". Measures how powerful the ability is.
+	protected int					level;																							// 1-10. AKA "level". Measures how powerful the ability is.
 	protected double				cooldown;																						// Duration in which power doesn't work after using it. -1 = passive, 0 = no cooldown
 	protected double				cost;																							// -1 = passive. Is a cost in mana, stamina or charge...depending on the power.
 	protected double				costPerSecond;																					// applies to some abilities. Is a cost in mana, stamina or charge...depending on the power.
@@ -115,7 +116,7 @@ public class Ability
 	public Ability(String n, int p)
 	{
 		name = n;
-		points = p;
+		level = p;
 
 		// default values.
 		costPerSecond = -1;
@@ -425,15 +426,15 @@ public class Ability
 
 	public String toString()
 	{
-		return name + " [" + points + "]";
+		return name + " [" + level + "]";
 	}
 
 	static Comparator<Ability> pointsThenAlphabetical = new Comparator<Ability>()
 	{
 		public int compare(Ability a1, Ability a2)
 		{
-			if (a1.points != a2.points)
-				return Integer.compare(a2.points, a1.points);
+			if (a1.level != a2.level)
+				return Integer.compare(a2.level, a1.level);
 			else
 				return a1.name.compareTo(a2.name);
 		}
@@ -450,6 +451,8 @@ public class Ability
 		}
 		switch (trimmedAbilityName)
 		{
+		case "Precision I":
+			return new Precision_I(pnts);
 		case "Protective Bubble I":
 			return new Protective_Bubble_I(pnts);
 		case "Sprint":

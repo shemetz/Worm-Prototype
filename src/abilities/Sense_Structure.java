@@ -12,7 +12,7 @@ public class Sense_Structure extends Ability
 	public Sense_Structure(int p)
 	{
 		super("Sense Structure", p);
-		range = (int) (50 * Math.pow(2, points));
+		range = (int) (50 * Math.pow(2, level));
 		rangeType = "Circle area";
 	}
 	

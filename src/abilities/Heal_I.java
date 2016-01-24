@@ -20,7 +20,7 @@ public class Heal_I extends Ability
 		costPerSecond = 1;
 		costType = "mana";
 		cooldown = 0;
-		range = 50 * points;
+		range = 50 * level;
 		rangeType = "Circle area";
 		stopsMovement = false;
 		maintainable = true;
@@ -64,11 +64,11 @@ public class Heal_I extends Ability
 					{
 						shortestDistancePow2 = distancePow2;
 						if (targetEffect1 * targetEffect1 >= distancePow2)
-							targetEffect1 -= 1 * points * deltaTime * (range + 20 - Math.sqrt(range - targetEffect1) - targetEffect1);
+							targetEffect1 -= 1 * level * deltaTime * (range + 20 - Math.sqrt(range - targetEffect1) - targetEffect1);
 						healingTarget = p;
 					}
 				}
-			healingTarget.affect(new Effect(deltaTime, "Healed", points), true);
+			healingTarget.affect(new Effect(deltaTime, "Healed", level), true);
 			if (healingTarget != user)
 			{
 				VisualEffect healingEffect = new VisualEffect();

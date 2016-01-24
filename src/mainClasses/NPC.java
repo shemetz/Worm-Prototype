@@ -163,7 +163,7 @@ public class NPC extends Person
 						if (a.justName().equals("Ball"))
 						{
 							// aim the ball the right direction, taking into account the velocity addition caused by the person moving
-							double v = Ball.giveVelocity(a.points);
+							double v = Ball.giveVelocity(a.level);
 							double xv = v * Math.cos(angleToTarget);
 							double yv = v * Math.sin(angleToTarget);
 							xv -= this.xVel;

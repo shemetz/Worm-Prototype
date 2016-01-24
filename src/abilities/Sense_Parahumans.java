@@ -15,7 +15,7 @@ public class Sense_Parahumans extends Ability
 		cost = -1;
 		costType = "none";
 		cooldown = -1;
-		range = (int) (50 * Math.pow(3, points));
+		range = (int) (50 * Math.pow(3, level));
 		rangeType = "Circle area";
 	}
 	
