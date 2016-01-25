@@ -57,6 +57,8 @@ public class Protective_Bubble_I extends Ability
 					env.AFFs.remove(i);
 					i--;
 				}
+
+			// Add a new protective bubble
 			bubble = new ArcForceField(user, 0, 2 * Math.PI, 60, 107, 10 * level, 12, "Protective Bubble");
 			env.AFFs.add(bubble);
 			user.mana -= this.cost;

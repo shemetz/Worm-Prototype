@@ -31,7 +31,7 @@ public class NPC extends Person
 	// RETREAT = move away from any person within retreat range.
 	// PANIC = run aimlessly, not stopping, randomly rotating (panic).
 	// PUNCH_CHASING = move towards the target, and punch them when able.
-	
+
 	boolean	hasAllies;
 
 	int		targetID		= -1;
@@ -134,11 +134,16 @@ public class NPC extends Person
 						index = i;
 						punch = this.abilities.get(index);
 					}
-				if (punch != null)
-					if (distanceToTargetPow2 < Math.pow(punch.range + targetPerson.radius / 2, 2))
-						main.pressAbilityKey(index, true, this);
-					else if (punch.cooldownLeft <= 0)
-						main.pressAbilityKey(index, false, this);
+				if (punch == null)
+					break;
+				double maxDistanceNeeded = punch.range + targetPerson.radius / 2;
+				for (ArcForceField aff : env.AFFs)
+					if (aff.target.equals(targetPerson) && aff.arc == 2 * Math.PI)
+						maxDistanceNeeded = punch.range + aff.maxRadius;
+				if (distanceToTargetPow2 < Math.pow(maxDistanceNeeded, 2))
+					main.pressAbilityKey(index, true, this);
+				else if (punch.cooldownLeft <= 0)
+					main.pressAbilityKey(index, false, this); // stop punching
 				break;
 			case CIRCLE_STRAFING:
 				// move around target. Also, get close to it or away from it to get into the "circle strafing" range.
@@ -193,11 +198,11 @@ public class NPC extends Person
 							main.pressAbilityKey(aIndex, true, this);
 						}
 					if (a instanceof Beam_E) // beam
-						{
-							// aims the beam exactly at the target, so will miss often
-							this.target = new Point((int) (this.x), (int) (this.y));
-							main.pressAbilityKey(aIndex, true, this);
-						}
+					{
+						// aims the beam exactly at the target, so will miss often
+						this.target = new Point((int) (this.x), (int) (this.y));
+						main.pressAbilityKey(aIndex, true, this);
+					}
 				}
 				break;
 			case RETREAT:
