@@ -49,6 +49,7 @@ import abilities.Protective_Bubble_I;
 import abilities.Sense_Powers;
 import abilities.Shield_E;
 import abilities.Sprint;
+import effects.Burning;
 import mainClasses.NPC.Strategy;
 import mainResourcesPackage.SoundEffect;
 
@@ -269,8 +270,10 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 
 				// maintaining person abilities
 				for (Ability a : p.abilities)
+				{
 					if (a.on && a.cost != -1)
 						a.maintain(env, p, p.target, deltaTime);
+				}
 				// using abilities the person is trying to repetitively use (e.g. holding down the Punch ability's key)
 				if (p.abilityTryingToRepetitivelyUse != -1)
 				{
@@ -314,7 +317,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 					case 9: // flesh (blood pool)
 						if (frameNum % 50 == 0)
 						{
-							p.affect(new Effect("Burning", -1), false); // stop burning
+							p.affect(new Burning(0), false); // stop burning
 							double slipChance = -0.01;
 							if (p.xVel * p.xVel + p.yVel * p.yVel > 40000)
 								slipChance += 0.2;
@@ -336,7 +339,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 					case 8: // lava
 						env.hitPerson(p, 20, 0, 0, 8, deltaTime); // burn damage
 						if (frameNum % 50 == 0 && random.nextDouble() < 0.7) // burn chance is 70% in lava
-							p.affect(new Effect("Burning", 5), true);
+							p.affect(new Burning(0), true);
 						break;
 					case 10: // earth spikes
 						env.hitPerson(p, 25, 0, 0, 10, deltaTime);
@@ -353,7 +356,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 				for (int i = 0; i < p.effects.size(); i++)
 				{
 					Effect e = p.effects.get(i);
-					if (e.name.equals("Burning"))
+					if (e instanceof Burning)
 					{
 						env.hitPerson(p, e.strength, 0, 0, 2);
 						if (random.nextDouble() < 0.25) // 25% chance to stop burning, per second

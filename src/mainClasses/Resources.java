@@ -405,7 +405,7 @@ public class Resources
 			}
 
 		// Effect icons:
-		List<String> effectNames = Arrays.asList("Healed", "Burning", "Health Bonus"); // all effect names should be written here! TODO make sure it happens
+		List<String> effectNames = Arrays.asList("Healed", "Burning"); // all effect names should be written here! TODO make sure it happens
 		for (String s : effectNames)
 			icons.put(s, ResourceLoader.getBufferedImage("icons/effects/" + s + ".png"));
 
