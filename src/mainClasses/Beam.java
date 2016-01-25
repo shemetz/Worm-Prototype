@@ -26,7 +26,6 @@ public class Beam extends Drawable
 
 	public Beam(Person creator, Beam_E theAbility, Point3D start, Point3D end, int elementNum, int points, double range)
 	{
-		System.out.println(1);
 		this.theAbility = theAbility;
 		this.creator = creator;
 		this.start = start;
