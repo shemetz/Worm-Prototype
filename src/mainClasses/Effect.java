@@ -7,24 +7,35 @@ public class Effect
 	public String	name;		// can be an int or a short, honestly, but then the programming would be difficulter
 	public int		strength;
 	public int		animFrame;
+	public boolean	stackable;
 
-	public Effect(double duration1, String type, int strength1)
+	public Effect(String type, double duration1, int strength1)
 	{
+		name = type;
 		duration = duration1;
 		timeLeft = duration;
-		name = type;
 		strength = strength1;
 		animFrame = 0;
+		// stackable - depends
 	}
 
-	// A constructor for indefinite effects
-	public Effect(String type, int strength1)
+	public void apply(Person target)
 	{
-		duration = -1;
-		timeLeft = -1;
-		name = type;
-		strength = strength1;
-		animFrame = 0;
+		target.effects.add(this);
+	}
+
+	public void remove(Person target)
+	{
+		target.effects.remove(this);
+	}
+
+	public void update(Person target, double deltaTime)
+	{
+		timeLeft -= deltaTime;
+		if (timeLeft < 0)
+		{
+			remove(target);
+		}
 	}
 
 	public void nextFrame(int frameNum)
@@ -40,7 +51,6 @@ public class Effect
 				animFrame = 0;
 			break;
 		default:
-			// error message
 			Main.errorMessage(
 					"They call me 'Bell',\nThey call me 'Stacey',\nThey call me 'her',\nThey call me 'Jane',\nThat's not my name!\nThat's not my name!\nThat's not my name!\nThat's not my...name!\n");
 			Main.errorMessage();

@@ -3,6 +3,8 @@ package mainClasses;
 import java.awt.Point;
 import java.awt.geom.Point2D;
 
+import abilities.Ball_E;
+import abilities.Beam_E;
 import abilities.Punch;
 
 public class NPC extends Person
@@ -179,7 +181,7 @@ public class NPC extends Person
 				{
 					Ability a = this.abilities.get(aIndex);
 					if (a.hasTag("projectile")) // ball
-						if (a.justName().equals("Ball"))
+						if (a instanceof Ball_E)
 						{
 							// aim the ball the right direction, taking into account the velocity addition caused by the person moving
 							double v = Ball.giveVelocity(a.level);
@@ -190,8 +192,7 @@ public class NPC extends Person
 							this.target = new Point((int) (this.x + xv), (int) (this.y + yv));
 							main.pressAbilityKey(aIndex, true, this);
 						}
-					if (a.hasTag("beam")) // beam
-						if (a.justName().equals("Beam"))
+					if (a instanceof Beam_E) // beam
 						{
 							// aims the beam exactly at the target, so will miss often
 							this.target = new Point((int) (this.x), (int) (this.y));
@@ -232,19 +233,20 @@ public class NPC extends Person
 				// don't move
 				this.strengthOfAttemptedMovement = 0;
 				// try to switch tactics
-
 				if (this.strategy.equals(Strategy.AGGRESSIVE))
 				{
 					// Choose as target the closest enemy.
 					double shortestDistanceToTargetPow2 = Double.MAX_VALUE;
 					for (Person p2 : env.people)
 						if (this.viableTarget(p2))
+						{
 							if (Methods.DistancePow2(this.x, this.y, p2.x, p2.y) < shortestDistanceToTargetPow2)
 							{
 								shortestDistanceToTargetPow2 = Methods.DistancePow2(this.x, this.y, p2.x, p2.y);
 								this.targetID = p2.id; // not necessary?
 								targetPerson = p2;
 							}
+						}
 					if (targetPerson != null)
 						if (Methods.DistancePow2(this.x, this.y, targetPerson.x, targetPerson.y) < 600 * 600) // 600 sounds like an OK number
 							if (this.mana > 0.4 * this.maxMana)
@@ -274,21 +276,21 @@ public class NPC extends Person
 				break;
 			}
 		// tactic-switching decisions. TODO make it make sense
-		String prevTactic = "" + this.tactic; // copy
+		Tactic prevTactic = this.tactic;
 		if (this.panic)
 			this.tactic = Tactic.PANIC;
 		else if (this.life < 0.15 * this.maxLife)
 			this.tactic = Tactic.RETREAT;
-		else if (this.tactic.equals("retreat")) // stop retreating when uninjured
+		else if (this.tactic.equals(Tactic.RETREAT)) // stop retreating when uninjured
 			this.tactic = Tactic.NO_TARGET;
 		else if (this.strategy.equals(Strategy.AGGRESSIVE))
 		{
-			if (this.tactic.equals("circle strafing") && this.mana <= 0.1 * this.maxMana)
+			if (this.tactic.equals(Tactic.CIRCLE_STRAFING) && this.mana <= 0.1 * this.maxMana)
 				this.tactic = Tactic.PUNCH_CHASING;
-			else if (this.tactic.equals("punch chasing") && this.mana >= 0.9 * this.maxMana)
+			else if (this.tactic.equals(Tactic.PUNCH_CHASING) && this.mana >= 0.9 * this.maxMana)
 				this.tactic = Tactic.CIRCLE_STRAFING;
 		}
-		if (!prevTactic.equals(this.tactic))
+		if (prevTactic != this.tactic)
 		{
 			if (this.abilityMaintaining != -1)
 				main.pressAbilityKey(this.abilityMaintaining, false, this);
