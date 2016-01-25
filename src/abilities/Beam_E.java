@@ -139,7 +139,7 @@ public class Beam_E extends Ability
 			criticalTimeLeft -= deltaTime;
 		double angle = Math.atan2(target.y - user.y, target.x - user.x);
 		final double beamExitDistance = 40;
-		if (!getElement().equals("Plant")) // non-plant
+		if (!getElement().equals("Plant")) // non-plant. Normal Beam.
 		{
 			if (cooldownLeft == 0)
 				if (user.mana >= costPerSecond * deltaTime)
@@ -148,9 +148,9 @@ public class Beam_E extends Ability
 						criticalTimeLeft = 1;
 					sounds.get(0).loop();
 					angle = user.rotation + user.inaccuracyAngle; // rotation changes in updateTargeting
-					Point3D start = new Point3D((int) (user.x + beamExitDistance * Math.cos(angle)), (int) (user.y + beamExitDistance * Math.sin(angle)), (int) user.z); // starts beamExitDistance pixels in front of the user
+					Point3D start = new Point3D((int) (user.x + beamExitDistance * Math.cos(angle)), (int) (user.y + beamExitDistance * Math.sin(angle)), user.z + user.height/2); // starts beamExitDistance pixels in front of the user
 					// TODO piercing beams, or electric lightning bolts
-					Point3D end = new Point3D((int) (user.x + range * Math.cos(angle)), (int) (user.y + range * Math.sin(angle)), (int) user.z);
+					Point3D end = new Point3D((int) (user.x + range * Math.cos(angle)), (int) (user.y + range * Math.sin(angle)), user.z + user.height/2);
 					Beam b = new Beam(user, this, start, end, getElementNum(), level, range);
 					frameNum++;
 					b.frameNum = beamFrameNum;

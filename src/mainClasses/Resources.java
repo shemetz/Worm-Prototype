@@ -245,16 +245,16 @@ public class Resources
 			{
 				// Comment: Yes. this part is messy. And remember that it needs to be in combination with the Person.initAnimation part.
 				bodyPart.get(i).add(new ArrayList<List<BufferedImage>>());
-				if (i == 0 || i == 1)
+				if (i == 0 || i == 1) // if body part is legs or chest
 				{
-					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // stand
+					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // stand = 0
 					bodyPart.get(i).get(j).get(0).add(ResourceLoader.getBufferedImage("people/stand-" + bodyPartName + "_" + j + ".png"));
-					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // walk (run, actually)
+					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // walk (run, actually) = 1
 					for (int k = 1; k < 5; k++) // TODO make it from 0 to 3 in the file names, not from 1 to 4
 						bodyPart.get(i).get(j).get(1).add(ResourceLoader.getBufferedImage("people/run_" + k + "-" + bodyPartName + "_" + j + ".png"));
-					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // hold shield
+					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // hold shield = 2
 					bodyPart.get(i).get(j).get(2).add(ResourceLoader.getBufferedImage("people/hold_shield-" + bodyPartName + "_" + j + ".png"));
-					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // slip
+					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // slip = 3
 					bodyPart.get(i).get(j).get(3).add(ResourceLoader.getBufferedImage("people/slip_0-" + bodyPartName + "_" + j + ".png"));
 				} else if (i == 2 || i == 3) // heads and hairs have the same image for all frames in most animations, unlike legs and chest
 				{
@@ -272,17 +272,17 @@ public class Resources
 					stanly = slipImg.createGraphics();
 					stanly.drawImage(runImg, 0, -13, null);
 					stanly.dispose();
-					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // stand
+					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // 0 stand
 					bodyPart.get(i).get(j).get(0).add(standImg);
-					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // walk (run, actually)
+					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // 1 walk (run, actually)
 					bodyPart.get(i).get(j).get(1).add(runImg);
-					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // hold shield
+					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // 2 hold shield
 					bodyPart.get(i).get(j).get(2).add(runImg);
-					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // slip
+					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // 3 slip
 					bodyPart.get(i).get(j).get(3).add(slipImg);
 				}
 
-				bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // get up from slip
+				bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // 4 get up from slip
 				bodyPart.get(i).get(j).get(4).add(ResourceLoader.getBufferedImage("people/slip_1-" + bodyPartName + "_" + j + ".png"));
 				bodyPart.get(i).get(j).get(4).add(ResourceLoader.getBufferedImage("people/slip_2-" + bodyPartName + "_" + j + ".png"));
 				bodyPart.get(i).get(j).get(4).add(ResourceLoader.getBufferedImage("people/slip_3-" + bodyPartName + "_" + j + ".png"));
@@ -290,10 +290,10 @@ public class Resources
 				// punches:
 				if (i == 1) // only chest+arms move differently during punches
 				{
-					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // right punch
+					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // 5 right punch
 					bodyPart.get(i).get(j).get(5).add(ResourceLoader.getBufferedImage("people/punch_1-" + bodyPartName + "_" + j + ".png"));
 					bodyPart.get(i).get(j).get(5).add(ResourceLoader.getBufferedImage("people/punch_3-" + bodyPartName + "_" + j + ".png"));
-					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // left punch
+					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // 6 left punch
 					bodyPart.get(i).get(j).get(6).add(ResourceLoader.getBufferedImage("people/punch_2-" + bodyPartName + "_" + j + ".png"));
 					bodyPart.get(i).get(j).get(6).add(ResourceLoader.getBufferedImage("people/punch_3-" + bodyPartName + "_" + j + ".png"));
 				} else if (i == 0 || i == 2 || i == 3)
@@ -303,32 +303,32 @@ public class Resources
 					Graphics2D punchy = punchImg.createGraphics();
 					punchy.drawImage(runImg, 0, 11, null);
 					punchy.dispose();
-					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // right punch
+					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // 5 right punch //maybe the opposite?)
 					bodyPart.get(i).get(j).get(5).add(punchImg);
 					bodyPart.get(i).get(j).get(5).add(punchImg);
-					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // left punch
+					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // 6 left punch //I think
 					bodyPart.get(i).get(j).get(6).add(punchImg);
 					bodyPart.get(i).get(j).get(6).add(punchImg);
 				}
 				// flight
 				if (i < 3) // legs, chest, head
 				{
-					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // fly
+					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // 7 fly
 					bodyPart.get(i).get(j).get(7).add(ResourceLoader.getBufferedImage("people/fly-" + bodyPartName + "_" + j + ".png"));
 					bodyPart.get(i).get(j).get(7).add(ResourceLoader.getBufferedImage("people/fly-" + bodyPartName + "_" + j + ".png"));
 					bodyPart.get(i).get(j).get(7).add(ResourceLoader.getBufferedImage("people/fly-" + bodyPartName + "_" + j + ".png"));
 					bodyPart.get(i).get(j).get(7).add(ResourceLoader.getBufferedImage("people/fly-" + bodyPartName + "_" + j + ".png"));
 				} else
 				{
-					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // fly
+					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // 7 fly
 					bodyPart.get(i).get(j).get(7).add(ResourceLoader.getBufferedImage("people/fly_1-" + bodyPartName + "_" + j + ".png"));
 					bodyPart.get(i).get(j).get(7).add(ResourceLoader.getBufferedImage("people/fly_2-" + bodyPartName + "_" + j + ".png"));
 					bodyPart.get(i).get(j).get(7).add(ResourceLoader.getBufferedImage("people/fly_3-" + bodyPartName + "_" + j + ".png"));
 				}
 				// fly-hover and hover
-				bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // fly-hover
+				bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // 8 fly-hover
 				bodyPart.get(i).get(j).get(8).add(ResourceLoader.getBufferedImage("people/fly_hover_transition-" + bodyPartName + "_" + j + ".png"));
-				bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // hover
+				bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // 9 hover
 				bodyPart.get(i).get(j).get(9).add(ResourceLoader.getBufferedImage("people/hover_1-" + bodyPartName + "_" + j + ".png"));
 				// flight punch w/ arm held back
 				if (i == 1) // chest and arms prepare for a strike
@@ -350,7 +350,7 @@ public class Resources
 					bodyPart.get(i).get(j).get(10).add(ResourceLoader.getBufferedImage("people/fly-" + bodyPartName + "_" + j + ".png"));
 					bodyPart.get(i).get(j).get(10).add(ResourceLoader.getBufferedImage("people/fly-" + bodyPartName + "_" + j + ".png"));
 				}
-				// flight punch w/ arms
+				// 10 11 12 flight punch w/ arms
 				if (i == 1) // chest and arms prepare for a strike
 				{
 					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>());
@@ -374,6 +374,10 @@ public class Resources
 					bodyPart.get(i).get(j).get(12).add(ResourceLoader.getBufferedImage("people/fly-" + bodyPartName + "_" + j + ".png"));
 					bodyPart.get(i).get(j).get(12).add(ResourceLoader.getBufferedImage("people/fly-" + bodyPartName + "_" + j + ".png"));
 				}
+
+				// dead
+				bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // dead = 13
+				bodyPart.get(i).get(j).get(13).add(ResourceLoader.getBufferedImage("people/dead_0-" + bodyPartName + "_" + j + ".png"));
 
 				// TODO burning
 			}

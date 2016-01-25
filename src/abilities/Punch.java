@@ -86,7 +86,7 @@ public class Punch extends Ability
 					}
 				} else
 					user.notMoving = false;
-		} else if (user.z >= 1.1)
+		} else if (user.z >= 1.1 && user.flySpeed > 0) // Fly, flight punch
 		{
 			if (!user.prone && !user.maintaining && cost <= user.stamina) // maybe the previous if can be inserted after the identical if of the other one? dunno
 			{
@@ -161,7 +161,6 @@ public class Punch extends Ability
 							user.punchedSomething = true;
 							break collisionCheck;
 						}
-						// TODO arcforcefields
 						for (ForceField ff : env.FFs)
 							if (ff.z + ff.height > user.z && ff.z < user.z + user.height)
 							{
@@ -175,7 +174,7 @@ public class Punch extends Ability
 									forcefieldArea.transform(aft);
 									if (forcefieldArea.contains(user.target))
 									{
-										double leftoverPushback = ff.life > damage + pushback ? pushback : Math.min(env.wallHealths[i][j], pushback);
+										double leftoverPushback = ff.life > damage + pushback ? pushback : Math.min(ff.life, pushback);
 										env.damageForceField(ff, damage + pushback, user.target);
 										env.hitPerson(user, ff.armor, leftoverPushback, user.rotation - Math.PI, 6); // Energy damage, equal to the armor of the force field.
 										user.punchedSomething = true;
@@ -184,48 +183,6 @@ public class Punch extends Ability
 								}
 							}
 
-						for (ArcForceField aff : env.AFFs)
-						{
-							if (aff.target.equals(user) && aff.type != "Bubble")
-								continue;
-							if (aff.z + aff.height < user.z || aff.z > user.z + user.height)
-								continue;
-							if (Methods.DistancePow2(user.target, aff.target.Point()) > aff.maxRadius * aff.maxRadius) // outer arc
-								continue;
-							if (Methods.DistancePow2(user.target, aff.target.Point()) < aff.minRadius * aff.minRadius) // inner arc
-								continue;
-							boolean withinAngles = false;
-							if (aff.arc == 2 * Math.PI)
-								withinAngles = true;
-							else
-							{
-								double angleToPunch = Math.atan2(user.target.y - aff.y, user.target.x - aff.x);
-								double minAngle = aff.rotation - aff.arc / 2;
-								while (minAngle < 0)
-									minAngle += 2 * Math.PI;
-								while (minAngle >= 2 * Math.PI)
-									minAngle -= 2 * Math.PI;
-								double maxAngle = aff.rotation + aff.arc / 2;
-								while (maxAngle < 0)
-									maxAngle += 2 * Math.PI;
-								while (maxAngle > 2 * Math.PI)
-									maxAngle -= 2 * Math.PI;
-								if (minAngle < maxAngle)
-								{
-									if (angleToPunch > minAngle && angleToPunch < maxAngle)
-										withinAngles = true;
-								} else if (angleToPunch > minAngle || angleToPunch > maxAngle)
-									withinAngles = true;
-							}
-							if (withinAngles) // check angles
-							{
-								double leftoverPushback = aff.life > damage + pushback ? pushback : Math.min(env.wallHealths[i][j], pushback);
-								env.damageArcForceField(aff, damage + pushback, user.target, 0);
-								env.hitPerson(user, 5, leftoverPushback, user.rotation - Math.PI, aff.elementNum); // 5 damage. TODO
-								user.punchedSomething = true;
-								break collisionCheck;
-							}
-						}
 						for (Ball b : env.balls)
 							if (b.z + b.height > user.z && b.z < user.z + user.height)
 								if (Methods.DistancePow2(new Point((int) b.x, (int) b.y), user.target) < b.radius * b.radius)
@@ -241,9 +198,54 @@ public class Punch extends Ability
 									break collisionCheck;
 								}
 					}
+					for (ArcForceField aff : env.AFFs)
+					{
+						if (aff.target.equals(user) && aff.type != "Bubble")
+							continue;
+						if (aff.highestPoint() < user.z || aff.z > user.highestPoint())
+							continue;
+						if (Methods.DistancePow2(user.target, aff.target.Point()) > aff.maxRadius * aff.maxRadius) // outer arc
+							continue;
+						if (Methods.DistancePow2(user.target, aff.target.Point()) < aff.minRadius * aff.minRadius) // inner arc
+							continue;
+						boolean withinAngles = false;
+						if (aff.arc == 2 * Math.PI)
+							withinAngles = true;
+						else
+						{
+							double angleToPunch = Math.atan2(user.target.y - aff.y, user.target.x - aff.x);
+							double minAngle = aff.rotation - aff.arc / 2;
+							while (minAngle < 0)
+								minAngle += 2 * Math.PI;
+							while (minAngle >= 2 * Math.PI)
+								minAngle -= 2 * Math.PI;
+							double maxAngle = aff.rotation + aff.arc / 2;
+							while (maxAngle < 0)
+								maxAngle += 2 * Math.PI;
+							while (maxAngle > 2 * Math.PI)
+								maxAngle -= 2 * Math.PI;
+							if (minAngle < maxAngle)
+							{
+								if (angleToPunch > minAngle && angleToPunch < maxAngle)
+									withinAngles = true;
+							} else if (angleToPunch > minAngle || angleToPunch > maxAngle)
+								withinAngles = true;
+						}
+						if (withinAngles) // check angles
+						{
+							double leftoverPushback = aff.life > damage + pushback ? pushback : Math.min(aff.life, pushback);
+							env.damageArcForceField(aff, damage + pushback, user.target, 0);
+							int AFFelement = aff.elementNum;
+							if (AFFelement == 12)
+								AFFelement = 6; // energy
+							env.hitPerson(user, 5, leftoverPushback, user.rotation - Math.PI, AFFelement); // 5 damage. TODO
+							user.punchedSomething = true;
+							break collisionCheck;
+						}
+					}
 					for (Person p : env.people)
 						// allowing higher vertical range, for flying people? //TODO leave it as it is or remove it and lower Punch-flight height to about 0.6
-						if (p.z + p.height > user.z - extraVerticalHeight && p.z < user.z + user.height + extraVerticalHeight)
+						if (p.highestPoint() > user.z - extraVerticalHeight && p.z < user.highestPoint() + extraVerticalHeight)
 							// This is actually the purpose of the punches, by the way
 							if (!p.equals(user)) // TODO find a better way (not two double-number comparisons) to make sure they aren't the same. Maybe with person.equals()?
 								if (p.x - p.radius / 2 < user.target.x && p.y - p.radius / 2 < user.target.y && p.x + p.radius / 2 > user.target.x && p.y + p.radius / 2 > user.target.y)
@@ -260,7 +262,7 @@ public class Punch extends Ability
 		if (user.punchedSomething)
 		{
 			// backwards pushback
-			env.hitPerson(user, 0, pushback * 0.6, user.rotation + Math.PI, 0);
+			env.hitPerson(user, 0, pushback * 0.6, user.rotation + Math.PI, -1);
 			// Sound effect of hit
 			sounds.get((int) (Math.random() * 3)).play();
 			return true;

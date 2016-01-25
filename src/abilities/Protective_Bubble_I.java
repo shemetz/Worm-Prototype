@@ -31,7 +31,6 @@ public class Protective_Bubble_I extends Ability
 	public void use(Environment env, Person user, Point target)
 	{
 		setSounds(user.Point());
-		double angle = Math.atan2(target.y - user.y, target.x - user.x); // can be 0, honestly
 		// deactivating the bubble
 		if (on && cooldownLeft == 0)
 		{
@@ -58,8 +57,7 @@ public class Protective_Bubble_I extends Ability
 					env.AFFs.remove(i);
 					i--;
 				}
-			double AFFwidth = 5;// 5 + 5*points; //should be
-			bubble = new ArcForceField(user, angle, 2 * Math.PI, 100, 100 + AFFwidth, 10 * level, 12, "Protective Bubble");
+			bubble = new ArcForceField(user, 0, 2 * Math.PI, 60, 107, 10 * level, 12, "Protective Bubble");
 			env.AFFs.add(bubble);
 			user.mana -= this.cost;
 			this.cooldownLeft = this.cooldown;

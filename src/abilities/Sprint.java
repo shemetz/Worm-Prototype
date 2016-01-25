@@ -15,7 +15,7 @@ public class Sprint extends Ability
 		super("Sprint", p);
 		cost = 0;
 		costType = "stamina";
-		cooldown = 1;
+		cooldown = 0;
 		rangeType = "";
 		maintainable = true;
 		instant = true;
@@ -26,8 +26,6 @@ public class Sprint extends Ability
 	{
 		if (cooldownLeft == 0 || on)
 		{
-			if (on)
-				cooldownLeft = cooldown;
 			on = !on;
 			user.maintaining = !user.maintaining;
 		}

@@ -54,4 +54,8 @@ public class Drawable
 		shadow = Methods.optimizeImage(shadow);
 		return shadow;
 	}
+	public double highestPoint()
+	{
+		return z + height;
+	}
 }

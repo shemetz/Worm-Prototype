@@ -202,7 +202,8 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 				i--;
 			}
 		}
-		checkPlayerMovementKeys();
+		if (!player.dead)
+			checkPlayerMovementKeys();
 		// VINES
 		for (int i = 0; i < env.vines.size(); i++)
 		{
@@ -247,29 +248,41 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		// PEOPLE
 		for (Person p : env.people)
 		{
-			if (p.getClass().equals(NPC.class))
-			{
-				NPC npc = (NPC) p;
-				npc.frameAIupdate(deltaTime, frameNum, env, this);
-			}
-
-			// maintaining person abilities
-			for (Ability a : p.abilities)
-				if (a.on && a.cost != -1)
-					a.maintain(env, p, p.target, deltaTime);
-			// using abilities the person is trying to repetitively use (e.g. holding down the Punch ability's key)
-			if (p.abilityTryingToRepetitivelyUse != -1)
-			{
-				p.inCombat = true; // TODO
-				p.abilities.get(p.abilityTryingToRepetitivelyUse).use(env, p, p.target);
-			}
-
-			p.selfFrame(deltaTime);
-			for (Effect e : p.effects)
-				e.nextFrame(frameNum);
-			// movement
 			double floorFriction = applyGravityAndFrictionAndReturnFriction(p, deltaTime);
-			checkMovementAttempt(p, floorFriction, deltaTime);
+			if (p.dead)
+			{
+				// Deactivate all abilities
+				for (Ability a : p.abilities)
+					if (a.on)
+						a.use(env, p, null);
+				// Remove all effects
+				for (Effect e : p.effects)
+					p.affect(e, false);
+			} else
+			{
+				if (p.getClass().equals(NPC.class))
+				{
+					NPC npc = (NPC) p;
+					npc.frameAIupdate(deltaTime, frameNum, env, this);
+				}
+
+				// maintaining person abilities
+				for (Ability a : p.abilities)
+					if (a.on && a.cost != -1)
+						a.maintain(env, p, p.target, deltaTime);
+				// using abilities the person is trying to repetitively use (e.g. holding down the Punch ability's key)
+				if (p.abilityTryingToRepetitivelyUse != -1)
+				{
+					p.inCombat = true; // TODO
+					p.abilities.get(p.abilityTryingToRepetitivelyUse).use(env, p, p.target);
+				}
+
+				p.selfFrame(deltaTime);
+				for (Effect e : p.effects)
+					e.nextFrame(frameNum);
+				// movement
+				checkMovementAttempt(p, floorFriction, deltaTime);
+			}
 			env.movePerson(p, deltaTime);
 			// Animation
 			p.nextFrame(frameNum);
@@ -835,13 +848,13 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		player = new Player(96 * 20, 96 * 20);
 		player.abilities.add(Ability.ability("Protective Bubble I", 5));
 		player.abilities.add(Ability.ability("Spray <Acid>", 5));
-		player.abilities.add(Ability.ability("Elemental Combat II <Earth>", 5));
 		player.abilities.add(Ability.ability("Ball <Fire>", 5));
 		player.abilities.add(Ability.ability("Flight I", 5));
 		player.abilities.add(Ability.ability("Blink", 5));
 		player.abilities.add(Ability.ability("Beam <Energy>", 5));
 		player.abilities.add(Ability.ability("Ghost Mode I", 5));
 		player.abilities.add(Ability.ability("Sense Life", 5));
+		player.abilities.add(Ability.ability("Elemental Combat II <Earth>", 5));
 		player.updateAbilities(); // for the elemental combat
 		player.abilities.add(Ability.ability("Beam <Plant>", 5));
 		player.abilities.add(Ability.ability("Sense Powers", 4));
@@ -876,6 +889,8 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 
 	void pressAbilityKey(int abilityIndex, boolean press, Person p)
 	{
+		if (p.dead)
+			return; //TODO is there a neater way of resolving this?
 		// n is between 1 and 10; checkHotkey need a number between 0 and 9. So.... n-1.
 		if (p.target.getX() == -1 && p.target.getY() == -1)
 			p.target = new Point(mx, my); /// WHT ARE YOU DOING ITAMAR WTF ARE YOU EVEN THINKING
@@ -1579,10 +1594,10 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		{
 			player.strengthOfAttemptedMovement = 0;
 			player.flyDirection = 0;
-			if (player.leftMousePressed && !player.maintaining)
+			if (player.leftMousePressed && !player.maintaining && !player.dead)
 			{
-				//rotate to where mouse point is
-				double angle = Math.atan2(my-player.y, mx-player.x);
+				// rotate to where mouse point is
+				double angle = Math.atan2(my - player.y, mx - player.x);
 				player.rotate(angle, globalDeltaTime);
 			}
 		} else

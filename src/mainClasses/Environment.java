@@ -224,7 +224,7 @@ public class Environment
 				for (Evasion e : b.evasions)
 					if (e.id == p.id)
 						continue peopleLoop;
-				if (p.z + p.height > b.z && p.z < b.z + b.height)
+				if (p.highestPoint() > b.z && p.z < b.z + b.height)
 					if (!p.ghostMode || EP.damageType(b.elementNum) == 4 || EP.damageType(b.elementNum) == 2) // shock and fire
 						// temp collide calculation
 						if (Math.sqrt(Math.pow(p.x - b.x, 2) + Math.pow(p.y - b.y, 2)) < p.radius / 2 + b.radius)
@@ -561,7 +561,7 @@ public class Environment
 				if (e.id == p.id)
 					continue peopleLoop;
 
-			if (p.z + p.height > sd.z && p.z < sd.z + sd.height)
+			if (p.highestPoint() > sd.z && p.z < sd.z + sd.height)
 				if (!p.ghostMode || EP.damageType(sd.elementNum) == 4 || EP.damageType(sd.elementNum) == 2) // shock and fire
 					// temp collide calculation
 					if (Math.sqrt(Math.pow(p.x - sd.x, 2) + Math.pow(p.y - sd.y, 2)) < p.radius / 2 + sd.radius)
@@ -768,40 +768,44 @@ public class Environment
 						}
 					}
 
+			// People-people collisions
 			for (Person p2 : people)
 				if (!p.equals(p2))
 				{
 					Rectangle2D p2rect = new Rectangle2D.Double(p2.x - 0.5 * p2.radius, p2.y - 0.5 * p2.radius, p2.radius, p2.radius);
 					if (personRect.intersects(p2rect)) // collision check
 					{
-						if (p2.z + p2.height > p.z && p2.z < p.z + p.height)
+						if (p2.highestPoint() > p.z && p2.z < p.highestPoint())
 						{
-							// physics. Assumes the two people are circles.
-							// The following code is translated from a StackExchange answer.
-							double xVelocity = p2.xVel - p.xVel;
-							double yVelocity = p2.yVel - p.yVel;
-							double dotProduct = (p2.x - p.x) * xVelocity + (p2.y - p.y) * yVelocity;
-							// Neat vector maths, used for checking if the objects moves towards one another.
-							if (dotProduct < 0)
+							if (!p2.dead) // No colliding with dead people! //TODO make it slow you down a bit maybe
 							{
-								double collisionScale = dotProduct / Methods.DistancePow2(p.x, p.y, p2.x, p2.y);
-								double xCollision = (p2.x - p.x) * collisionScale;
-								double yCollision = (p2.y - p.y) * collisionScale;
-								// The Collision vector is the speed difference projected on the Dist vector,
-								// thus it is the component of the speed difference needed for the collision.
-								double combinedMass = p.mass + p2.mass;
-								double collisionWeightA = 2 * p2.mass / combinedMass;
-								double collisionWeightB = 2 * p.mass / combinedMass;
-								p.xVel += collisionWeightA * xCollision;
-								p.yVel += collisionWeightA * yCollision;
-								p2.xVel -= collisionWeightB * xCollision;
-								p2.yVel -= collisionWeightB * yCollision;
-								p.x -= 2 * moveQuantumX; // good enough for most purposes right now
-								p.y -= 2 * moveQuantumY;//
-								if (p instanceof NPC)
-									((NPC) p).justCollided = true;
-								if (p2 instanceof NPC)
-									((NPC) p2).justCollided = true;
+								// physics. Assumes the two people are circles.
+								// The following code is translated from a StackExchange answer.
+								double xVelocity = p2.xVel - p.xVel;
+								double yVelocity = p2.yVel - p.yVel;
+								double dotProduct = (p2.x - p.x) * xVelocity + (p2.y - p.y) * yVelocity;
+								// Neat vector maths, used for checking if the objects moves towards one another.
+								if (dotProduct < 0)
+								{
+									double collisionScale = dotProduct / Methods.DistancePow2(p.x, p.y, p2.x, p2.y);
+									double xCollision = (p2.x - p.x) * collisionScale;
+									double yCollision = (p2.y - p.y) * collisionScale;
+									// The Collision vector is the speed difference projected on the Dist vector,
+									// thus it is the component of the speed difference needed for the collision.
+									double combinedMass = p.mass + p2.mass;
+									double collisionWeightA = 2 * p2.mass / combinedMass;
+									double collisionWeightB = 2 * p.mass / combinedMass;
+									p.xVel += collisionWeightA * xCollision;
+									p.yVel += collisionWeightA * yCollision;
+									p2.xVel -= collisionWeightB * xCollision;
+									p2.yVel -= collisionWeightB * yCollision;
+									p.x -= 2 * moveQuantumX; // good enough for most purposes right now
+									p.y -= 2 * moveQuantumY;//
+									if (p instanceof NPC)
+										((NPC) p).justCollided = true;
+									if (p2 instanceof NPC)
+										((NPC) p2).justCollided = true;
+								}
 							}
 						}
 					}
@@ -809,7 +813,7 @@ public class Environment
 			for (ForceField ff : FFs)
 			{
 				// checks if (rotated) force field corners are inside person hitbox
-				if (ff.z + ff.height > p.z && ff.z < p.z + p.height)
+				if (ff.z + ff.height > p.z && ff.z < p.highestPoint())
 				{
 					boolean collidedWithACorner = false;
 					for (Point p1 : ff.p)
@@ -911,7 +915,7 @@ public class Environment
 		Rectangle2D personRect = new Rectangle2D.Double((int) p.x - p.radius / 2, (int) p.y - p.radius / 2, p.radius, p.radius);
 		if (personRect.intersects(affBox))
 		{
-			if (aff.z + aff.height > p.z && aff.z < p.z + p.height)
+			if (aff.z + aff.height > p.z && aff.z < p.highestPoint())
 				if (aff.arc < TAU) // if not bubble
 				{
 					// following code is copied from ball-aff collision
@@ -1344,35 +1348,34 @@ public class Environment
 		Person collidedPerson = null;
 		peopleLoop: for (Person p : people)
 			if (p.id != v.creator.id)
-				if (!p.prone)
-				{
-					for (Evasion e : v.evasions)
-						if (e.id == p.id)
-							continue peopleLoop;
-					// grabbling test
-					if (v.state == 0 || v.state == 2)
-						if (Math.abs(p.z - v.end.z) < 2 && Methods.DistancePow2(p.x, p.y, v.end.x, v.end.y) < Vine.grabblingRange * Vine.grabblingRange)
+			{
+				for (Evasion e : v.evasions)
+					if (e.id == p.id)
+						continue peopleLoop;
+				// grabbling test
+				if (v.state == 0 || v.state == 2)
+					if (Math.abs(p.z - v.end.z) < 2 && Methods.DistancePow2(p.x, p.y, v.end.x, v.end.y) < Vine.grabblingRange * Vine.grabblingRange) // z difference 2? TODO
+					{
+						collisionType = 3;
+						collidedPerson = p;
+						intersectionPoint = new Point2D.Double(-1, -1); // irrelevant
+					}
+
+				// collision with the body (length) of the vine
+				if (v.state != 1 && !v.creator.equals(v.grabbledThing))
+					if (Methods.LineToPointDistancePow2(v.start.Point(), v.end.Point(), p.Point()) <= p.radius * p.radius / 4)
+					{
+						Point closestPoint = Methods.getClosestRoundedPointOnSegment(v.start.Point(), v.end.Point(), p.Point());
+						double distancePow2 = Methods.DistancePow2(p.Point(), closestPoint);
+						if (distancePow2 < shortestDistancePow2)
 						{
-							collisionType = 3;
+							shortestDistancePow2 = distancePow2;
+							collisionType = 4;
 							collidedPerson = p;
 							intersectionPoint = new Point2D.Double(-1, -1); // irrelevant
 						}
-
-					// collision with the body (length) of the vine
-					if (v.state != 1 && !v.creator.equals(v.grabbledThing))
-						if (Methods.LineToPointDistancePow2(v.start.Point(), v.end.Point(), p.Point()) <= p.radius * p.radius / 4)
-						{
-							Point closestPoint = Methods.getClosestRoundedPointOnSegment(v.start.Point(), v.end.Point(), p.Point());
-							double distancePow2 = Methods.DistancePow2(p.Point(), closestPoint);
-							if (distancePow2 < shortestDistancePow2)
-							{
-								shortestDistancePow2 = distancePow2;
-								collisionType = 4;
-								collidedPerson = p;
-								intersectionPoint = new Point2D.Double(-1, -1); // irrelevant
-							}
-						}
-				}
+					}
+			}
 
 		// 5,6 balls
 		Ball collidedBall = null;
@@ -1786,7 +1789,7 @@ public class Environment
 			for (Evasion e : b.theAbility.evasions)
 				if (e.id == p.id)
 					continue peopleLoop;
-			if (p.z <= b.z + b.height / 2 && p.z + p.height > b.z - b.height / 2) // height check
+			if (p.z <= b.z + b.height / 2 && p.highestPoint() > b.z - b.height / 2) // height check
 			{
 				Rectangle2D TyrannosaurusRect = new Rectangle2D.Double(p.x - 0.5 * p.radius, p.y - 0.5 * p.radius, p.radius, p.radius);
 				if (beamLine.intersects(TyrannosaurusRect)) // intersection check
@@ -2205,7 +2208,7 @@ public class Environment
 		explosionEffect.size = radius * 2;
 		visualEffects.add(explosionEffect);
 		for (Person p : people)
-			if (p.z < z + explosionHeight / 2 && p.z + p.height > z - explosionHeight / 2)
+			if (p.z < z + explosionHeight / 2 && p.highestPoint() > z - explosionHeight / 2)
 				if (Methods.DistancePow2(p.x, p.y, x, y) < radius * radius)
 				{
 					double distance = Math.sqrt(Methods.DistancePow2(p.x, p.y, x, y));
@@ -2332,9 +2335,9 @@ public class Environment
 		{
 			// damage is multiplied by 0.9 to 1.1
 			damage *= 0.9 + Math.random() * 0.2;
-			
-			//pushback takes into account pushback resistance
-			pushback -= pushback*p.pushbackResistance;
+
+			// pushback takes into account pushback resistance
+			pushback -= pushback * p.pushbackResistance;
 
 			// TODO all damage-related powers
 			damage = p.damageAfterHittingArmor(damage, elementNum, percentageOfTheDamage);
@@ -2665,17 +2668,17 @@ public class Environment
 				return false;
 			}
 		};
-		Comparator<Drawable> sortByHeight = new Comparator<Drawable>()
+		Comparator<Drawable> sortDrawablesbyHeight = new Comparator<Drawable>()
 		{
 			public int compare(Drawable d1, Drawable d2)
 			{
-				Double i1 = new Double(d1.z + d1.height);
-				Double i2 = new Double(d2.z + d2.height);
+				Double i1 = new Double(d1.highestPoint());
+				Double i2 = new Double(d2.highestPoint());
 				return i1.compareTo(i2);
 			}
 		};
 		drawableThings.removeIf(outOfScreen);
-		Collections.sort(drawableThings, sortByHeight);
+		Collections.sort(drawableThings, sortDrawablesbyHeight);
 		// Clouds, people, balls, force fields, debris, arc force fields, beams, vines, drops
 		drawDrawables(buffer, cameraZed, cameraRotation, drawableThings, -1, 1);
 

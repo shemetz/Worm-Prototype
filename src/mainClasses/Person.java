@@ -63,6 +63,7 @@ public class Person extends RndPhysObj
 	public boolean						ghostMode;
 	public boolean						panic;																// used for panic purposes
 	public boolean						prone;																// while ducking or slipping
+	public boolean						dead;
 	public double						slippedTimeLeft;
 	public int							imgW, imgH;															// For drawing purposes only
 	public boolean						inCombat;
@@ -118,6 +119,7 @@ public class Person extends RndPhysObj
 		animFrame = 0;
 		rotation = 0;
 		prone = false;
+		dead = false;
 		slippedTimeLeft = 0;
 		maintaining = false;
 		DNA = new ArrayList<EP>();
@@ -269,6 +271,25 @@ public class Person extends RndPhysObj
 		missAngle = (1 - accuracy) * Math.PI / 3; // DEX 0 = 60 degree miss, DEX 3 = 15.
 	}
 
+	public void die()
+	{
+		switchAnimation(13); // TODO death animation
+		dead = true;
+		prone = false;
+		// Abilities will be deactivated in the Main class' frame() method
+		// Abilities can't be activated any more (pressAbilityKey() will not work on dead people)
+	}
+
+	public double highestPoint()
+	{
+		double value = z + height;
+		if (prone)
+			value -= 0.2;
+		if (dead)
+			value -= 0.9;
+		return value;
+	}
+
 	public void initSounds()
 	{
 		sounds.add(new SoundEffect("scorched.wav")); // 0 - when a beam hits you
@@ -283,7 +304,7 @@ public class Person extends RndPhysObj
 
 	public void initAnimation()
 	{
-		// randomize look
+		// randomize look. TODO
 		int legs = Main.random.nextInt(2);
 		int chest = Main.random.nextInt(2);
 		int head = Main.random.nextInt(2);
@@ -342,6 +363,8 @@ public class Person extends RndPhysObj
 		animation.add(new ArrayList<BufferedImage>()); // flypunch (right arm)
 		insertFullBodyAnimation(12, 0, n);
 		insertFullBodyAnimation(12, 0, n);
+		animation.add(new ArrayList<BufferedImage>()); // dead
+		insertFullBodyAnimation(13, 0, n);
 
 		changeImage(animation.get(animState).get(animFrame));
 	}
@@ -404,29 +427,32 @@ public class Person extends RndPhysObj
 			if (animFrame > 2)
 				animFrame = 2;
 			break;
-		case 7:
+		case 7: // fly
 			if (frameNum % 15 == 0)
 				animFrame++;
 			break;
-		case 8:
+		case 8: // fly-hover
 			// only one transition state here
 			if (frameNum % 30 == 0)
 				animFrame = 1; // transition-ready frame
 			break;
-		case 9:
+		case 9: // hover
 			if (frameNum % 15 == 0)
 				animFrame++;
 			break;
-		case 10: // like case 7
+		case 10: // fly punch
 			if (frameNum % 15 == 0)
 				animFrame++;
 			break;
-		case 11: // right
-		case 12: // left
+		case 11: // fly punch right
+		case 12: // fly punch left
 			if (frameNum % 10 == 0)
 				animFrame++;
 			if (animFrame > 1)
 				switchAnimation(10);
+			break;
+		case 13: // dead
+			// Nothing, right? TODO
 			break;
 		default:
 			Main.errorMessage("Non-cased animState: " + animState);
@@ -437,9 +463,9 @@ public class Person extends RndPhysObj
 			animFrame = 0;
 	}
 
-	public void switchAnimation(int animNum)
+	public void switchAnimation(int newAnimState)
 	{
-		switch (animNum) // (hahaha switch pun)
+		switch (newAnimState) // (hahaha switch pun)
 		// depending on what you're trying to DO
 		{
 		case 0:// standing
@@ -456,6 +482,8 @@ public class Person extends RndPhysObj
 					animFrame = 0;
 				}
 				break;
+			case 13: // = dead
+				break;
 			default:
 				animState = 0;
 				animFrame = 0;
@@ -466,6 +494,8 @@ public class Person extends RndPhysObj
 			switch (animState)
 			{
 			case 1:
+				break;
+			case 13: // = dead
 				break;
 			default:
 				animState = 1;
@@ -482,6 +512,8 @@ public class Person extends RndPhysObj
 			{
 			case 3:
 				break;
+			case 13: // = dead
+				break;
 			default:
 				animState = 3;
 				animFrame = 0;
@@ -492,6 +524,8 @@ public class Person extends RndPhysObj
 			switch (animState)
 			{
 			case 4:
+				break;
+			case 13: // = dead
 				break;
 			default:
 				animState = 4;
@@ -531,6 +565,7 @@ public class Person extends RndPhysObj
 				break;
 			case 11:
 			case 12:
+			case 13: // = dead
 				break;
 			default:
 				animState = 7;
@@ -560,6 +595,7 @@ public class Person extends RndPhysObj
 				break;
 			case 11:
 			case 12:
+			case 13: // = dead
 				break;
 			default:
 				animState = 9;
@@ -570,6 +606,8 @@ public class Person extends RndPhysObj
 		case 10:
 			switch (animState)
 			{
+			case 13: // = dead
+				break;
 			default:
 				animState = 10;
 				animFrame = 0;
@@ -580,14 +618,21 @@ public class Person extends RndPhysObj
 		case 12:
 			switch (animState)
 			{
+			case 13: // = dead
+				break;
 			default:
-				animState = animNum;
+				animState = newAnimState;
 				animFrame = 0;
 				break;
 			}
 			break;
+		case 13:
+			// TODO dying animation
+			animState = newAnimState;
+			animFrame = 0;
+			break;
 		default:
-			Main.errorMessage("Non-cased animNum: " + animNum);
+			Main.errorMessage("Non-cased animNum: " + newAnimState);
 			break;
 		}
 
@@ -675,6 +720,12 @@ public class Person extends RndPhysObj
 			stamina = maxStamina;
 		if (charge > 100)
 			charge = 100;
+
+		// DIE
+		if (life < 0)
+		{
+			die();
+		}
 
 		if (life < 0)
 			life = 0;
@@ -799,14 +850,24 @@ public class Person extends RndPhysObj
 		// name
 		buffer.setFont(new Font(Font.MONOSPACED, Font.BOLD, 16));
 		buffer.setColor(Color.black);
-		buffer.drawString(name, (int) (x - name.length() / 2 * 11), (int) (y - radius - 18));
+		String s = name;
+		if (dead)
+		{
+			s += " (RIP)";
+			buffer.setColor(new Color(50,50,50)); //dark gray
+		}
+		buffer.drawString(s, (int) (x - s.length() / 2 * 10), (int) (y - radius - 18));
 
-		if (drawLife)
-			drawLife(buffer);
-		if (drawMana)
-			drawMana(buffer);
-		if (drawStamina)
-			drawStamina(buffer);
+		//Does not draw data if the person is dead
+		if (!dead)
+		{
+			if (drawLife)
+				drawLife(buffer);
+			if (drawMana)
+				drawMana(buffer);
+			if (drawStamina)
+				drawStamina(buffer);
+		}
 		buffer.rotate(-cameraRotation, x, y);
 	}
 
