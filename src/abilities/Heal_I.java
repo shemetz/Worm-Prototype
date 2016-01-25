@@ -2,26 +2,22 @@ package abilities;
 
 import java.awt.Point;
 
-import mainClasses.Ability;
-import mainClasses.Effect;
+import effects.Healed;
 import mainClasses.Environment;
-import mainClasses.Methods;
 import mainClasses.Person;
 import mainClasses.Player;
-import mainClasses.VisualEffect;
-import effects.Heal;
 
 public class Heal_I extends ApplyEffect
 {
 
 	public Heal_I(int p)
 	{
-		super("Heal I", p, new Heal("Heal", p), ApplyEffect.targetTypes.OTHER, 3);
+		super("Heal I", p, new Healed(p), ApplyEffect.targetTypes.OTHER, 3);
 		cost = 0;
 		costPerSecond = 1;
 		costType = "mana";
 		cooldown = 0;
-		range = 50 * points;
+		range = 50 * level;
 		rangeType = "Circle area";
 		stopsMovement = false;
 		maintainable = true;

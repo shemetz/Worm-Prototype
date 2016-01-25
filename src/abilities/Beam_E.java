@@ -65,7 +65,7 @@ public class Beam_E extends Ability
 		 * 
 		 * Lash a plant vine attack at a direction!
 		 */
-		if (!getElement().equals("Plant")) // not plant (which uses Vines)
+		if (!getElement().equals("Plant")) // regular beam and not plant
 		{
 			if (on)
 			{

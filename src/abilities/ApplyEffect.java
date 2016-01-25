@@ -5,26 +5,35 @@ import java.awt.Point;
 import mainClasses.Ability;
 import mainClasses.Effect;
 import mainClasses.Environment;
+import mainClasses.Main;
 import mainClasses.Methods;
 import mainClasses.Person;
 import mainClasses.VisualEffect;
 
-public class ApplyEffect extends Ability{
-	public enum targetTypes {SELF, OTHER, TARGETED};
-	targetTypes target;
-	Effect effect;
-	int visualType;
-	
-	public ApplyEffect(String name, int p, Effect effect1, targetTypes targetType1, int visual){
+public class ApplyEffect extends Ability
+{
+	public enum targetTypes
+	{
+		SELF, OTHER, TARGETED
+	};
+
+	targetTypes	targetingType;
+	Effect		effect;
+	int			visualType;
+
+	public ApplyEffect(String name, int p, Effect effect1, targetTypes targetType1, int visual)
+	{
 		super(name, p);
 		effect = effect1;
-		target = targetType1;
+		targetingType = targetType1;
 		visualType = visual;
 	}
-	
-	public Person getTarget(Environment env, Person user, double deltaTime){
+
+	public Person getTarget(Environment env, Person user, double deltaTime)
+	{
 		Person effectTarget = user;
-		switch(target){
+		switch (targetingType)
+		{
 		case OTHER:
 			double shortestDistancePow2 = range * range;
 			for (Person p : env.people)
@@ -35,16 +44,20 @@ public class ApplyEffect extends Ability{
 					{
 						shortestDistancePow2 = distancePow2;
 						if (targetEffect1 * targetEffect1 >= distancePow2)
-							targetEffect1 -= 1 * points * deltaTime * (range + 20 - Math.sqrt(range - targetEffect1) - targetEffect1);
+							targetEffect1 -= 1 * level * deltaTime * (range + 20 - Math.sqrt(range - targetEffect1) - targetEffect1);
 						effectTarget = p;
 					}
 				}
 			break;
+		default:
+			Main.errorMessage(targetingType);
+			break;
 		}
-			return effectTarget;
+		return effectTarget;
 	}
-	
-	public void draw(Environment env, double deltaTime, Person user, Person effectTarget){
+
+	public void draw(Environment env, double deltaTime, Person user, Person effectTarget)
+	{
 		if (effectTarget != user)
 		{
 			VisualEffect visual = new VisualEffect();
@@ -55,11 +68,12 @@ public class ApplyEffect extends Ability{
 			visual.type = visualType;
 			visual.angle = Math.atan2(effectTarget.y - user.y, effectTarget.x - user.x);
 
-			env.effects.add(visual);
+			env.visualEffects.add(visual);
 		}
 	}
-	
-	public void maintain (Environment env, Person user, Point target, double deltaTime){
+
+	public void maintain(Environment env, Person user, Point target, double deltaTime)
+	{
 		{
 			if (costPerSecond * deltaTime <= user.mana)
 			{
@@ -68,7 +82,6 @@ public class ApplyEffect extends Ability{
 				if (frameNum >= 4)
 					frameNum = 0;
 
-				double shortestDistancePow2 = range * range;
 				Person effectTarget = getTarget(env, user, deltaTime);
 				effect.apply(effectTarget);
 				draw(env, deltaTime, user, effectTarget);

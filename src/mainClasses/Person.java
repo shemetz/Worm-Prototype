@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import abilities.Sprint;
+import effects.Burning;
+import effects.Healed;
 import mainResourcesPackage.SoundEffect;
 
 public class Person extends RndPhysObj
@@ -157,45 +159,33 @@ public class Person extends RndPhysObj
 
 	public void affect(Effect e, boolean add)
 	{
-		// For passive effects, added or removed
-		// the "val" variable is used to cancel out an effect's effects before it is removed, to return back to normal.
-		int val = 1;
-		if (!add)
-			val = -1;
-		switch (e.name)
-		{
-		case "Healed":
-			lifeRegen += val * 2 * e.strength;
-			break;
-		case "Health Bonus":
-			maxLife += val * e.strength;
-			life += val * e.strength; // Directly changes health; That means that buffing an injured character will functionally heal it, but debuffing an injured character will instantly kill it (life becomes negative). :)
-			break;
-		case "Burning": // if removed, the strength of the effect doesn't matter
-			panic = add;
+		if (!e.stackable)
 			for (int i = 0; i < effects.size(); i++)
 			{
 				Effect e2 = effects.get(i);
-				if (e2.name.equals("Burning"))
+				if (e2.name.equals(e.name))
 				{
 					if (add)
 					{
+						//set old effect to strength of new effect, and refresh it
 						e2.strength = Math.max(e.strength, e2.strength);
-						add = false;
+						e2.timeLeft = e.duration;
+						return;
 					} else
 					{
+						//remove old effect
+						e2.remove(this);
 						effects.remove(i);
 						i--;
+						return;
 					}
 				}
 			}
-			break;
-		default:
-			Main.errorMessage("Effect not written in code: " + e.name);
-			break;
-		}
 		if (add)
+		{
+			e.apply(this);
 			effects.add(e);
+		}
 		else // DELETES OLDEST EFFECT WITH SAME NAME AND STRENGTH
 		{
 			int oldestEffectIndex = -1;
@@ -204,7 +194,10 @@ public class Person extends RndPhysObj
 					if (oldestEffectIndex == -1 || effects.get(i).timeLeft < effects.get(oldestEffectIndex).timeLeft)
 						oldestEffectIndex = i;
 			if (oldestEffectIndex != -1) // sometimes the program attempts to remove an effect without checking if it already exists. It's ok.
+			{
+				effects.get(oldestEffectIndex).remove(this);
 				effects.remove(oldestEffectIndex);
+			}
 		}
 	}
 
@@ -756,10 +749,10 @@ public class Person extends RndPhysObj
 			Effect e = effects.get(eNum);
 			if (e.duration != -1)
 				if (e.timeLeft > 0)
-					e.timeLeft -= 1 * deltaTime;
+					e.timeLeft -= deltaTime;
 				else
 				{
-					affect(e, false);
+					affect(e, false); //will remove the effect
 					eNum--;
 				}
 		}
@@ -827,11 +820,11 @@ public class Person extends RndPhysObj
 			buffer.translate(-x, -y);
 			buffer.rotate(rotation - 0.5 * Math.PI, (int) (x), (int) (y));
 			for (Effect e : effects)
-				if (e.name.equals("Healed"))
+				if (e instanceof Healed)
 					drawLargeGreenShadow(buffer, e.strength);
 			buffer.drawImage(img, (int) (x - 0.5 * imgW), (int) (y - 0.5 * imgH), null);
 			for (Effect e : effects)
-				if (e.name.equals("Burning"))
+				if (e instanceof Burning)
 				{
 					img = Resources.effects.get(0).get(e.animFrame);
 					buffer.drawImage(img, (int) (x - 0.5 * imgW), (int) (y - 0.5 * imgH), null);

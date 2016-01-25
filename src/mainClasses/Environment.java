@@ -18,6 +18,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.function.Predicate;
 
+import effects.Burning;
+import effects.E_Resistant;
 import mainResourcesPackage.SoundEffect;
 
 public class Environment
@@ -2353,7 +2355,7 @@ public class Environment
 				}
 			// Elemental resistance
 			for (Effect e : p.effects)
-				if (e.name.equals("Elemental Resistance <" + EP.nameOfDamageType(elementNum) + ">"))
+				if (e instanceof E_Resistant)
 				{
 					if (e.strength >= 5)
 						damage = 0;
@@ -2372,7 +2374,7 @@ public class Environment
 			case 8: // lava
 				// Burn
 				if (randomNumber < 0.15) // 15% chance
-					p.affect(new Effect("Burning", 5), true);
+					p.affect(new Burning(5), true);
 				break;
 			case 1: // water
 				// Slip
