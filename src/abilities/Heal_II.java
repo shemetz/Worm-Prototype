@@ -16,7 +16,7 @@ public class Heal_II extends Ability
 		costPerSecond = 3;
 		costType = "mana";
 		cooldown = 0;
-		range = 100 * level;
+		range = 100 * points;
 		rangeType = "Circle area";
 		stopsMovement = false;
 		maintainable = true;
