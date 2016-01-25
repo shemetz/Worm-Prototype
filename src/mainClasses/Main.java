@@ -49,6 +49,7 @@ import abilities.Protective_Bubble_I;
 import abilities.Sense_Powers;
 import abilities.Shield_E;
 import abilities.Sprint;
+import mainClasses.NPC.Strategy;
 import mainResourcesPackage.SoundEffect;
 
 public class Main extends JFrame implements KeyListener, MouseListener, MouseMotionListener, MouseWheelListener, ComponentListener, WindowFocusListener
@@ -865,7 +866,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		player.DNA = EPgenerator.generateEPs();
 		player.rename();
 
-		Person shmulik = new NPC(96 * 22, 96 * 19, "aggressive");
+		Person shmulik = new NPC(96 * 22, 96 * 19, Strategy.AGGRESSIVE);
 		shmulik.abilities.add(Ability.ability("Beam <Energy>", 6));
 		shmulik.abilities.add(Ability.ability("Flight II", 5));
 		shmulik.abilities.add(Ability.ability("Force Shield", 3));
@@ -874,15 +875,15 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		shmulik.name = "Shmulik";
 		env.people.add(shmulik);
 
-		Person tzippi = new NPC(96 * 15, 96 * 25, "passive");
+		Person tzippi = new NPC(96 * 15, 96 * 25, Strategy.PASSIVE);
 		// tzippi.trigger();
 		tzippi.name = "TEST SUBJECT DELTA";
 		tzippi.abilities.add(Ability.ability("Protective Bubble I", 4));
 		env.people.add(tzippi);
-		Person aa = new NPC(96 * 17, 96 * 27, "passive");
+		Person aa = new NPC(96 * 17, 96 * 27, Strategy.PASSIVE);
 		// aa.trigger();
 		env.people.add(aa);
-		Person cc = new NPC(96 * 10, 96 * 25, "passive");
+		Person cc = new NPC(96 * 10, 96 * 25, Strategy.PASSIVE);
 		// cc.trigger();
 		env.people.add(cc);
 	}

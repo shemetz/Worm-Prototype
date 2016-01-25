@@ -2,11 +2,11 @@ package mainClasses;
 
 public class Effect
 {
-	double	duration;	// -1 = forever
-	double	timeLeft;	// -1 = forever
-	String	name;		// can be an int or a short, honestly, but then the programming would be difficulter
-	int		strength;
-	int		animFrame;
+	public double	duration;	// -1 = forever
+	public double	timeLeft;	// -1 = forever
+	public String	name;		// can be an int or a short, honestly, but then the programming would be difficulter
+	public int		strength;
+	public int		animFrame;
 
 	public Effect(double duration1, String type, int strength1)
 	{

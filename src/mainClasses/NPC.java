@@ -7,12 +7,29 @@ import abilities.Punch;
 
 public class NPC extends Person
 {
-	String	strategy;				// "aggressive" = attack enemies if possible, then heal/buff and follow if possible.
-									// "defensive" = push away enemies and block them if possible, run away if possible.
-									// "passive" = does nothing.
-									//
-	String	tactic;					// "circle strafing" = move in a constant angular direction around the target, shooting at it when able. When hitting something or randomly while moving, change direction.
-									// "move into position" = move towards or away from the target until in optimalRange, strafing left or right when being hit by something. If can't see target, stop.
+	Strategy strategy;
+
+	enum Strategy
+	{
+		AGGRESSIVE, DEFENSIVE, PASSIVE
+	}
+	// AGGRESSIVE = attack enemies if possible, then heal/buff and follow if possible.
+	// "defensive" = push away enemies and block them if possible, run away if possible.
+	// PASSIVE = does nothing.
+
+	Tactic tactic;
+
+	enum Tactic
+	{
+		CIRCLE_STRAFING, MOVE_INTO_POSITION, NO_TARGET, RETREAT, PANIC, PUNCH_CHASING
+	};
+	// CIRCLE_STRAFING = move in a constant angular direction around the target, shooting at it when able. When hitting something or randomly while moving, change direction.
+	// MOVE_INTO_POSITION = move towards or away from the target until in optimalRange, strafing left or right when being hit by something. If can't see target, stop.
+	// NO_TARGET = no target. Do nothing, wait to find a tactic.
+	// RETREAT = move away from any person within retreat range.
+	// PANIC = run aimlessly, not stopping, randomly rotating (panic).
+	// PUNCH_CHASING = move towards the target, and punch them when able.
+	
 	boolean	hasAllies;
 
 	int		targetID		= -1;
@@ -23,13 +40,13 @@ public class NPC extends Person
 	double	timeSinceLastInstinct;
 	double	angleOfLastInstinct;
 
-	public NPC(int x1, int y1, String s1)
+	public NPC(int x1, int y1, Strategy s1)
 	{
 		super(x1, y1);
 		hasAllies = false;
 		// TEMP
 		strategy = s1;
-		tactic = "no target";
+		tactic = Tactic.NO_TARGET;
 		rightOrLeft = true;
 		timeSinceLastInstinct = instinctDelayTime;
 		angleOfLastInstinct = 0;
@@ -52,7 +69,7 @@ public class NPC extends Person
 	{
 		if (enemy.commanderID == commanderID)
 			return false;
-		if (enemy.z >= z + height) //TODO remove this when ground-to-air combat is more possible
+		if (enemy.z >= z + height) // TODO remove this when ground-to-air combat is more possible
 			return false;
 		if (enemy.dead)
 			return false;
@@ -64,9 +81,9 @@ public class NPC extends Person
 		// choose target
 		switch (this.tactic)
 		{
-		case "retreat":
-		case "circle strafing":
-		case "punch chasing":
+		case RETREAT:
+		case CIRCLE_STRAFING:
+		case PUNCH_CHASING:
 			if (frameNum % 25 == 0) // don't check a lot of times in a short period
 			{
 				// Choose as target the closest enemy. There's no range limit to this. TODO
@@ -80,14 +97,14 @@ public class NPC extends Person
 						}
 			}
 			break;
-		case "no target":
-		case "panic":
+		case NO_TARGET:
+		case PANIC:
 		default:
 			this.targetID = -1;
 			break;
 		}
 		Person targetPerson = null;
-		if (this.targetID != -1 && this.tactic != "no target")
+		if (this.targetID != -1 && this.tactic != Tactic.NO_TARGET)
 			for (Person p2 : env.people)
 				if (p2.id == this.targetID)
 				{
@@ -101,7 +118,7 @@ public class NPC extends Person
 			// target-type tactics
 			switch (this.tactic)
 			{
-			case "punch chasing":
+			case PUNCH_CHASING:
 				// move towards target and punch them.
 				this.rotate(angleToTarget, deltaTime);
 				this.directionOfAttemptedMovement = angleToTarget;
@@ -121,7 +138,7 @@ public class NPC extends Person
 					else if (punch.cooldownLeft <= 0)
 						main.pressAbilityKey(index, false, this);
 				break;
-			case "circle strafing":
+			case CIRCLE_STRAFING:
 				// move around target. Also, get close to it or away from it to get into the "circle strafing" range.
 				this.rotate(angleToTarget, deltaTime);
 
@@ -182,7 +199,7 @@ public class NPC extends Person
 						}
 				}
 				break;
-			case "retreat":
+			case RETREAT:
 				// Back away from any enemy nearby when low on health
 				this.strengthOfAttemptedMovement = 0; // stop if there's nobody to retreat from
 				double shortestSquaredDistance = 400000; // minimum distance to keep from enemies. About 7 tiles
@@ -200,23 +217,23 @@ public class NPC extends Person
 		} else // no-target tactics
 			switch (this.tactic)
 			{
-			case "panic":
+			case PANIC:
 				// run around aimlessly
 				if (frameNum % 40 == 0)
 					this.directionOfAttemptedMovement = this.rotation - 0.5 * Math.PI + Math.random() * Math.PI; // random direction in 180 degree arc
 				this.rotate(this.directionOfAttemptedMovement, deltaTime);
 				this.strengthOfAttemptedMovement = 1;
 				break;
-			case "circle strafing":
-			case "punch chasing":
+			case CIRCLE_STRAFING:
+			case PUNCH_CHASING:
 				// waiting for tactic-switching
 				break;
-			case "no target":
+			case NO_TARGET:
 				// don't move
 				this.strengthOfAttemptedMovement = 0;
 				// try to switch tactics
 
-				if (this.strategy.equals("aggressive"))
+				if (this.strategy.equals(Strategy.AGGRESSIVE))
 				{
 					// Choose as target the closest enemy.
 					double shortestDistanceToTargetPow2 = Double.MAX_VALUE;
@@ -231,13 +248,13 @@ public class NPC extends Person
 					if (targetPerson != null)
 						if (Methods.DistancePow2(this.x, this.y, targetPerson.x, targetPerson.y) < 600 * 600) // 600 sounds like an OK number
 							if (this.mana > 0.4 * this.maxMana)
-								this.tactic = "circle strafing";
+								this.tactic = Tactic.CIRCLE_STRAFING;
 							else if (this.stamina > 0.1 * this.maxStamina)
-								this.tactic = "punch chasing";
+								this.tactic = Tactic.PUNCH_CHASING;
 							else
-								this.tactic = "retreat";
+								this.tactic = Tactic.RETREAT;
 				}
-				if (this.strategy.equals("passive")) // TEMP TODO
+				if (this.strategy.equals(Strategy.PASSIVE)) // TEMP TODO
 				{
 					if (this.justGotHit)
 						for (int aIndex = 0; aIndex < this.abilities.size(); aIndex++)
@@ -259,17 +276,17 @@ public class NPC extends Person
 		// tactic-switching decisions. TODO make it make sense
 		String prevTactic = "" + this.tactic; // copy
 		if (this.panic)
-			this.tactic = "panic";
+			this.tactic = Tactic.PANIC;
 		else if (this.life < 0.15 * this.maxLife)
-			this.tactic = "retreat";
+			this.tactic = Tactic.RETREAT;
 		else if (this.tactic.equals("retreat")) // stop retreating when uninjured
-			this.tactic = "no target";
-		else if (this.strategy.equals("aggressive"))
+			this.tactic = Tactic.NO_TARGET;
+		else if (this.strategy.equals(Strategy.AGGRESSIVE))
 		{
 			if (this.tactic.equals("circle strafing") && this.mana <= 0.1 * this.maxMana)
-				this.tactic = "punch chasing";
+				this.tactic = Tactic.PUNCH_CHASING;
 			else if (this.tactic.equals("punch chasing") && this.mana >= 0.9 * this.maxMana)
-				this.tactic = "circle strafing";
+				this.tactic = Tactic.CIRCLE_STRAFING;
 		}
 		if (!prevTactic.equals(this.tactic))
 		{
