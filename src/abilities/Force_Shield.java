@@ -2,13 +2,12 @@ package abilities;
 
 import java.awt.Point;
 
-import mainClasses.Ability;
 import mainClasses.Environment;
 import mainClasses.ForceField;
 import mainClasses.Person;
 import mainClasses.Player;
 
-public class Force_Shield extends Ability
+public class Force_Shield extends ForceFieldAbility
 {
 
 	public Force_Shield(int p)
@@ -17,9 +16,6 @@ public class Force_Shield extends Ability
 		cost = 3;
 		costType = "mana";
 		cooldown = 1;
-		targetEffect1 = -1;
-		targetEffect2 = 0; // length
-		targetEffect3 = 0; // width
 		range = 68;
 		rangeType = "Exact range";
 	}
@@ -45,10 +41,9 @@ public class Force_Shield extends Ability
 
 		player.targetType = "createFF";
 		player.target = new Point((int) (player.x + range * Math.cos(angle)), (int) (player.y + range * Math.sin(angle)));
-		// length
-		targetEffect2 = 100 + 100 * (int) level / 3;
-		// width
-		targetEffect3 = 10 + (int) level * 1;
+		
+		width = 100 + 100 * (int) level / 3;
+		height = 10 + (int) level * 1;
 
 		if (!player.leftMousePressed)
 			player.rotate(angle, 3.0 * deltaTime);

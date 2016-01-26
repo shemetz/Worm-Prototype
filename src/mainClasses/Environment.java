@@ -2198,7 +2198,7 @@ public class Environment
 		explosionEffect.p1.x = (int) x;
 		explosionEffect.p1.y = (int) y;
 		explosionEffect.z = z;
-		explosionEffect.type = 4;
+		explosionEffect.type = VisualEffect.Type.EXPLOSION;
 		if (type == -1)
 			explosionEffect.subtype = 2;
 		else
@@ -2374,7 +2374,7 @@ public class Environment
 			case 8: // lava
 				// Burn
 				if (randomNumber < 0.15) // 15% chance
-					p.affect(new Burning(5), true);
+					p.affect(new Burning(5, null), true);
 				break;
 			case 1: // water
 				// Slip
@@ -2659,7 +2659,7 @@ public class Environment
 				// debugging
 				if (arg0 == null || arg0.image == null)
 				{
-					Main.errorMessage("ummm what? " + arg0);
+					Main.errorMessage("ummm what? no image found for " + arg0 + " or maybe it's null");
 					return true;
 				}
 				if (arg0.image.getWidth() == 1 && arg0.image.getHeight() == 1) // for stuff like Beam images
@@ -2963,7 +2963,7 @@ public class Environment
 		updatePools();
 	}
 
-	public void remove(int x, int y)
+	public boolean remove(int x, int y)
 	{
 		int element = -1;
 		if (wallTypes[x][y] != -1)
@@ -2975,6 +2975,7 @@ public class Environment
 			checkWCorner(element, x + 1, y);
 			checkWCorner(element, x, y + 1);
 			checkWCorner(element, x + 1, y + 1);
+			return true;
 		}
 		if (poolTypes[x][y] != -1)
 		{
@@ -2986,12 +2987,24 @@ public class Environment
 			checkPCorner(element, x, y + 1);
 			checkPCorner(element, x + 1, y + 1);
 			updatePools();
+			return true;
 		}
+		return false;
 	}
 
 	public void destroyWall(int x, int y)
 	{
 		int elementNum = wallTypes[x][y];
+		if (remove(x, y))
+		{
+			for (int i = 0; i < 5; i++)
+				debris.add(new Debris(x * squareSize + 0.5 * squareSize, y * squareSize + 0.5 * squareSize, 0, Math.PI * 2 / 5 * i, elementNum, 200));
+		}
+	}
+
+	public void destroyPool(int x, int y)
+	{
+		int elementNum = poolTypes[x][y];
 		for (int i = 0; i < 5; i++)
 			debris.add(new Debris(x * squareSize + 0.5 * squareSize, y * squareSize + 0.5 * squareSize, 0, Math.PI * 2 / 5 * i, elementNum, 200));
 		remove(x, y);

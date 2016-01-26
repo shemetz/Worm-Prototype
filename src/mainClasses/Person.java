@@ -6,11 +6,11 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
+import abilities.Elemental_Void;
 import abilities.Sprint;
 import effects.Burning;
 import effects.Healed;
@@ -74,7 +74,6 @@ public class Person extends RndPhysObj
 	public double						timeBetweenDamageTexts;
 	public double						waitingDamage;
 	public Point						target;
-	public Area							rangeArea;
 	public boolean						lastHandUsedIsRight					= false;
 	public boolean						punchedSomething					= false;
 	public boolean						notMoving							= false;
@@ -135,7 +134,6 @@ public class Person extends RndPhysObj
 		waitingDamage = 0;
 		panic = false;
 		target = new Point(-1, -1);
-		rangeArea = null;
 		initAnimation();
 		initSounds();
 		imgW = 96;
@@ -167,14 +165,14 @@ public class Person extends RndPhysObj
 				{
 					if (add)
 					{
-						//set old effect to strength of new effect, and refresh it
+						// set old effect to strength of new effect, and refresh it
 						e2.strength = Math.max(e.strength, e2.strength);
 						e2.timeLeft = e.duration;
 						return;
 					} else
 					{
-						//remove old effect
-						e2.remove(this);
+						// remove old effect
+						e2.unapply(this);
 						effects.remove(i);
 						i--;
 						return;
@@ -185,8 +183,7 @@ public class Person extends RndPhysObj
 		{
 			e.apply(this);
 			effects.add(e);
-		}
-		else // DELETES OLDEST EFFECT WITH SAME NAME AND STRENGTH
+		} else // DELETES OLDEST EFFECT WITH SAME NAME AND STRENGTH
 		{
 			int oldestEffectIndex = -1;
 			for (int i = 0; i < effects.size(); i++)
@@ -195,7 +192,7 @@ public class Person extends RndPhysObj
 						oldestEffectIndex = i;
 			if (oldestEffectIndex != -1) // sometimes the program attempts to remove an effect without checking if it already exists. It's ok.
 			{
-				effects.get(oldestEffectIndex).remove(this);
+				effects.get(oldestEffectIndex).unapply(this);
 				effects.remove(oldestEffectIndex);
 			}
 		}
@@ -752,7 +749,7 @@ public class Person extends RndPhysObj
 					e.timeLeft -= deltaTime;
 				else
 				{
-					affect(e, false); //will remove the effect
+					affect(e, false); // will remove the effect
 					eNum--;
 				}
 		}
@@ -819,10 +816,19 @@ public class Person extends RndPhysObj
 			buffer.scale(z * Main.heightZoomRatio + 1, z * Main.heightZoomRatio + 1);
 			buffer.translate(-x, -y);
 			buffer.rotate(rotation - 0.5 * Math.PI, (int) (x), (int) (y));
+			// Special shadows
 			for (Effect e : effects)
 				if (e instanceof Healed)
-					drawLargeGreenShadow(buffer, e.strength);
+					drawColoredShadow(buffer, e.strength, Color.green);
+			for (Ability a : abilities)
+				if (a.on)
+					if (a instanceof Elemental_Void)
+						drawColoredShadow(buffer, a.level * 10, Color.gray);
+
+			// Player Image
 			buffer.drawImage(img, (int) (x - 0.5 * imgW), (int) (y - 0.5 * imgH), null);
+
+			// Special effects (burning)
 			for (Effect e : effects)
 				if (e instanceof Burning)
 				{
@@ -847,11 +853,11 @@ public class Person extends RndPhysObj
 		if (dead)
 		{
 			s += " (RIP)";
-			buffer.setColor(new Color(50,50,50)); //dark gray
+			buffer.setColor(new Color(50, 50, 50)); // dark gray
 		}
 		buffer.drawString(s, (int) (x - s.length() / 2 * 10), (int) (y - radius - 18));
 
-		//Does not draw data if the person is dead
+		// Does not draw data if the person is dead
 		if (!dead)
 		{
 			if (drawLife)
@@ -915,6 +921,7 @@ public class Person extends RndPhysObj
 
 	public void drawWhiteShadow(Graphics2D buffer)
 	{
+		// TODO figure out what the fuck this is meant to be.
 		if (life < 0)
 			life = 0;
 		if (mana < 0)
@@ -935,24 +942,25 @@ public class Person extends RndPhysObj
 		buffer.rotate(-rotation + 0.5 * Math.PI, (int) (x), (int) (y));
 	}
 
-	public void drawLargeGreenShadow(Graphics2D buffer, double strength)
+	public void drawColoredShadow(Graphics2D buffer, double size, Color color)
 	{
-		int extra = (int) (strength * 1.5); // extra outline on each side
-		if (life < 0)
-			life = 0;
-		if (mana < 0)
-			mana = 0;
-		if (stamina < 0)
-			stamina = 0;
-		BufferedImage img = new BufferedImage(96 + 2 * extra, 96 + 2 * extra, BufferedImage.TYPE_INT_ARGB);
+		BufferedImage img = new BufferedImage(96, 96, BufferedImage.TYPE_INT_ARGB);
 		Graphics2D buffy = img.createGraphics();
-		buffy.drawImage(shadow, 0, 0, 96 + 2 * extra, 96 + 2 * extra, null);
+		buffy.drawImage(shadow, 0, 0, 96, 96, null);
 		buffy.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_IN, 0.8f));
-		buffy.setColor(new Color(0, 255, 0)); // greener the more life regen you have
-		buffy.fillRect(0, 0, 96 + 2 * extra, 96 + 2 * extra);
+		buffy.setColor(color);
+		buffy.fillRect(0, 0, 96, 96);
 		buffy.dispose();
 
-		buffer.drawImage(img, (int) (x - imgW / 2 - extra), (int) (y - imgH / 2 - extra), null);
+		double factor = 0.6*Math.log(size);
+
+		buffer.translate(x, y);
+		buffer.scale(factor, factor);
+		buffer.translate(-x, -y);
+		buffer.drawImage(img, (int) (x - imgW / 2), (int) (y - imgH / 2), null);
+		buffer.translate(x, y);
+		buffer.scale((double) 1 / factor, (double) 1 / factor);
+		buffer.translate(-x, -y);
 	}
 
 	public void rotate(double rotationAngle, double deltaTime)

@@ -13,6 +13,7 @@ import abilities.Beam_E;
 import abilities.Blink;
 import abilities.Elemental_Combat_II_E;
 import abilities.Elemental_Combat_I_E;
+import abilities.Elemental_Void;
 import abilities.Flight_I;
 import abilities.Flight_II;
 import abilities.Force_Shield;
@@ -85,8 +86,6 @@ public class Ability
 	// Fire Beam 7: name = "Beam <Fire>"; points = 7; cooldown = 0.5; cost = 0; costPerSecond = 5 / <fire damage>; range = 500*points; areaRadius = -1; instant = true; maintainable = true; stopsMovement = false; onOff = false; costType = "mana";
 
 	// for special effects:
-	protected double				targetEffect1				= -1,
-											targetEffect2 = -1, targetEffect3 = -1;
 	protected String				rangeType					= "";
 	protected int					frameNum					= 0;																// used in child classes
 
@@ -451,6 +450,8 @@ public class Ability
 		}
 		switch (trimmedAbilityName)
 		{
+		case "Elemental Void":
+			return new Elemental_Void(pnts);
 		case "Precision I":
 			return new Precision_I(pnts);
 		case "Protective Bubble I":

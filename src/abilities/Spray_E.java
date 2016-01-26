@@ -53,6 +53,9 @@ public class Spray_E extends Ability
 
 	public void maintain(Environment env, Person user, Point target, double deltaTime)
 	{
+		double targetAngle = Math.atan2(target.y - user.y, target.x - user.x);
+		user.rotate(targetAngle, deltaTime);
+
 		setSounds(user.Point());
 		double angle = user.rotation;
 		arc = 10 * (1 - user.accuracy); // user accuracy is 0.85 for average person.

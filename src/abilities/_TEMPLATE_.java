@@ -13,6 +13,15 @@ public class _TEMPLATE_ extends Ability
 	public _TEMPLATE_(int p)
 	{
 		super("TEMPLATE", p);
+		// costPerSecond = ;
+		// cost = ;
+		// costType = "";
+		// cooldown = ;
+		// range = ;
+		// rangeType = "";
+		// stopsMovement = ;
+		// maintainable = ;
+		// instant = ;
 	}
 
 	public void use(Environment env, Person user, Point target)

@@ -2,17 +2,13 @@ package abilities;
 
 import java.awt.Point;
 
-import mainClasses.Ability;
 import mainClasses.Environment;
-import mainClasses.Methods;
 import mainClasses.Person;
-import mainClasses.Player;
 import mainClasses.VisualEffect;
 import mainResourcesPackage.SoundEffect;
 
-public class Blink extends Ability
+public class Blink extends TeleportAbility
 {
-	final int squareSize = 96;
 
 	public Blink(int p)
 	{
@@ -20,9 +16,6 @@ public class Blink extends Ability
 		cost = 1 + (double) (level) / 3;
 		costType = "mana";
 		cooldown = 0.1 + (double) (level) / 4;
-		targetEffect1 = 0;
-		targetEffect2 = 2;
-		targetEffect3 = 4;
 		range = level * 100;
 		rangeType = "Exact range"; // maybe change it to up-to range?
 
@@ -60,7 +53,7 @@ public class Blink extends Ability
 			for (int j = 0; j < numOfLines; j++)
 			{
 				VisualEffect eff = new VisualEffect();
-				eff.type = 1;
+				eff.type = VisualEffect.Type.BLINK_SUCCESS;
 				eff.duration = 0.4;
 				eff.timeLeft = eff.duration;
 				eff.p1p2variations = new Point(user.radius, user.radius);
@@ -80,7 +73,7 @@ public class Blink extends Ability
 			for (int j = 0; j < numOfLines; j++)
 			{
 				VisualEffect eff = new VisualEffect();
-				eff.type = 2;
+				eff.type = VisualEffect.Type.BLINK_FAIL;
 				eff.duration = 0.3;
 				eff.timeLeft = eff.duration;
 				eff.p1p2variations = new Point(user.radius, user.radius);
@@ -95,37 +88,4 @@ public class Blink extends Ability
 		}
 	}
 
-	public boolean checkIfAvailable(double x, double y, double z, Environment env, Person user)
-	{
-		// test boundaries
-		if (x < 0 || y < 0 || x > env.widthPixels || y > env.heightPixels)
-			return false;
-		// test walls
-		if (!user.ghostMode && z < 1)
-			for (int i = (int) (x - 0.5 * user.radius); i / squareSize <= (int) (x + 0.5 * user.radius) / squareSize; i += squareSize)
-				for (int j = (int) (y - 0.5 * user.radius); j / squareSize <= (int) (y + 0.5 * user.radius) / squareSize; j += squareSize)
-					if (env.wallTypes[i / squareSize][j / squareSize] != -1)
-						return false;
-		// test people
-		for (Person p : env.people)
-			if (!p.equals(user)) // pretty redundant
-				if (p.z + p.height > user.z && p.z < user.z + user.height)
-					if (Methods.DistancePow2(x, y, p.x, p.y) < Math.pow((user.radius + p.radius), 2))
-						return false;
-		return true;
-	}
-
-	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
-	{
-		double angle = Math.atan2(target.y - player.y, target.x - player.x);
-		player.target = new Point((int) (player.x + range * Math.cos(angle)), (int) (player.y + range * Math.sin(angle)));
-		target = player.target;
-		player.targetType = "teleport";
-		player.successfulTarget = checkIfAvailable(target.x, target.y, player.z, env, player);
-
-		// sweet awesome triangles
-		targetEffect1 += 0.031;
-		targetEffect2 += 0.053;
-		targetEffect3 -= 0.041;
-	}
 }

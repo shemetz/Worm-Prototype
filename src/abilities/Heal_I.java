@@ -1,18 +1,16 @@
 package abilities;
 
-import java.awt.Point;
-
 import effects.Healed;
-import mainClasses.Environment;
+import mainClasses.Effect;
 import mainClasses.Person;
-import mainClasses.Player;
+import mainClasses.VisualEffect;
 
 public class Heal_I extends ApplyEffect
 {
 
 	public Heal_I(int p)
 	{
-		super("Heal I", p, new Healed(p), ApplyEffect.targetTypes.OTHER, 3);
+		super("Heal I", p, ApplyEffect.targetTypes.OTHER, VisualEffect.Type.HEAL);
 		cost = 0;
 		costPerSecond = 1;
 		costType = "mana";
@@ -24,27 +22,17 @@ public class Heal_I extends ApplyEffect
 		instant = true;
 	}
 
-	public void use(Environment env, Person user, Point target)
+	public boolean viableTarget(Person p, Person user)
 	{
-		/*
-		 * Continuously heal the closest injured person within range, or yourself.
-		 */
-		if (on)
-		{
-			on = false;
-			user.maintaining = false;
-			user.abilityMaintaining = -1;
-		} else if (!user.prone && !user.maintaining && cooldownLeft <= 0)
-		{
-			user.maintaining = true;
-			on = true;
-			targetEffect1 = 0;
-		}
+		if (!defaultViableTarget(p, user))
+			return false;
+		if (p.life / p.maxLife == 1)
+			return false;
+		return true;
 	}
 
-	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
+	public Effect effect()
 	{
-		player.targetType = "";
-		player.target = new Point(-1, -1);
+		return new Healed(2 * level, this);
 	}
 }
