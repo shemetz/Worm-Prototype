@@ -2,6 +2,7 @@ package abilities;
 
 import effects.Healed;
 import mainClasses.Effect;
+import mainClasses.Person;
 import mainClasses.VisualEffect;
 
 public class Heal_II extends ApplyEffect
@@ -21,8 +22,17 @@ public class Heal_II extends ApplyEffect
 		instant = true;
 	}
 
+	public boolean viableTarget(Person p, Person user)
+	{
+		if (!defaultViableTarget(p, user))
+			return false;
+		if (p.life / p.maxLife == 1)
+			return false;
+		return true;
+	}
+
 	public Effect effect()
 	{
-		return new Healed(4*level, this);
+		return new Healed(4 * level, this);
 	}
 }

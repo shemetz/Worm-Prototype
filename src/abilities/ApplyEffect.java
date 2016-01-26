@@ -103,16 +103,20 @@ public class ApplyEffect extends Ability
 		}
 	}
 
-	public boolean viableTarget(Person p, Person user)
+	public boolean defaultViableTarget(Person p, Person user)
 	{
 		if (p.equals(user))
 			return false;
 		if (p.highestPoint() < user.z || user.highestPoint() < p.z)
 			return false;
-		if (p.life / p.maxLife == 1)
-			return false;
 		// TODO check for walls!!
 		return true;
+	}
+
+	public boolean viableTarget(Person p, Person user)
+	{
+		// Override this if needed
+		return defaultViableTarget(p, user);
 	}
 
 	public void use(Environment env, Person user, Point targetPoint)
