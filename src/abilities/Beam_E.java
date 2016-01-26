@@ -56,7 +56,11 @@ public class Beam_E extends Ability
 	public void use(Environment env, Person user, Point target)
 	{
 		setSounds(user.Point());
-		double angle = Math.atan2(target.y - user.y, target.x - user.x);
+		double angle = 0;
+		if (target != null)
+			angle = Math.atan2(target.y - user.y, target.x - user.x);
+		else
+			on = true;// should always be true if target is null, but just in case.
 
 		/*
 		 * Continuously shoot a beam at a target direction
@@ -137,27 +141,27 @@ public class Beam_E extends Ability
 			}
 		if (criticalTimeLeft > 0)
 			criticalTimeLeft -= deltaTime;
-		
+
 		double targetAngle = Math.atan2(target.y - user.y, target.x - user.x);
 		user.rotate(targetAngle, deltaTime);
-		
+
 		final double beamExitDistance = 40;
 		if (!getElement().equals("Plant")) // non-plant. Normal Beam.
 		{
 			if (cooldownLeft == 0)
 				if (user.mana >= costPerSecond * deltaTime)
 				{
-					if (Math.random() * 0.24 < user.criticalChance) //I hope this 0.24 makes sense
+					if (Math.random() * 0.24 < user.criticalChance) // I hope this 0.24 makes sense
 						criticalTimeLeft = 1;
 					sounds.get(0).loop();
 					double angle = user.rotation + user.inaccuracyAngle;
-					Point3D start = new Point3D((int) (user.x + beamExitDistance * Math.cos(angle)), (int) (user.y + beamExitDistance * Math.sin(angle)), user.z + user.height/2); // starts beamExitDistance pixels in front of the user
+					Point3D start = new Point3D((int) (user.x + beamExitDistance * Math.cos(angle)), (int) (user.y + beamExitDistance * Math.sin(angle)), user.z + user.height / 2); // starts beamExitDistance pixels in front of the user
 					// TODO piercing beams, or electric lightning bolts
-					Point3D end = new Point3D((int) (user.x + range * Math.cos(angle)), (int) (user.y + range * Math.sin(angle)), user.z + user.height/2);
+					Point3D end = new Point3D((int) (user.x + range * Math.cos(angle)), (int) (user.y + range * Math.sin(angle)), user.z + user.height / 2);
 					Beam b = new Beam(user, this, start, end, getElementNum(), level, range);
 					frameNum++;
 					b.frameNum = beamFrameNum;
-					//critical chance
+					// critical chance
 					if (criticalTimeLeft > 0)
 						b.critical = true;
 					env.beams.add(b);
