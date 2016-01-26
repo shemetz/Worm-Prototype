@@ -1,17 +1,14 @@
 package abilities;
 
-import java.awt.Point;
+import effects.Healed;
+import mainClasses.Effect;
 
-import mainClasses.Ability;
-import mainClasses.Environment;
-import mainClasses.Person;
-
-public class Heal_II extends Ability
+public class Heal_II extends ApplyEffect
 {
 
 	public Heal_II(int p)
 	{
-		super("Heal II", p);
+		super("Heal II", p, ApplyEffect.targetTypes.AREA, 3);
 		cost = 0;
 		costPerSecond = 3;
 		costType = "mana";
@@ -22,9 +19,9 @@ public class Heal_II extends Ability
 		maintainable = true;
 		instant = true;
 	}
-	
-	public void use(Environment env, Person user, Point target)
+
+	public Effect effect()
 	{
-		
+		return new Healed(4*level, this);
 	}
 }

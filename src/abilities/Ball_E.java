@@ -16,7 +16,7 @@ public class Ball_E extends Ability
 
 	public Ball_E(String elementName, int p)
 	{
-		super("Ball <"+elementName+">", p);
+		super("Ball <" + elementName + ">", p);
 		cost = 5 / elementalAttackNumbers[getElementNum()][2];
 		costType = "mana";
 		cooldown = 5 / elementalAttackNumbers[getElementNum()][2];
@@ -25,11 +25,11 @@ public class Ball_E extends Ability
 		stopsMovement = false;
 		maintainable = true;
 		instant = true;
-		
+
 		for (int i = 1; i < 6; i++)
-			sounds.add(new SoundEffect("Ball_"+i+".wav"));
+			sounds.add(new SoundEffect("Ball_" + i + ".wav"));
 	}
-	
+
 	public void use(Environment env, Person user, Point target)
 	{
 		setSounds(user.Point());
@@ -49,15 +49,17 @@ public class Ball_E extends Ability
 		user.switchAnimation(2);
 		user.notAnimating = true;
 	}
-	
+
 	public void maintain(Environment env, Person user, Point target, double deltaTime)
 	{
 		setSounds(user.Point());
+		double targetAngle = Math.atan2(target.y - user.y, target.x - user.x);
+		user.rotate(targetAngle, deltaTime);
+
 		if (cooldownLeft == 0)
 			if (user.mana >= cost)
 			{
-				double angle = Math.atan2(target.y - user.y, target.x - user.x);
-				angle = angle + user.missAngle * (2 * Math.random() - 1);
+				double angle = targetAngle + user.missAngle * (2 * Math.random() - 1);
 				cooldownLeft = cooldown;
 				Ball b = new Ball(getElementNum(), level, angle, user);
 				b.x = user.x + range * Math.cos(angle);
@@ -65,8 +67,8 @@ public class Ball_E extends Ability
 				b.z = user.z + 0.9;
 				b.xVel += user.xVel;
 				b.yVel += user.yVel;
-				
-				//critical chance
+
+				// critical chance
 				if (Math.random() < user.criticalChance)
 					b.critical = true;
 
@@ -78,8 +80,7 @@ public class Ball_E extends Ability
 				double ballRadiusPow2 = Math.pow(b.radius, 2);
 				// test force field collision
 				for (ForceField ff : env.FFs)
-					if (ff.x - 0.5 * ff.length <= b.x + b.radius && ff.x + 0.5 * ff.length >= b.x - b.radius && ff.y - 0.5 * ff.length <= b.y + b.radius
-							&& ff.y + 0.5 * ff.length >= b.y - b.radius)
+					if (ff.x - 0.5 * ff.length <= b.x + b.radius && ff.x + 0.5 * ff.length >= b.x - b.radius && ff.y - 0.5 * ff.length <= b.y + b.radius && ff.y + 0.5 * ff.length >= b.y - b.radius)
 						if ((0 <= Methods.realDotProduct(ff.p[0], ballCenter, ff.p[1]) && Methods.realDotProduct(ff.p[0], ballCenter, ff.p[1]) <= ff.width * ff.width
 								&& 0 <= Methods.realDotProduct(ff.p[0], ballCenter, ff.p[3]) && Methods.realDotProduct(ff.p[0], ballCenter, ff.p[3]) <= ff.length * ff.length)
 								|| Methods.LineToPointDistancePow2(ff.p[0], ff.p[1], ballCenter) < ballRadiusPow2 || Methods.LineToPointDistancePow2(ff.p[2], ff.p[3], ballCenter) < ballRadiusPow2
@@ -93,9 +94,8 @@ public class Ball_E extends Ability
 				if (ballCreationSuccess)
 				{
 					env.balls.add(b);
-					sounds.get((int)(Math.random()*5)).play();
-				}
-				else
+					sounds.get((int) (Math.random() * 5)).play();
+				} else
 					env.ballDebris(b, "shatter", b.angle());
 				user.mana -= cost;
 				user.rotate(angle, deltaTime);

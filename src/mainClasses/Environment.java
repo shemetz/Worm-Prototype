@@ -2374,7 +2374,7 @@ public class Environment
 			case 8: // lava
 				// Burn
 				if (randomNumber < 0.15) // 15% chance
-					p.affect(new Burning(5), true);
+					p.affect(new Burning(5, null), true);
 				break;
 			case 1: // water
 				// Slip

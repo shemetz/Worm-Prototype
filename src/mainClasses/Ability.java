@@ -85,8 +85,6 @@ public class Ability
 	// Fire Beam 7: name = "Beam <Fire>"; points = 7; cooldown = 0.5; cost = 0; costPerSecond = 5 / <fire damage>; range = 500*points; areaRadius = -1; instant = true; maintainable = true; stopsMovement = false; onOff = false; costType = "mana";
 
 	// for special effects:
-	protected double				targetEffect1				= -1,
-											targetEffect2 = -1, targetEffect3 = -1;
 	protected String				rangeType					= "";
 	protected int					frameNum					= 0;																// used in child classes
 

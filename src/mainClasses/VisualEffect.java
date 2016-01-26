@@ -1,4 +1,5 @@
 package mainClasses;
+
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -60,13 +61,13 @@ public class VisualEffect
 		case 2: // teleport fail
 			if (frameNum % 4 == 0)
 			{
-			points.clear();
-			Point pp01 = new Point((int) (p1.x + Math.random() * p1p2variations.x - 0.5 * p1p2variations.x), (int) (p1.y + Math.random() * p1p2variations.y - 0.5 * p1p2variations.y));
-			Point pp02 = new Point((int) (p2.x + Math.random() * p1p2variations.x - 0.5 * p1p2variations.x), (int) (p2.y + Math.random() * p1p2variations.y - 0.5 * p1p2variations.y));
-			for (int i = 0; i < numOfPoints + 1; i++)
-				points.add(new Point((int) (pp01.x + i * (pp02.x - pp01.x) / numOfPoints + Math.random() * (variation * 2 + 1) - variation),
-						(int) (pp01.y + i * (pp02.y - pp01.y) / numOfPoints + Math.random() * (variation * 2 + 1) - variation)));
-			color = new Color(255 - (int) (Math.random() * 100), 70, 60, (int) (255 * timeLeft / duration));
+				points.clear();
+				Point pp01 = new Point((int) (p1.x + Math.random() * p1p2variations.x - 0.5 * p1p2variations.x), (int) (p1.y + Math.random() * p1p2variations.y - 0.5 * p1p2variations.y));
+				Point pp02 = new Point((int) (p2.x + Math.random() * p1p2variations.x - 0.5 * p1p2variations.x), (int) (p2.y + Math.random() * p1p2variations.y - 0.5 * p1p2variations.y));
+				for (int i = 0; i < numOfPoints + 1; i++)
+					points.add(new Point((int) (pp01.x + i * (pp02.x - pp01.x) / numOfPoints + Math.random() * (variation * 2 + 1) - variation),
+							(int) (pp01.y + i * (pp02.y - pp01.y) / numOfPoints + Math.random() * (variation * 2 + 1) - variation)));
+				color = new Color(255 - (int) (Math.random() * 100), 70, 60, (int) (255 * timeLeft / duration));
 			}
 			break;
 		case 3: // heal
@@ -106,13 +107,25 @@ public class VisualEffect
 			int numOfBeamImages = beamDistance / 100;
 			int leftoverImageWidth = beamDistance % 100;
 			buffer.rotate(angle, p1.x, p1.y);
+
+			int imageHeight = Resources.healingBeam[0].getHeight();
 			for (int i = 0; i < numOfBeamImages; i++)
 			{
-				buffer.drawImage(Resources.healingBeam[frame], (int) (p1.x + i * 100), (int) (p1.y - 0.5 * 100), null);
+				buffer.drawImage(Resources.healingBeam[0].getSubimage(frame, 0, 100 - frame, imageHeight), (int) (p1.x + i * 100), (int) (p1.y - 0.5 * 100), null);
+				if (frame != 0)
+					buffer.drawImage(Resources.healingBeam[0].getSubimage(0, 0, frame, imageHeight), (int) (p1.x + i * 100 + 100 - frame), (int) (p1.y - 0.5 * 100), null);
 			}
-			// leftover
 			if (leftoverImageWidth > 0)
-				buffer.drawImage(Resources.healingBeam[frame].getSubimage(0, 0, leftoverImageWidth, 100), (int) (p1.x + numOfBeamImages * 100), (int) (p1.y - 0.5 * 100), null);
+			{
+				if (frame + leftoverImageWidth <= 100)
+					buffer.drawImage(Resources.healingBeam[0].getSubimage(frame, 0, leftoverImageWidth, imageHeight), (int) (p1.x + numOfBeamImages * 100), (int) (p1.y - 0.5 * 100), null);
+				else
+				{
+					buffer.drawImage(Resources.healingBeam[0].getSubimage(frame, 0, 100 - frame, imageHeight), (int) (p1.x + numOfBeamImages * 100), (int) (p1.y - 0.5 * 100), null);
+					buffer.drawImage(Resources.healingBeam[0].getSubimage(0, 0, leftoverImageWidth + frame - 100, imageHeight), (int) (p1.x + numOfBeamImages * 100 + 100 - frame),
+							(int) (p1.y - 0.5 * 100), null);
+				}
+			}
 
 			buffer.rotate(-angle, p1.x, p1.y);
 

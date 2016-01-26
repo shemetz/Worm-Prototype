@@ -2,15 +2,17 @@ package mainClasses;
 
 public class Effect
 {
-	public double	duration;	// -1 = forever
-	public double	timeLeft;	// -1 = forever
-	public String	name;		// can be an int or a short, honestly, but then the programming would be difficulter
+	public double	duration;		// -1 = forever
+	public double	timeLeft;		// -1 = forever
+	public String	name;			// can be an int or a short, honestly, but then the programming would be difficulter
 	public int		strength;
 	public int		animFrame;
 	public boolean	stackable;
+	public Ability	creatorAbility;	// to avoid same ability giving same effect multiple times to same person
 
-	public Effect(String type, double duration1, int strength1)
+	public Effect(String type, double duration1, int strength1, Ability creatorAbility1)
 	{
+		creatorAbility = creatorAbility1;
 		name = type;
 		duration = duration1;
 		timeLeft = duration;
@@ -19,14 +21,16 @@ public class Effect
 		// stackable - depends
 	}
 
+	@SuppressWarnings("unused")
 	public void apply(Person target)
 	{
-		target.effects.add(this);
+		Main.errorMessage("Error message. 1234567");
 	}
 
-	public void remove(Person target)
+	@SuppressWarnings("unused")
+	public void unapply(Person target)
 	{
-		target.effects.remove(this);
+		Main.errorMessage("String literal out of exception campaign");
 	}
 
 	public void update(Person target, double deltaTime)
@@ -34,7 +38,7 @@ public class Effect
 		timeLeft -= deltaTime;
 		if (timeLeft < 0)
 		{
-			remove(target);
+			unapply(target);
 		}
 	}
 

@@ -27,7 +27,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
 import java.awt.font.FontRenderContext;
-import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
@@ -45,10 +44,13 @@ import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.Timer;
 
+import abilities.ForceFieldAbility;
+import abilities.GridTargetingAbility;
 import abilities.Protective_Bubble_I;
 import abilities.Sense_Powers;
 import abilities.Shield_E;
 import abilities.Sprint;
+import abilities.TeleportAbility;
 import effects.Burning;
 import mainClasses.NPC.Strategy;
 import mainResourcesPackage.SoundEffect;
@@ -246,7 +248,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 			}
 		} // BUG - Reflecting a beam will cause increased pushback due to something related to the order of stuff in a frame. Maybe friction?
 			// targeting
-		updateTargeting(deltaTime);
+		updatePlayerTargeting();
 		// PEOPLE
 		for (Person p : env.people)
 		{
@@ -254,12 +256,16 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 			if (p.dead)
 			{
 				// Deactivate all abilities
-				for (Ability a : p.abilities)
+				for (Ability a : p.abilities) // TODO make sure this is resistant to ConcurrentModificationException and doesn't bug out when dying with extra ability giving abilities
 					if (a.on)
 						a.use(env, p, null);
 				// Remove all effects
-				for (Effect e : p.effects)
-					p.affect(e, false);
+				for (int i = 0; i < p.effects.size(); i++)
+				{
+					p.effects.get(i).unapply(p);
+					p.effects.remove(i);
+					i--;
+				}
 			} else
 			{
 				if (p.getClass().equals(NPC.class))
@@ -272,7 +278,9 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 				for (Ability a : p.abilities)
 				{
 					if (a.on && a.cost != -1)
+					{
 						a.maintain(env, p, p.target, deltaTime);
+					}
 				}
 				// using abilities the person is trying to repetitively use (e.g. holding down the Punch ability's key)
 				if (p.abilityTryingToRepetitivelyUse != -1)
@@ -317,7 +325,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 					case 9: // flesh (blood pool)
 						if (frameNum % 50 == 0)
 						{
-							p.affect(new Burning(0), false); // stop burning
+							p.affect(new Burning(0, null), false); // stop burning
 							double slipChance = -0.01;
 							if (p.xVel * p.xVel + p.yVel * p.yVel > 40000)
 								slipChance += 0.2;
@@ -339,8 +347,8 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 					case 8: // lava
 						env.hitPerson(p, 20, 0, 0, 8, deltaTime); // burn damage
 						if (frameNum % 50 == 0 && random.nextDouble() < 0.7) // burn chance is 70% in lava
-							p.affect(new Burning(0), true);
-						break;
+							// p.affect(new Burning(0,null), true);
+							break;
 					case 10: // earth spikes
 						env.hitPerson(p, 25, 0, 0, 10, deltaTime);
 						break;
@@ -590,10 +598,9 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		// TODO
 	}
 
-	void updateTargeting(double deltaTime) // for the player
+	void updatePlayerTargeting()
 	{
 		player.target = new Point(mx, my);
-		double angle = Math.atan2(player.target.y - player.y, player.target.x - player.x);
 		Ability ability;
 		if (player.abilityAiming != -1)
 			ability = player.abilities.get(player.abilityAiming);
@@ -603,43 +610,32 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 			ability = player.abilities.get(player.abilityMaintaining);
 		else
 		{
-			player.target = new Point(-1, -1);
 			player.targetType = "";
 			player.successfulTarget = false;
 			return;
 		}
-		// if the area isn't nice
-		switch (ability.rangeType)
-		{
-		case "Create in grid":
-			break;
-		default:
-			player.rangeArea = null;
-			break;
-		}
-		// clamp target to range:
-		int comeOnProgramWorkWithMeHere = 0;
-		if (player.rangeArea != null && !player.rangeArea.isEmpty())
-			while (!player.rangeArea.contains(player.target.x, player.target.y))
-			{
-				player.target.x = (int) (player.x + Math.cos(angle) * (ability.range - comeOnProgramWorkWithMeHere));
-				player.target.y = (int) (player.y + Math.sin(angle) * (ability.range - comeOnProgramWorkWithMeHere));
-				comeOnProgramWorkWithMeHere += 10;
-			}
-		else if (ability.range != -1)
-			if (Methods.DistancePow2(player.x, player.y, player.target.x, player.target.y) > ability.range * ability.range)
-			{
-				player.target.x = (int) (player.x + Math.cos(angle) * ability.range);
-				player.target.y = (int) (player.y + Math.sin(angle) * ability.range);
-			}
+		updateTargeting(player, ability);
+		ability.updatePlayerTargeting(env, player, player.target, 0);
+		print();
+	}
 
-		ability.updatePlayerTargeting(env, player, player.target, deltaTime);
+	void updateTargeting(Person p, Ability ability)
+	{
+		double angle = Math.atan2(p.target.y - p.y, p.target.x - p.x);
+
+		// if the area isn't nice
+		if (!ability.rangeType.equals("Create in grid"))
+			if (ability.range != -1)
+				// clamp target to range:
+				if (Methods.DistancePow2(p.x, p.y, p.target.x, p.target.y) > ability.range * ability.range)
+				{
+					p.target.x = (int) (p.x + Math.cos(angle) * ability.range);
+					p.target.y = (int) (p.y + Math.sin(angle) * ability.range);
+				}
 	}
 
 	void drawRange(Graphics2D buffer, Ability ability)
 	{
-
-		// else - is written in the case
 		switch (ability.rangeType)
 		{
 		case "Ranged circular area":
@@ -650,22 +646,18 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 			break;
 		case "Create in grid":
 			buffer.setStroke(dashedStroke3);
+			GridTargetingAbility gAbility = (GridTargetingAbility) ability;
+			gAbility.UPT(env, player);
 			if (player.abilityAiming == -1 || player.abilityMaintaining == player.hotkeys[hotkeySelected])
 			{
-				if (ability.targetEffect3 == 0)
+				if (gAbility.canBuildInTarget)
 					buffer.setColor(Color.green);
 				else
 					buffer.setColor(Color.red);
 				buffer.drawRect(player.target.x - squareSize / 2, player.target.y - squareSize / 2, squareSize, squareSize);
 			}
-			Area rangeArea = new Area();
-			for (int i = (int) (player.x - ability.range); i < (int) (player.x + ability.range); i += squareSize)
-				for (int j = (int) (player.y - ability.range); j < (int) (player.y + ability.range); j += squareSize)
-					if (Math.pow(player.x - i / squareSize * squareSize - 0.5 * squareSize, 2) + Math.pow(player.y - j / squareSize * squareSize - 0.5 * squareSize, 2) <= ability.range
-							* ability.range)
-						rangeArea.add(new Area(new Rectangle2D.Double(i / squareSize * squareSize, j / squareSize * squareSize, squareSize, squareSize)));
 			buffer.setColor(new Color(255, 255, 255, 80)); // stroke is still dashed
-			buffer.draw(rangeArea);
+			buffer.draw(gAbility.rangeArea);
 			break;
 		case "Exact range":
 			buffer.setColor(new Color(255, 255, 255, 80)); // transparent white
@@ -745,51 +737,52 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		case "teleport":
 			buffer.setStroke(new BasicStroke(3));
 			final int radius = 35;
+			TeleportAbility teleportAbility = (TeleportAbility) ability;
 			if (player.successfulTarget)
 			{
 				buffer.setColor(new Color(53, 230, 240));
-				buffer.drawLine(player.target.x + (int) (radius * 1.3 * Math.cos(ability.targetEffect1)), player.target.y + (int) (radius * 1.3 * Math.sin(ability.targetEffect1)),
-						player.target.x + (int) (radius * 1.3 * Math.cos(ability.targetEffect1 + Math.PI * 2 / 3)),
-						player.target.y + (int) (radius * 1.3 * Math.sin(ability.targetEffect1 + Math.PI * 2 / 3)));
+				buffer.drawLine(player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle1)), player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle1)),
+						player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle1 + Math.PI * 2 / 3)),
+						player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle1 + Math.PI * 2 / 3)));
 				buffer.setColor(new Color(40, 210, 250));
-				buffer.drawLine(player.target.x + (int) (radius * 1.3 * Math.cos(ability.targetEffect2)), player.target.y + (int) (radius * 1.3 * Math.sin(ability.targetEffect2)),
-						player.target.x + (int) (radius * 1.3 * Math.cos(ability.targetEffect2 + Math.PI * 2 / 3)),
-						player.target.y + (int) (radius * 1.3 * Math.sin(ability.targetEffect2 + Math.PI * 2 / 3)));
+				buffer.drawLine(player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle2)), player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle2)),
+						player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle2 + Math.PI * 2 / 3)),
+						player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle2 + Math.PI * 2 / 3)));
 				buffer.setColor(new Color(20, 200, 255));
-				buffer.drawLine(player.target.x + (int) (radius * 1.3 * Math.cos(ability.targetEffect3)), player.target.y + (int) (radius * 1.3 * Math.sin(ability.targetEffect3)),
-						player.target.x + (int) (radius * 1.3 * Math.cos(ability.targetEffect3 + Math.PI * 2 / 3)),
-						player.target.y + (int) (radius * 1.3 * Math.sin(ability.targetEffect3 + Math.PI * 2 / 3)));
+				buffer.drawLine(player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle3)), player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle3)),
+						player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle3 + Math.PI * 2 / 3)),
+						player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle3 + Math.PI * 2 / 3)));
 				buffer.setColor(new Color(53, 230, 240));
-				buffer.drawLine(player.target.x + (int) (radius * 1.3 * Math.cos(ability.targetEffect1)), player.target.y + (int) (radius * 1.3 * Math.sin(ability.targetEffect1)),
-						player.target.x + (int) (radius * 1.3 * Math.cos(ability.targetEffect1 - Math.PI * 2 / 3)),
-						player.target.y + (int) (radius * 1.3 * Math.sin(ability.targetEffect1 - Math.PI * 2 / 3)));
+				buffer.drawLine(player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle1)), player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle1)),
+						player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle1 - Math.PI * 2 / 3)),
+						player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle1 - Math.PI * 2 / 3)));
 				buffer.setColor(new Color(53, 218, 255));
 				buffer.drawOval(player.target.x - radius, player.target.y - radius, radius * 2, radius * 2);
 				buffer.setColor(new Color(40, 210, 250));
-				buffer.drawLine(player.target.x + (int) (radius * 1.3 * Math.cos(ability.targetEffect2)), player.target.y + (int) (radius * 1.3 * Math.sin(ability.targetEffect2)),
-						player.target.x + (int) (radius * 1.3 * Math.cos(ability.targetEffect2 - Math.PI * 2 / 3)),
-						player.target.y + (int) (radius * 1.3 * Math.sin(ability.targetEffect2 - Math.PI * 2 / 3)));
+				buffer.drawLine(player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle2)), player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle2)),
+						player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle2 - Math.PI * 2 / 3)),
+						player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle2 - Math.PI * 2 / 3)));
 				buffer.setColor(new Color(53, 230, 240));
-				buffer.drawLine(player.target.x + (int) (radius * 1.3 * Math.cos(ability.targetEffect1 + Math.PI * 2 / 3)),
-						player.target.y + (int) (radius * 1.3 * Math.sin(ability.targetEffect1 + Math.PI * 2 / 3)),
-						player.target.x + (int) (radius * 1.3 * Math.cos(ability.targetEffect1 - Math.PI * 2 / 3)),
-						player.target.y + (int) (radius * 1.3 * Math.sin(ability.targetEffect1 - Math.PI * 2 / 3)));
+				buffer.drawLine(player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle1 + Math.PI * 2 / 3)),
+						player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle1 + Math.PI * 2 / 3)),
+						player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle1 - Math.PI * 2 / 3)),
+						player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle1 - Math.PI * 2 / 3)));
 				buffer.setColor(new Color(20, 200, 255));
-				buffer.drawLine(player.target.x + (int) (radius * 1.3 * Math.cos(ability.targetEffect3)), player.target.y + (int) (radius * 1.3 * Math.sin(ability.targetEffect3)),
-						player.target.x + (int) (radius * 1.3 * Math.cos(ability.targetEffect3 - Math.PI * 2 / 3)),
-						player.target.y + (int) (radius * 1.3 * Math.sin(ability.targetEffect3 - Math.PI * 2 / 3)));
+				buffer.drawLine(player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle3)), player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle3)),
+						player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle3 - Math.PI * 2 / 3)),
+						player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle3 - Math.PI * 2 / 3)));
 
 				buffer.setColor(new Color(40, 210, 250));
-				buffer.drawLine(player.target.x + (int) (radius * 1.3 * Math.cos(ability.targetEffect2 + Math.PI * 2 / 3)),
-						player.target.y + (int) (radius * 1.3 * Math.sin(ability.targetEffect2 + Math.PI * 2 / 3)),
-						player.target.x + (int) (radius * 1.3 * Math.cos(ability.targetEffect2 - Math.PI * 2 / 3)),
-						player.target.y + (int) (radius * 1.3 * Math.sin(ability.targetEffect2 - Math.PI * 2 / 3)));
+				buffer.drawLine(player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle2 + Math.PI * 2 / 3)),
+						player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle2 + Math.PI * 2 / 3)),
+						player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle2 - Math.PI * 2 / 3)),
+						player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle2 - Math.PI * 2 / 3)));
 
 				buffer.setColor(new Color(20, 200, 255));
-				buffer.drawLine(player.target.x + (int) (radius * 1.3 * Math.cos(ability.targetEffect3 + Math.PI * 2 / 3)),
-						player.target.y + (int) (radius * 1.3 * Math.sin(ability.targetEffect3 + Math.PI * 2 / 3)),
-						player.target.x + (int) (radius * 1.3 * Math.cos(ability.targetEffect3 - Math.PI * 2 / 3)),
-						player.target.y + (int) (radius * 1.3 * Math.sin(ability.targetEffect3 - Math.PI * 2 / 3)));
+				buffer.drawLine(player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle3 + Math.PI * 2 / 3)),
+						player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle3 + Math.PI * 2 / 3)),
+						player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle3 - Math.PI * 2 / 3)),
+						player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle3 - Math.PI * 2 / 3)));
 
 			} else
 			{
@@ -806,11 +799,12 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 
 			break;
 		case "createFF":
+			ForceFieldAbility ffAbility = (ForceFieldAbility) ability;
 			double angleToFF = Math.atan2(player.y - player.target.y, player.x - player.target.x);
 			buffer.setColor(new Color(53, 218, 255));
 			buffer.setStroke(dashedStroke3);
 			buffer.rotate(angleToFF + Math.PI / 2, player.target.x, player.target.y);
-			buffer.drawRect((int) (player.target.x - ability.targetEffect2 / 2), (int) (player.target.y - ability.targetEffect3 / 2), (int) (ability.targetEffect2), (int) (ability.targetEffect3));
+			buffer.drawRect((int) (player.target.x - ffAbility.width / 2), (int) (player.target.y - ffAbility.height / 2), (int) (ffAbility.width), (int) (ffAbility.height));
 			buffer.rotate(-angleToFF - Math.PI / 2, player.target.x, player.target.y);
 			break;
 		case "":
@@ -853,6 +847,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		player.abilities.add(Ability.ability("Protective Bubble I", 5));
 		player.abilities.add(Ability.ability("Spray <Acid>", 5));
 		player.abilities.add(Ability.ability("Ball <Fire>", 5));
+		player.abilities.add(Ability.ability("Heal I", 5));
 		player.abilities.add(Ability.ability("Flight I", 5));
 		player.abilities.add(Ability.ability("Blink", 5));
 		player.abilities.add(Ability.ability("Beam <Energy>", 5));
@@ -894,10 +889,8 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 	void pressAbilityKey(int abilityIndex, boolean press, Person p)
 	{
 		if (p.dead)
-			return; //TODO is there a neater way of resolving this?
+			return; // TODO is there a neater way of resolving this?
 		// n is between 1 and 10; checkHotkey need a number between 0 and 9. So.... n-1.
-		if (p.target.getX() == -1 && p.target.getY() == -1)
-			p.target = new Point(mx, my); /// WHT ARE YOU DOING ITAMAR WTF ARE YOU EVEN THINKING
 		if (stopUsingPower)
 		{
 			if (!press)
@@ -912,6 +905,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 			Ability a = p.abilities.get(abilityIndex);
 			if (press)
 			{
+				updateTargeting(p, a);
 				if (p.abilityTryingToRepetitivelyUse == -1)
 				{
 					if (a.maintainable)
@@ -920,7 +914,9 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 						{
 							p.abilityMaintaining = abilityIndex;
 							if (!a.on)
+							{
 								a.use(env, p, p.target);
+							}
 						} // Can't start a maintainable ability while maintaining another
 					} else
 					{

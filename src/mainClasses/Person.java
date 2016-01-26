@@ -6,7 +6,6 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
@@ -74,7 +73,6 @@ public class Person extends RndPhysObj
 	public double						timeBetweenDamageTexts;
 	public double						waitingDamage;
 	public Point						target;
-	public Area							rangeArea;
 	public boolean						lastHandUsedIsRight					= false;
 	public boolean						punchedSomething					= false;
 	public boolean						notMoving							= false;
@@ -135,7 +133,6 @@ public class Person extends RndPhysObj
 		waitingDamage = 0;
 		panic = false;
 		target = new Point(-1, -1);
-		rangeArea = null;
 		initAnimation();
 		initSounds();
 		imgW = 96;
@@ -174,7 +171,7 @@ public class Person extends RndPhysObj
 					} else
 					{
 						//remove old effect
-						e2.remove(this);
+						e2.unapply(this);
 						effects.remove(i);
 						i--;
 						return;
@@ -195,7 +192,7 @@ public class Person extends RndPhysObj
 						oldestEffectIndex = i;
 			if (oldestEffectIndex != -1) // sometimes the program attempts to remove an effect without checking if it already exists. It's ok.
 			{
-				effects.get(oldestEffectIndex).remove(this);
+				effects.get(oldestEffectIndex).unapply(this);
 				effects.remove(oldestEffectIndex);
 			}
 		}

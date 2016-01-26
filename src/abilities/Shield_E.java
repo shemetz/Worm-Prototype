@@ -90,6 +90,9 @@ public class Shield_E extends Ability
 			use(env, user, target);
 		else
 		{
+			double targetAngle = Math.atan2(target.y - user.y, target.x - user.x);
+			user.rotate(targetAngle, deltaTime);
+			
 			user.mana -= costPerSecond * deltaTime;
 			for (ArcForceField a : env.AFFs)
 				if (a.target.equals(user))
@@ -105,7 +108,6 @@ public class Shield_E extends Ability
 	{
 		double angle = Math.atan2(target.y - player.y, target.x - player.x);
 		player.targetType = "look";
-		player.target = new Point(-1, -1);
 		if (!player.leftMousePressed) // stops aiming shield while pressing mouse, to blink for example
 			player.rotate(angle, deltaTime);
 	}
