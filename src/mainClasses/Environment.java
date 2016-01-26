@@ -2659,7 +2659,7 @@ public class Environment
 				// debugging
 				if (arg0 == null || arg0.image == null)
 				{
-					Main.errorMessage("ummm what? " + arg0);
+					Main.errorMessage("ummm what? no image found for " + arg0+" or maybe it's null");
 					return true;
 				}
 				if (arg0.image.getWidth() == 1 && arg0.image.getHeight() == 1) // for stuff like Beam images
@@ -2992,6 +2992,14 @@ public class Environment
 	public void destroyWall(int x, int y)
 	{
 		int elementNum = wallTypes[x][y];
+		for (int i = 0; i < 5; i++)
+			debris.add(new Debris(x * squareSize + 0.5 * squareSize, y * squareSize + 0.5 * squareSize, 0, Math.PI * 2 / 5 * i, elementNum, 200));
+		remove(x, y);
+	}
+
+	public void destroyPool(int x, int y)
+	{
+		int elementNum = poolTypes[x][y];
 		for (int i = 0; i < 5; i++)
 			debris.add(new Debris(x * squareSize + 0.5 * squareSize, y * squareSize + 0.5 * squareSize, 0, Math.PI * 2 / 5 * i, elementNum, 200));
 		remove(x, y);

@@ -1115,8 +1115,8 @@ Create a 1x1 m pool of the element. When creating pools adjacent to existing poo
 Cost: 7-0.5*Level(minimum 1) Mana, or 3-0.5*Level (minimum 0) Mana next to another pool.
 
 
-Elemental Void (Passive)
-passive range
+Elemental Void (On/Off)
+on-off range
 You have an aura that destroys elemental pools and walls.
 Pools and walls that are not earth pools and walls are damaged at 20 HP/sec if they are within Level meters from you and are not Earth walls or pits.
 

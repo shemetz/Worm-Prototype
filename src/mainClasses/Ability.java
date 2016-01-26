@@ -13,6 +13,7 @@ import abilities.Beam_E;
 import abilities.Blink;
 import abilities.Elemental_Combat_II_E;
 import abilities.Elemental_Combat_I_E;
+import abilities.Elemental_Void;
 import abilities.Flight_I;
 import abilities.Flight_II;
 import abilities.Force_Shield;
@@ -449,6 +450,8 @@ public class Ability
 		}
 		switch (trimmedAbilityName)
 		{
+		case "Elemental Void":
+			return new Elemental_Void(pnts);
 		case "Precision I":
 			return new Precision_I(pnts);
 		case "Protective Bubble I":

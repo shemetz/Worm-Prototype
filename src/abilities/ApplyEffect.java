@@ -41,11 +41,11 @@ public class ApplyEffect extends Ability
 
 	public void addNewTargets(Environment env, Person user)
 	{
-		List<Person> newTargets = new ArrayList<Person>();
 		switch (targetingType)
 		{
 		case SELF:
-			newTargets.add(user);
+			targets.remove(user);
+			targets.add(user);
 			break;
 		case OTHER:
 			Person effectTarget = user;
@@ -60,16 +60,29 @@ public class ApplyEffect extends Ability
 						effectTarget = p;
 					}
 				}
-			newTargets.add(effectTarget);
+			if (targets.isEmpty())
+				targets.add(effectTarget);
+			// If changed target:
+			else if (!effectTarget.equals(targets.get(0)))
+			{
+				targets.get(0).affect(effect(), false);
+				targets.remove(0);
+				targets.add(effectTarget);
+			}
+			// Else, targets were not changed
+			break;
+		case AREA:
+			for (Person p : env.people)
+			{
+				double distancePow2 = Methods.DistancePow2(user.x, user.y, p.x, p.y);
+				if (distancePow2 < range * range)
+					targets.add(p);
+			}
 			break;
 		default:
 			Main.errorMessage(targetingType);
 			break;
 		}
-
-		// Only add new targets, without having duplicates
-		targets.removeAll(newTargets);
-		targets.addAll(newTargets);
 	}
 
 	public void draw(Environment env, double deltaTime, Person user, Person effectTarget)
@@ -97,8 +110,8 @@ public class ApplyEffect extends Ability
 			user.abilityMaintaining = -1;
 			for (Person target : targets)
 			{
-					target.affect(effect(), false);
-					//uh add visual effect ?  TODO
+				target.affect(effect(), false);
+				// uh add visual effect ? TODO
 			}
 			targets.clear();
 		} else if (!user.prone && !user.maintaining && cooldownLeft <= 0)
@@ -114,16 +127,12 @@ public class ApplyEffect extends Ability
 		frameNum += 3;
 		if (costPerSecond * deltaTime <= user.mana)
 		{
-			boolean userWasTarget = targets.contains(user);
 			addNewTargets(env, user);
-			boolean userIsNowTarget = targets.contains(user);
-			if (userWasTarget && !userIsNowTarget)
-				user.affect(effect(), false);
+			// Stop affecting anyone out of range
 			for (int i = 0; i < targets.size(); i++)
 			{
 				if (Methods.DistancePow2(targets.get(i).Point(), user.Point()) > range * range)
 				{
-					System.out.println(targets.size());
 					targets.get(i).affect(effect(), false);
 					targets.remove(i);
 					i--;
