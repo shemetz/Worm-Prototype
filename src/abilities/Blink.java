@@ -53,7 +53,7 @@ public class Blink extends TeleportAbility
 			for (int j = 0; j < numOfLines; j++)
 			{
 				VisualEffect eff = new VisualEffect();
-				eff.type = 1;
+				eff.type = VisualEffect.Type.BLINK_SUCCESS;
 				eff.duration = 0.4;
 				eff.timeLeft = eff.duration;
 				eff.p1p2variations = new Point(user.radius, user.radius);
@@ -73,7 +73,7 @@ public class Blink extends TeleportAbility
 			for (int j = 0; j < numOfLines; j++)
 			{
 				VisualEffect eff = new VisualEffect();
-				eff.type = 2;
+				eff.type = VisualEffect.Type.BLINK_FAIL;
 				eff.duration = 0.3;
 				eff.timeLeft = eff.duration;
 				eff.p1p2variations = new Point(user.radius, user.radius);

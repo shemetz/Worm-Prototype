@@ -26,15 +26,15 @@ public class ApplyEffect extends Ability
 	// OTHER - works on the closest person in range that isn't yourself. IF there is none, works on self instead.
 	// AREA - works on every person in range, including yourself.
 	// TARGETED - works on the person closest to target point, if they're within range.
-	List<Person>	targets;
-	targetTypes		targetingType;
-	int				visualType;
+	List<Person>		targets;
+	targetTypes			targetingType;
+	VisualEffect.Type	type;
 
-	public ApplyEffect(String name, int p, targetTypes targetType1, int visual)
+	public ApplyEffect(String name, int p, targetTypes targetType1, VisualEffect.Type type1)
 	{
 		super(name, p);
 		targetingType = targetType1;
-		visualType = visual;
+		type = type1;
 		beamAnimationTimer = 0;
 		targets = new ArrayList<Person>();
 	}
@@ -51,7 +51,7 @@ public class ApplyEffect extends Ability
 			Person effectTarget = user;
 			double shortestDistancePow2 = range * range;
 			for (Person p : env.people)
-				if (p != user)
+				if (viableTarget(p, user))
 				{
 					double distancePow2 = Methods.DistancePow2(user.x, user.y, p.x, p.y);
 					if (distancePow2 < shortestDistancePow2)
@@ -72,12 +72,14 @@ public class ApplyEffect extends Ability
 			// Else, targets were not changed
 			break;
 		case AREA:
+			targets.add(user);
 			for (Person p : env.people)
-			{
-				double distancePow2 = Methods.DistancePow2(user.x, user.y, p.x, p.y);
-				if (distancePow2 < range * range)
-					targets.add(p);
-			}
+				if (viableTarget(p, user))
+				{
+					double distancePow2 = Methods.DistancePow2(user.x, user.y, p.x, p.y);
+					if (distancePow2 < range * range)
+						targets.add(p);
+				}
 			break;
 		default:
 			Main.errorMessage(targetingType);
@@ -94,11 +96,23 @@ public class ApplyEffect extends Ability
 			visual.frame = 99 - (frameNum % 100);
 			visual.p1 = new Point((int) user.x, (int) user.y);
 			visual.p2 = new Point((int) effectTarget.x, (int) effectTarget.y);
-			visual.type = visualType;
+			visual.type = type;
 			visual.angle = Math.atan2(effectTarget.y - user.y, effectTarget.x - user.x);
 
 			env.visualEffects.add(visual);
 		}
+	}
+
+	public boolean viableTarget(Person p, Person user)
+	{
+		if (p.equals(user))
+			return false;
+		if (p.highestPoint() < user.z || user.highestPoint() < p.z)
+			return false;
+		if (p.life / p.maxLife == 1)
+			return false;
+		// TODO check for walls!!
+		return true;
 	}
 
 	public void use(Environment env, Person user, Point targetPoint)

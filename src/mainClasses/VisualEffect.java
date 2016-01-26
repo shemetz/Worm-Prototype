@@ -18,19 +18,27 @@ public class VisualEffect
 	public List<Point>	points;
 	public Color		color;
 	public int			frame;
-	public int			type, subtype;
-	public double		angle;
-	public double		size;
+
+	public enum Type
+	{
+		BLINK_SUCCESS, BLINK_FAIL, HEAL, EXPLOSION
+	};
+
+	public Type			type;
 
 	/*
-	 * 1 = successful blink. Random blue lines between entry and exit points.
+	 * BLINK_SUCCESS = successful blink. Random blue lines between entry and exit points.
 	 * 
-	 * 2 = unsuccessful blink. Random red lines between entry and exit.
+	 * BLINK_FAIL = unsuccessful blink. Random red lines between entry and exit.
 	 * 
-	 * 3 = healing beam. Green.
+	 * HEAL = healing beam. Green.
 	 * 
-	 * 4 = explosion (subtypes for different drawings)
+	 * EXPLOSION = explosion (subtypes for different drawings)
 	 */
+	public int		subtype;
+	public double	angle;
+	public double	size;
+
 	public VisualEffect()
 	{
 		points = new ArrayList<Point>();
@@ -46,7 +54,7 @@ public class VisualEffect
 		final int variation = 30;
 		switch (type)
 		{
-		case 1: // teleport success
+		case BLINK_SUCCESS: // teleport success
 			if (frameNum % 4 == 0)
 			{
 				points.clear();
@@ -58,7 +66,7 @@ public class VisualEffect
 				color = new Color(120, 190 - (int) (Math.random() * 80), 255 - (int) (Math.random() * 100), (int) (255 * timeLeft / duration));
 			}
 			break;
-		case 2: // teleport fail
+		case BLINK_FAIL: // teleport fail
 			if (frameNum % 4 == 0)
 			{
 				points.clear();
@@ -70,9 +78,9 @@ public class VisualEffect
 				color = new Color(255 - (int) (Math.random() * 100), 70, 60, (int) (255 * timeLeft / duration));
 			}
 			break;
-		case 3: // heal
+		case HEAL: // heal
 			break;
-		case 4: // explosion
+		case EXPLOSION: // explosion
 			// explosions don't loop - they just stay invisible
 			if (frame != -1 && frameNum % 4 == 0)
 				frame++;
@@ -90,19 +98,19 @@ public class VisualEffect
 	{
 		switch (type)
 		{
-		case 1:
+		case BLINK_SUCCESS:
 			buffer.setStroke(new BasicStroke(2));
 			buffer.setColor(color);
 			for (int i = 0; i < points.size() - 2; i++)
 				buffer.drawLine(points.get(i).x, points.get(i).y, points.get(i + 1).x, points.get(i + 1).y);
 			break;
-		case 2:
+		case BLINK_FAIL:
 			buffer.setStroke(new BasicStroke(2));
 			buffer.setColor(color);
 			for (int i = 0; i < points.size() - 2; i++)
 				buffer.drawLine(points.get(i).x, points.get(i).y, points.get(i + 1).x, points.get(i + 1).y);
 			break;
-		case 3:
+		case HEAL:
 			int beamDistance = (int) Math.sqrt(Methods.DistancePow2(p1.x, p1.y, p2.x, p2.y));
 			int numOfBeamImages = beamDistance / 100;
 			int leftoverImageWidth = beamDistance % 100;
@@ -130,7 +138,7 @@ public class VisualEffect
 			buffer.rotate(-angle, p1.x, p1.y);
 
 			break;
-		case 4: // explosions. Scaled by size.
+		case EXPLOSION: // explosions. Scaled by size.
 			if (frame != -1)
 			{
 				buffer.drawImage(Resources.explosions.get(subtype).get(frame), p1.x - p2.x, p1.y - p2.y, null);

@@ -2,13 +2,14 @@ package abilities;
 
 import effects.Healed;
 import mainClasses.Effect;
+import mainClasses.VisualEffect;
 
 public class Heal_I extends ApplyEffect
 {
 
 	public Heal_I(int p)
 	{
-		super("Heal I", p, ApplyEffect.targetTypes.OTHER, 3);
+		super("Heal I", p, ApplyEffect.targetTypes.OTHER, VisualEffect.Type.HEAL);
 		cost = 0;
 		costPerSecond = 1;
 		costType = "mana";

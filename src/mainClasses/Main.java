@@ -840,8 +840,36 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 					env.addWall(i, j, -2, true);
 				}
 			}
+
+		// Shadow direction and distance of every object
 		env.shadowX = 1;
 		env.shadowY = -0.7;
+
+		// Random 5x5 walls
+		for (int i = 0; i < 15; i++)
+		{
+			int sx = random.nextInt(env.width - 7) + 1;
+			int sy = random.nextInt(env.height - 7) + 1;
+			for (int x = sx; x < sx + 5; x++)
+				for (int y = sy; y < sy + 5; y++)
+					env.addWall(x, y, 10, true);
+		}
+		// Random 5x1 lines
+		for (int i = 0; i < 10; i++)
+		{
+			int sx = random.nextInt(env.width - 7) + 1;
+			int sy = random.nextInt(env.height - 2) + 1;
+			for (int x = sx; x < sx + 5; x++)
+				env.addWall(x, sy, 10, true);
+		}
+		// Random 1x5 lines
+		for (int i = 0; i < 10; i++)
+		{
+			int sx = random.nextInt(env.width - 2) + 1;
+			int sy = random.nextInt(env.height - 7) + 1;
+			for (int y = sy; y < sy + 5; y++)
+				env.addWall(sx, y, 10, true);
+		}
 
 		player = new Player(96 * 20, 96 * 20);
 		player.abilities.add(Ability.ability("Protective Bubble I", 5));
@@ -885,6 +913,15 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		Person cc = new NPC(96 * 10, 96 * 25, Strategy.PASSIVE);
 		// cc.trigger();
 		env.people.add(cc);
+
+		// Fix walls spawning on people
+		for (Person p : env.people)
+		{
+			env.remove((int) (p.x - p.radius) / squareSize, (int) (p.y - p.radius) / squareSize);
+			env.remove((int) (p.x - p.radius) / squareSize, (int) (p.y + p.radius) / squareSize);
+			env.remove((int) (p.x + p.radius) / squareSize, (int) (p.y - p.radius) / squareSize);
+			env.remove((int) (p.x + p.radius) / squareSize, (int) (p.y + p.radius) / squareSize);
+		}
 	}
 
 	void pressAbilityKey(int abilityIndex, boolean press, Person p)
@@ -1875,6 +1912,8 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 				sounds.addAll(a.sounds);
 			sounds.addAll(p.sounds);
 		}
+		for (ForceField ff : env.FFs)
+			sounds.addAll(ff.sounds);
 
 		for (SoundEffect s : sounds)
 			if (pausePlay)
@@ -1883,11 +1922,29 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 				s.cont(); // inue
 	}
 
+	void stopAllSounds()
+	{
+		List<SoundEffect> sounds = new ArrayList<SoundEffect>();
+		sounds.addAll(env.ongoingSounds);
+		for (Person p : env.people)
+		{
+			for (Ability a : p.abilities)
+				sounds.addAll(a.sounds);
+			sounds.addAll(p.sounds);
+		}
+		for (ForceField ff : env.FFs)
+			sounds.addAll(ff.sounds);
+
+		for (SoundEffect s : sounds)
+			s.stop();
+	}
+
 	public void keyPressed(KeyEvent e)
 	{
 		switch (e.getKeyCode())
 		{ // TODO sort to development-only keys
 		case KeyEvent.VK_BACK_SPACE:// Restart
+			stopAllSounds();
 			restart();
 			break;
 		case KeyEvent.VK_ESCAPE:// Exit
