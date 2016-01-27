@@ -79,7 +79,7 @@ public class Debris extends Drawable
 		velocity = Math.sqrt(xVel * xVel + yVel * yVel);
 	}
 
-	public void drawShadow(Graphics2D buffer, double shadowX, double shadowY)
+	public void trueDrawShadow(Graphics2D buffer, double shadowX, double shadowY)
 	{
 		if (z > 1)
 		{
@@ -89,7 +89,7 @@ public class Debris extends Drawable
 		}
 	}
 
-	public void draw(Graphics2D buffer, double cameraZed)
+	public void trueDraw(Graphics2D buffer, double cameraZed)
 	{
 		if (z <= cameraZed)
 		{

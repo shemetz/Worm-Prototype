@@ -6,7 +6,6 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.Polygon;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
@@ -283,7 +282,7 @@ public class Person extends RndPhysObj
 
 	public void initSounds()
 	{
-		sounds.add(new SoundEffect("scorched.wav")); // 0 - when a beam hits you
+		sounds.add(new SoundEffect("Scorched.wav")); // 0 - when a beam hits you
 		sounds.get(0).endUnlessMaintained = true;
 	}
 
@@ -771,7 +770,7 @@ public class Person extends RndPhysObj
 		}
 	}
 
-	public void drawShadow(Graphics2D buffer, double shadowX, double shadowY)
+	public void trueDrawShadow(Graphics2D buffer, double shadowX, double shadowY)
 	{
 		if (z > 0)
 		{
@@ -779,53 +778,6 @@ public class Person extends RndPhysObj
 			buffer.drawImage(shadow, (int) (x - image.getWidth() / 2 + shadowX * z), (int) (y - image.getHeight() / 2 + shadowY * z), null);
 			buffer.rotate(-rotation + 0.5 * Math.PI, (int) (x + shadowX * z), (int) (y + shadowY * z));
 		}
-	}
-
-	public void draw(Graphics2D buffer, double cameraZed)
-	{
-		if (intersectedPortal == null || intersectedPortal.partner == null)
-		{
-			trueDraw(buffer, cameraZed);
-			return;
-		}
-
-		// PORTAL INTERSECTION
-		Portal p = intersectedPortal;
-
-		double k = (p.end.x - p.start.x) * (this.y - p.start.y) - (p.end.y - p.start.y) * (this.x - p.start.x);
-		// k is >0 if this is below p, <0 if this is above p, or 0 if this is in the middle of p
-
-		Polygon clip = getClipOfPortal(p, k > 0);
-		buffer.setClip(clip);
-		trueDraw(buffer, cameraZed);
-		buffer.setClip(null);
-
-		clip = getClipOfPortal(p.partner, k <= 0);
-		buffer.setClip(clip);
-		buffer.translate(p.partner.x - p.x, p.partner.y - p.y);
-		buffer.translate(p.x, p.y);
-		buffer.rotate(p.partner.angle - p.angle);
-		buffer.translate(-p.x, -p.y);
-		trueDraw(buffer, cameraZed);
-		buffer.translate(p.x, p.y);
-		buffer.rotate(-p.partner.angle + p.angle);
-		buffer.translate(-p.x, -p.y);
-		buffer.translate(-p.partner.x + p.x, -p.partner.y + p.y);
-		buffer.setClip(null);
-	}
-
-	public Polygon getClipOfPortal(Portal p, boolean direction)
-	{
-
-		int k = direction ? 1 : -1;
-		Polygon clip = new Polygon();
-		clip.addPoint((int) (p.x - Math.cos(p.angle) * p.length * 1), (int) (p.y - Math.sin(p.angle) * p.length * 1));
-		clip.addPoint((int) (p.x + Math.cos(p.angle) * p.length * 1), (int) (p.y + Math.sin(p.angle) * p.length * 1));
-		clip.addPoint((int) (p.x + Math.cos(p.angle) * p.length * 1 + Math.cos(p.angle + Math.PI / 2) * p.length * 1 * k),
-				(int) (p.y + Math.sin(p.angle) * p.length * 1 + Math.sin(p.angle + Math.PI / 2) * p.length * 1 * k));
-		clip.addPoint((int) (p.x - Math.cos(p.angle) * p.length * 1 + Math.cos(p.angle + Math.PI / 2) * p.length * 1 * k),
-				(int) (p.y - Math.sin(p.angle) * p.length * 1 + Math.sin(p.angle + Math.PI / 2) * p.length * 1 * k));
-		return clip;
 	}
 
 	public void trueDraw(Graphics2D buffer, double cameraZed)

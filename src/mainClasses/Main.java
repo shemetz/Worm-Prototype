@@ -10,6 +10,7 @@ import java.awt.Image;
 import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.PointerInfo;
+import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.event.ActionEvent;
@@ -27,6 +28,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
 import java.awt.font.FontRenderContext;
+import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
@@ -544,12 +546,14 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		stuff.addAll(env.balls);
 		stuff.addAll(env.debris);
 		stuff.addAll(env.sprayDrops);
-		for (Portal p : env.portals)
+		for (Drawable d : stuff)
 		{
-			Line2D pLine = new Line2D.Double(p.start.x, p.start.y, p.end.x, p.end.y);
-			for (Drawable d : stuff)
+			Rectangle2D dRect = new Rectangle2D.Double(d.x - d.image.getWidth() / 2, d.y - d.image.getHeight() / 2, d.image.getWidth(), d.image.getHeight());
+			if (d.intersectedPortal != null && !env.portals.contains(d.intersectedPortal))
+				d.intersectedPortal = null;
+			for (Portal p : env.portals)
 			{
-				Rectangle2D dRect = new Rectangle2D.Double(d.x - d.image.getWidth() / 2, d.y - d.image.getHeight() / 2, d.image.getWidth(), d.image.getHeight());
+				Line2D pLine = new Line2D.Double(p.start.x, p.start.y, p.end.x, p.end.y);
 				if (dRect.intersectsLine(pLine))
 				{
 					// check if within portal
@@ -648,6 +652,9 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 	{
 		double angle = Math.atan2(p.target.y - p.y, p.target.x - p.x);
 
+		if (ability instanceof Portals)
+			if (((Portals) ability).holdTarget != null)
+				return;
 		// if the area isn't nice
 		if (!ability.rangeType.equals("Create in grid"))
 			if (ability.range != -1)
@@ -745,29 +752,72 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		{
 		case "portals":
 			Portals p = (Portals) ability;
+			if (p.holdTarget == null)
+				break;
 			if (p.p1 == null) // first portal - variable length
 			{
 				buffer.setStroke(dashedStroke3);
 				buffer.setColor(Color.orange);
 				double portalAngle = Math.atan2(player.target.y - p.holdTarget.y, player.target.x - p.holdTarget.x);
+				if (p.alignPortals) // snap to cardinal directions
+				{
+					double length = Math.min(p.maxPortalLength, Math.sqrt(Methods.DistancePow2(p.holdTarget.x, p.holdTarget.y, player.target.x, player.target.y)));
+					length = Math.max(p.minPortalLength, length);
+					portalAngle += Math.PI; // angle is between 0 and TAU
+					portalAngle = (int) ((portalAngle / Math.PI * 180 + 45) / 90) * 90 + 180;
+					portalAngle = portalAngle / 180 * Math.PI;
+				}
 				double length;
 				length = Math.min(p.maxPortalLength, Math.sqrt(Methods.DistancePow2(p.holdTarget.x, p.holdTarget.y, player.target.x, player.target.y)));
 				length = Math.max(p.minPortalLength, length);
 				buffer.drawLine((int) (p.holdTarget.x), (int) (p.holdTarget.y), (int) (p.holdTarget.x + length * Math.cos(portalAngle)), (int) (p.holdTarget.y + length * Math.sin(portalAngle)));
 			} else if (p.p2 == null)
 			{
-				buffer.setStroke(dashedStroke3);
-				buffer.setColor(Color.orange);
-				double portalAngle = Math.atan2(player.target.y - p.holdTarget.y, player.target.x - p.holdTarget.x);
 				double length = p.p1.length;
-				buffer.drawLine((int) (p.holdTarget.x), (int) (p.holdTarget.y), (int) (p.holdTarget.x + length * Math.cos(portalAngle)), (int) (p.holdTarget.y + length * Math.sin(portalAngle)));
-			} else
+				double portalAngle = Math.atan2(player.target.y - p.holdTarget.y, player.target.x - p.holdTarget.x);
+				Line2D newPortal = new Line2D.Double(p.holdTarget.x, p.holdTarget.y, p.holdTarget.x + length * Math.cos(portalAngle), p.holdTarget.y + length * Math.sin(portalAngle));
+				if (p.alignPortals) // parallel portals
+				{
+					double htx = (int) (player.target.x - p.p1.length / 2 * Math.cos(p.p1.angle));
+					double hty = (int) (player.target.y - p.p1.length / 2 * Math.sin(p.p1.angle));
+					portalAngle = p.p1.angle;
+					newPortal = new Line2D.Double(htx, hty, htx + length * Math.cos(portalAngle), hty + length * Math.sin(portalAngle));
+				}
+				if (p.portalsCollide(p.p1, new Portal(newPortal)))
+				{
+					double minDist = Math.sqrt(p.minimumDistanceBetweenPortalsPow2);
+					// rectangle
+					Polygon polygon = new Polygon();
+					polygon.addPoint((int) (p.p1.start.x + minDist * Math.cos(p.p1.angle + Math.PI / 2)), (int) (p.p1.start.y + minDist * Math.sin(p.p1.angle + Math.PI / 2)));
+					polygon.addPoint((int) (p.p1.start.x - minDist * Math.cos(p.p1.angle + Math.PI / 2)), (int) (p.p1.start.y - minDist * Math.sin(p.p1.angle + Math.PI / 2)));
+					polygon.addPoint((int) (p.p1.end.x - minDist * Math.cos(p.p1.angle + Math.PI / 2)), (int) (p.p1.end.y - minDist * Math.sin(p.p1.angle + Math.PI / 2)));
+					polygon.addPoint((int) (p.p1.end.x + minDist * Math.cos(p.p1.angle + Math.PI / 2)), (int) (p.p1.end.y + minDist * Math.sin(p.p1.angle + Math.PI / 2)));
+					Area a = new Area(polygon);
+					// two circles
+					Area e1 = new Area(new Ellipse2D.Double(p.p1.start.x - minDist, p.p1.start.y - minDist, minDist * 2, minDist * 2));
+					Area e2 = new Area(new Ellipse2D.Double(p.p1.end.x - minDist, p.p1.end.y - minDist, minDist * 2, minDist * 2));
+					a.add(e1);
+					a.add(e2);
+					buffer.setColor(new Color(255, 0, 0, 78));
+					buffer.fill(a);
+					buffer.setColor(Color.red);
+					buffer.setStroke(new BasicStroke(2));
+					buffer.draw(a);
+					buffer.setColor(Color.red);
+				} else
+					buffer.setColor(Color.orange);
+				buffer.setStroke(dashedStroke3);
+				buffer.drawLine((int) (newPortal.getX1()), (int) (newPortal.getY1()), (int) (newPortal.getX2()), (int) (newPortal.getY2()));
+			} else // Deleting portals
 			{
 				buffer.setStroke(new BasicStroke(3));
 				buffer.setColor(Color.orange);
 				int XArmLength = 50;
 				buffer.drawLine(player.target.x - XArmLength, player.target.y - XArmLength, player.target.x + XArmLength, player.target.y + XArmLength);
 				buffer.drawLine(player.target.x - XArmLength, player.target.y + XArmLength, player.target.x + XArmLength, player.target.y - XArmLength);
+				buffer.setColor(Color.red);
+				buffer.drawLine(p.p1.start.x, p.p1.start.y, p.p1.end.x, p.p1.end.y);
+				buffer.drawLine(p.p2.start.x, p.p2.start.y, p.p2.end.x, p.p2.end.y);
 			}
 			break;
 		case "explosion":
@@ -1526,7 +1576,15 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 					buffer.setColor(Color.cyan);
 					buffer.setStroke(new BasicStroke(2));
 					buffer.drawRect(x + (int) (1 * UIzoomLevel), y + (int) (1 * UIzoomLevel), (int) (59 * UIzoomLevel), (int) (59 * UIzoomLevel));
-				}
+				} else if (ability instanceof Portals)
+					if (((Portals) ability).p1 != null)
+					{
+						// draw half of the "on" sign
+						buffer.setColor(Color.cyan);
+						buffer.setStroke(new BasicStroke(2));
+						buffer.drawLine(x + (int) (1 * UIzoomLevel), y + (int) (1 * UIzoomLevel), x + (int) (1 * UIzoomLevel + 59 * UIzoomLevel), y + (int) (1 * UIzoomLevel));
+						buffer.drawLine(x + (int) (1 * UIzoomLevel), y + (int) (1 * UIzoomLevel), x + (int) (1 * UIzoomLevel), y + (int) (1 * UIzoomLevel + 59 * UIzoomLevel));
+					}
 
 				// current power
 				if (player.hotkeys[i] == player.abilityAiming || player.hotkeys[i] == player.abilityMaintaining || player.hotkeys[i] == player.abilityTryingToRepetitivelyUse)
@@ -2483,6 +2541,8 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 				} else if (player.abilityAiming != -1)
 				{
 					stopUsingPower = true;
+					// some abilities need to know that you stopped aiming them. specifically, the Portals ability.
+					player.abilities.get(player.abilityAiming).updatePlayerTargeting(env, player, player.target, 0);
 					player.abilityAiming = -1;
 				}
 			}

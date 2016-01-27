@@ -54,7 +54,7 @@ public class Ball extends RndPhysObj
 		return 0.6 * points * Ability.elementalAttackNumbers[elementNum][1] * mass / ballMass + 1; // balls deal an extra 1 pushback
 	}
 
-	public void drawShadow(Graphics2D buffer, double shadowX, double shadowY)
+	public void trueDrawShadow(Graphics2D buffer, double shadowX, double shadowY)
 	{
 		if (z > 1)
 		{
@@ -64,7 +64,7 @@ public class Ball extends RndPhysObj
 		}
 	}
 
-	public void draw(Graphics2D buffer, double cameraZed)
+	public void trueDraw(Graphics2D buffer, double cameraZed)
 	{
 		if (z <= cameraZed)
 		{

@@ -897,6 +897,7 @@ public class Environment
 
 			// Portals
 			for (Portal por : portals)
+				if (por.partner != null && por.highestPoint() > p.z && p.highestPoint() > por.z)
 			{
 				if (Methods.DistancePow2(por.start, p.Point()) < p.radius * p.radius)
 				{
@@ -934,6 +935,7 @@ public class Environment
 			double distanceRelativeToPortal = Math.sqrt(Methods.DistancePow2(intersectedPortal.x, intersectedPortal.y, p.x, p.y));
 			p.x = intersectedPortal.partner.x + distanceRelativeToPortal * Math.cos(angleRelativeToPortal + angleChange);
 			p.y = intersectedPortal.partner.y + distanceRelativeToPortal * Math.sin(angleRelativeToPortal + angleChange);
+			p.z = intersectedPortal.partner.z; //not quite, but who cares
 			p.rotation += angleChange;
 			double newAngle = p.angle() + angleChange;
 			double velocity = p.velocity();
