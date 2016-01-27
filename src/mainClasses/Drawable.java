@@ -10,6 +10,8 @@ public class Drawable
 	public double rotation = 0;
 	public double height; //z is the bottom or the middle of an object; height is the leftover.
 	public BufferedImage image, shadow;
+	public Portal intersectedPortal = null;
+	
 	public Drawable(){}
 	public void drawShadow(Graphics2D buffer, double shadowX, double shadowY)
 	{

@@ -6,6 +6,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.Polygon;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
@@ -109,7 +110,7 @@ public class Person extends RndPhysObj
 	{
 		super(x1, y1, 0, 0);
 		mass = 70; // TODO
-		radius = 48;
+		radius = 24;
 		id = Person.giveID();
 		commanderID = id;
 		z = 0; // Characters start standing on the ground, I think
@@ -782,7 +783,57 @@ public class Person extends RndPhysObj
 
 	public void draw(Graphics2D buffer, double cameraZed)
 	{
-		BufferedImage img = image;
+		if (intersectedPortal == null || intersectedPortal.partner == null)
+		{
+			trueDraw(buffer, cameraZed);
+			return;
+		}
+
+		// PORTAL INTERSECTION
+		Portal p = intersectedPortal;
+
+		double k = (p.end.x - p.start.x) * (this.y - p.start.y) - (p.end.y - p.start.y) * (this.x - p.start.x);
+		// k is >0 if this is below p, <0 if this is above p, or 0 if this is in the middle of p
+
+		Polygon clip = getClipOfPortal(p, k > 0);
+		buffer.setClip(clip);
+		trueDraw(buffer, cameraZed);
+		buffer.setClip(null);
+
+		clip = getClipOfPortal(p.partner, k <= 0);
+		buffer.setClip(clip);
+		buffer.translate(p.partner.x - p.x, p.partner.y - p.y);
+		buffer.translate(p.x, p.y);
+		buffer.rotate(p.partner.angle - p.angle);
+		buffer.translate(-p.x, -p.y);
+		trueDraw(buffer, cameraZed);
+		buffer.translate(p.x, p.y);
+		buffer.rotate(-p.partner.angle + p.angle);
+		buffer.translate(-p.x, -p.y);
+		buffer.translate(-p.partner.x + p.x, -p.partner.y + p.y);
+		buffer.setClip(null);
+	}
+
+	public Polygon getClipOfPortal(Portal p, boolean direction)
+	{
+
+		int k = direction ? 1 : -1;
+		Polygon clip = new Polygon();
+		clip.addPoint((int) (p.x - Math.cos(p.angle) * p.length * 1), (int) (p.y - Math.sin(p.angle) * p.length * 1));
+		clip.addPoint((int) (p.x + Math.cos(p.angle) * p.length * 1), (int) (p.y + Math.sin(p.angle) * p.length * 1));
+		clip.addPoint((int) (p.x + Math.cos(p.angle) * p.length * 1 + Math.cos(p.angle + Math.PI / 2) * p.length * 1 * k),
+				(int) (p.y + Math.sin(p.angle) * p.length * 1 + Math.sin(p.angle + Math.PI / 2) * p.length * 1 * k));
+		clip.addPoint((int) (p.x - Math.cos(p.angle) * p.length * 1 + Math.cos(p.angle + Math.PI / 2) * p.length * 1 * k),
+				(int) (p.y - Math.sin(p.angle) * p.length * 1 + Math.sin(p.angle + Math.PI / 2) * p.length * 1 * k));
+		return clip;
+	}
+
+	public void trueDraw(Graphics2D buffer, double cameraZed)
+	{
+		BufferedImage img = new BufferedImage(image.getWidth(), image.getHeight(), image.getType());
+		Graphics2D g = img.createGraphics();
+		g.drawImage(image, 0, 0, null);
+		g.dispose();
 		if (ghostMode)
 		{
 			if (z <= cameraZed) // when in Ghost Mode, people are drawn as if they are higher on the Z axis, in order to make them be drawn above walls. cameraZed will be 1 lower than actual.
@@ -952,7 +1003,7 @@ public class Person extends RndPhysObj
 		buffy.fillRect(0, 0, 96, 96);
 		buffy.dispose();
 
-		double factor = 0.6*Math.log(size);
+		double factor = 0.6 * Math.log(size);
 
 		buffer.translate(x, y);
 		buffer.scale(factor, factor);

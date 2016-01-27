@@ -2,18 +2,18 @@ package mainClasses;
 
 public class Player extends Person
 {
-	public int[]	hotkeys;								// Mid-Click, Shift, Q, E, R, F, V, C, X, Z
-	public String targetType = "";
-	
-	public boolean leftMousePressed;
-	public boolean						rightMousePressed		= false;
-	public boolean						leftPressed, rightPressed, upPressed, downPressed;
-	public boolean						ctrlPressed				= false;
-	public boolean						resizeUIButtonPressed	= false;
-	public boolean						spacePressed			= false;
-	public boolean						rotateButtonPressed		= false;
-	public boolean						successfulTarget;
-	
+	public int[]	hotkeys;											// Mid-Click, Shift, Q, E, R, F, V, C, X, Z
+	public String	targetType				= "";
+
+	public boolean	leftMousePressed;
+	public boolean	rightMousePressed		= false;
+	public boolean	leftPressed, rightPressed, upPressed, downPressed;
+	public boolean	ctrlPressed				= false;
+	public boolean	resizeUIButtonPressed	= false;
+	public boolean	spacePressed			= false;
+	public boolean	rotateButtonPressed		= false;
+	public boolean	successfulTarget;
+
 	// maybe hotkeys shouldn't belong to the player?
 
 	public Player(int x1, int y1)
@@ -27,9 +27,9 @@ public class Player extends Person
 	public void updateSubStats()
 	{
 		basicUpdateSubStats();
-		//TODO evasion
+		// TODO evasion
 	}
-	
+
 	public void updateAbilities()
 	{
 		selfFrame(0);

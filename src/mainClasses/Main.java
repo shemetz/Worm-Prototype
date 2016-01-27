@@ -46,6 +46,7 @@ import javax.swing.Timer;
 
 import abilities.ForceFieldAbility;
 import abilities.GridTargetingAbility;
+import abilities.Portals;
 import abilities.Protective_Bubble_I;
 import abilities.Sense_Powers;
 import abilities.Shield_E;
@@ -537,6 +538,31 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 				// possible TODO: flow from pools to other pools
 			}
 
+		// PORTALS
+		List<Drawable> stuff = new ArrayList<Drawable>();
+		stuff.addAll(env.people);
+		stuff.addAll(env.balls);
+		stuff.addAll(env.debris);
+		stuff.addAll(env.sprayDrops);
+		for (Portal p : env.portals)
+		{
+			Line2D pLine = new Line2D.Double(p.start.x, p.start.y, p.end.x, p.end.y);
+			for (Drawable d : stuff)
+			{
+				Rectangle2D dRect = new Rectangle2D.Double(d.x - d.image.getWidth() / 2, d.y - d.image.getHeight() / 2, d.image.getWidth(), d.image.getHeight());
+				if (dRect.intersectsLine(pLine))
+				{
+					// check if within portal
+					// weird method
+					boolean a = d.x < p.start.x == d.x > p.end.x; // = is the drawable's center between their X values
+					boolean b = d.y < p.start.y == d.y > p.end.y;// = is the drawable's center between their Y values
+					if (a || b)
+						d.intersectedPortal = p;
+				} else if (d.intersectedPortal != null && d.intersectedPortal.equals(p)) // if it used to be but no longer is
+					d.intersectedPortal = null;
+			}
+		}
+
 		// Updating pool transparencies due to damage, and spreading the damage around evenly
 		if (frameNum % 10 == 0)
 			env.updatePools();
@@ -616,7 +642,6 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		}
 		updateTargeting(player, ability);
 		ability.updatePlayerTargeting(env, player, player.target, 0);
-		print();
 	}
 
 	void updateTargeting(Person p, Ability ability)
@@ -712,12 +737,39 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		}
 	}
 
-	void drawAim(Graphics2D buffer, Player p)
+	void drawAim(Graphics2D buffer)
 	{
 		Ability ability = player.abilities.get(player.abilityAiming);
 
-		switch (p.targetType)
+		switch (player.targetType)
 		{
+		case "portals":
+			Portals p = (Portals) ability;
+			if (p.p1 == null) // first portal - variable length
+			{
+				buffer.setStroke(dashedStroke3);
+				buffer.setColor(Color.orange);
+				double portalAngle = Math.atan2(player.target.y - p.holdTarget.y, player.target.x - p.holdTarget.x);
+				double length;
+				length = Math.min(p.maxPortalLength, Math.sqrt(Methods.DistancePow2(p.holdTarget.x, p.holdTarget.y, player.target.x, player.target.y)));
+				length = Math.max(p.minPortalLength, length);
+				buffer.drawLine((int) (p.holdTarget.x), (int) (p.holdTarget.y), (int) (p.holdTarget.x + length * Math.cos(portalAngle)), (int) (p.holdTarget.y + length * Math.sin(portalAngle)));
+			} else if (p.p2 == null)
+			{
+				buffer.setStroke(dashedStroke3);
+				buffer.setColor(Color.orange);
+				double portalAngle = Math.atan2(player.target.y - p.holdTarget.y, player.target.x - p.holdTarget.x);
+				double length = p.p1.length;
+				buffer.drawLine((int) (p.holdTarget.x), (int) (p.holdTarget.y), (int) (p.holdTarget.x + length * Math.cos(portalAngle)), (int) (p.holdTarget.y + length * Math.sin(portalAngle)));
+			} else
+			{
+				buffer.setStroke(new BasicStroke(3));
+				buffer.setColor(Color.orange);
+				int XArmLength = 50;
+				buffer.drawLine(player.target.x - XArmLength, player.target.y - XArmLength, player.target.x + XArmLength, player.target.y + XArmLength);
+				buffer.drawLine(player.target.x - XArmLength, player.target.y + XArmLength, player.target.x + XArmLength, player.target.y - XArmLength);
+			}
+			break;
 		case "explosion":
 			buffer.setStroke(dashedStroke3);
 			buffer.setColor(Color.orange);
@@ -872,21 +924,14 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		}
 
 		player = new Player(96 * 20, 96 * 20);
+		player.abilities.add(Ability.ability("Portals", 5));
 		player.abilities.add(Ability.ability("Protective Bubble I", 5));
 		player.abilities.add(Ability.ability("Spray <Acid>", 5));
-		player.abilities.add(Ability.ability("Elemental Void", 5));
 		player.abilities.add(Ability.ability("Ball <Fire>", 5));
 		player.abilities.add(Ability.ability("Heal I", 5));
 		player.abilities.add(Ability.ability("Flight I", 5));
 		player.abilities.add(Ability.ability("Blink", 5));
 		player.abilities.add(Ability.ability("Beam <Energy>", 5));
-		player.abilities.add(Ability.ability("Ghost Mode I", 5));
-		player.abilities.add(Ability.ability("Sense Life", 5));
-		player.abilities.add(Ability.ability("Elemental Combat II <Earth>", 5));
-		player.updateAbilities(); // for the elemental combat
-		player.abilities.add(Ability.ability("Beam <Plant>", 5));
-		player.abilities.add(Ability.ability("Sense Powers", 4));
-		player.abilities.add(Ability.ability("Strong Force Field", 5));
 		player.updateAbilities(); // Because we added some abilities and the hotkeys haven't been updated
 		env.people.add(player);
 		camera = new Point3D((int) player.x, (int) player.y, (int) player.z + 25);
@@ -900,7 +945,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		shmulik.abilities.add(Ability.ability("Ball <Earth>", 6));
 		shmulik.abilities.add(Ability.ability("Heal I", 3));
 		shmulik.name = "Shmulik";
-		env.people.add(shmulik);
+		// env.people.add(shmulik);
 
 		Person tzippi = new NPC(96 * 15, 96 * 25, Strategy.PASSIVE);
 		// tzippi.trigger();
@@ -963,7 +1008,11 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 							a.use(env, p, p.target);
 							p.abilityTryingToRepetitivelyUse = abilityIndex;
 						} else
+						{
 							p.abilityAiming = abilityIndex; // straightforward
+							if (a instanceof Portals) // TODO make this for any ability that does stuff while aiming
+								a.updatePlayerTargeting(env, player, p.target, 0);
+						}
 					}
 				}
 				// if trying to use ability while repetitively trying another, doesn't work
@@ -1149,7 +1198,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		if (hotkeyHovered != -1 && player.hotkeys[hotkeyHovered] != -1)
 			drawRange(buffer, player.abilities.get(player.hotkeys[hotkeyHovered]));
 		if (player.abilityAiming != -1)
-			drawAim(buffer, player);
+			drawAim(buffer);
 
 		// temp
 		buffer.setColor(Color.red);

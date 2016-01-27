@@ -67,6 +67,7 @@ public class Environment
 	public List<Beam>				beams;
 	public List<Vine>				vines;
 	public List<SprayDrop>			sprayDrops;
+	public List<Portal>				portals;
 
 	// Sounds
 	public List<SoundEffect>		ongoingSounds		= new ArrayList<SoundEffect>();
@@ -102,6 +103,7 @@ public class Environment
 		beams = new ArrayList<Beam>();
 		vines = new ArrayList<Vine>();
 		sprayDrops = new ArrayList<SprayDrop>();
+		portals = new ArrayList<Portal>();
 
 		for (int x = 0; x < width; x++)
 			for (int y = 0; y < height; y++)
@@ -688,6 +690,11 @@ public class Environment
 
 	void movePerson(Person p, double deltaTime)
 	{
+		Portal intersectedPortal = p.intersectedPortal;
+		boolean startedAbovePortal = false;
+		if (intersectedPortal != null)
+			startedAbovePortal = (intersectedPortal.end.x - intersectedPortal.start.x) * (p.y - intersectedPortal.start.y) > (intersectedPortal.end.y - intersectedPortal.start.y)
+					* (p.x - intersectedPortal.start.x);
 		double velocityLeft = Math.sqrt(p.xVel * p.xVel + p.yVel * p.yVel) * deltaTime;
 
 		p.lastSpeed = velocityLeft / deltaTime;
@@ -696,7 +703,7 @@ public class Environment
 		// This function moves the physics object one pixel towards their direction, until they can't move anymore or they collide with something.
 		if (velocityLeft > 0)
 			p.insideWall = false; // pretty important
-		Rectangle2D personRect = new Rectangle2D.Double((int) p.x - p.radius / 2, (int) p.y - p.radius / 2, p.radius, p.radius); // for FF collisions
+		Rectangle2D personRect = new Rectangle2D.Double((int) p.x - p.radius, (int) p.y - p.radius, p.radius * 2, p.radius * 2); // for FF collisions
 		while (velocityLeft > 0)
 		{
 			if (velocityLeft < 1)
@@ -722,8 +729,8 @@ public class Environment
 
 			// check collisions with walls in the environment, locked to a grid
 			if (p.z <= 1)
-				for (int i = (int) (p.x - 0.5 * p.radius); velocityLeft > 0 && i / squareSize <= (int) (p.x + 0.5 * p.radius) / squareSize; i += squareSize)
-					for (int j = (int) (p.y - 0.5 * p.radius); velocityLeft > 0 && j / squareSize <= (int) (p.y + 0.5 * p.radius) / squareSize; j += squareSize)
+				for (int i = (int) (p.x - p.radius); velocityLeft > 0 && i / squareSize <= (int) (p.x + p.radius) / squareSize; i += squareSize)
+					for (int j = (int) (p.y - p.radius); velocityLeft > 0 && j / squareSize <= (int) (p.y + p.radius) / squareSize; j += squareSize)
 					{
 						if (wallTypes[i / squareSize][j / squareSize] != -1)
 						{
@@ -774,7 +781,7 @@ public class Environment
 			for (Person p2 : people)
 				if (!p.equals(p2))
 				{
-					Rectangle2D p2rect = new Rectangle2D.Double(p2.x - 0.5 * p2.radius, p2.y - 0.5 * p2.radius, p2.radius, p2.radius);
+					Rectangle2D p2rect = new Rectangle2D.Double(p2.x - p2.radius, p2.y - p2.radius, p2.radius * 2, p2.radius * 2);
 					if (personRect.intersects(p2rect)) // collision check
 					{
 						if (p2.highestPoint() > p.z && p2.z < p.highestPoint())
@@ -819,7 +826,7 @@ public class Environment
 				{
 					boolean collidedWithACorner = false;
 					for (Point p1 : ff.p)
-						if (p1.x > p.x - p.radius / 2 && p1.x < p.x + p.radius / 2 && p1.y > p.y - p.radius / 2 && p1.y < p.y + p.radius / 2)
+						if (p1.x > p.x - p.radius && p1.x < p.x + p.radius && p1.y > p.y - p.radius && p1.y < p.y + p.radius)
 						{
 							collidedWithACorner = true;
 							// hitting corners just reverses the person's movement
@@ -888,10 +895,52 @@ public class Environment
 
 			}
 
+			// Portals
+			for (Portal por : portals)
+			{
+				if (Methods.DistancePow2(por.start, p.Point()) < p.radius * p.radius)
+				{
+					p.x -= moveQuantumX;
+					p.y -= moveQuantumY;
+					double angle = Math.atan2(p.y - por.start.y, p.x - por.start.x);
+					p.xVel += 11.32 * Math.cos(angle);
+					p.yVel += 11.32 * Math.sin(angle);
+				}
+				if (Methods.DistancePow2(por.end, p.Point()) < p.radius * p.radius)
+				{
+					p.x -= moveQuantumX;
+					p.y -= moveQuantumY;
+					double angle = Math.atan2(p.y - por.end.y, p.x - por.end.x);
+					p.xVel += 11.32 * Math.cos(angle);
+					p.yVel += 11.32 * Math.sin(angle);
+				}
+			}
+
 			if (velocityLeft < 1) // continue
 				velocityLeft = 0;
-			personRect = new Rectangle2D.Double((int) p.x - p.radius / 2, (int) p.y - p.radius / 2, p.radius, p.radius);
+			personRect = new Rectangle2D.Double((int) p.x - p.radius, (int) p.y - p.radius, p.radius * 2, p.radius * 2);
 		}
+
+		// check if person passed through a Portal
+		boolean endedAbovePortal = false;
+		if (intersectedPortal != null)
+			endedAbovePortal = (intersectedPortal.end.x - intersectedPortal.start.x) * (p.y - intersectedPortal.start.y) > (intersectedPortal.end.y - intersectedPortal.start.y)
+					* (p.x - intersectedPortal.start.x);
+		if (startedAbovePortal != endedAbovePortal && intersectedPortal.partner != null)
+		{
+			// Portal teleport!
+			double angleChange = intersectedPortal.partner.angle - intersectedPortal.angle;
+			double angleRelativeToPortal = Math.atan2(p.y - intersectedPortal.y, p.x - intersectedPortal.x);
+			double distanceRelativeToPortal = Math.sqrt(Methods.DistancePow2(intersectedPortal.x, intersectedPortal.y, p.x, p.y));
+			p.x = intersectedPortal.partner.x + distanceRelativeToPortal * Math.cos(angleRelativeToPortal + angleChange);
+			p.y = intersectedPortal.partner.y + distanceRelativeToPortal * Math.sin(angleRelativeToPortal + angleChange);
+			p.rotation += angleChange;
+			double newAngle = p.angle() + angleChange;
+			double velocity = p.velocity();
+			p.xVel = velocity * Math.cos(newAngle);
+			p.yVel = velocity * Math.sin(newAngle);
+		}
+
 		// extra check for insideWall, in case you stand still
 		if (p.ghostMode && p.z < 1)
 			for (int i = (int) (p.x - 0.5 * p.radius); i / squareSize <= (int) (p.x + 0.5 * p.radius) / squareSize; i += squareSize)
@@ -2652,6 +2701,7 @@ public class Environment
 		drawableThings.addAll(beams);
 		drawableThings.addAll(vines);
 		drawableThings.addAll(sprayDrops);
+		drawableThings.addAll(portals);
 		Predicate<Drawable> outOfScreen = new Predicate<Drawable>()
 		{
 			public boolean test(Drawable arg0)
@@ -2681,6 +2731,7 @@ public class Environment
 		};
 		drawableThings.removeIf(outOfScreen);
 		Collections.sort(drawableThings, sortDrawablesbyHeight);
+
 		// Clouds, people, balls, force fields, debris, arc force fields, beams, vines, drops
 		drawDrawables(buffer, cameraZed, cameraRotation, drawableThings, -1, 1);
 
@@ -2800,6 +2851,18 @@ public class Environment
 				// dev-mode debugging unimportant drawings:
 				if (devMode) // draws helpful things in the x,y of the object. (NOT Z AXIS)
 				{
+					if (d instanceof Portal)
+					{
+						Portal p = (Portal) d;
+						if (p.partner != null)
+						{
+							buffer.setStroke(new BasicStroke(2));
+							buffer.setColor(Color.red);
+							buffer.drawLine((int) p.start.x, (int) p.start.y, (int) p.partner.start.x, (int) p.partner.start.y);
+							buffer.setColor(Color.orange);
+							buffer.drawLine((int) p.end.x, (int) p.end.y, (int) p.partner.end.x, (int) p.partner.end.y);
+						}
+					}
 					if (d instanceof Vine)
 					{
 						Vine v = (Vine) d;
@@ -2853,9 +2916,9 @@ public class Environment
 						buffer.setColor(Color.green);
 						buffer.drawRect((int) (p.x - 1), (int) (p.y - 1), 3, 3);
 						// hitbox
-						buffer.drawRect((int) (p.x - 0.5 * p.radius), (int) (p.y - 0.5 * p.radius), p.radius, p.radius);
+						buffer.drawRect((int) (p.x - p.radius), (int) (p.y - p.radius), p.radius * 2, p.radius * 2);
 						// radius
-						buffer.drawOval((int) (p.x - 0.5 * p.radius), (int) (p.y - 0.5 * p.radius), p.radius, p.radius);
+						buffer.drawOval((int) (p.x - p.radius), (int) (p.y - p.radius), p.radius * 2, p.radius * 2);
 						// target
 						buffer.setColor(Color.red);
 						buffer.drawOval(p.target.x - 10, p.target.y - 10, 20, 20);
@@ -2876,9 +2939,9 @@ public class Environment
 						buffer.setColor(new Color(160, 255, 160));
 						buffer.drawRect((int) (p.x - 1), (int) (p.y - 1), 3, 3);
 						// hitbox
-						buffer.drawRect((int) (p.x - 0.5 * p.radius), (int) (p.y - 0.5 * p.radius), p.radius, p.radius);
+						buffer.drawRect((int) (p.x - p.radius), (int) (p.y - p.radius), p.radius * 2, p.radius * 2);
 						// radius
-						buffer.drawOval((int) (p.x - 0.5 * p.radius), (int) (p.y - 0.5 * p.radius), p.radius, p.radius);
+						buffer.drawOval((int) (p.x - p.radius), (int) (p.y - p.radius), p.radius * 2, p.radius * 2);
 						// target
 						buffer.setColor(new Color(255, 160, 160));
 						buffer.drawOval(p.target.x - 10, p.target.y - 10, 20, 20);
