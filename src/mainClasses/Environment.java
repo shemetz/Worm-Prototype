@@ -2036,6 +2036,24 @@ public class Environment
 			}
 		}
 
+		// Portals - 6
+		Portal collidedPortal = null;
+		double minimumDistanceFromStart = 10; //to avoid post-portal beams hitting their own exit portal
+		for (Portal p : portals)
+		{
+			if (p.partner != null && p.highestPoint() > b.z && b.highestPoint() > p.z && beamLine.intersectsLine(p.Line2D()))
+			{
+				Point2D intersection = Methods.getSegmentIntersection(beamLine, p.Line2D());
+				if (intersection != null)
+					if (Methods.DistancePow2(b.start, intersection) > minimumDistanceFromStart*minimumDistanceFromStart)
+				{
+					collisionLine = p.Line2D();
+					collisionType = 6;
+					collidedPortal = p;
+				}
+			}
+		}
+
 		if (collisionType == -1)
 		{
 			b.endType = 0;
@@ -2158,6 +2176,24 @@ public class Environment
 			collidedVine.life -= b.getDamage();
 			// TODO vine plant debris
 			break;
+		case 6: // Portal
+			b.end.x = roundedIntersectionPoint.x;
+			b.end.y = roundedIntersectionPoint.y;
+			b.endType = 1;
+			boolean sideOfPortal = (b.x - collidedPortal.start.x) * Math.sin(b.angle()) > (b.y - collidedPortal.y) * Math.cos(b.angle());
+			b.endAngle = collidedPortal.angle + (sideOfPortal ? TAU / 4 : -TAU / 4);
+
+			if (recursive)
+			{
+				b2 = getPortaledBeam(b, collidedPortal, roundedIntersectionPoint);
+
+				if (b2 != null)
+				{
+					beams.add(b2);
+					moveBeam(b2, true, deltaTime); // Recursion!!!
+				}
+			}
+			break;
 		default:
 			Main.errorMessage("Dragon and Defiant, sitting in a tree, K-I-S-S-I-S-S-I-P-P-I");
 			break;
@@ -2183,6 +2219,27 @@ public class Environment
 			return null;
 		Beam b2 = new Beam(b.creator, b.theAbility, new Point3D((int) (b.end.x + startDistance * Math.cos(newBeamAngle)), (int) (b.end.y + startDistance * Math.sin(newBeamAngle)), b.end.z - 0.01),
 				new Point3D((int) (b.end.x + newRange * Math.cos(newBeamAngle)), (int) (b.end.y + newRange * Math.sin(newBeamAngle)), b.end.z - 0.01), b.elementNum, b.points, newRange);
+		b2.frameNum = b.frameNum;
+		b2.isChild = true;
+		return b2;
+	}
+
+	Beam getPortaledBeam(Beam b, Portal p, Point intersection)
+	{
+		double beamLength = Math.sqrt(Math.pow(b.end.x - b.start.x, 2) + Math.pow(b.end.y - b.start.y, 2)); // Should work
+		double newRange = b.range - beamLength;
+		if (newRange < 0) // because bugs
+			return null;
+		double newBeamAngle = b.angle() + p.partner.angle - p.angle;
+		final double startDistance = 10; // Extra distance from partner portal
+		double angleRelativeToPartner = Math.atan2(intersection.y - p.y, intersection.x - p.x) + p.partner.angle - p.angle;
+		double distanceToPortalCenter = Math.sqrt(Methods.DistancePow2(p.x, p.y, b.end.x, b.end.y));
+		Beam b2 = new Beam(b.creator, b.theAbility,
+				new Point3D((int) (p.partner.x + distanceToPortalCenter * Math.cos(angleRelativeToPartner) + startDistance * Math.cos(newBeamAngle)),
+						(int) (p.partner.y + distanceToPortalCenter * Math.sin(angleRelativeToPartner) + startDistance * Math.sin(newBeamAngle)), b.end.z + p.partner.z - p.z - 0.01),
+				new Point3D((int) (p.partner.x + distanceToPortalCenter * Math.cos(angleRelativeToPartner) + (startDistance + newRange) * Math.cos(newBeamAngle)),
+						(int) (p.partner.y + distanceToPortalCenter * Math.sin(angleRelativeToPartner) + (startDistance + newRange) * Math.sin(newBeamAngle)), b.end.z + p.partner.z - p.z - 0.01),
+				b.elementNum, b.points, newRange);
 		b2.frameNum = b.frameNum;
 		b2.isChild = true;
 		return b2;
@@ -2826,7 +2883,7 @@ public class Environment
 				if (d1 instanceof Portal && d2.highestPoint() > d1.z)
 					i1 = -1.0; // Portals are always drawn underneath other things in same Z
 				if (d2 instanceof Portal && d1.highestPoint() > d2.z)
-					i2 = -1.0; // 
+					i2 = -1.0; //
 				return i1.compareTo(i2);
 			}
 		};

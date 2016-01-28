@@ -46,6 +46,11 @@ public class Portal extends Drawable
 		return new Line2D.Double(start.x, start.y, end.x, end.y);
 	}
 
+	public Line2D OtherLine2D()
+	{
+		return new Line2D.Double(end.x, end.y, start.x, start.y);
+	}
+
 	public void drawShadow(Graphics2D buffer, double shadowX, double shadowY)
 	{
 

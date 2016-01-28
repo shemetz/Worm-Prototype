@@ -574,6 +574,26 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 					d.intersectedPortal = null;
 			}
 		}
+		for (Beam b : env.beams)
+		{
+			double minDist = b.size * 20 * 1.414;
+			for (Portal p : env.portals)
+			{
+				boolean intersects = false;
+				Point2D closestPointOnLine = Methods.getClosestPointOnLine(p.start.x, p.start.y, p.end.x, p.end.y, b.start.x, b.start.y);
+				Point2D closestPointOnSegment = Methods.getClosestPointOnSegment(p.start.x, p.start.y, p.end.x, p.end.y, b.start.x, b.start.y);
+				if (closestPointOnLine.equals(closestPointOnSegment) && Methods.DistancePow2(b.start, closestPointOnLine) < minDist*minDist)
+						intersects = true;
+				closestPointOnLine = Methods.getClosestPointOnLine(p.start.x, p.start.y, p.end.x, p.end.y, b.end.x, b.end.y);
+				closestPointOnSegment = Methods.getClosestPointOnSegment(p.start.x, p.start.y, p.end.x, p.end.y, b.end.x, b.end.y);
+				if (closestPointOnLine.equals(closestPointOnSegment))
+						intersects = true;
+				if (intersects)
+					b.intersectedPortal = p;
+				else if (b.intersectedPortal != null && b.intersectedPortal.equals(p)) // if it used to be but no longer is
+					b.intersectedPortal = null;
+			}
+		}
 
 		// Updating pool transparencies due to damage, and spreading the damage around evenly
 		if (frameNum % 10 == 0)
