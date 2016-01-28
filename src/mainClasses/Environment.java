@@ -1022,7 +1022,7 @@ public class Environment
 				double distanceRelativeToPortal = Math.sqrt(Methods.DistancePow2(intersectedPortal.x, intersectedPortal.y, p.x, p.y));
 				p.x = intersectedPortal.partner.x + distanceRelativeToPortal * Math.cos(angleRelativeToPortal + angleChange);
 				p.y = intersectedPortal.partner.y + distanceRelativeToPortal * Math.sin(angleRelativeToPortal + angleChange);
-				p.z = intersectedPortal.partner.z; // not quite, but who cares
+				p.z += intersectedPortal.partner.z - intersectedPortal.z;
 				p.rotation += angleChange;
 				double newAngle = p.angle() + angleChange;
 				double velocity = p.velocity();
@@ -1553,6 +1553,17 @@ public class Environment
 					}
 				}
 		}
+		
+		//7 Portals
+		Portal collidedPortal = null;
+		for (Portal p: portals)
+			if (v.z < p.highestPoint() && v.highestPoint() > p.z)
+				if (vineLine.intersectsLine(collidedPortal.Line2D()))
+				{
+					collidedPortal = p;
+					collisionType = 7;
+					intersectionPoint = Methods.getLineLineIntersection(collidedPortal.Line2D(), vineLine);
+				}
 
 		if (collisionType == -1)
 			return;
@@ -1634,6 +1645,14 @@ public class Environment
 			break;
 		case 6: // ball (intersected)
 			v.rotate(originalAngle, deltaTime * 2);
+			v.fixPosition();
+			break;
+		case 7: //portal
+			v.retract();
+			v.end.x = roundedIntersectionPoint.x;
+			v.end.y = roundedIntersectionPoint.y;
+			if (v.state != 2)
+				v.retract();
 			v.fixPosition();
 			break;
 		default:

@@ -25,7 +25,7 @@ public class Portal extends Drawable
 		x = x_;
 		y = y_;
 		z = z_;
-		height = 10;// a lot
+		height = 1;
 		angle = angle1;
 		length = length1;
 		start = new Point3D((int) (x - Math.cos(angle) * length * 0.5), (int) (y - Math.sin(angle) * length * 0.5), z);

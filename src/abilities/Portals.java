@@ -28,6 +28,7 @@ public class Portals extends Ability
 		cooldown = 0;
 		range = 1000;
 		rangeType = "Ranged circular area";
+		toggleable = true;
 
 		alignPortals = false;
 		p1 = null;
@@ -40,10 +41,14 @@ public class Portals extends Ability
 	public void use(Environment env, Person user, Point target)
 	{
 		if (holdTarget == null)
+		{
+			alignPortals = false;
 			return;
+		}
 		if (p2 != null)
 		{
 			removePortals(env);
+			alignPortals = false;
 			holdTarget = null;
 			return;
 		}
@@ -91,6 +96,7 @@ public class Portals extends Ability
 				}
 			}
 		}
+		alignPortals = false;
 		holdTarget = null;
 	}
 
@@ -122,16 +128,17 @@ public class Portals extends Ability
 	{
 
 	}
+	
+	public void toggle()
+	{
+		alignPortals = !alignPortals;
+	}
 
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
 	{
 		player.targetType = "portals";
 		if (holdTarget == null) // when starting to hold mouse
 			holdTarget = new Point(target.x, target.y);
-		if (player.leftMousePressed) // Parallel portals
-			alignPortals = true;
-		else
-			alignPortals = false;
 		if (player.rightMousePressed) // cancel
 			holdTarget = null;
 	}

@@ -557,17 +557,18 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 			{
 				Line2D pLine = new Line2D.Double(p.start.x, p.start.y, p.end.x, p.end.y);
 				boolean intersects = false;
-				if (dRect.intersectsLine(pLine))
-				{
-					// check if within portal
-					Point2D closestPointOnLine = Methods.getClosestPointOnLine(p.start.x, p.start.y, p.end.x, p.end.y, d.x, d.y);
-					Point2D closestPointOnSegment = Methods.getClosestPointOnSegment(p.start.x, p.start.y, p.end.x, p.end.y, d.x, d.y);
-					if (closestPointOnLine.equals(closestPointOnSegment))
+				if (d.z < p.highestPoint() && p.z < d.highestPoint())
+					if (dRect.intersectsLine(pLine))
 					{
-						if (Methods.DistancePow2(p.start, closestPointOnSegment) > d.radius * d.radius && Methods.DistancePow2(p.end, closestPointOnSegment) > d.radius * d.radius)
-							intersects = true;
+						// check if within portal
+						Point2D closestPointOnLine = Methods.getClosestPointOnLine(p.start.x, p.start.y, p.end.x, p.end.y, d.x, d.y);
+						Point2D closestPointOnSegment = Methods.getClosestPointOnSegment(p.start.x, p.start.y, p.end.x, p.end.y, d.x, d.y);
+						if (closestPointOnLine.equals(closestPointOnSegment))
+						{
+							if (Methods.DistancePow2(p.start, closestPointOnSegment) > d.radius * d.radius && Methods.DistancePow2(p.end, closestPointOnSegment) > d.radius * d.radius)
+								intersects = true;
+						}
 					}
-				}
 				if (intersects)
 					d.intersectedPortal = p;
 				else if (d.intersectedPortal != null && d.intersectedPortal.equals(p)) // if it used to be but no longer is
@@ -582,12 +583,12 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 				boolean intersects = false;
 				Point2D closestPointOnLine = Methods.getClosestPointOnLine(p.start.x, p.start.y, p.end.x, p.end.y, b.start.x, b.start.y);
 				Point2D closestPointOnSegment = Methods.getClosestPointOnSegment(p.start.x, p.start.y, p.end.x, p.end.y, b.start.x, b.start.y);
-				if (closestPointOnLine.equals(closestPointOnSegment) && Methods.DistancePow2(b.start, closestPointOnLine) < minDist*minDist)
-						intersects = true;
+				if (closestPointOnLine.equals(closestPointOnSegment) && Methods.DistancePow2(b.start, closestPointOnLine) < minDist * minDist)
+					intersects = true;
 				closestPointOnLine = Methods.getClosestPointOnLine(p.start.x, p.start.y, p.end.x, p.end.y, b.end.x, b.end.y);
 				closestPointOnSegment = Methods.getClosestPointOnSegment(p.start.x, p.start.y, p.end.x, p.end.y, b.end.x, b.end.y);
 				if (closestPointOnLine.equals(closestPointOnSegment))
-						intersects = true;
+					intersects = true;
 				if (intersects)
 					b.intersectedPortal = p;
 				else if (b.intersectedPortal != null && b.intersectedPortal.equals(p)) // if it used to be but no longer is
@@ -1236,7 +1237,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 
 	void paintBuffer(Graphics g)
 	{
-		// NOTICE! THE ORDER OF DRAWING OPERATIONS IS ACTUALY IMPORTANT!
+		// NOTICE! THE ORDER OF DRAWING OPERATIONS IS ACTUALLY IMPORTANT!
 		Graphics2D buffer = (Graphics2D) g;
 		zoomLevel /= (player.z * heightZoomRatio + 1);
 		// Move "camera" to position
@@ -2557,6 +2558,11 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		if (me.getButton() == MouseEvent.BUTTON1) // Left Click
 		{
 			player.leftMousePressed = true;
+
+			if (player.abilityAiming != -1 && player.abilities.get(player.abilityAiming).toggleable)
+				player.abilities.get(player.abilityAiming).toggle();
+			else if (hotkeySelected != -1 && player.abilities.get(player.hotkeys[hotkeySelected]).toggleable)
+				player.abilities.get(player.hotkeys[hotkeySelected]).toggle();
 		}
 		if (me.getButton() == MouseEvent.BUTTON2) // Mid Click
 		{

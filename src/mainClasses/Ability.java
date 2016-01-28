@@ -66,6 +66,7 @@ public class Ability
 	protected double				areaRadius;																						// radius of area of effect of ability.
 	protected boolean				instant;																						// Instant abilities don't aim, they immediately activate after a single click. Maintained abilities are always
 																																	// instant.
+	public boolean					toggleable;
 	protected boolean				maintainable;																					// Maintained abilities are instant, and require you to continue holding the button to use them (they're continuous
 																																	// abilities).
 	protected boolean				stopsMovement;																					// Does the power stop the person from moving?
@@ -129,6 +130,7 @@ public class Ability
 		instant = false;
 		maintainable = false;
 		stopsMovement = false;
+		toggleable = false;
 		on = false;
 		costType = "none";
 		timeLeft = 0;
@@ -137,6 +139,11 @@ public class Ability
 		elementNum = getElementNum();
 	}
 
+	public void toggle()
+	{
+		Main.errorMessage("Toggleable ability was toggled, but the toggle method that toggled was not overridden. toggle.  (ability is "+name+")");
+	}
+	
 	void addTags()
 	{
 		// tags
@@ -351,10 +358,10 @@ public class Ability
 
 	public void setSounds(Point point)
 	{
-		for (SoundEffect s: sounds)
+		for (SoundEffect s : sounds)
 			s.setPosition(point);
 	}
-	
+
 	public static void initializeDescriptions()
 	{
 		try
