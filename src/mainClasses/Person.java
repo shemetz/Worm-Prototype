@@ -88,6 +88,7 @@ public class Person extends RndPhysObj
 	public double						lastSpeed							= 0;							// used for ease of calculation sometimes.
 	public boolean						holdingVine							= false;						// true if the person is using a Plant Beam (vine) and grabbling an enemy.
 	public double						flySpeed							= -1;
+	public double						timeSincePortal						= 0;
 
 	// for continuous inaccuracy stuff like beams
 	public double						inaccuracyAngle						= 0;
@@ -663,6 +664,8 @@ public class Person extends RndPhysObj
 			timeSinceLastHit += deltaTime;
 		if (timeBetweenDamageTexts < 60)
 			timeBetweenDamageTexts += deltaTime;
+		if (timeSincePortal > 0)
+			timeSincePortal -= deltaTime;
 
 		if (prone)
 		{

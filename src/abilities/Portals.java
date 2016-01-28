@@ -34,7 +34,7 @@ public class Portals extends Ability
 		p2 = null;
 		minPortalLength = 100;
 		maxPortalLength = 2000;
-		minimumDistanceBetweenPortalsPow2 = 100 * 100;
+		minimumDistanceBetweenPortalsPow2 = 80 * 80;
 	}
 
 	public void use(Environment env, Person user, Point target)

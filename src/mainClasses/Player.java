@@ -2,17 +2,19 @@ package mainClasses;
 
 public class Player extends Person
 {
-	public int[]	hotkeys;											// Mid-Click, Shift, Q, E, R, F, V, C, X, Z
-	public String	targetType				= "";
+	public int[]		hotkeys;											// Mid-Click, Shift, Q, E, R, F, V, C, X, Z
+	public String		targetType				= "";
 
-	public boolean	leftMousePressed;
-	public boolean	rightMousePressed		= false;
-	public boolean	leftPressed, rightPressed, upPressed, downPressed;
-	public boolean	ctrlPressed				= false;
-	public boolean	resizeUIButtonPressed	= false;
-	public boolean	spacePressed			= false;
-	public boolean	rotateButtonPressed		= false;
-	public boolean	successfulTarget;
+	public boolean		leftMousePressed;
+	public boolean		rightMousePressed		= false;
+	public boolean		leftPressed, rightPressed, upPressed, downPressed;
+	public boolean		ctrlPressed				= false;
+	public boolean		resizeUIButtonPressed	= false;
+	public boolean		spacePressed			= false;
+	public boolean		rotateButtonPressed		= false;
+	public boolean		successfulTarget;
+	public double		movementAxisRotation	= 0;
+	public boolean[]	wasdPortalArray;									// used to disable/enable movement axis rotation
 
 	// maybe hotkeys shouldn't belong to the player?
 
@@ -22,6 +24,9 @@ public class Player extends Person
 		hotkeys = new int[10];
 		for (int i = 0; i < 10; i++)
 			hotkeys[i] = -1;
+		wasdPortalArray = new boolean[4];
+		for (int i = 0; i < 4; i++)
+			wasdPortalArray[i] = false;
 	}
 
 	public void updateSubStats()

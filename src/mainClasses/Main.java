@@ -31,6 +31,7 @@ import java.awt.font.FontRenderContext;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.RenderedImage;
 import java.io.File;
@@ -177,6 +178,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		{
 			Debris d = env.debris.get(i);
 			d.update(deltaTime);
+			env.moveDebris(d, deltaTime);
 			if (d.velocity <= 35 && d.timeLeft <= 0)
 			{
 				env.debris.remove(i);
@@ -554,15 +556,21 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 			for (Portal p : env.portals)
 			{
 				Line2D pLine = new Line2D.Double(p.start.x, p.start.y, p.end.x, p.end.y);
+				boolean intersects = false;
 				if (dRect.intersectsLine(pLine))
 				{
 					// check if within portal
-					// weird method
-					boolean a = d.x < p.start.x == d.x > p.end.x; // = is the drawable's center between their X values
-					boolean b = d.y < p.start.y == d.y > p.end.y;// = is the drawable's center between their Y values
-					if (a || b)
-						d.intersectedPortal = p;
-				} else if (d.intersectedPortal != null && d.intersectedPortal.equals(p)) // if it used to be but no longer is
+					Point2D closestPointOnLine = Methods.getClosestPointOnLine(p.start.x, p.start.y, p.end.x, p.end.y, d.x, d.y);
+					Point2D closestPointOnSegment = Methods.getClosestPointOnSegment(p.start.x, p.start.y, p.end.x, p.end.y, d.x, d.y);
+					if (closestPointOnLine.equals(closestPointOnSegment))
+					{
+						if (Methods.DistancePow2(p.start, closestPointOnSegment) > d.radius * d.radius && Methods.DistancePow2(p.end, closestPointOnSegment) > d.radius * d.radius)
+							intersects = true;
+					}
+				}
+				if (intersects)
+					d.intersectedPortal = p;
+				else if (d.intersectedPortal != null && d.intersectedPortal.equals(p)) // if it used to be but no longer is
 					d.intersectedPortal = null;
 			}
 		}
@@ -1576,7 +1584,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 					buffer.setColor(Color.cyan);
 					buffer.setStroke(new BasicStroke(2));
 					buffer.drawRect(x + (int) (1 * UIzoomLevel), y + (int) (1 * UIzoomLevel), (int) (59 * UIzoomLevel), (int) (59 * UIzoomLevel));
-				} else if (ability instanceof Portals)
+				} else if (ability instanceof Portals) // if portals ability
 					if (((Portals) ability).p1 != null)
 					{
 						// draw half of the "on" sign
@@ -1735,10 +1743,23 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 			vertAccel++;
 		if (player.rightPressed)
 			horiAccel++;
+		if (player.timeSincePortal > 0.05)
+		{
+			player.wasdPortalArray[0] = player.upPressed;
+			player.wasdPortalArray[1] = player.leftPressed;
+			player.wasdPortalArray[2] = player.downPressed;
+			player.wasdPortalArray[3] = player.rightPressed;
+		} else if (player.movementAxisRotation != 0)
+		{
+			if ((player.wasdPortalArray[0] != player.upPressed) || (player.wasdPortalArray[1] != player.leftPressed) || (player.wasdPortalArray[2] != player.downPressed)
+					|| (player.wasdPortalArray[3] != player.rightPressed))
+				player.movementAxisRotation = 0;
+		}
 		if (horiAccel == 0 && vertAccel == 0)
 		{
 			player.strengthOfAttemptedMovement = 0;
 			player.flyDirection = 0;
+			player.movementAxisRotation = 0; // If you stop, portal sickness cancels
 			if (player.leftMousePressed && !player.maintaining && !player.dead)
 			{
 				// rotate to where mouse point is
@@ -1748,7 +1769,11 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		} else
 		{
 			player.strengthOfAttemptedMovement = 1;
-			player.directionOfAttemptedMovement = Math.atan2(vertAccel, horiAccel) + cameraRotation;
+			player.directionOfAttemptedMovement = Math.atan2(vertAccel, horiAccel) + cameraRotation + player.movementAxisRotation;
+
+			// Reduce effect of portal axis change. Commented out because "keep moving until you release keys" feels better.
+			// if (player.movementAxisRotation > 0)
+			// player.movementAxisRotation += (((((0 - player.movementAxisRotation) % (Math.PI * 2)) + (Math.PI * 3)) % (Math.PI * 2)) - Math.PI) * 3 * 0.02 * (0.5 - player.timeSincePortal);
 
 			if (player.spacePressed && !player.ctrlPressed)
 				player.flyDirection = 1;

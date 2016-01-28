@@ -23,6 +23,7 @@ public class Debris extends Drawable
 		velocity *= Main.random.nextDouble() * 1.4 + 0.3;
 		image = Resources.debris[elementNum][type];
 		shadow = Resources.debrisShadows[elementNum][type];
+		radius = image.getWidth() / 2;
 	}
 
 	public Debris(double x1, double y1, double z1, double a1, int e1, boolean unMoving, double timeLeft1)
@@ -41,6 +42,7 @@ public class Debris extends Drawable
 			velocity = 0;
 			image = Resources.debris[elementNum][type];
 			shadow = Resources.debrisShadows[elementNum][type];
+			radius = image.getWidth() / 2;
 
 			timeLeft = timeLeft1;
 		} else
@@ -60,8 +62,6 @@ public class Debris extends Drawable
 			}
 		} else
 		{
-			x += velocity * Math.cos(angle) * deltaTime;
-			y += velocity * Math.sin(angle) * deltaTime;
 			velocity -= 2.4 * deltaTime * velocity;
 			if (type == 1 || type == 4)
 				rotation += 4 * Math.PI * deltaTime; // temp ?

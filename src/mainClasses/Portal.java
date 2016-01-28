@@ -15,26 +15,32 @@ public class Portal extends Drawable
 	public double	angle;
 	public Point3D	start;
 	public Point3D	end;
+	boolean			blackOrWhite;
+	Color			black	= Color.black;
+	Color			white	= Color.white;
+	double			slope;
 
 	public Portal(double x_, double y_, double z_, double angle1, double length1)
 	{
 		x = x_;
 		y = y_;
 		z = z_;
-		height = 10;//a lot
+		height = 10;// a lot
 		angle = angle1;
 		length = length1;
 		start = new Point3D((int) (x - Math.cos(angle) * length * 0.5), (int) (y - Math.sin(angle) * length * 0.5), z);
 		end = new Point3D((int) (x + Math.cos(angle) * length * 0.5), (int) (y + Math.sin(angle) * length * 0.5), z);
 		image = new BufferedImage((int) length, (int) length, BufferedImage.TYPE_INT_ARGB);
+		slope = length / 6 / 6;
 	}
+
 	public Portal(Line2D line)
 	{
-		//For collision detection purposes
-		start = new Point3D((int)line.getX1(),(int)line.getY1(), z);
-		end = new Point3D((int)line.getX2(),(int)line.getY2(), z);
+		// For collision detection purposes
+		start = new Point3D((int) line.getX1(), (int) line.getY1(), z);
+		end = new Point3D((int) line.getX2(), (int) line.getY2(), z);
 	}
-	
+
 	public Line2D Line2D()
 	{
 		return new Line2D.Double(start.x, start.y, end.x, end.y);
@@ -49,15 +55,28 @@ public class Portal extends Drawable
 	{
 		if (z <= cameraZed)
 		{
-			buffer.setStroke(new BasicStroke(8));
-			if (partner == null)
-				buffer.setColor(Color.black);
-			else
-				buffer.setColor(Color.white);
-			buffer.drawLine(start.x, start.y, end.x, end.y);
-			buffer.setStroke(new BasicStroke(4));
-			buffer.setColor(Color.gray);
-			buffer.drawLine(start.x, start.y, end.x, end.y);
+			buffer.setStroke(new BasicStroke(2));
+
+			buffer.setColor((blackOrWhite ? black : white));
+			for (int i = 1; i < 6; i++)
+			{
+				buffer.drawLine((int) (start.x + i * Math.cos(angle + Math.PI / 2) + i * i * slope * Math.cos(angle)),
+						(int) (start.y + i * Math.sin(angle + Math.PI / 2) + i * i * slope * Math.sin(angle)), (int) (end.x + i * Math.cos(angle + Math.PI / 2) - i * i * slope * Math.cos(angle)),
+						(int) (end.y + i * Math.sin(angle + Math.PI / 2) - i * i * slope * Math.sin(angle)));
+			}
+
+			buffer.setStroke(new BasicStroke(1));
+			buffer.drawLine((int) (start.x), (int) (start.y), (int) (end.x), (int) (end.y));
+
+			buffer.setStroke(new BasicStroke(2));
+			buffer.setColor((blackOrWhite ? white : black));
+
+			for (int i = 1; i < 6; i++)
+			{
+				buffer.drawLine((int) (start.x - i * Math.cos(angle + Math.PI / 2) + i * i * slope * Math.cos(angle)),
+						(int) (start.y - i * Math.sin(angle + Math.PI / 2) + i * i * slope * Math.sin(angle)), (int) (end.x - i * Math.cos(angle + Math.PI / 2) - i * i * slope * Math.cos(angle)),
+						(int) (end.y - i * Math.sin(angle + Math.PI / 2) - i * i * slope * Math.sin(angle)));
+			}
 		}
 	}
 
@@ -65,5 +84,7 @@ public class Portal extends Drawable
 	{
 		this.partner = p2;
 		p2.partner = this;
+		this.blackOrWhite = false;
+		p2.partner.partner.partner.partner.blackOrWhite = true; // :)
 	}
 }

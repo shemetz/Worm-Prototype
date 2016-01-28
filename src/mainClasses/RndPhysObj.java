@@ -5,7 +5,6 @@ public class RndPhysObj extends Drawable
 {
 	public double	xVel, yVel;			// per second
 	public double	angularVelocity;	// radians per second
-	public int		radius;				// in pixels
 	public double	mass;				// in kilograms
 	public double	zVel;				// positive = upwards
 

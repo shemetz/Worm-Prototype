@@ -141,6 +141,11 @@ public class Environment
 	boolean moveBall(Ball b, double deltaTime)
 	{
 		// return false if ball was destroyed
+		Portal intersectedPortal = b.intersectedPortal;
+		boolean startedAbovePortal = false;
+		if (intersectedPortal != null)
+			startedAbovePortal = (intersectedPortal.end.x - intersectedPortal.start.x) * (b.y - intersectedPortal.start.y) > (intersectedPortal.end.y - intersectedPortal.start.y)
+					* (b.x - intersectedPortal.start.x);
 
 		double velocityLeft = Math.sqrt(b.xVel * b.xVel + b.yVel * b.yVel) * deltaTime;
 		double moveQuantumX = b.xVel / velocityLeft * deltaTime;
@@ -505,6 +510,27 @@ public class Environment
 			}
 		}
 
+		// check if the ball passed through a Portal
+		boolean endedAbovePortal = false;
+		if (intersectedPortal != null)
+			endedAbovePortal = (intersectedPortal.end.x - intersectedPortal.start.x) * (b.y - intersectedPortal.start.y) > (intersectedPortal.end.y - intersectedPortal.start.y)
+					* (b.x - intersectedPortal.start.x);
+		if (startedAbovePortal != endedAbovePortal && intersectedPortal.partner != null)
+		{
+			// Portal teleport!
+			double angleChange = intersectedPortal.partner.angle - intersectedPortal.angle;
+			double angleRelativeToPortal = Math.atan2(b.y - intersectedPortal.y, b.x - intersectedPortal.x);
+			double distanceRelativeToPortal = Math.sqrt(Methods.DistancePow2(intersectedPortal.x, intersectedPortal.y, b.x, b.y));
+			b.x = intersectedPortal.partner.x + distanceRelativeToPortal * Math.cos(angleRelativeToPortal + angleChange);
+			b.y = intersectedPortal.partner.y + distanceRelativeToPortal * Math.sin(angleRelativeToPortal + angleChange);
+			b.z += intersectedPortal.partner.z - intersectedPortal.z;
+			b.rotation += angleChange;
+			double newAngle = b.angle() + angleChange;
+			double velocity = b.velocity();
+			b.xVel = velocity * Math.cos(newAngle);
+			b.yVel = velocity * Math.sin(newAngle);
+		}
+
 		// ball gravity
 		b.z += b.zVel;
 		if (b.z < 0)
@@ -519,6 +545,12 @@ public class Environment
 
 	boolean moveSprayDrop(SprayDrop sd, double deltaTime)
 	{
+		Portal intersectedPortal = sd.intersectedPortal;
+		boolean startedAbovePortal = false;
+		if (intersectedPortal != null)
+			startedAbovePortal = (intersectedPortal.end.x - intersectedPortal.start.x) * (sd.y - intersectedPortal.start.y) > (intersectedPortal.end.y - intersectedPortal.start.y)
+					* (sd.x - intersectedPortal.start.x);
+
 		sd.x += sd.xVel * deltaTime;
 		sd.y += sd.yVel * deltaTime;
 
@@ -676,6 +708,27 @@ public class Environment
 					}
 				}
 
+		// check if the spray drop passed through a Portal
+		boolean endedAbovePortal = false;
+		if (intersectedPortal != null)
+			endedAbovePortal = (intersectedPortal.end.x - intersectedPortal.start.x) * (sd.y - intersectedPortal.start.y) > (intersectedPortal.end.y - intersectedPortal.start.y)
+					* (sd.x - intersectedPortal.start.x);
+		if (startedAbovePortal != endedAbovePortal && intersectedPortal.partner != null)
+		{
+			// Portal teleport!
+			double angleChange = intersectedPortal.partner.angle - intersectedPortal.angle;
+			double angleRelativeToPortal = Math.atan2(sd.y - intersectedPortal.y, sd.x - intersectedPortal.x);
+			double distanceRelativeToPortal = Math.sqrt(Methods.DistancePow2(intersectedPortal.x, intersectedPortal.y, sd.x, sd.y));
+			sd.x = intersectedPortal.partner.x + distanceRelativeToPortal * Math.cos(angleRelativeToPortal + angleChange);
+			sd.y = intersectedPortal.partner.y + distanceRelativeToPortal * Math.sin(angleRelativeToPortal + angleChange);
+			sd.z += intersectedPortal.partner.z - intersectedPortal.z;
+			sd.rotation += angleChange;
+			double newAngle = sd.angle() + angleChange;
+			double velocity = sd.velocity();
+			sd.xVel = velocity * Math.cos(newAngle);
+			sd.yVel = velocity * Math.sin(newAngle);
+		}
+
 		// gravity
 		sd.z += sd.zVel;
 		if (sd.z < 0)
@@ -686,6 +739,35 @@ public class Environment
 
 		return true;
 
+	}
+
+	void moveDebris(Debris d, double deltaTime)
+	{
+		Portal intersectedPortal = d.intersectedPortal;
+		boolean startedAbovePortal = false;
+		if (intersectedPortal != null)
+			startedAbovePortal = (intersectedPortal.end.x - intersectedPortal.start.x) * (d.y - intersectedPortal.start.y) > (intersectedPortal.end.y - intersectedPortal.start.y)
+					* (d.x - intersectedPortal.start.x);
+
+		d.x += d.velocity * Math.cos(d.angle) * deltaTime;
+		d.y += d.velocity * Math.sin(d.angle) * deltaTime;
+		// check if the debris passed through a Portal
+		boolean endedAbovePortal = false;
+		if (intersectedPortal != null)
+			endedAbovePortal = (intersectedPortal.end.x - intersectedPortal.start.x) * (d.y - intersectedPortal.start.y) > (intersectedPortal.end.y - intersectedPortal.start.y)
+					* (d.x - intersectedPortal.start.x);
+		if (startedAbovePortal != endedAbovePortal && intersectedPortal.partner != null)
+		{
+			// Portal teleport!
+			double angleChange = intersectedPortal.partner.angle - intersectedPortal.angle;
+			double angleRelativeToPortal = Math.atan2(d.y - intersectedPortal.y, d.x - intersectedPortal.x);
+			double distanceRelativeToPortal = Math.sqrt(Methods.DistancePow2(intersectedPortal.x, intersectedPortal.y, d.x, d.y));
+			d.x = intersectedPortal.partner.x + distanceRelativeToPortal * Math.cos(angleRelativeToPortal + angleChange);
+			d.y = intersectedPortal.partner.y + distanceRelativeToPortal * Math.sin(angleRelativeToPortal + angleChange);
+			d.z += intersectedPortal.partner.z - intersectedPortal.z;
+			d.rotation += angleChange;
+			d.angle = d.angle + angleChange;
+		}
 	}
 
 	void movePerson(Person p, double deltaTime)
@@ -898,24 +980,24 @@ public class Environment
 			// Portals
 			for (Portal por : portals)
 				if (por.partner != null && por.highestPoint() > p.z && p.highestPoint() > por.z)
-			{
-				if (Methods.DistancePow2(por.start, p.Point()) < p.radius * p.radius)
 				{
-					p.x -= moveQuantumX;
-					p.y -= moveQuantumY;
-					double angle = Math.atan2(p.y - por.start.y, p.x - por.start.x);
-					p.xVel += 11.32 * Math.cos(angle);
-					p.yVel += 11.32 * Math.sin(angle);
+					if (Methods.DistancePow2(por.start, p.Point()) < p.radius * p.radius)
+					{
+						p.x -= moveQuantumX;
+						p.y -= moveQuantumY;
+						double angle = Math.atan2(p.y - por.start.y, p.x - por.start.x);
+						p.xVel += 11.32 * Math.cos(angle);
+						p.yVel += 11.32 * Math.sin(angle);
+					}
+					if (Methods.DistancePow2(por.end, p.Point()) < p.radius * p.radius)
+					{
+						p.x -= moveQuantumX;
+						p.y -= moveQuantumY;
+						double angle = Math.atan2(p.y - por.end.y, p.x - por.end.x);
+						p.xVel += 11.32 * Math.cos(angle);
+						p.yVel += 11.32 * Math.sin(angle);
+					}
 				}
-				if (Methods.DistancePow2(por.end, p.Point()) < p.radius * p.radius)
-				{
-					p.x -= moveQuantumX;
-					p.y -= moveQuantumY;
-					double angle = Math.atan2(p.y - por.end.y, p.x - por.end.x);
-					p.xVel += 11.32 * Math.cos(angle);
-					p.yVel += 11.32 * Math.sin(angle);
-				}
-			}
 
 			if (velocityLeft < 1) // continue
 				velocityLeft = 0;
@@ -923,25 +1005,38 @@ public class Environment
 		}
 
 		// check if person passed through a Portal
+		/*
+		 * NOTE: This WILL fail if the player tries a lot of time in different rottions, "edging" the portal, and so sometimes players will exit on the other side of the portal. Right now this is a known bug, because I'm not really sure how to fix
+		 * it, but it shouldn't happen with non-player people or objects. I hope.
+		 */
 		boolean endedAbovePortal = false;
 		if (intersectedPortal != null)
 			endedAbovePortal = (intersectedPortal.end.x - intersectedPortal.start.x) * (p.y - intersectedPortal.start.y) > (intersectedPortal.end.y - intersectedPortal.start.y)
 					* (p.x - intersectedPortal.start.x);
 		if (startedAbovePortal != endedAbovePortal && intersectedPortal.partner != null)
-		{
-			// Portal teleport!
-			double angleChange = intersectedPortal.partner.angle - intersectedPortal.angle;
-			double angleRelativeToPortal = Math.atan2(p.y - intersectedPortal.y, p.x - intersectedPortal.x);
-			double distanceRelativeToPortal = Math.sqrt(Methods.DistancePow2(intersectedPortal.x, intersectedPortal.y, p.x, p.y));
-			p.x = intersectedPortal.partner.x + distanceRelativeToPortal * Math.cos(angleRelativeToPortal + angleChange);
-			p.y = intersectedPortal.partner.y + distanceRelativeToPortal * Math.sin(angleRelativeToPortal + angleChange);
-			p.z = intersectedPortal.partner.z; //not quite, but who cares
-			p.rotation += angleChange;
-			double newAngle = p.angle() + angleChange;
-			double velocity = p.velocity();
-			p.xVel = velocity * Math.cos(newAngle);
-			p.yVel = velocity * Math.sin(newAngle);
-		}
+			if (p.timeSincePortal <= 0)
+			{
+				// Portal teleport!
+				double angleChange = intersectedPortal.partner.angle - intersectedPortal.angle;
+				double angleRelativeToPortal = Math.atan2(p.y - intersectedPortal.y, p.x - intersectedPortal.x);
+				double distanceRelativeToPortal = Math.sqrt(Methods.DistancePow2(intersectedPortal.x, intersectedPortal.y, p.x, p.y));
+				p.x = intersectedPortal.partner.x + distanceRelativeToPortal * Math.cos(angleRelativeToPortal + angleChange);
+				p.y = intersectedPortal.partner.y + distanceRelativeToPortal * Math.sin(angleRelativeToPortal + angleChange);
+				p.z = intersectedPortal.partner.z; // not quite, but who cares
+				p.rotation += angleChange;
+				double newAngle = p.angle() + angleChange;
+				double velocity = p.velocity();
+				p.xVel = velocity * Math.cos(newAngle);
+				p.yVel = velocity * Math.sin(newAngle);
+				p.timeSincePortal = 0.1; // For a period of time after portaling, you can't move through more portals.
+				if (p instanceof Player)
+					((Player) p).movementAxisRotation += angleChange; // player's keys will keep pushing character relative to previous rotation
+			} else
+			{
+				// Tried to move through portal too soon after previous one
+				p.x -= moveQuantumX;
+				p.y -= moveQuantumY;
+			}
 
 		// extra check for insideWall, in case you stand still
 		if (p.ghostMode && p.z < 1)
@@ -2728,6 +2823,10 @@ public class Environment
 			{
 				Double i1 = new Double(d1.highestPoint());
 				Double i2 = new Double(d2.highestPoint());
+				if (d1 instanceof Portal && d2.highestPoint() > d1.z)
+					i1 = -1.0; // Portals are always drawn underneath other things in same Z
+				if (d2 instanceof Portal && d1.highestPoint() > d2.z)
+					i2 = -1.0; // 
 				return i1.compareTo(i2);
 			}
 		};
