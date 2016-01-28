@@ -15,7 +15,7 @@ public class Heal_II extends ApplyEffect
 		costPerSecond = 3;
 		costType = "mana";
 		cooldown = 0;
-		range = 100 * points;
+		range = 100 * level;
 		rangeType = "Circle area";
 		stopsMovement = false;
 		maintainable = true;
