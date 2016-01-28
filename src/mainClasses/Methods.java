@@ -1,4 +1,5 @@
 package mainClasses;
+
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Frame;
@@ -65,8 +66,9 @@ public class Methods
 	// Compute the SQUARED distance from AB to C
 	public static double LineToPointDistancePow2(Point3D start, Point3D end, Point point)
 	{
-		return LineToPointDistancePow2(new Point(start.x,start.y), new Point(end.x,end.y), point);
+		return LineToPointDistancePow2(new Point(start.x, start.y), new Point(end.x, end.y), point);
 	}
+
 	public static double LineToPointDistancePow2(Point start, Point end, Point point)
 	{
 
@@ -116,23 +118,48 @@ public class Methods
 
 		return closestPoint;
 	}
-	
-	// returns closest point on AB to the point X
-		public static Point2D getClosestPointOnLine(double sx1, double sy1, double sx2, double sy2, double px, double py)
+
+	// Returns distance to closest point
+	public static double getSegmentPointDistancePow2(double sx1, double sy1, double sx2, double sy2, double px, double py)
+	{
+		double xDelta = sx2 - sx1;
+		double yDelta = sy2 - sy1;
+
+		if ((xDelta == 0) && (yDelta == 0))
 		{
-			double xDelta = sx2 - sx1;
-			double yDelta = sy2 - sy1;
-
-			if ((xDelta == 0) && (yDelta == 0))
-			{
-				Main.errorMessage("That's not a line");
-				return null;
-			}
-
-			double u = ((px - sx1) * xDelta + (py - sy1) * yDelta) / (xDelta * xDelta + yDelta * yDelta);
-
-			return new Point2D.Double(sx1 + u * xDelta, sy1 + u * yDelta);
+			Main.errorMessage("That's not a line");
+			return -1;
 		}
+
+		double u = ((px - sx1) * xDelta + (py - sy1) * yDelta) / (xDelta * xDelta + yDelta * yDelta);
+		if (u < 0)
+		{
+			return Methods.DistancePow2(sx1, sy1, px, py);
+		} else if (u > 1)
+		{
+			return Methods.DistancePow2(sx2, sy2, px, py);
+		} else
+		{
+			return Methods.DistancePow2(sx1 + u * xDelta, sy1 + u * yDelta, px, py);
+		}
+	}
+
+	// returns closest point on AB to the point X
+	public static Point2D getClosestPointOnLine(double sx1, double sy1, double sx2, double sy2, double px, double py)
+	{
+		double xDelta = sx2 - sx1;
+		double yDelta = sy2 - sy1;
+
+		if ((xDelta == 0) && (yDelta == 0))
+		{
+			Main.errorMessage("That's not a line");
+			return null;
+		}
+
+		double u = ((px - sx1) * xDelta + (py - sy1) * yDelta) / (xDelta * xDelta + yDelta * yDelta);
+
+		return new Point2D.Double(sx1 + u * xDelta, sy1 + u * yDelta);
+	}
 
 	// Compute the dot product AB . AC
 	public static double realDotProduct(Point a, Point b, Point c)
@@ -262,7 +289,7 @@ public class Methods
 
 	public static double lerpAngle(double angle, double target, double amount)
 	{
-		//TODO um. Does it accept all angles, or only ones between 0 and tau, or only ones between -pi and +pi?
+		// TODO um. Does it accept all angles, or only ones between 0 and tau, or only ones between -pi and +pi?
 		return angle + (((((target - angle) % (Math.PI * 2)) + (Math.PI * 3)) % (Math.PI * 2)) - Math.PI) * amount;
 	}
 

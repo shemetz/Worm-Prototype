@@ -67,6 +67,7 @@ public class Environment
 	public List<Beam>				beams;
 	public List<Vine>				vines;
 	public List<SprayDrop>			sprayDrops;
+	public List<Portal>				portals;
 
 	// Sounds
 	public List<SoundEffect>		ongoingSounds		= new ArrayList<SoundEffect>();
@@ -102,6 +103,7 @@ public class Environment
 		beams = new ArrayList<Beam>();
 		vines = new ArrayList<Vine>();
 		sprayDrops = new ArrayList<SprayDrop>();
+		portals = new ArrayList<Portal>();
 
 		for (int x = 0; x < width; x++)
 			for (int y = 0; y < height; y++)
@@ -139,6 +141,11 @@ public class Environment
 	boolean moveBall(Ball b, double deltaTime)
 	{
 		// return false if ball was destroyed
+		Portal intersectedPortal = b.intersectedPortal;
+		boolean startedAbovePortal = false;
+		if (intersectedPortal != null)
+			startedAbovePortal = (intersectedPortal.end.x - intersectedPortal.start.x) * (b.y - intersectedPortal.start.y) > (intersectedPortal.end.y - intersectedPortal.start.y)
+					* (b.x - intersectedPortal.start.x);
 
 		double velocityLeft = Math.sqrt(b.xVel * b.xVel + b.yVel * b.yVel) * deltaTime;
 		double moveQuantumX = b.xVel / velocityLeft * deltaTime;
@@ -503,6 +510,27 @@ public class Environment
 			}
 		}
 
+		// check if the ball passed through a Portal
+		boolean endedAbovePortal = false;
+		if (intersectedPortal != null)
+			endedAbovePortal = (intersectedPortal.end.x - intersectedPortal.start.x) * (b.y - intersectedPortal.start.y) > (intersectedPortal.end.y - intersectedPortal.start.y)
+					* (b.x - intersectedPortal.start.x);
+		if (startedAbovePortal != endedAbovePortal && intersectedPortal.partner != null)
+		{
+			// Portal teleport!
+			double angleChange = intersectedPortal.partner.angle - intersectedPortal.angle;
+			double angleRelativeToPortal = Math.atan2(b.y - intersectedPortal.y, b.x - intersectedPortal.x);
+			double distanceRelativeToPortal = Math.sqrt(Methods.DistancePow2(intersectedPortal.x, intersectedPortal.y, b.x, b.y));
+			b.x = intersectedPortal.partner.x + distanceRelativeToPortal * Math.cos(angleRelativeToPortal + angleChange);
+			b.y = intersectedPortal.partner.y + distanceRelativeToPortal * Math.sin(angleRelativeToPortal + angleChange);
+			b.z += intersectedPortal.partner.z - intersectedPortal.z;
+			b.rotation += angleChange;
+			double newAngle = b.angle() + angleChange;
+			double velocity = b.velocity();
+			b.xVel = velocity * Math.cos(newAngle);
+			b.yVel = velocity * Math.sin(newAngle);
+		}
+
 		// ball gravity
 		b.z += b.zVel;
 		if (b.z < 0)
@@ -517,6 +545,12 @@ public class Environment
 
 	boolean moveSprayDrop(SprayDrop sd, double deltaTime)
 	{
+		Portal intersectedPortal = sd.intersectedPortal;
+		boolean startedAbovePortal = false;
+		if (intersectedPortal != null)
+			startedAbovePortal = (intersectedPortal.end.x - intersectedPortal.start.x) * (sd.y - intersectedPortal.start.y) > (intersectedPortal.end.y - intersectedPortal.start.y)
+					* (sd.x - intersectedPortal.start.x);
+
 		sd.x += sd.xVel * deltaTime;
 		sd.y += sd.yVel * deltaTime;
 
@@ -674,6 +708,27 @@ public class Environment
 					}
 				}
 
+		// check if the spray drop passed through a Portal
+		boolean endedAbovePortal = false;
+		if (intersectedPortal != null)
+			endedAbovePortal = (intersectedPortal.end.x - intersectedPortal.start.x) * (sd.y - intersectedPortal.start.y) > (intersectedPortal.end.y - intersectedPortal.start.y)
+					* (sd.x - intersectedPortal.start.x);
+		if (startedAbovePortal != endedAbovePortal && intersectedPortal.partner != null)
+		{
+			// Portal teleport!
+			double angleChange = intersectedPortal.partner.angle - intersectedPortal.angle;
+			double angleRelativeToPortal = Math.atan2(sd.y - intersectedPortal.y, sd.x - intersectedPortal.x);
+			double distanceRelativeToPortal = Math.sqrt(Methods.DistancePow2(intersectedPortal.x, intersectedPortal.y, sd.x, sd.y));
+			sd.x = intersectedPortal.partner.x + distanceRelativeToPortal * Math.cos(angleRelativeToPortal + angleChange);
+			sd.y = intersectedPortal.partner.y + distanceRelativeToPortal * Math.sin(angleRelativeToPortal + angleChange);
+			sd.z += intersectedPortal.partner.z - intersectedPortal.z;
+			sd.rotation += angleChange;
+			double newAngle = sd.angle() + angleChange;
+			double velocity = sd.velocity();
+			sd.xVel = velocity * Math.cos(newAngle);
+			sd.yVel = velocity * Math.sin(newAngle);
+		}
+
 		// gravity
 		sd.z += sd.zVel;
 		if (sd.z < 0)
@@ -686,8 +741,42 @@ public class Environment
 
 	}
 
+	void moveDebris(Debris d, double deltaTime)
+	{
+		Portal intersectedPortal = d.intersectedPortal;
+		boolean startedAbovePortal = false;
+		if (intersectedPortal != null)
+			startedAbovePortal = (intersectedPortal.end.x - intersectedPortal.start.x) * (d.y - intersectedPortal.start.y) > (intersectedPortal.end.y - intersectedPortal.start.y)
+					* (d.x - intersectedPortal.start.x);
+
+		d.x += d.velocity * Math.cos(d.angle) * deltaTime;
+		d.y += d.velocity * Math.sin(d.angle) * deltaTime;
+		// check if the debris passed through a Portal
+		boolean endedAbovePortal = false;
+		if (intersectedPortal != null)
+			endedAbovePortal = (intersectedPortal.end.x - intersectedPortal.start.x) * (d.y - intersectedPortal.start.y) > (intersectedPortal.end.y - intersectedPortal.start.y)
+					* (d.x - intersectedPortal.start.x);
+		if (startedAbovePortal != endedAbovePortal && intersectedPortal.partner != null)
+		{
+			// Portal teleport!
+			double angleChange = intersectedPortal.partner.angle - intersectedPortal.angle;
+			double angleRelativeToPortal = Math.atan2(d.y - intersectedPortal.y, d.x - intersectedPortal.x);
+			double distanceRelativeToPortal = Math.sqrt(Methods.DistancePow2(intersectedPortal.x, intersectedPortal.y, d.x, d.y));
+			d.x = intersectedPortal.partner.x + distanceRelativeToPortal * Math.cos(angleRelativeToPortal + angleChange);
+			d.y = intersectedPortal.partner.y + distanceRelativeToPortal * Math.sin(angleRelativeToPortal + angleChange);
+			d.z += intersectedPortal.partner.z - intersectedPortal.z;
+			d.rotation += angleChange;
+			d.angle = d.angle + angleChange;
+		}
+	}
+
 	void movePerson(Person p, double deltaTime)
 	{
+		Portal intersectedPortal = p.intersectedPortal;
+		boolean startedAbovePortal = false;
+		if (intersectedPortal != null)
+			startedAbovePortal = (intersectedPortal.end.x - intersectedPortal.start.x) * (p.y - intersectedPortal.start.y) > (intersectedPortal.end.y - intersectedPortal.start.y)
+					* (p.x - intersectedPortal.start.x);
 		double velocityLeft = Math.sqrt(p.xVel * p.xVel + p.yVel * p.yVel) * deltaTime;
 
 		p.lastSpeed = velocityLeft / deltaTime;
@@ -696,7 +785,7 @@ public class Environment
 		// This function moves the physics object one pixel towards their direction, until they can't move anymore or they collide with something.
 		if (velocityLeft > 0)
 			p.insideWall = false; // pretty important
-		Rectangle2D personRect = new Rectangle2D.Double((int) p.x - p.radius / 2, (int) p.y - p.radius / 2, p.radius, p.radius); // for FF collisions
+		Rectangle2D personRect = new Rectangle2D.Double((int) p.x - p.radius, (int) p.y - p.radius, p.radius * 2, p.radius * 2); // for FF collisions
 		while (velocityLeft > 0)
 		{
 			if (velocityLeft < 1)
@@ -722,8 +811,8 @@ public class Environment
 
 			// check collisions with walls in the environment, locked to a grid
 			if (p.z <= 1)
-				for (int i = (int) (p.x - 0.5 * p.radius); velocityLeft > 0 && i / squareSize <= (int) (p.x + 0.5 * p.radius) / squareSize; i += squareSize)
-					for (int j = (int) (p.y - 0.5 * p.radius); velocityLeft > 0 && j / squareSize <= (int) (p.y + 0.5 * p.radius) / squareSize; j += squareSize)
+				for (int i = (int) (p.x - p.radius); velocityLeft > 0 && i / squareSize <= (int) (p.x + p.radius) / squareSize; i += squareSize)
+					for (int j = (int) (p.y - p.radius); velocityLeft > 0 && j / squareSize <= (int) (p.y + p.radius) / squareSize; j += squareSize)
 					{
 						if (wallTypes[i / squareSize][j / squareSize] != -1)
 						{
@@ -774,7 +863,7 @@ public class Environment
 			for (Person p2 : people)
 				if (!p.equals(p2))
 				{
-					Rectangle2D p2rect = new Rectangle2D.Double(p2.x - 0.5 * p2.radius, p2.y - 0.5 * p2.radius, p2.radius, p2.radius);
+					Rectangle2D p2rect = new Rectangle2D.Double(p2.x - p2.radius, p2.y - p2.radius, p2.radius * 2, p2.radius * 2);
 					if (personRect.intersects(p2rect)) // collision check
 					{
 						if (p2.highestPoint() > p.z && p2.z < p.highestPoint())
@@ -819,7 +908,7 @@ public class Environment
 				{
 					boolean collidedWithACorner = false;
 					for (Point p1 : ff.p)
-						if (p1.x > p.x - p.radius / 2 && p1.x < p.x + p.radius / 2 && p1.y > p.y - p.radius / 2 && p1.y < p.y + p.radius / 2)
+						if (p1.x > p.x - p.radius && p1.x < p.x + p.radius && p1.y > p.y - p.radius && p1.y < p.y + p.radius)
 						{
 							collidedWithACorner = true;
 							// hitting corners just reverses the person's movement
@@ -888,10 +977,67 @@ public class Environment
 
 			}
 
+			// Portals
+			for (Portal por : portals)
+				if (por.partner != null && por.highestPoint() > p.z && p.highestPoint() > por.z)
+				{
+					if (Methods.DistancePow2(por.start, p.Point()) < p.radius * p.radius)
+					{
+						p.x -= moveQuantumX;
+						p.y -= moveQuantumY;
+						double angle = Math.atan2(p.y - por.start.y, p.x - por.start.x);
+						p.xVel += 11.32 * Math.cos(angle);
+						p.yVel += 11.32 * Math.sin(angle);
+					}
+					if (Methods.DistancePow2(por.end, p.Point()) < p.radius * p.radius)
+					{
+						p.x -= moveQuantumX;
+						p.y -= moveQuantumY;
+						double angle = Math.atan2(p.y - por.end.y, p.x - por.end.x);
+						p.xVel += 11.32 * Math.cos(angle);
+						p.yVel += 11.32 * Math.sin(angle);
+					}
+				}
+
 			if (velocityLeft < 1) // continue
 				velocityLeft = 0;
-			personRect = new Rectangle2D.Double((int) p.x - p.radius / 2, (int) p.y - p.radius / 2, p.radius, p.radius);
+			personRect = new Rectangle2D.Double((int) p.x - p.radius, (int) p.y - p.radius, p.radius * 2, p.radius * 2);
 		}
+
+		// check if person passed through a Portal
+		/*
+		 * NOTE: This WILL fail if the player tries a lot of time in different rottions, "edging" the portal, and so sometimes players will exit on the other side of the portal. Right now this is a known bug, because I'm not really sure how to fix
+		 * it, but it shouldn't happen with non-player people or objects. I hope.
+		 */
+		boolean endedAbovePortal = false;
+		if (intersectedPortal != null)
+			endedAbovePortal = (intersectedPortal.end.x - intersectedPortal.start.x) * (p.y - intersectedPortal.start.y) > (intersectedPortal.end.y - intersectedPortal.start.y)
+					* (p.x - intersectedPortal.start.x);
+		if (startedAbovePortal != endedAbovePortal && intersectedPortal.partner != null)
+			if (p.timeSincePortal <= 0)
+			{
+				// Portal teleport!
+				double angleChange = intersectedPortal.partner.angle - intersectedPortal.angle;
+				double angleRelativeToPortal = Math.atan2(p.y - intersectedPortal.y, p.x - intersectedPortal.x);
+				double distanceRelativeToPortal = Math.sqrt(Methods.DistancePow2(intersectedPortal.x, intersectedPortal.y, p.x, p.y));
+				p.x = intersectedPortal.partner.x + distanceRelativeToPortal * Math.cos(angleRelativeToPortal + angleChange);
+				p.y = intersectedPortal.partner.y + distanceRelativeToPortal * Math.sin(angleRelativeToPortal + angleChange);
+				p.z = intersectedPortal.partner.z; // not quite, but who cares
+				p.rotation += angleChange;
+				double newAngle = p.angle() + angleChange;
+				double velocity = p.velocity();
+				p.xVel = velocity * Math.cos(newAngle);
+				p.yVel = velocity * Math.sin(newAngle);
+				p.timeSincePortal = 0.1; // For a period of time after portaling, you can't move through more portals.
+				if (p instanceof Player)
+					((Player) p).movementAxisRotation += angleChange; // player's keys will keep pushing character relative to previous rotation
+			} else
+			{
+				// Tried to move through portal too soon after previous one
+				p.x -= moveQuantumX;
+				p.y -= moveQuantumY;
+			}
+
 		// extra check for insideWall, in case you stand still
 		if (p.ghostMode && p.z < 1)
 			for (int i = (int) (p.x - 0.5 * p.radius); i / squareSize <= (int) (p.x + 0.5 * p.radius) / squareSize; i += squareSize)
@@ -1890,6 +2036,24 @@ public class Environment
 			}
 		}
 
+		// Portals - 6
+		Portal collidedPortal = null;
+		double minimumDistanceFromStart = 10; //to avoid post-portal beams hitting their own exit portal
+		for (Portal p : portals)
+		{
+			if (p.partner != null && p.highestPoint() > b.z && b.highestPoint() > p.z && beamLine.intersectsLine(p.Line2D()))
+			{
+				Point2D intersection = Methods.getSegmentIntersection(beamLine, p.Line2D());
+				if (intersection != null)
+					if (Methods.DistancePow2(b.start, intersection) > minimumDistanceFromStart*minimumDistanceFromStart)
+				{
+					collisionLine = p.Line2D();
+					collisionType = 6;
+					collidedPortal = p;
+				}
+			}
+		}
+
 		if (collisionType == -1)
 		{
 			b.endType = 0;
@@ -2012,6 +2176,24 @@ public class Environment
 			collidedVine.life -= b.getDamage();
 			// TODO vine plant debris
 			break;
+		case 6: // Portal
+			b.end.x = roundedIntersectionPoint.x;
+			b.end.y = roundedIntersectionPoint.y;
+			b.endType = 1;
+			boolean sideOfPortal = (b.x - collidedPortal.start.x) * Math.sin(b.angle()) > (b.y - collidedPortal.y) * Math.cos(b.angle());
+			b.endAngle = collidedPortal.angle + (sideOfPortal ? TAU / 4 : -TAU / 4);
+
+			if (recursive)
+			{
+				b2 = getPortaledBeam(b, collidedPortal, roundedIntersectionPoint);
+
+				if (b2 != null)
+				{
+					beams.add(b2);
+					moveBeam(b2, true, deltaTime); // Recursion!!!
+				}
+			}
+			break;
 		default:
 			Main.errorMessage("Dragon and Defiant, sitting in a tree, K-I-S-S-I-S-S-I-P-P-I");
 			break;
@@ -2037,6 +2219,27 @@ public class Environment
 			return null;
 		Beam b2 = new Beam(b.creator, b.theAbility, new Point3D((int) (b.end.x + startDistance * Math.cos(newBeamAngle)), (int) (b.end.y + startDistance * Math.sin(newBeamAngle)), b.end.z - 0.01),
 				new Point3D((int) (b.end.x + newRange * Math.cos(newBeamAngle)), (int) (b.end.y + newRange * Math.sin(newBeamAngle)), b.end.z - 0.01), b.elementNum, b.points, newRange);
+		b2.frameNum = b.frameNum;
+		b2.isChild = true;
+		return b2;
+	}
+
+	Beam getPortaledBeam(Beam b, Portal p, Point intersection)
+	{
+		double beamLength = Math.sqrt(Math.pow(b.end.x - b.start.x, 2) + Math.pow(b.end.y - b.start.y, 2)); // Should work
+		double newRange = b.range - beamLength;
+		if (newRange < 0) // because bugs
+			return null;
+		double newBeamAngle = b.angle() + p.partner.angle - p.angle;
+		final double startDistance = 10; // Extra distance from partner portal
+		double angleRelativeToPartner = Math.atan2(intersection.y - p.y, intersection.x - p.x) + p.partner.angle - p.angle;
+		double distanceToPortalCenter = Math.sqrt(Methods.DistancePow2(p.x, p.y, b.end.x, b.end.y));
+		Beam b2 = new Beam(b.creator, b.theAbility,
+				new Point3D((int) (p.partner.x + distanceToPortalCenter * Math.cos(angleRelativeToPartner) + startDistance * Math.cos(newBeamAngle)),
+						(int) (p.partner.y + distanceToPortalCenter * Math.sin(angleRelativeToPartner) + startDistance * Math.sin(newBeamAngle)), b.end.z + p.partner.z - p.z - 0.01),
+				new Point3D((int) (p.partner.x + distanceToPortalCenter * Math.cos(angleRelativeToPartner) + (startDistance + newRange) * Math.cos(newBeamAngle)),
+						(int) (p.partner.y + distanceToPortalCenter * Math.sin(angleRelativeToPartner) + (startDistance + newRange) * Math.sin(newBeamAngle)), b.end.z + p.partner.z - p.z - 0.01),
+				b.elementNum, b.points, newRange);
 		b2.frameNum = b.frameNum;
 		b2.isChild = true;
 		return b2;
@@ -2652,6 +2855,7 @@ public class Environment
 		drawableThings.addAll(beams);
 		drawableThings.addAll(vines);
 		drawableThings.addAll(sprayDrops);
+		drawableThings.addAll(portals);
 		Predicate<Drawable> outOfScreen = new Predicate<Drawable>()
 		{
 			public boolean test(Drawable arg0)
@@ -2676,11 +2880,16 @@ public class Environment
 			{
 				Double i1 = new Double(d1.highestPoint());
 				Double i2 = new Double(d2.highestPoint());
+				if (d1 instanceof Portal && d2.highestPoint() > d1.z)
+					i1 = -1.0; // Portals are always drawn underneath other things in same Z
+				if (d2 instanceof Portal && d1.highestPoint() > d2.z)
+					i2 = -1.0; //
 				return i1.compareTo(i2);
 			}
 		};
 		drawableThings.removeIf(outOfScreen);
 		Collections.sort(drawableThings, sortDrawablesbyHeight);
+
 		// Clouds, people, balls, force fields, debris, arc force fields, beams, vines, drops
 		drawDrawables(buffer, cameraZed, cameraRotation, drawableThings, -1, 1);
 
@@ -2800,6 +3009,18 @@ public class Environment
 				// dev-mode debugging unimportant drawings:
 				if (devMode) // draws helpful things in the x,y of the object. (NOT Z AXIS)
 				{
+					if (d instanceof Portal)
+					{
+						Portal p = (Portal) d;
+						if (p.partner != null)
+						{
+							buffer.setStroke(new BasicStroke(2));
+							buffer.setColor(Color.red);
+							buffer.drawLine((int) p.start.x, (int) p.start.y, (int) p.partner.start.x, (int) p.partner.start.y);
+							buffer.setColor(Color.orange);
+							buffer.drawLine((int) p.end.x, (int) p.end.y, (int) p.partner.end.x, (int) p.partner.end.y);
+						}
+					}
 					if (d instanceof Vine)
 					{
 						Vine v = (Vine) d;
@@ -2853,9 +3074,9 @@ public class Environment
 						buffer.setColor(Color.green);
 						buffer.drawRect((int) (p.x - 1), (int) (p.y - 1), 3, 3);
 						// hitbox
-						buffer.drawRect((int) (p.x - 0.5 * p.radius), (int) (p.y - 0.5 * p.radius), p.radius, p.radius);
+						buffer.drawRect((int) (p.x - p.radius), (int) (p.y - p.radius), p.radius * 2, p.radius * 2);
 						// radius
-						buffer.drawOval((int) (p.x - 0.5 * p.radius), (int) (p.y - 0.5 * p.radius), p.radius, p.radius);
+						buffer.drawOval((int) (p.x - p.radius), (int) (p.y - p.radius), p.radius * 2, p.radius * 2);
 						// target
 						buffer.setColor(Color.red);
 						buffer.drawOval(p.target.x - 10, p.target.y - 10, 20, 20);
@@ -2876,9 +3097,9 @@ public class Environment
 						buffer.setColor(new Color(160, 255, 160));
 						buffer.drawRect((int) (p.x - 1), (int) (p.y - 1), 3, 3);
 						// hitbox
-						buffer.drawRect((int) (p.x - 0.5 * p.radius), (int) (p.y - 0.5 * p.radius), p.radius, p.radius);
+						buffer.drawRect((int) (p.x - p.radius), (int) (p.y - p.radius), p.radius * 2, p.radius * 2);
 						// radius
-						buffer.drawOval((int) (p.x - 0.5 * p.radius), (int) (p.y - 0.5 * p.radius), p.radius, p.radius);
+						buffer.drawOval((int) (p.x - p.radius), (int) (p.y - p.radius), p.radius * 2, p.radius * 2);
 						// target
 						buffer.setColor(new Color(255, 160, 160));
 						buffer.drawOval(p.target.x - 10, p.target.y - 10, 20, 20);

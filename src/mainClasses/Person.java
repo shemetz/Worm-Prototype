@@ -88,6 +88,7 @@ public class Person extends RndPhysObj
 	public double						lastSpeed							= 0;							// used for ease of calculation sometimes.
 	public boolean						holdingVine							= false;						// true if the person is using a Plant Beam (vine) and grabbling an enemy.
 	public double						flySpeed							= -1;
+	public double						timeSincePortal						= 0;
 
 	// for continuous inaccuracy stuff like beams
 	public double						inaccuracyAngle						= 0;
@@ -109,7 +110,7 @@ public class Person extends RndPhysObj
 	{
 		super(x1, y1, 0, 0);
 		mass = 70; // TODO
-		radius = 48;
+		radius = 24;
 		id = Person.giveID();
 		commanderID = id;
 		z = 0; // Characters start standing on the ground, I think
@@ -282,7 +283,7 @@ public class Person extends RndPhysObj
 
 	public void initSounds()
 	{
-		sounds.add(new SoundEffect("scorched.wav")); // 0 - when a beam hits you
+		sounds.add(new SoundEffect("Scorched.wav")); // 0 - when a beam hits you
 		sounds.get(0).endUnlessMaintained = true;
 	}
 
@@ -663,6 +664,8 @@ public class Person extends RndPhysObj
 			timeSinceLastHit += deltaTime;
 		if (timeBetweenDamageTexts < 60)
 			timeBetweenDamageTexts += deltaTime;
+		if (timeSincePortal > 0)
+			timeSincePortal -= deltaTime;
 
 		if (prone)
 		{
@@ -770,7 +773,7 @@ public class Person extends RndPhysObj
 		}
 	}
 
-	public void drawShadow(Graphics2D buffer, double shadowX, double shadowY)
+	public void trueDrawShadow(Graphics2D buffer, double shadowX, double shadowY)
 	{
 		if (z > 0)
 		{
@@ -780,9 +783,12 @@ public class Person extends RndPhysObj
 		}
 	}
 
-	public void draw(Graphics2D buffer, double cameraZed)
+	public void trueDraw(Graphics2D buffer, double cameraZed)
 	{
-		BufferedImage img = image;
+		BufferedImage img = new BufferedImage(image.getWidth(), image.getHeight(), image.getType());
+		Graphics2D g = img.createGraphics();
+		g.drawImage(image, 0, 0, null);
+		g.dispose();
 		if (ghostMode)
 		{
 			if (z <= cameraZed) // when in Ghost Mode, people are drawn as if they are higher on the Z axis, in order to make them be drawn above walls. cameraZed will be 1 lower than actual.
@@ -952,7 +958,7 @@ public class Person extends RndPhysObj
 		buffy.fillRect(0, 0, 96, 96);
 		buffy.dispose();
 
-		double factor = 0.6*Math.log(size);
+		double factor = 0.6 * Math.log(size);
 
 		buffer.translate(x, y);
 		buffer.scale(factor, factor);

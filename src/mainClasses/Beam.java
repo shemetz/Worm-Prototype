@@ -1,6 +1,8 @@
 package mainClasses;
 
 import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.Polygon;
 import java.awt.image.BufferedImage;
 
 import abilities.Beam_E;
@@ -22,7 +24,7 @@ public class Beam extends Drawable
 	public double			range;							// The maximum range of this beam. Subsequent reflection-beams will have shorter range.
 	public double			size;
 	public Beam_E			theAbility;
-	public boolean critical = false;
+	public boolean			critical		= false;
 
 	public Beam(Person creator, Beam_E theAbility, Point3D start, Point3D end, int elementNum, int points, double range)
 	{
@@ -86,6 +88,49 @@ public class Beam extends Drawable
 
 	public void draw(Graphics2D buffer, double cameraZed)
 	{
+		if (intersectedPortal == null || intersectedPortal.partner == null)
+		{
+			trueDraw(buffer, cameraZed);
+			return;
+		}
+		// PORTAL INTERSECTION
+		Portal p = intersectedPortal;
+
+		Point point = (Methods.LineToPointDistancePow2(p.start, p.end, new Point(start.x, start.y)) > Methods.LineToPointDistancePow2(p.start, p.end, new Point(end.x, end.y))) ? new Point(5*end.x/6 + start.x / 6, 5*end.y/6 + start.y / 6) : new Point(end.x/6 + 5*start.x / 6, end.y/6 + 5*start.y / 6);
+		double k = (p.end.x - p.start.x) * (point.y - p.start.y) - (p.end.y - p.start.y) * (point.x - p.start.x);
+		// k is >0 if this is below p, <0 if this is above p, or 0 if this is in the middle of p
+
+		Polygon clip = getClipOfPortal(p, k > 0);
+		buffer.setClip(clip);
+		trueDraw(buffer, cameraZed);
+		buffer.setClip(null);
+		clip = getClipOfPortal(p.partner, k <= 0);
+		buffer.setClip(clip);
+		buffer.translate(p.partner.x - p.x, p.partner.y - p.y);
+		buffer.rotate(p.partner.angle - p.angle, p.x, p.y);
+		trueDraw(buffer, cameraZed);
+		buffer.rotate(-p.partner.angle + p.angle, p.x, p.y);
+		buffer.translate(-p.partner.x + p.x, -p.partner.y + p.y);
+		buffer.setClip(null);
+	}
+
+	public Polygon getClipOfPortal(Portal p, boolean direction)
+	{
+
+		int k = direction ? 1 : -1;
+		double clipLength = this.range;
+		Polygon clip = new Polygon();
+		clip.addPoint((int) (p.x - Math.cos(p.angle) * clipLength * 1), (int) (p.y - Math.sin(p.angle) * clipLength * 1));
+		clip.addPoint((int) (p.x + Math.cos(p.angle) * clipLength * 1), (int) (p.y + Math.sin(p.angle) * clipLength * 1));
+		clip.addPoint((int) (p.x + Math.cos(p.angle) * clipLength * 1 + Math.cos(p.angle + Math.PI / 2) * clipLength * 1 * k),
+				(int) (p.y + Math.sin(p.angle) * clipLength * 1 + Math.sin(p.angle + Math.PI / 2) * clipLength * 1 * k));
+		clip.addPoint((int) (p.x - Math.cos(p.angle) * clipLength * 1 + Math.cos(p.angle + Math.PI / 2) * clipLength * 1 * k),
+				(int) (p.y - Math.sin(p.angle) * clipLength * 1 + Math.sin(p.angle + Math.PI / 2) * clipLength * 1 * k));
+		return clip;
+	}
+
+	public void trueDraw(Graphics2D buffer, double cameraZed)
+	{
 		double angle = Math.atan2(end.y - start.y, end.x - start.x);
 		if (z <= cameraZed && endType != -1)
 		{
@@ -116,7 +161,7 @@ public class Beam extends Drawable
 			buffer.translate(x, y);
 			buffer.scale(1 / (z * Main.heightZoomRatio + 1), 1 / (z * Main.heightZoomRatio + 1));
 			buffer.translate(-x, -y);
-			
+
 			// end is in the next method
 		}
 	}

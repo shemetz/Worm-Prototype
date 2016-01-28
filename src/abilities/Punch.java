@@ -42,7 +42,7 @@ public class Punch extends Ability
 	public void use(Environment env, Person user, Point target)
 	{
 		setSounds(user.Point());
-		range = (int) (1.15 * user.radius);
+		range = (int) (2.3 * user.radius);
 
 		/*
 		 * Punch
@@ -124,7 +124,7 @@ public class Punch extends Ability
 
 	boolean testUserPunch(Person user, Environment env, boolean onlyOrganics, boolean missSound)
 	{
-		range = (int) (1.15 * user.radius);
+		range = (int) (2.3 * user.radius);
 		if (user.flySpeed != -1)
 			range = range + 65; // eh
 		double damage = user.STRENGTH;
@@ -142,7 +142,7 @@ public class Punch extends Ability
 		final double extraAimingAngle = user.flySpeed == -1 ? 0.3 : 0.8; // If the user is flying the arc of Punch-testing is larger, because it's more difficult to aim with the keyboard and while moving.
 		for (int l = 0; l < timesTested; l++)
 		{
-			range = (int) (user.radius * 1.15 * (1 - (double) l / timesTested));
+			range = (int) (user.radius * 2.3 * (1 - (double) l / timesTested));
 			collisionCheck: if (true)
 			{
 				for (double m = -1; m <= 1; m++)
@@ -247,8 +247,8 @@ public class Punch extends Ability
 						// allowing higher vertical range, for flying people? //TODO leave it as it is or remove it and lower Punch-flight height to about 0.6
 						if (p.highestPoint() > user.z - extraVerticalHeight && p.z < user.highestPoint() + extraVerticalHeight)
 							// This is actually the purpose of the punches, by the way
-							if (!p.equals(user)) // TODO find a better way (not two double-number comparisons) to make sure they aren't the same. Maybe with person.equals()?
-								if (p.x - p.radius / 2 < user.target.x && p.y - p.radius / 2 < user.target.y && p.x + p.radius / 2 > user.target.x && p.y + p.radius / 2 > user.target.y)
+							if (!p.equals(user))
+								if (p.x - p.radius < user.target.x && p.y - p.radius < user.target.y && p.x + p.radius > user.target.x && p.y + p.radius > user.target.y)
 								{
 									env.hitPerson(p, damage, pushback, user.rotation, punchElement); // This is such an elegant line of code :3
 									user.punchedSomething = true;
@@ -258,7 +258,7 @@ public class Punch extends Ability
 			}
 		}
 		// restore range to normal
-		range = (int) (1.15 * user.radius);
+		range = (int) (2.3 * user.radius);
 		if (user.punchedSomething)
 		{
 			// backwards pushback

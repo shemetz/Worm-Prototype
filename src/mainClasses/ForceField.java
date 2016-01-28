@@ -60,7 +60,7 @@ public class ForceField extends Drawable
 
 	void initSounds()
 	{
-		sounds.add(new SoundEffect("reflect.wav")); // 0 - when a beam hits the FF and is reflected
+		sounds.add(new SoundEffect("Reflect.wav")); // 0 - when a beam hits the FF and is reflected
 		sounds.get(0).endUnlessMaintained = true;
 	}
 

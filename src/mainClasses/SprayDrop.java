@@ -46,12 +46,12 @@ public class SprayDrop extends RndPhysObj
 		return 0.6 * points * Ability.elementalAttackNumbers[elementNum][1] * mass * Ability.elementalAttackNumbers[elementNum][2];
 	}
 
-	public void drawShadow(Graphics2D buffer, double shadowX, double shadowY)
+	public void trueDrawShadow(Graphics2D buffer, double shadowX, double shadowY)
 	{
 		// no shadow
 	}
 
-	public void draw(Graphics2D buffer, double cameraZed)
+	public void trueDraw(Graphics2D buffer, double cameraZed)
 	{
 		if (z <= cameraZed)
 		{

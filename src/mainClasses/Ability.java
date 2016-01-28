@@ -21,6 +21,7 @@ import abilities.Ghost_Mode_I;
 import abilities.Heal_I;
 import abilities.Heal_II;
 import abilities.Pool_E;
+import abilities.Portals;
 import abilities.Precision_I;
 import abilities.Protective_Bubble_I;
 import abilities.Punch;
@@ -450,6 +451,8 @@ public class Ability
 		}
 		switch (trimmedAbilityName)
 		{
+		case "Portals":
+			return new Portals(pnts);
 		case "Elemental Void":
 			return new Elemental_Void(pnts);
 		case "Precision I":

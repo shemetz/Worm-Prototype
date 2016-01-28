@@ -10,6 +10,7 @@ import java.awt.Image;
 import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.PointerInfo;
+import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.event.ActionEvent;
@@ -27,8 +28,10 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
 import java.awt.font.FontRenderContext;
+import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.RenderedImage;
 import java.io.File;
@@ -46,6 +49,7 @@ import javax.swing.Timer;
 
 import abilities.ForceFieldAbility;
 import abilities.GridTargetingAbility;
+import abilities.Portals;
 import abilities.Protective_Bubble_I;
 import abilities.Sense_Powers;
 import abilities.Shield_E;
@@ -174,6 +178,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		{
 			Debris d = env.debris.get(i);
 			d.update(deltaTime);
+			env.moveDebris(d, deltaTime);
 			if (d.velocity <= 35 && d.timeLeft <= 0)
 			{
 				env.debris.remove(i);
@@ -537,6 +542,59 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 				// possible TODO: flow from pools to other pools
 			}
 
+		// PORTALS
+		List<Drawable> stuff = new ArrayList<Drawable>();
+		stuff.addAll(env.people);
+		stuff.addAll(env.balls);
+		stuff.addAll(env.debris);
+		stuff.addAll(env.sprayDrops);
+		for (Drawable d : stuff)
+		{
+			Rectangle2D dRect = new Rectangle2D.Double(d.x - d.image.getWidth() / 2, d.y - d.image.getHeight() / 2, d.image.getWidth(), d.image.getHeight());
+			if (d.intersectedPortal != null && !env.portals.contains(d.intersectedPortal))
+				d.intersectedPortal = null;
+			for (Portal p : env.portals)
+			{
+				Line2D pLine = new Line2D.Double(p.start.x, p.start.y, p.end.x, p.end.y);
+				boolean intersects = false;
+				if (dRect.intersectsLine(pLine))
+				{
+					// check if within portal
+					Point2D closestPointOnLine = Methods.getClosestPointOnLine(p.start.x, p.start.y, p.end.x, p.end.y, d.x, d.y);
+					Point2D closestPointOnSegment = Methods.getClosestPointOnSegment(p.start.x, p.start.y, p.end.x, p.end.y, d.x, d.y);
+					if (closestPointOnLine.equals(closestPointOnSegment))
+					{
+						if (Methods.DistancePow2(p.start, closestPointOnSegment) > d.radius * d.radius && Methods.DistancePow2(p.end, closestPointOnSegment) > d.radius * d.radius)
+							intersects = true;
+					}
+				}
+				if (intersects)
+					d.intersectedPortal = p;
+				else if (d.intersectedPortal != null && d.intersectedPortal.equals(p)) // if it used to be but no longer is
+					d.intersectedPortal = null;
+			}
+		}
+		for (Beam b : env.beams)
+		{
+			double minDist = b.size * 20 * 1.414;
+			for (Portal p : env.portals)
+			{
+				boolean intersects = false;
+				Point2D closestPointOnLine = Methods.getClosestPointOnLine(p.start.x, p.start.y, p.end.x, p.end.y, b.start.x, b.start.y);
+				Point2D closestPointOnSegment = Methods.getClosestPointOnSegment(p.start.x, p.start.y, p.end.x, p.end.y, b.start.x, b.start.y);
+				if (closestPointOnLine.equals(closestPointOnSegment) && Methods.DistancePow2(b.start, closestPointOnLine) < minDist*minDist)
+						intersects = true;
+				closestPointOnLine = Methods.getClosestPointOnLine(p.start.x, p.start.y, p.end.x, p.end.y, b.end.x, b.end.y);
+				closestPointOnSegment = Methods.getClosestPointOnSegment(p.start.x, p.start.y, p.end.x, p.end.y, b.end.x, b.end.y);
+				if (closestPointOnLine.equals(closestPointOnSegment))
+						intersects = true;
+				if (intersects)
+					b.intersectedPortal = p;
+				else if (b.intersectedPortal != null && b.intersectedPortal.equals(p)) // if it used to be but no longer is
+					b.intersectedPortal = null;
+			}
+		}
+
 		// Updating pool transparencies due to damage, and spreading the damage around evenly
 		if (frameNum % 10 == 0)
 			env.updatePools();
@@ -616,13 +674,15 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		}
 		updateTargeting(player, ability);
 		ability.updatePlayerTargeting(env, player, player.target, 0);
-		print();
 	}
 
 	void updateTargeting(Person p, Ability ability)
 	{
 		double angle = Math.atan2(p.target.y - p.y, p.target.x - p.x);
 
+		if (ability instanceof Portals)
+			if (((Portals) ability).holdTarget != null)
+				return;
 		// if the area isn't nice
 		if (!ability.rangeType.equals("Create in grid"))
 			if (ability.range != -1)
@@ -712,12 +772,82 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		}
 	}
 
-	void drawAim(Graphics2D buffer, Player p)
+	void drawAim(Graphics2D buffer)
 	{
 		Ability ability = player.abilities.get(player.abilityAiming);
 
-		switch (p.targetType)
+		switch (player.targetType)
 		{
+		case "portals":
+			Portals p = (Portals) ability;
+			if (p.holdTarget == null)
+				break;
+			if (p.p1 == null) // first portal - variable length
+			{
+				buffer.setStroke(dashedStroke3);
+				buffer.setColor(Color.orange);
+				double portalAngle = Math.atan2(player.target.y - p.holdTarget.y, player.target.x - p.holdTarget.x);
+				if (p.alignPortals) // snap to cardinal directions
+				{
+					double length = Math.min(p.maxPortalLength, Math.sqrt(Methods.DistancePow2(p.holdTarget.x, p.holdTarget.y, player.target.x, player.target.y)));
+					length = Math.max(p.minPortalLength, length);
+					portalAngle += Math.PI; // angle is between 0 and TAU
+					portalAngle = (int) ((portalAngle / Math.PI * 180 + 45) / 90) * 90 + 180;
+					portalAngle = portalAngle / 180 * Math.PI;
+				}
+				double length;
+				length = Math.min(p.maxPortalLength, Math.sqrt(Methods.DistancePow2(p.holdTarget.x, p.holdTarget.y, player.target.x, player.target.y)));
+				length = Math.max(p.minPortalLength, length);
+				buffer.drawLine((int) (p.holdTarget.x), (int) (p.holdTarget.y), (int) (p.holdTarget.x + length * Math.cos(portalAngle)), (int) (p.holdTarget.y + length * Math.sin(portalAngle)));
+			} else if (p.p2 == null)
+			{
+				double length = p.p1.length;
+				double portalAngle = Math.atan2(player.target.y - p.holdTarget.y, player.target.x - p.holdTarget.x);
+				Line2D newPortal = new Line2D.Double(p.holdTarget.x, p.holdTarget.y, p.holdTarget.x + length * Math.cos(portalAngle), p.holdTarget.y + length * Math.sin(portalAngle));
+				if (p.alignPortals) // parallel portals
+				{
+					double htx = (int) (player.target.x - p.p1.length / 2 * Math.cos(p.p1.angle));
+					double hty = (int) (player.target.y - p.p1.length / 2 * Math.sin(p.p1.angle));
+					portalAngle = p.p1.angle;
+					newPortal = new Line2D.Double(htx, hty, htx + length * Math.cos(portalAngle), hty + length * Math.sin(portalAngle));
+				}
+				if (p.portalsCollide(p.p1, new Portal(newPortal)))
+				{
+					double minDist = Math.sqrt(p.minimumDistanceBetweenPortalsPow2);
+					// rectangle
+					Polygon polygon = new Polygon();
+					polygon.addPoint((int) (p.p1.start.x + minDist * Math.cos(p.p1.angle + Math.PI / 2)), (int) (p.p1.start.y + minDist * Math.sin(p.p1.angle + Math.PI / 2)));
+					polygon.addPoint((int) (p.p1.start.x - minDist * Math.cos(p.p1.angle + Math.PI / 2)), (int) (p.p1.start.y - minDist * Math.sin(p.p1.angle + Math.PI / 2)));
+					polygon.addPoint((int) (p.p1.end.x - minDist * Math.cos(p.p1.angle + Math.PI / 2)), (int) (p.p1.end.y - minDist * Math.sin(p.p1.angle + Math.PI / 2)));
+					polygon.addPoint((int) (p.p1.end.x + minDist * Math.cos(p.p1.angle + Math.PI / 2)), (int) (p.p1.end.y + minDist * Math.sin(p.p1.angle + Math.PI / 2)));
+					Area a = new Area(polygon);
+					// two circles
+					Area e1 = new Area(new Ellipse2D.Double(p.p1.start.x - minDist, p.p1.start.y - minDist, minDist * 2, minDist * 2));
+					Area e2 = new Area(new Ellipse2D.Double(p.p1.end.x - minDist, p.p1.end.y - minDist, minDist * 2, minDist * 2));
+					a.add(e1);
+					a.add(e2);
+					buffer.setColor(new Color(255, 0, 0, 78));
+					buffer.fill(a);
+					buffer.setColor(Color.red);
+					buffer.setStroke(new BasicStroke(2));
+					buffer.draw(a);
+					buffer.setColor(Color.red);
+				} else
+					buffer.setColor(Color.orange);
+				buffer.setStroke(dashedStroke3);
+				buffer.drawLine((int) (newPortal.getX1()), (int) (newPortal.getY1()), (int) (newPortal.getX2()), (int) (newPortal.getY2()));
+			} else // Deleting portals
+			{
+				buffer.setStroke(new BasicStroke(3));
+				buffer.setColor(Color.orange);
+				int XArmLength = 50;
+				buffer.drawLine(player.target.x - XArmLength, player.target.y - XArmLength, player.target.x + XArmLength, player.target.y + XArmLength);
+				buffer.drawLine(player.target.x - XArmLength, player.target.y + XArmLength, player.target.x + XArmLength, player.target.y - XArmLength);
+				buffer.setColor(Color.red);
+				buffer.drawLine(p.p1.start.x, p.p1.start.y, p.p1.end.x, p.p1.end.y);
+				buffer.drawLine(p.p2.start.x, p.p2.start.y, p.p2.end.x, p.p2.end.y);
+			}
+			break;
 		case "explosion":
 			buffer.setStroke(dashedStroke3);
 			buffer.setColor(Color.orange);
@@ -872,21 +1002,14 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		}
 
 		player = new Player(96 * 20, 96 * 20);
+		player.abilities.add(Ability.ability("Portals", 5));
 		player.abilities.add(Ability.ability("Protective Bubble I", 5));
 		player.abilities.add(Ability.ability("Spray <Acid>", 5));
-		player.abilities.add(Ability.ability("Elemental Void", 5));
 		player.abilities.add(Ability.ability("Ball <Fire>", 5));
 		player.abilities.add(Ability.ability("Heal I", 5));
 		player.abilities.add(Ability.ability("Flight I", 5));
 		player.abilities.add(Ability.ability("Blink", 5));
 		player.abilities.add(Ability.ability("Beam <Energy>", 5));
-		player.abilities.add(Ability.ability("Ghost Mode I", 5));
-		player.abilities.add(Ability.ability("Sense Life", 5));
-		player.abilities.add(Ability.ability("Elemental Combat II <Earth>", 5));
-		player.updateAbilities(); // for the elemental combat
-		player.abilities.add(Ability.ability("Beam <Plant>", 5));
-		player.abilities.add(Ability.ability("Sense Powers", 4));
-		player.abilities.add(Ability.ability("Strong Force Field", 5));
 		player.updateAbilities(); // Because we added some abilities and the hotkeys haven't been updated
 		env.people.add(player);
 		camera = new Point3D((int) player.x, (int) player.y, (int) player.z + 25);
@@ -900,7 +1023,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		shmulik.abilities.add(Ability.ability("Ball <Earth>", 6));
 		shmulik.abilities.add(Ability.ability("Heal I", 3));
 		shmulik.name = "Shmulik";
-		env.people.add(shmulik);
+		// env.people.add(shmulik);
 
 		Person tzippi = new NPC(96 * 15, 96 * 25, Strategy.PASSIVE);
 		// tzippi.trigger();
@@ -963,7 +1086,11 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 							a.use(env, p, p.target);
 							p.abilityTryingToRepetitivelyUse = abilityIndex;
 						} else
+						{
 							p.abilityAiming = abilityIndex; // straightforward
+							if (a instanceof Portals) // TODO make this for any ability that does stuff while aiming
+								a.updatePlayerTargeting(env, player, p.target, 0);
+						}
 					}
 				}
 				// if trying to use ability while repetitively trying another, doesn't work
@@ -1149,7 +1276,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		if (hotkeyHovered != -1 && player.hotkeys[hotkeyHovered] != -1)
 			drawRange(buffer, player.abilities.get(player.hotkeys[hotkeyHovered]));
 		if (player.abilityAiming != -1)
-			drawAim(buffer, player);
+			drawAim(buffer);
 
 		// temp
 		buffer.setColor(Color.red);
@@ -1477,7 +1604,15 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 					buffer.setColor(Color.cyan);
 					buffer.setStroke(new BasicStroke(2));
 					buffer.drawRect(x + (int) (1 * UIzoomLevel), y + (int) (1 * UIzoomLevel), (int) (59 * UIzoomLevel), (int) (59 * UIzoomLevel));
-				}
+				} else if (ability instanceof Portals) // if portals ability
+					if (((Portals) ability).p1 != null)
+					{
+						// draw half of the "on" sign
+						buffer.setColor(Color.cyan);
+						buffer.setStroke(new BasicStroke(2));
+						buffer.drawLine(x + (int) (1 * UIzoomLevel), y + (int) (1 * UIzoomLevel), x + (int) (1 * UIzoomLevel + 59 * UIzoomLevel), y + (int) (1 * UIzoomLevel));
+						buffer.drawLine(x + (int) (1 * UIzoomLevel), y + (int) (1 * UIzoomLevel), x + (int) (1 * UIzoomLevel), y + (int) (1 * UIzoomLevel + 59 * UIzoomLevel));
+					}
 
 				// current power
 				if (player.hotkeys[i] == player.abilityAiming || player.hotkeys[i] == player.abilityMaintaining || player.hotkeys[i] == player.abilityTryingToRepetitivelyUse)
@@ -1628,10 +1763,23 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 			vertAccel++;
 		if (player.rightPressed)
 			horiAccel++;
+		if (player.timeSincePortal > 0.05)
+		{
+			player.wasdPortalArray[0] = player.upPressed;
+			player.wasdPortalArray[1] = player.leftPressed;
+			player.wasdPortalArray[2] = player.downPressed;
+			player.wasdPortalArray[3] = player.rightPressed;
+		} else if (player.movementAxisRotation != 0)
+		{
+			if ((player.wasdPortalArray[0] != player.upPressed) || (player.wasdPortalArray[1] != player.leftPressed) || (player.wasdPortalArray[2] != player.downPressed)
+					|| (player.wasdPortalArray[3] != player.rightPressed))
+				player.movementAxisRotation = 0;
+		}
 		if (horiAccel == 0 && vertAccel == 0)
 		{
 			player.strengthOfAttemptedMovement = 0;
 			player.flyDirection = 0;
+			player.movementAxisRotation = 0; // If you stop, portal sickness cancels
 			if (player.leftMousePressed && !player.maintaining && !player.dead)
 			{
 				// rotate to where mouse point is
@@ -1641,7 +1789,11 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		} else
 		{
 			player.strengthOfAttemptedMovement = 1;
-			player.directionOfAttemptedMovement = Math.atan2(vertAccel, horiAccel) + cameraRotation;
+			player.directionOfAttemptedMovement = Math.atan2(vertAccel, horiAccel) + cameraRotation + player.movementAxisRotation;
+
+			// Reduce effect of portal axis change. Commented out because "keep moving until you release keys" feels better.
+			// if (player.movementAxisRotation > 0)
+			// player.movementAxisRotation += (((((0 - player.movementAxisRotation) % (Math.PI * 2)) + (Math.PI * 3)) % (Math.PI * 2)) - Math.PI) * 3 * 0.02 * (0.5 - player.timeSincePortal);
 
 			if (player.spacePressed && !player.ctrlPressed)
 				player.flyDirection = 1;
@@ -2434,6 +2586,8 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 				} else if (player.abilityAiming != -1)
 				{
 					stopUsingPower = true;
+					// some abilities need to know that you stopped aiming them. specifically, the Portals ability.
+					player.abilities.get(player.abilityAiming).updatePlayerTargeting(env, player, player.target, 0);
 					player.abilityAiming = -1;
 				}
 			}
