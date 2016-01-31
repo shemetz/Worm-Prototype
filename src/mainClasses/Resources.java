@@ -17,8 +17,8 @@ public class Resources
 	static BufferedImage[][]						croppedPool;														// type, 0123 = abcd, 45 = two bridge types
 	static BufferedImage[]							floor;																// type
 	static BufferedImage[][]						cracks;																// health type, connection style
-	static BufferedImage[][]						wCorner;															// type, connection (up, bridge, bite, full)
-	static BufferedImage[][]						pCorner;															// type, connection (up, bridge, bite, full)
+	static BufferedImage[][][]						wCorner;															// type, connection (up, bridge, bite, full), angle (in quarter-circles)
+	static BufferedImage[][][]						pCorner;															// type, connection (up, bridge, bite, full), angle (in quarter-circles)
 	static List<List<List<List<BufferedImage>>>>	bodyPart;															// body part, permutation, state, frame
 	static Map<String, BufferedImage>				icons;																// ability, frame
 	final static int								elementalNum	= 12;
@@ -44,8 +44,8 @@ public class Resources
 		pool = new BufferedImage[elementalNum];
 		croppedPool = new BufferedImage[elementalNum][14];
 		floor = new BufferedImage[1];
-		wCorner = new BufferedImage[elementalNum][4];
-		pCorner = new BufferedImage[elementalNum][4];
+		wCorner = new BufferedImage[elementalNum][4][4];
+		pCorner = new BufferedImage[elementalNum][4][4];
 
 		bodyPart = new ArrayList<List<List<List<BufferedImage>>>>(); // LEGS, CHEST (+arms), HEAD, HAIR
 
@@ -67,14 +67,20 @@ public class Resources
 		{
 			pool[i] = ResourceLoader.getBufferedImage("environment/pool_" + EP.elementList[i] + ".png");
 			wall[i] = ResourceLoader.getBufferedImage("environment/wall_" + EP.elementList[i] + ".png");
-			wCorner[i][0] = ResourceLoader.getBufferedImage("environment/wCorner_" + EP.elementList[i] + "_up.png");
-			wCorner[i][1] = ResourceLoader.getBufferedImage("environment/wCorner_" + EP.elementList[i] + "_bridge.png");
-			wCorner[i][2] = ResourceLoader.getBufferedImage("environment/wCorner_" + EP.elementList[i] + "_bite.png");
-			wCorner[i][3] = ResourceLoader.getBufferedImage("environment/wCorner_" + EP.elementList[i] + "_full.png");
-			pCorner[i][0] = ResourceLoader.getBufferedImage("environment/pCorner_" + EP.elementList[i] + "_up.png");
-			pCorner[i][1] = ResourceLoader.getBufferedImage("environment/pCorner_" + EP.elementList[i] + "_bridge.png");
-			pCorner[i][2] = ResourceLoader.getBufferedImage("environment/pCorner_" + EP.elementList[i] + "_bite.png");
-			pCorner[i][3] = ResourceLoader.getBufferedImage("environment/pCorner_" + EP.elementList[i] + "_full.png");
+			wCorner[i][0][0] = ResourceLoader.getBufferedImage("environment/wCorner_" + EP.elementList[i] + "_up.png");
+			wCorner[i][1][0] = ResourceLoader.getBufferedImage("environment/wCorner_" + EP.elementList[i] + "_bridge.png");
+			wCorner[i][2][0] = ResourceLoader.getBufferedImage("environment/wCorner_" + EP.elementList[i] + "_bite.png");
+			wCorner[i][3][0] = ResourceLoader.getBufferedImage("environment/wCorner_" + EP.elementList[i] + "_full.png");
+			for (int j = 0; j < 4; j++) //Rotated corner images
+				for (int k = 1; k < 4; k++)
+					wCorner[i][j][k] = Methods.rotate(wCorner[i][j][0], 0.5 * Math.PI * k);
+			pCorner[i][0][0] = ResourceLoader.getBufferedImage("environment/pCorner_" + EP.elementList[i] + "_up.png");
+			pCorner[i][1][0] = ResourceLoader.getBufferedImage("environment/pCorner_" + EP.elementList[i] + "_bridge.png");
+			pCorner[i][2][0] = ResourceLoader.getBufferedImage("environment/pCorner_" + EP.elementList[i] + "_bite.png");
+			pCorner[i][3][0] = ResourceLoader.getBufferedImage("environment/pCorner_" + EP.elementList[i] + "_full.png");
+			for (int j = 0; j < 4; j++) //Rotated corner images
+				for (int k = 1; k < 4; k++)
+					pCorner[i][j][k] = Methods.rotate(pCorner[i][j][0], 0.5 * Math.PI * k);
 			for (int j = 0; j < 4; j++)
 				arcForceFields[i][j] = ResourceLoader.getBufferedImage("forcefields/" + EP.elementList[i] + "_" + j + ".png");
 			for (int j = 0; j < Ability.elementalAttacks.length; j++)

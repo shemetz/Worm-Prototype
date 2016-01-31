@@ -139,12 +139,22 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 										tab2 = true;
 	int							tabHoverAbility			= -1;																											// ability player is hovering above which, with the mouse
 
-	// METHODS
+	// FPS checks
+	long lastLoopTime = System.nanoTime();
+	int							FPS						= -1;
 
+	// METHODS
 	void frame()
 	{
 		double deltaTime = globalDeltaTime;
 		// Remember: 20 milliseconds between frames, 50 frames per second
+
+		// FPS stuff
+		long delta = System.nanoTime() - lastLoopTime;
+        lastLoopTime = System.nanoTime();
+        if (frameNum % 25 == 0)
+        	FPS = (int)(1000000000/delta);
+
 		// Resetting the sounds.
 		// SOUNDS EFFECTS (1)
 		List<SoundEffect> allSounds = new ArrayList<SoundEffect>();
@@ -1207,7 +1217,6 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 				velocity -= friction * gravity * deltaTime;
 			else
 				velocity = 0;
-
 			p.xVel = velocity * Math.cos(moveDirectionAngle);
 			p.yVel = velocity * Math.sin(moveDirectionAngle);
 			return friction;
@@ -1239,6 +1248,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 	{
 		// NOTICE! THE ORDER OF DRAWING OPERATIONS IS ACTUALLY IMPORTANT!
 		Graphics2D buffer = (Graphics2D) g;
+		
 		zoomLevel /= (player.z * heightZoomRatio + 1);
 		// Move "camera" to position
 		buffer.scale(zoomLevel, zoomLevel);
@@ -1267,7 +1277,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		env.drawFloor(buffer, this, bounds);
 		drawBottomEffects(buffer);
 		// environment not including effects and clouds
-		env.draw(buffer, this, (int) camera.z, bounds, cameraRotation);
+		env.draw(buffer, (int) camera.z, bounds, cameraRotation);
 		drawTopEffects(buffer);
 
 		if (hotkeySelected != -1 && player.hotkeys[hotkeySelected] != -1)
@@ -1303,6 +1313,11 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 
 		if (timeSinceLastScreenshot < 2)
 			drawScreenshot(buffer);
+		
+		//FPS
+		buffer.setColor(Color.white);
+		buffer.setFont(tooltipFont);
+		buffer.drawString(""+FPS, frameWidth-50, 50);
 	}
 
 	void drawExtraPeopleInfo(Graphics2D buffer)
@@ -2319,6 +2334,8 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		this.setFocusTraversalKeysEnabled(false);
 		this.setExtendedState(Frame.MAXIMIZED_BOTH);
 
+		//System.setProperty("sun.java2d.ddforcevram","True"); // not doing anything
+		
 		frameWidth = (int) this.getBounds().getWidth();
 		frameHeight = (int) this.getBounds().getHeight();
 		updateFrame();

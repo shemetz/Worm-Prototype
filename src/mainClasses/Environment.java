@@ -1553,10 +1553,10 @@ public class Environment
 					}
 				}
 		}
-		
-		//7 Portals
+
+		// 7 Portals
 		Portal collidedPortal = null;
-		for (Portal p: portals)
+		for (Portal p : portals)
 			if (v.z < p.highestPoint() && v.highestPoint() > p.z)
 				if (vineLine.intersectsLine(collidedPortal.Line2D()))
 				{
@@ -1647,7 +1647,7 @@ public class Environment
 			v.rotate(originalAngle, deltaTime * 2);
 			v.fixPosition();
 			break;
-		case 7: //portal
+		case 7: // portal
 			v.retract();
 			v.end.x = roundedIntersectionPoint.x;
 			v.end.y = roundedIntersectionPoint.y;
@@ -2057,19 +2057,19 @@ public class Environment
 
 		// Portals - 6
 		Portal collidedPortal = null;
-		double minimumDistanceFromStart = 10; //to avoid post-portal beams hitting their own exit portal
+		double minimumDistanceFromStart = 10; // to avoid post-portal beams hitting their own exit portal
 		for (Portal p : portals)
 		{
 			if (p.partner != null && p.highestPoint() > b.z && b.highestPoint() > p.z && beamLine.intersectsLine(p.Line2D()))
 			{
 				Point2D intersection = Methods.getSegmentIntersection(beamLine, p.Line2D());
 				if (intersection != null)
-					if (Methods.DistancePow2(b.start, intersection) > minimumDistanceFromStart*minimumDistanceFromStart)
-				{
-					collisionLine = p.Line2D();
-					collisionType = 6;
-					collidedPortal = p;
-				}
+					if (Methods.DistancePow2(b.start, intersection) > minimumDistanceFromStart * minimumDistanceFromStart)
+					{
+						collisionLine = p.Line2D();
+						collisionType = 6;
+						collidedPortal = p;
+					}
 			}
 		}
 
@@ -2830,39 +2830,7 @@ public class Environment
 		sound.play();
 	}
 
-	public void drawFloor(Graphics2D buffer, Frame that, final Rectangle bounds)
-	{
-		// Pools (and floors)
-		for (int x = 0; x < width; x++)
-			if (x * squareSize > bounds.getMinX() - squareSize && x * squareSize < bounds.getMaxX())
-				for (int y = 0; y < height; y++)
-					if (y * squareSize > bounds.getMinY() - squareSize && y * squareSize < bounds.getMaxY())
-					{
-						// floor
-						if (floorTypes[x][y] != -1)
-							buffer.drawImage(Resources.floor[floorTypes[x][y]], x * squareSize, y * squareSize, that);
-						// pools
-						if (poolTypes[x][y] != -1)
-						{
-							buffer.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.1f + 0.009f * poolHealths[x][y]));
-							buffer.drawImage(poolImages[x][y], x * squareSize, y * squareSize, that);
-							buffer.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
-						}
-						// pool corners
-						for (int i = elementalNum - 1; i >= 0; i--)
-							// decreasing order because I want earth walls to be bottomest and earth is one of the last elements
-							if (pCornerStyles[x][y][i] != -1)
-							{
-								BufferedImage cornerImg = Resources.pCorner[i][getStyle(pCornerStyles[x][y][i])];
-								cornerImg = Methods.rotate(cornerImg, 0.5 * Math.PI * Environment.getAngle(pCornerStyles[x][y][i]), that);
-								buffer.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.1f + 0.009f * pCornerTransparencies[x][y][i]));
-								buffer.drawImage(cornerImg, x * squareSize - squareSize / 2, y * squareSize - squareSize / 2, that);
-								buffer.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
-							}
-					}
-	}
-
-	public void draw(Graphics2D buffer, Frame that, int cameraZed, final Rectangle bounds, double cameraRotation)
+	public void draw(Graphics2D buffer, int cameraZed, final Rectangle bounds, double cameraRotation)
 	{
 		List<Drawable> drawableThings = new ArrayList<Drawable>();
 		drawableThings.addAll(people);
@@ -2913,7 +2881,7 @@ public class Environment
 		drawDrawables(buffer, cameraZed, cameraRotation, drawableThings, -1, 1);
 
 		// Walls and wall corners
-		drawWalls(buffer, bounds, that);
+		drawWalls(buffer, bounds);
 
 		// Clouds, people, balls, force fields, debris, arc force fields, beams, vines, drops
 		drawDrawables(buffer, cameraZed, cameraRotation, drawableThings, 1, Integer.MAX_VALUE);
@@ -2928,7 +2896,38 @@ public class Environment
 			}
 	}
 
-	public void drawWalls(Graphics2D buffer, Rectangle bounds, Frame that)
+	public void drawFloor(Graphics2D buffer, Frame that, final Rectangle bounds)
+	{
+		// Pools (and floors)
+		for (int x = 0; x < width; x++)
+			if (x * squareSize > bounds.getMinX() - squareSize && x * squareSize < bounds.getMaxX())
+				for (int y = 0; y < height; y++)
+					if (y * squareSize > bounds.getMinY() - squareSize && y * squareSize < bounds.getMaxY())
+					{
+						// floor
+						if (floorTypes[x][y] != -1)
+							buffer.drawImage(Resources.floor[floorTypes[x][y]], x * squareSize, y * squareSize, that);
+						// pools
+						if (poolTypes[x][y] != -1)
+						{
+							buffer.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.1f + 0.009f * poolHealths[x][y]));
+							buffer.drawImage(poolImages[x][y], x * squareSize, y * squareSize, that);
+							buffer.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
+						}
+						// pool corners
+						for (int i = elementalNum - 1; i >= 0; i--)
+							// decreasing order because I want earth walls to be bottomest and earth is one of the last elements
+							if (pCornerStyles[x][y][i] != -1)
+							{
+								BufferedImage cornerImg = Resources.pCorner[i][getCornerStyle(pCornerStyles[x][y][i])][Environment.getCornerAngle(pCornerStyles[x][y][i])];
+								buffer.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.1f + 0.009f * pCornerTransparencies[x][y][i]));
+								buffer.drawImage(cornerImg, x * squareSize - squareSize / 2, y * squareSize - squareSize / 2, that);
+								buffer.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
+							}
+					}
+	}
+
+	public void drawWalls(Graphics2D buffer, Rectangle bounds)
 	{
 		for (int x = 0; x < width; x++)
 			if (x * squareSize > bounds.getMinX() - squareSize && x * squareSize < bounds.getMaxX())
@@ -2954,8 +2953,7 @@ public class Environment
 						for (int i = elementalNum - 1; i >= 0; i--)
 							if (wCornerStyles[x][y][i] != -1)
 							{
-								BufferedImage cornerImg = Resources.wCorner[i][getStyle(wCornerStyles[x][y][i])];
-								cornerImg = Methods.rotate(cornerImg, 0.5 * Math.PI * Environment.getAngle(wCornerStyles[x][y][i]), that);
+								BufferedImage cornerImg = Resources.wCorner[i][getCornerStyle(wCornerStyles[x][y][i])][Environment.getCornerAngle(wCornerStyles[x][y][i])];
 								buffer.drawImage(cornerImg, x * squareSize - squareSize / 2, y * squareSize - squareSize / 2, null);
 
 								// cracks
@@ -3380,25 +3378,27 @@ public class Environment
 		// else, I don't have time for this shit
 	}
 
-	static int getAngle(int x)
+	static int getCornerAngle(int n)
 	{
 		int ans = 0;
-		if (x < 4)
-			ans = x;
-		if (x >= 4)
-			ans = x - 4;
-		if (x >= 6)
-			ans = x - 6;
+		if (n < 4)
+			ans = n;
+		if (n >= 4)
+			ans = n - 4;
+		if (n >= 6)
+			ans = n - 6;
+		if (n == 10)
+			return 0;
 		return ans;
 	}
 
-	static int getStyle(int x)
+	static int getCornerStyle(int n)
 	{
-		if (x < 4)
+		if (n < 4)
 			return 0;
-		if (x < 6)
+		if (n < 6)
 			return 1;
-		if (x < 10)
+		if (n < 10)
 			return 2;
 		else
 			return 3;
