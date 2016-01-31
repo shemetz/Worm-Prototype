@@ -2,7 +2,6 @@ package mainClasses;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;
-import java.awt.Frame;
 import java.awt.Graphics2D;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsDevice;
@@ -18,12 +17,17 @@ import java.awt.image.Kernel;
 public class Methods
 {
 	// Handy rotation method
-	public static BufferedImage rotate(BufferedImage image, double angle, Frame that)
+	static GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+    static GraphicsDevice gs = ge.getDefaultScreenDevice();
+    static GraphicsConfiguration tgc = gs.getDefaultConfiguration();
+	public static BufferedImage rotate(BufferedImage image, double angle)
 	{
+		if (image == null)
+			return null;
 		double sin = Math.abs(Math.sin(angle)), cos = Math.abs(Math.cos(angle));
 		int w = image.getWidth(), h = image.getHeight();
 		int neww = (int) Math.floor(w * cos + h * sin), newh = (int) Math.floor(h * cos + w * sin);
-		GraphicsConfiguration tgc = that.getGraphicsConfiguration();
+		
 		BufferedImage result = tgc.createCompatibleImage(neww, newh, Transparency.TRANSLUCENT);
 		Graphics2D g = result.createGraphics();
 		g.translate((neww - w) / 2, (newh - h) / 2);
