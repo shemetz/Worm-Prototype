@@ -152,7 +152,7 @@ public class Punch extends Ability
 					{
 						int i = user.target.x / squareSize;
 						int j = user.target.y / squareSize;
-						if (env.wallTypes[i][j] != -1)
+						if (env.wallTypes[i][j] > 0)
 						{
 							int wallHealth = env.wallHealths[i][j];
 							double leftoverPushback = wallHealth > damage + pushback ? pushback : Math.min(wallHealth, pushback);

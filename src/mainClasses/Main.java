@@ -1020,6 +1020,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 
 		player = new Player(96 * 20, 96 * 20);
 		player.abilities.add(Ability.ability("Portals", 5));
+		player.abilities.add(Ability.ability("Force Shield", 5));
 		player.abilities.add(Ability.ability("Protective Bubble I", 5));
 		player.abilities.add(Ability.ability("Spray <Acid>", 5));
 		player.abilities.add(Ability.ability("Ball <Fire>", 5));
@@ -1042,14 +1043,12 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		shmulik.name = "Shmulik";
 		// env.people.add(shmulik);
 
-		Person person1 = new NPC(96 * 4, 96 * 5, Strategy.AGGRESSIVE);
-		person1.name = "Ally";
-		person1.commanderID = player.id;
-		env.people.add(person1);
-		Person person2 = new NPC(96 * 48, 96 * 2, Strategy.AGGRESSIVE);
-		env.people.add(person2);
-		Person person5 = new NPC(96 * 30, 96 * 20, Strategy.PASSIVE);
-		env.people.add(person5);
+		for (int i = 0; i < 10; i++)
+		{
+			Person person = new NPC((int) (Math.random() * env.widthPixels), (int) (Math.random() * env.heightPixels), Strategy.AGGRESSIVE);
+			person.commanderID = 1;
+			env.people.add(person);
+		}
 
 		// Fix walls spawning on people
 		for (Person p : env.people)

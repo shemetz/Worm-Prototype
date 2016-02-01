@@ -126,7 +126,8 @@ public class NPC extends Person
 						}
 					}
 					this.targetID = possibleTargets.get(bestTargetIndex).id;
-				}
+				} else
+					;// NPCs will just punch the corpse of the last person they attacked. I guess that's fine.
 			}
 			break;
 		case NO_TARGET:
@@ -397,6 +398,19 @@ public class NPC extends Person
 				this.strengthOfAttemptedMovement = 1;
 				this.timeSinceLastInstinct += deltaTime;
 			}
+
+		// Group tactics - stay a bit away from any non-enemy
+		double forceX = this.strengthOfAttemptedMovement * Math.cos(this.directionOfAttemptedMovement), forceY = this.strengthOfAttemptedMovement * Math.sin(this.directionOfAttemptedMovement);
+		for (Person p : env.people)
+			if (!p.equals(this) && !this.viableTarget(p))
+			{
+				double angle = Math.atan2(this.y - p.y, this.x - p.x);
+				//~5000 = what you'd expect, but leads to many problems (people running into sideways walls).
+				double amount = 1000 / Methods.DistancePow2(p.Point(), this.Point());
+				forceX += amount * Math.cos(angle);
+				forceY += amount * Math.sin(angle);
+			}
+		this.directionOfAttemptedMovement = Math.atan2(forceY, forceX);
 	}
 
 	void refreshMap(Environment env)
