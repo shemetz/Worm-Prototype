@@ -104,7 +104,7 @@ public class AStarPathFinder implements PathFinder {
 
 			for (int x=-1;x<2;x++) {
 				for (int y=-1;y<2;y++) {
-					// not a neighbour, its the current tile
+					// not a neighbour, it's the current tile
 
 					if ((x == 0) && (y == 0)) {
 						continue;
