@@ -360,7 +360,7 @@ public class NPC extends Person
 			this.tactic = Tactic.NO_TARGET;
 		else if (this.strategy.equals(Strategy.AGGRESSIVE))
 		{
-				this.tactic = Tactic.PUNCH_CHASING;
+			this.tactic = Tactic.PUNCH_CHASING;
 		}
 		if (prevTactic != this.tactic)
 		{
@@ -518,40 +518,8 @@ public class NPC extends Person
 
 		int sum = 0;
 		for (int i = 0; i < p.size() - 1; i++)
-			sum += approximateDistance(p.get(i + 1).x - p.get(i).x, p.get(i + 1).y - p.get(i).y);
+			sum += Math.sqrt(Methods.DistancePow2(p.get(i + 1).x, p.get(i + 1).y, p.get(i).x, p.get(i).y));
 		return sum;
-	}
-
-	/*
-	 * Taken from this 13 years old website:
-	 * 
-	 * http://www.flipcode.com/archives/Fast_Approximate_Distance_Functions.shtml
-	 */
-	int approximateDistance(int dx, int dy)
-	{
-		int min, max, approx;
-
-		if (dx < 0)
-			dx = -dx;
-		if (dy < 0)
-			dy = -dy;
-
-		if (dx < dy)
-		{
-			min = dx;
-			max = dy;
-		} else
-		{
-			min = dy;
-			max = dx;
-		}
-
-		approx = (max * 1007) + (min * 441);
-		if (max < (min << 4))
-			approx -= (max * 40);
-
-		// add 512 for proper rounding
-		return ((approx + 512) >> 10);
 	}
 
 	Mover Mover()
