@@ -286,7 +286,7 @@ public class AStarPathFinder implements PathFinder {
 	 * 
 	 * @param mover The entity that is being moved
 	 * @param sx The x coordinate of the tile whose cost is being determined
-	 * @param sy The y coordiante of the tile whose cost is being determined
+	 * @param sy The y coordinate of the tile whose cost is being determined
 	 * @param tx The x coordinate of the target location
 	 * @param ty The y coordinate of the target location
 	 * @return The cost of movement through the given tile

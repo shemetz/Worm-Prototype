@@ -23,7 +23,7 @@ public class Punch extends Ability
 	public Punch(int p)
 	{
 		super("Punch", p);
-		cost = 1;
+		cost = 0.7;
 		costType = "stamina";
 		cooldown = 0.55; // is actually 0.55 - Math.min(0.02*FITNESS, 0.15);
 		rangeType = "Exact range";
@@ -127,7 +127,7 @@ public class Punch extends Ability
 		range = (int) (2.3 * user.radius);
 		if (user.flySpeed != -1)
 			range = range + 65; // eh
-		double damage = user.STRENGTH;
+		double damage = user.STRENGTH * 1;
 		double pushback = user.STRENGTH * 1.5; // TODO have some cool power that greatly increases the pushback, thus making the user bounce off of walls!
 		pushback += Math.sqrt(user.xVel * user.xVel + user.yVel * user.yVel) * 100 / 3000; // TODO uhhh
 

@@ -15,8 +15,9 @@ import abilities.Sprint;
 import effects.Burning;
 import effects.Healed;
 import mainResourcesPackage.SoundEffect;
+import pathfinding.Mover;
 
-public class Person extends RndPhysObj
+public class Person extends RndPhysObj implements Mover
 {
 	public int							id;
 	public String						name;

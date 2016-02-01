@@ -408,8 +408,7 @@ public class NPC extends Person
 	{
 		AStarPathFinder pathFinder = new AStarPathFinder(envMap, 50, false);
 
-		Mover mover = Mover(); // TODO make it real
-		Path foundPath = pathFinder.findPath(mover, (int) (x / 96), (int) (y / 96), targetPoint.x / 96, targetPoint.y / 96);
+		Path foundPath = pathFinder.findPath(this, (int) (x / 96), (int) (y / 96), targetPoint.x / 96, targetPoint.y / 96);
 		if (foundPath != null)
 		{
 			// transform into a list of grid points
@@ -451,7 +450,7 @@ public class NPC extends Person
 					// check if it's OK to merge
 					loop: for (int xx = minX; xx <= maxX; xx++)
 						for (int yy = minY; yy <= maxY; yy++)
-							if (envMap.blocked(mover, xx, yy))
+							if (envMap.blocked(this, xx, yy))
 								if (Methods.LineToPointDistancePow2(A, C, new Point(xx, yy)) < minDistancePow2)
 								{
 									OKToMerge = false;
@@ -464,7 +463,7 @@ public class NPC extends Person
 					}
 				}
 
-			} while (prevPathLength < blargl.size());
+			} while (prevPathLength > blargl.size());
 			// 2: Merge every three points on the same line into two points
 			do
 			{
@@ -492,7 +491,7 @@ public class NPC extends Person
 					}
 				}
 
-			} while (prevPathLength < blargl.size());
+			} while (prevPathLength > blargl.size());
 
 			// transform into a list of points
 			List<Point> bestPath = new ArrayList<Point>();

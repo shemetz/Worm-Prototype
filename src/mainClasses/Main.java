@@ -1040,9 +1040,11 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		shmulik.abilities.add(Ability.ability("Ball <Earth>", 6));
 		shmulik.abilities.add(Ability.ability("Heal I", 3));
 		shmulik.name = "Shmulik";
-		//env.people.add(shmulik);
+		// env.people.add(shmulik);
 
 		Person person1 = new NPC(96 * 4, 96 * 5, Strategy.AGGRESSIVE);
+		person1.name = "Ally";
+		person1.commanderID = player.id;
 		env.people.add(person1);
 		Person person2 = new NPC(96 * 48, 96 * 2, Strategy.AGGRESSIVE);
 		env.people.add(person2);
@@ -2088,10 +2090,14 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 				sounds.add(p.sound);
 
 		for (SoundEffect s : sounds)
+		{
+			if (s == null)
+				errorMessage("ERROR - a sound is null. I dunno which sound. It's null.");
 			if (pausePlay)
 				s.pause();
 			else
 				s.cont(); // inue
+		}
 	}
 
 	void stopAllSounds()
