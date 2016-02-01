@@ -529,6 +529,7 @@ public class Environment
 			double velocity = b.velocity();
 			b.xVel = velocity * Math.cos(newAngle);
 			b.yVel = velocity * Math.sin(newAngle);
+			intersectedPortal.playPortalSound();
 		}
 
 		// ball gravity
@@ -1028,6 +1029,7 @@ public class Environment
 				double velocity = p.velocity();
 				p.xVel = velocity * Math.cos(newAngle);
 				p.yVel = velocity * Math.sin(newAngle);
+				intersectedPortal.playPortalSound();
 				p.timeSincePortal = 0.1; // For a period of time after portaling, you can't move through more portals.
 				if (p instanceof Player)
 					((Player) p).movementAxisRotation += angleChange; // player's keys will keep pushing character relative to previous rotation

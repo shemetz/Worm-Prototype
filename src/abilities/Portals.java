@@ -8,6 +8,7 @@ import mainClasses.Methods;
 import mainClasses.Person;
 import mainClasses.Player;
 import mainClasses.Portal;
+import mainResourcesPackage.SoundEffect;
 
 public class Portals extends Ability
 {
@@ -36,6 +37,8 @@ public class Portals extends Ability
 		minPortalLength = 100;
 		maxPortalLength = 2000;
 		minimumDistanceBetweenPortalsPow2 = 80 * 80;
+		sounds.add(new SoundEffect("Portal_1.wav"));
+		sounds.add(new SoundEffect("Portal_2.wav"));
 	}
 
 	public void use(Environment env, Person user, Point target)
@@ -72,6 +75,7 @@ public class Portals extends Ability
 		}
 		if (user.mana >= cost)
 		{
+			setSounds(user.Point());
 			if (p1 == null)
 			{
 				double length = Math.min(maxPortalLength, Math.sqrt(Methods.DistancePow2(holdTarget.x, holdTarget.y, target.x, target.y)));
@@ -79,6 +83,7 @@ public class Portals extends Ability
 				p1 = new Portal(holdTarget.x + length / 2 * Math.cos(angle), holdTarget.y + length / 2 * Math.sin(angle), user.z, angle, length);
 				env.portals.add(p1);
 				user.mana -= cost;
+				sounds.get(0).play();
 			} else if (p2 == null)
 			{
 				double length = p1.length;
@@ -93,6 +98,7 @@ public class Portals extends Ability
 					p1.join(p2);
 					on = true;
 					user.mana -= cost;
+					sounds.get(1).play();
 				}
 			}
 		}

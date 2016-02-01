@@ -6,6 +6,8 @@ import java.awt.Graphics2D;
 import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
 
+import mainResourcesPackage.SoundEffect;
+
 public class Portal extends Drawable
 {
 	// Portals are flat and in midair
@@ -19,6 +21,7 @@ public class Portal extends Drawable
 	Color			black	= Color.black;
 	Color			white	= Color.white;
 	double			slope;
+	SoundEffect		sound;
 
 	public Portal(double x_, double y_, double z_, double angle1, double length1)
 	{
@@ -32,6 +35,12 @@ public class Portal extends Drawable
 		end = new Point3D((int) (x + Math.cos(angle) * length * 0.5), (int) (y + Math.sin(angle) * length * 0.5), z);
 		image = new BufferedImage((int) length, (int) length, BufferedImage.TYPE_INT_ARGB);
 		slope = length / 6 / 6;
+	}
+
+	public void playPortalSound()
+	{
+		if (!sound.active)
+			sound.play();
 	}
 
 	public Portal(Line2D line)
@@ -91,5 +100,9 @@ public class Portal extends Drawable
 		p2.partner = this;
 		this.blackOrWhite = false;
 		p2.partner.partner.partner.partner.blackOrWhite = true; // :)
+		this.sound = new SoundEffect("Portal_1.wav");
+		p2.sound = new SoundEffect("Portal_2.wav");
+		this.sound.setPosition(x, y);
+		p2.sound.setPosition(p2.x, p2.y);
 	}
 }

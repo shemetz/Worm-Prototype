@@ -19,7 +19,6 @@ public class SoundEffect
 	public boolean		loopOrPlay			= false;
 	public boolean		endUnlessMaintained	= false;
 	double				x, y;						// position of sound
-
 	public SoundEffect(String fileName)
 	{
 		sound = ResourceLoader.getClip(fileName);
@@ -52,12 +51,13 @@ public class SoundEffect
 
 	public void stopIfEnded()
 	{
-		if (sound.getFramePosition() == sound.getFrameLength())
+		if (sound.getFramePosition() >= sound.getFrameLength())
 		{
 			stop();
 		}
 	}
 
+	//unused
 	public void updateVolume(Point camera)
 	{
 		double distancePow2 = Methods.DistancePow2(camera, this.Point());
