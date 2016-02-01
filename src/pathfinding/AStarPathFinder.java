@@ -23,7 +23,7 @@ public class AStarPathFinder implements PathFinder {
 	
 	/** The complete set of nodes across the map */
 	private Node[][] nodes;
-	/** True if we allow diaganol movement */
+	/** True if we allow diagonal movement */
 	private boolean allowDiagMovement;
 	/** The heuristic we're applying to determine which nodes to search first */
 	private AStarHeuristic heuristic;
@@ -83,7 +83,7 @@ public class AStarPathFinder implements PathFinder {
 		
 		nodes[tx][ty].parent = null;
 		
-		// while we haven'n't exceeded our max search depth
+		// while we haven't exceeded our max search depth
 		int maxDepth = 0;
 		while ((maxDepth < maxSearchDistance) && (open.size() != 0)) {
 			// pull out the first node in our open list, this is determined to 
@@ -110,7 +110,7 @@ public class AStarPathFinder implements PathFinder {
 						continue;
 					}
 					
-					// if we're not allowing diaganol movement then only 
+					// if we're not allowing diagonal movement then only 
 
 					// one of x or y can be set
 
@@ -128,7 +128,7 @@ public class AStarPathFinder implements PathFinder {
 					if (isValidLocation(mover,sx,sy,xp,yp)) {
 						// the cost to get to this node is cost the current plus the movement
 
-						// cost to reach this node. Note that the heursitic value is only used
+						// cost to reach this node. Note that the heuristic value is only used
 
 						// in the sorted open list
 
@@ -154,7 +154,7 @@ public class AStarPathFinder implements PathFinder {
 						
 						// if the node hasn't already been processed and discarded then
 
-						// reset it's cost to our current cost and add it as a next possible
+						// reset its cost to our current cost and add it as a next possible
 
 						// step (i.e. to the open list)
 
@@ -169,7 +169,7 @@ public class AStarPathFinder implements PathFinder {
 			}
 		}
 
-		// since we'e've run out of search 
+		// since we've run out of search 
 		// there was no path. Just return null
 
 		if (nodes[tx][ty].parent == null) {
@@ -190,7 +190,7 @@ public class AStarPathFinder implements PathFinder {
 		}
 		path.prependStep(sx,sy);
 		
-		// thats it, we have our path 
+		// that's it, we have our path 
 
 		return path;
 	}
