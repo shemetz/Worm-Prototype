@@ -1043,9 +1043,9 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		shmulik.name = "Shmulik";
 		// env.people.add(shmulik);
 
-		for (int i = 0; i < 10; i++)
+		for (int i = 0; i < 1; i++)
 		{
-			Person person = new NPC((int) (Math.random() * env.widthPixels), (int) (Math.random() * env.heightPixels), Strategy.AGGRESSIVE);
+			Person person = new NPC((int) (100 + Math.random() * (env.widthPixels-200)), (int) (100 + Math.random() * (env.heightPixels - 200)), Strategy.AGGRESSIVE);
 			person.commanderID = 1;
 			env.people.add(person);
 		}

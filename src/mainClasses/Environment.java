@@ -1033,6 +1033,8 @@ public class Environment
 				p.timeSincePortal = 0.1; // For a period of time after portaling, you can't move through more portals.
 				if (p instanceof Player)
 					((Player) p).movementAxisRotation += angleChange; // player's keys will keep pushing character relative to previous rotation
+				if (p instanceof NPC)
+					((NPC) p).path = ((NPC) p).pathFind(new Point((int) (p.x + 1 * Math.cos(newAngle)), (int) (p.y + 1 * Math.sin(newAngle))));
 			} else
 			{
 				// Tried to move through portal too soon after previous one
@@ -3139,7 +3141,13 @@ public class Environment
 							for (int i = 0; i < p.path.size() - 1; i++)
 								buffer.drawLine(p.path.get(i).x, p.path.get(i).y, p.path.get(i + 1).x, p.path.get(i + 1).y);
 							for (int i = 0; i < p.path.size(); i++)
+							{
+								if (p.path.get(i).byPortal)
+									buffer.setColor(Color.PINK);
+								else
+									buffer.setColor(Color.red);
 								buffer.drawRect(p.path.get(i).x - 1, p.path.get(i).y - 1, 3, 3);
+							}
 						}
 
 						// // other paths (commented out)

@@ -12,6 +12,7 @@ import pathfinding.AStarPathFinder;
 import pathfinding.EnvMap;
 import pathfinding.Mover;
 import pathfinding.Path;
+import pathfinding.WayPoint;
 
 public class NPC extends Person
 {
@@ -38,19 +39,19 @@ public class NPC extends Person
 	// PANIC = run aimlessly, not stopping, randomly rotating (panic).
 	// PUNCH_CHASING = move towards the target, and punch them when able.
 
-	boolean		hasAllies				= false;
+	boolean			hasAllies				= false;
 
-	int			targetID				= -1;
-	boolean		rightOrLeft				= false;			// true = right or CW. false = left or CCW.
-	boolean		justCollided			= false;
-	boolean		justGotHit				= false;
-	double		instinctDelayTime;
-	double		timeSinceLastInstinct;
-	double		angleOfLastInstinct;
-	double		timeSinceLastDistCheck	= 0;
-	double		lastDistPow2			= Double.MAX_VALUE;
-	List<Point>	path;
-	EnvMap		envMap					= null;
+	int				targetID				= -1;
+	boolean			rightOrLeft				= false;			// true = right or CW. false = left or CCW.
+	boolean			justCollided			= false;
+	boolean			justGotHit				= false;
+	double			instinctDelayTime;
+	double			timeSinceLastInstinct;
+	double			angleOfLastInstinct;
+	double			timeSinceLastDistCheck	= 0;
+	double			lastDistPow2			= Double.MAX_VALUE;
+	List<WayPoint>	path;
+	EnvMap			envMap					= null;
 
 	public NPC(int x1, int y1, Strategy s1)
 	{
@@ -61,7 +62,7 @@ public class NPC extends Person
 		tactic = Tactic.NO_TARGET;
 		timeSinceLastInstinct = instinctDelayTime;
 		angleOfLastInstinct = 0;
-		path = new ArrayList<Point>();
+		path = new ArrayList<WayPoint>();
 		rename(); // random npc name - no abilities yet
 	}
 
@@ -114,7 +115,7 @@ public class NPC extends Person
 					double shortestPathLength = Integer.MAX_VALUE;
 					for (int i = 0; i < possibleTargets.size(); i++)
 					{
-						List<Point> pathToTarget = pathFind(possibleTargets.get(i).Point());
+						List<WayPoint> pathToTarget = pathFind(possibleTargets.get(i).Point());
 						if (pathToTarget != null)
 						{
 							double pathLength = pathLength(pathToTarget);
@@ -170,7 +171,7 @@ public class NPC extends Person
 						path = pathFind(targetPerson.Point());
 
 					// move according to pathfinding
-					updatePath();
+					updatePath(env);
 					if (this.path != null && !this.path.isEmpty())
 					{
 						angleToTarget = Math.atan2(this.path.get(0).y - this.y, this.path.get(0).x - this.x);
@@ -405,7 +406,7 @@ public class NPC extends Person
 			if (!p.equals(this) && !this.viableTarget(p))
 			{
 				double angle = Math.atan2(this.y - p.y, this.x - p.x);
-				//~5000 = what you'd expect, but leads to many problems (people running into sideways walls).
+				// ~5000 = what you'd expect, but leads to many problems (people running into sideways walls).
 				double amount = 1000 / Methods.DistancePow2(p.Point(), this.Point());
 				forceX += amount * Math.cos(angle);
 				forceY += amount * Math.sin(angle);
@@ -418,7 +419,7 @@ public class NPC extends Person
 		envMap = new EnvMap(env);
 	}
 
-	List<Point> pathFind(Point targetPoint)
+	List<WayPoint> pathFind(Point targetPoint)
 	{
 		AStarPathFinder pathFinder = new AStarPathFinder(envMap, 50, false);
 
@@ -426,10 +427,20 @@ public class NPC extends Person
 		if (foundPath != null)
 		{
 			// transform into a list of grid points
-			List<Point> blargl = new ArrayList<Point>();
-			for (int i = 0; i < foundPath.getLength(); i++)
+			List<WayPoint> blargl = new ArrayList<WayPoint>();
+			double possibleMovement = Math.sqrt(1 + 1); // obvs
+
+			blargl.add(new WayPoint(foundPath.getX(0), foundPath.getY(0)));
+			for (int i = 1; i < foundPath.getLength(); i++)
 			{
-				blargl.add(new Point(foundPath.getX(i), foundPath.getY(i)));
+				WayPoint wp = new WayPoint(foundPath.getX(i), foundPath.getY(i));
+				// Is it through a portal?
+				if (Math.pow(foundPath.getX(i - 1) - foundPath.getX(i), 2) + Math.pow(foundPath.getX(i - 1) - foundPath.getX(i), 2) > possibleMovement * possibleMovement)
+				{
+					//set the byPortal of the previous one to true
+					blargl.get(blargl.size()-1).byPortal = true;
+				}
+				blargl.add(wp);
 			}
 
 			double minDistancePow2 = Math.pow(radius, 2);
@@ -455,6 +466,9 @@ public class NPC extends Person
 						continue bigloop;
 					// match the gradients
 					if ((A.x - C.x) * (A.y - C.y) == (C.x - B.x) * (C.y - B.y))
+						continue bigloop;
+					// not through a Portal
+					if (blargl.get(i + 1).byPortal)
 						continue bigloop;
 					boolean OKToMerge = true;
 					int minX = Math.min(A.x, Math.min(B.x, C.x));
@@ -498,6 +512,9 @@ public class NPC extends Person
 					// match the gradients
 					if ((A.x - C.x) * (A.y - C.y) == (C.x - B.x) * (C.y - B.y))
 						OKToMerge = true;
+					// not through a Portal
+					if (blargl.get(i + 1).byPortal)
+						OKToMerge = false;
 					if (OKToMerge)
 					{
 						blargl.remove(i + 1);
@@ -508,23 +525,55 @@ public class NPC extends Person
 			} while (prevPathLength > blargl.size());
 
 			// transform into a list of points
-			List<Point> bestPath = new ArrayList<Point>();
+			List<WayPoint> bestPath = new ArrayList<WayPoint>();
 			for (int i = 0; i < blargl.size(); i++)
-				bestPath.add(new Point(blargl.get(i).x * 96 + 96 / 2, blargl.get(i).y * 96 + 96 / 2));
+			{
+				bestPath.add(new WayPoint(blargl.get(i).x * 96 + 96 / 2, blargl.get(i).y * 96 + 96 / 2, blargl.get(i).byPortal));
+			}
 			return bestPath;
 		} else
 			return null; // no path possible
 	}
 
-	void updatePath()
+	void updatePath(Environment env)
 	{
-		// remove first point if in same tile
 		if (path != null && !path.isEmpty())
-			if ((int) (path.get(0).x / 96) == (int) (x / 96) && (int) (path.get(0).y / 96) == (int) (y / 96))
-				path.remove(0);
+		{
+			WayPoint waypoint = path.get(0);
+			// remove first point if in same tile
+			if ((int) (waypoint.x / 96) == (int) (x / 96) && (int) (waypoint.y / 96) == (int) (y / 96))
+				if (waypoint.byPortal == false)
+					path.remove(0);
+				else if (!waypoint.portalWasUsed)
+				{
+					// find relevant portal
+					Portal portal = null;
+					for (Portal p : env.portals)
+						if (Methods.LineToPointDistancePow2(p.start, p.end, waypoint) < 96 * 96 * 2)
+							if (Methods.DistancePow2(p.x, p.y, waypoint.x, waypoint.y) < p.length * p.length)
+								portal = p;
+					if (portal == null)
+					{
+						Main.errorMessage("	");
+						return;
+					}
+
+					// move waypoint to other side of *same* portal, like a mirror, to make the NPC move towards it.
+					double prevAngle = Math.atan2(this.y - portal.y, this.x - portal.x);
+					double newAngle = portal.angle - (prevAngle - portal.angle);
+					double distToWayPoint = Math.sqrt(Methods.DistancePow2(waypoint.x, waypoint.y, portal.x, portal.y));
+					waypoint.x = (int) (portal.x + distToWayPoint * Math.cos(newAngle));
+					waypoint.y = (int) (portal.y + distToWayPoint * Math.sin(newAngle));
+					waypoint.portalWasUsed = true;
+				} else if (Methods.DistancePow2(waypoint, Point()) > 96 * 96 * 4) // sort of right
+				{
+					System.out.println("this is supposed to happen");
+					path.remove(0);
+				}
+		}
 	}
 
-	int pathLength(List<Point> p)
+	int pathLength(List<WayPoint> p)
 	{
 		if (p == null || p.isEmpty())
 			return 0;
