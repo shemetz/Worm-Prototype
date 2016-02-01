@@ -4,7 +4,6 @@ import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.Frame;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -2900,7 +2899,7 @@ public class Environment
 			}
 	}
 
-	public void drawFloor(Graphics2D buffer, Frame that, final Rectangle bounds)
+	public void drawFloor(Graphics2D buffer, final Rectangle bounds)
 	{
 		// Pools (and floors)
 		for (int x = 0; x < width; x++)
@@ -2910,12 +2909,13 @@ public class Environment
 					{
 						// floor
 						if (floorTypes[x][y] != -1)
-							buffer.drawImage(Resources.floor[floorTypes[x][y]], x * squareSize, y * squareSize, that);
+							buffer.drawImage(Resources.floor[floorTypes[x][y]], x * squareSize, y * squareSize, null);
 						// pools
 						if (poolTypes[x][y] != -1)
 						{
+							System.out.println(System.nanoTime());
 							buffer.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.1f + 0.009f * poolHealths[x][y]));
-							buffer.drawImage(poolImages[x][y], x * squareSize, y * squareSize, that);
+							buffer.drawImage(poolImages[x][y], x * squareSize, y * squareSize, null);
 							buffer.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
 						}
 						// pool corners
@@ -2925,7 +2925,7 @@ public class Environment
 							{
 								BufferedImage cornerImg = Resources.pCorner[i][getCornerStyle(pCornerStyles[x][y][i])][Environment.getCornerAngle(pCornerStyles[x][y][i])];
 								buffer.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.1f + 0.009f * pCornerTransparencies[x][y][i]));
-								buffer.drawImage(cornerImg, x * squareSize - squareSize / 2, y * squareSize - squareSize / 2, that);
+								buffer.drawImage(cornerImg, x * squareSize - squareSize / 2, y * squareSize - squareSize / 2, null);
 								buffer.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
 							}
 					}

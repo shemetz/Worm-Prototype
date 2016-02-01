@@ -977,12 +977,14 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 
 		// ~~~TEMPORARY TESTING~~~
 
-		env = new Environment(50, 50);
-		for (int i = 0; i < 50; i++)
-			for (int j = 0; j < 50; j++)
+		env = new Environment(500, 500);
+
+		// outer bounds - grey walls
+		for (int i = 0; i < env.width; i++)
+			for (int j = 0; j < env.height; j++)
 			{
 				env.floorTypes[i][j] = 0;
-				if (i == 0 || j == 0 || i == 49 || j == 49)
+				if (i == 0 || j == 0 || i == env.width - 1 || j == env.height - 1)
 				{
 					env.addWall(i, j, -2, true);
 				}
@@ -1045,7 +1047,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 
 		for (int i = 0; i < 1; i++)
 		{
-			Person person = new NPC((int) (100 + Math.random() * (env.widthPixels-200)), (int) (100 + Math.random() * (env.heightPixels - 200)), Strategy.AGGRESSIVE);
+			Person person = new NPC((int) (100 + Math.random() * (env.widthPixels - 200)), (int) (100 + Math.random() * (env.heightPixels - 200)), Strategy.AGGRESSIVE);
 			person.commanderID = 1;
 			env.people.add(person);
 		}
@@ -1261,13 +1263,13 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		final int safetyDistance = 50;
 		Rectangle bounds = null;
 		if (cameraRotation * 180 / Math.PI % 180 == 0)
-			bounds = new Rectangle((int) (camera.x - frameWidth / 2 * (player.z - heightZoomRatio + 1) / zoomLevel) - safetyDistance,
-					(int) (camera.y - frameHeight / 2 * (player.z - heightZoomRatio + 1) / zoomLevel) - safetyDistance,
-					(int) (frameWidth * (player.z - heightZoomRatio + 1) / zoomLevel) + 2 * safetyDistance, (int) (frameHeight * (player.z - heightZoomRatio + 1) / zoomLevel) + 2 * safetyDistance);
+			bounds = new Rectangle((int) (camera.x - frameWidth / 2 * (player.z * heightZoomRatio + 1) / zoomLevel) - safetyDistance,
+					(int) (camera.y - frameHeight / 2 * (player.z * heightZoomRatio + 1) / zoomLevel) - safetyDistance,
+					(int) (frameWidth * (player.z * heightZoomRatio + 1) / zoomLevel) + 2 * safetyDistance, (int) (frameHeight * (player.z * heightZoomRatio + 1) / zoomLevel) + 2 * safetyDistance);
 		else if ((cameraRotation * 180 / Math.PI + 90) % 180 == 0)
-			bounds = new Rectangle((int) (camera.x - frameHeight / 2 * (player.z - heightZoomRatio + 1) / zoomLevel) - safetyDistance,
-					(int) (camera.y - frameWidth / 2 * (player.z - heightZoomRatio + 1) / zoomLevel) - safetyDistance,
-					(int) (frameHeight * (player.z - heightZoomRatio + 1) / zoomLevel) + 2 * safetyDistance, (int) (frameWidth * (player.z - heightZoomRatio + 1) / zoomLevel) + 2 * safetyDistance);
+			bounds = new Rectangle((int) (camera.x - frameHeight / 2 * (player.z * heightZoomRatio + 1) / zoomLevel) - safetyDistance,
+					(int) (camera.y - frameWidth / 2 * (player.z * heightZoomRatio + 1) / zoomLevel) - safetyDistance,
+					(int) (frameHeight * (player.z * heightZoomRatio + 1) / zoomLevel) + 2 * safetyDistance, (int) (frameWidth * (player.z * heightZoomRatio + 1) / zoomLevel) + 2 * safetyDistance);
 		else
 		{
 			// already overshoots, does not need to include safetyDistance
@@ -1276,7 +1278,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 			halfBoundsDiagonal = halfBoundsDiagonal * (player.z * heightZoomRatio + 1) / zoomLevel;
 			bounds = new Rectangle((int) (camera.x - halfBoundsDiagonal), (int) (camera.y - halfBoundsDiagonal), (int) (halfBoundsDiagonal * 2), (int) (halfBoundsDiagonal * 2));
 		}
-		env.drawFloor(buffer, this, bounds);
+		env.drawFloor(buffer, bounds);
 		drawBottomEffects(buffer);
 		// environment not including effects and clouds
 		env.draw(buffer, (int) camera.z, bounds, cameraRotation);

@@ -71,14 +71,14 @@ public class Resources
 			wCorner[i][1][0] = ResourceLoader.getBufferedImage("environment/wCorner_" + EP.elementList[i] + "_bridge.png");
 			wCorner[i][2][0] = ResourceLoader.getBufferedImage("environment/wCorner_" + EP.elementList[i] + "_bite.png");
 			wCorner[i][3][0] = ResourceLoader.getBufferedImage("environment/wCorner_" + EP.elementList[i] + "_full.png");
-			for (int j = 0; j < 4; j++) //Rotated corner images
+			for (int j = 0; j < 4; j++) // Rotated corner images
 				for (int k = 1; k < 4; k++)
 					wCorner[i][j][k] = Methods.rotate(wCorner[i][j][0], 0.5 * Math.PI * k);
 			pCorner[i][0][0] = ResourceLoader.getBufferedImage("environment/pCorner_" + EP.elementList[i] + "_up.png");
 			pCorner[i][1][0] = ResourceLoader.getBufferedImage("environment/pCorner_" + EP.elementList[i] + "_bridge.png");
 			pCorner[i][2][0] = ResourceLoader.getBufferedImage("environment/pCorner_" + EP.elementList[i] + "_bite.png");
 			pCorner[i][3][0] = ResourceLoader.getBufferedImage("environment/pCorner_" + EP.elementList[i] + "_full.png");
-			for (int j = 0; j < 4; j++) //Rotated corner images
+			for (int j = 0; j < 4; j++) // Rotated corner images
 				for (int k = 1; k < 4; k++)
 					pCorner[i][j][k] = Methods.rotate(pCorner[i][j][0], 0.5 * Math.PI * k);
 			for (int j = 0; j < 4; j++)
@@ -213,7 +213,6 @@ public class Resources
 
 		// no need to transform it into BufferedImage.TYPE_INT_RGB
 		floor[0] = ResourceLoader.getBufferedImage("environment/floor_Earth.png");
-
 		// TODO additional forcefield types
 
 		bodyPart.add(new ArrayList<List<List<BufferedImage>>>()); // legs
