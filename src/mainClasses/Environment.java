@@ -3131,15 +3131,18 @@ public class Environment
 						buffer.setColor(Color.red);
 						buffer.drawLine((int) (p.x), (int) (p.y), (int) (p.x + p.strengthOfAttemptedMovement * 100 * Math.cos(p.directionOfAttemptedMovement)),
 								(int) (p.y + p.strengthOfAttemptedMovement * 100 * Math.sin(p.directionOfAttemptedMovement)));
-						// // paths (commented out)
+						// path
+						buffer.setColor(Color.red);
+						buffer.setStroke(new BasicStroke(3));
+						for (int i = 0; i < p.path.size() - 1; i++)
+							buffer.drawLine(p.path.get(i).x, p.path.get(i).y, p.path.get(i + 1).x, p.path.get(i + 1).y);
+						for (int i = 0; i < p.path.size(); i++)
+							buffer.drawRect(p.path.get(i).x - 1, p.path.get(i).y - 1, 3, 3);
+
+						// // other paths (commented out)
 						// if (p.strategy == NPC.Strategy.AGGRESSIVE)
 						// {
-						// buffer.setColor(Color.red);
-						// buffer.setStroke(new BasicStroke(3));
-						// for (int i = 0; i < p.path.size() - 1; i++)
-						// buffer.drawLine(p.path.get(i).x, p.path.get(i).y, p.path.get(i + 1).x, p.path.get(i + 1).y);
-						// for (int i = 0; i < p.path.size(); i++)
-						// buffer.drawRect(p.path.get(i).x - 1, p.path.get(i).y - 1, 3, 3);
+						//
 						// buffer.setColor(Color.black);
 						// buffer.setStroke(new BasicStroke(1));
 						// for (Person p2 : people)
