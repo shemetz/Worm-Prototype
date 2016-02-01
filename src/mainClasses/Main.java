@@ -93,7 +93,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 	Font						tooltipFont				= new Font("Serif", Font.PLAIN, 12);
 	DateFormat					dateFormat				= new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
 	static Random				random					= new Random();
-	Point[]						nch;
+	Point[]						niceHotKeys;
 	int							hotkeysLook				= 0;
 
 	// CAMERA AND MOUSE STUFF
@@ -972,7 +972,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		NameGenerator.initialize();
 		Person.resetIDs();
 
-		nch = new Point[10];
+		niceHotKeys = new Point[10];
 		updateNiceHotkeys();
 
 		// ~~~TEMPORARY TESTING~~~
@@ -1040,19 +1040,14 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		shmulik.abilities.add(Ability.ability("Ball <Earth>", 6));
 		shmulik.abilities.add(Ability.ability("Heal I", 3));
 		shmulik.name = "Shmulik";
-		// env.people.add(shmulik);
+		//env.people.add(shmulik);
 
-		Person tzippi = new NPC(96 * 15, 96 * 25, Strategy.PASSIVE);
-		// tzippi.trigger();
-		tzippi.name = "TEST SUBJECT DELTA";
-		tzippi.abilities.add(Ability.ability("Protective Bubble I", 4));
-		env.people.add(tzippi);
-		Person aa = new NPC(96 * 17, 96 * 27, Strategy.PASSIVE);
-		// aa.trigger();
-		env.people.add(aa);
-		Person cc = new NPC(96 * 10, 96 * 25, Strategy.PASSIVE);
-		// cc.trigger();
-		env.people.add(cc);
+		Person person1 = new NPC(96 * 4, 96 * 5, Strategy.AGGRESSIVE);
+		env.people.add(person1);
+		Person person2 = new NPC(96 * 48, 96 * 2, Strategy.AGGRESSIVE);
+		env.people.add(person2);
+		Person person5 = new NPC(96 * 30, 96 * 20, Strategy.PASSIVE);
+		env.people.add(person5);
 
 		// Fix walls spawning on people
 		for (Person p : env.people)
@@ -1590,8 +1585,8 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		frc = buffer.getFontRenderContext();
 		for (int i = 0; i < player.hotkeys.length; i++)
 		{
-			int x = nch[i].x;
-			int y = nch[i].y;
+			int x = niceHotKeys[i].x;
+			int y = niceHotKeys[i].y;
 			buffer.setStroke(new BasicStroke((float) (3 * UIzoomLevel)));
 			buffer.setColor(Color.black);
 			if (player.hotkeys[i] != -1)
@@ -2654,11 +2649,11 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		{
 			if (player.hotkeys[i] != -1)
 			{
-				if (screenmx > nch[i].x && screenmy > nch[i].y && screenmx < nch[i].x + 60 && screenmy < nch[i].y + 60)
+				if (screenmx > niceHotKeys[i].x && screenmy > niceHotKeys[i].y && screenmx < niceHotKeys[i].x + 60 && screenmy < niceHotKeys[i].y + 60)
 				{
 					foundOne = true;
 					hotkeyHovered = i;
-					tooltipPoint = new Point(nch[i].x + 8, nch[i].y - 10);
+					tooltipPoint = new Point(niceHotKeys[i].x + 8, niceHotKeys[i].y - 10);
 					tooltip = player.abilities.get(player.hotkeys[i]).niceName();
 					if (player.rightMousePressed)
 					{
@@ -2727,66 +2722,66 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 					if (player.hotkeys[i] != -1)
 						numOfActiveHotkeys++;
 				int k = 0;
-				for (int i = 0; i < nch.length; i++)
+				for (int i = 0; i < niceHotKeys.length; i++)
 					if (player.hotkeys[i] != -1)
 					{
-						nch[i] = new Point();
-						nch[i].x = (int) (frameWidth / 2 - numOfActiveHotkeys * 40 * UIzoomLevel + k * 80 * UIzoomLevel);
-						nch[i].y = (int) (frameHeight - 100 * UIzoomLevel);
+						niceHotKeys[i] = new Point();
+						niceHotKeys[i].x = (int) (frameWidth / 2 - numOfActiveHotkeys * 40 * UIzoomLevel + k * 80 * UIzoomLevel);
+						niceHotKeys[i].y = (int) (frameHeight - 100 * UIzoomLevel);
 						k++;
 					}
 			}
 			break;
 
 		case 1:
-			for (int i = 0; i < nch.length; i++)
-				nch[i] = new Point((int) (frameWidth / 2 - 40 * UIzoomLevel), (int) (frameHeight - 180 * UIzoomLevel));
-			nch[0].x += 200 * UIzoomLevel;
-			nch[0].y += 80 * UIzoomLevel;
-			nch[1].x -= 200 * UIzoomLevel;
-			nch[1].y += 80 * UIzoomLevel;
+			for (int i = 0; i < niceHotKeys.length; i++)
+				niceHotKeys[i] = new Point((int) (frameWidth / 2 - 40 * UIzoomLevel), (int) (frameHeight - 180 * UIzoomLevel));
+			niceHotKeys[0].x += 200 * UIzoomLevel;
+			niceHotKeys[0].y += 80 * UIzoomLevel;
+			niceHotKeys[1].x -= 200 * UIzoomLevel;
+			niceHotKeys[1].y += 80 * UIzoomLevel;
 
-			nch[2].x -= 80 * UIzoomLevel;
-			nch[2].y -= 80 * UIzoomLevel;
-			nch[3].x -= 0 * UIzoomLevel;
-			nch[3].y -= 80 * UIzoomLevel;
-			nch[4].x += 80 * UIzoomLevel;
-			nch[4].y -= 80 * UIzoomLevel;
-			nch[5].x += 80 * UIzoomLevel;
-			nch[5].y -= 0 * UIzoomLevel;
-			nch[6].x += 80 * UIzoomLevel;
-			nch[6].y += 80 * UIzoomLevel;
-			nch[7].x += 0 * UIzoomLevel;
-			nch[7].y += 80 * UIzoomLevel;
-			nch[8].x -= 80 * UIzoomLevel;
-			nch[8].y += 80 * UIzoomLevel;
-			nch[9].x -= 80 * UIzoomLevel;
-			nch[9].y += 0 * UIzoomLevel;
+			niceHotKeys[2].x -= 80 * UIzoomLevel;
+			niceHotKeys[2].y -= 80 * UIzoomLevel;
+			niceHotKeys[3].x -= 0 * UIzoomLevel;
+			niceHotKeys[3].y -= 80 * UIzoomLevel;
+			niceHotKeys[4].x += 80 * UIzoomLevel;
+			niceHotKeys[4].y -= 80 * UIzoomLevel;
+			niceHotKeys[5].x += 80 * UIzoomLevel;
+			niceHotKeys[5].y -= 0 * UIzoomLevel;
+			niceHotKeys[6].x += 80 * UIzoomLevel;
+			niceHotKeys[6].y += 80 * UIzoomLevel;
+			niceHotKeys[7].x += 0 * UIzoomLevel;
+			niceHotKeys[7].y += 80 * UIzoomLevel;
+			niceHotKeys[8].x -= 80 * UIzoomLevel;
+			niceHotKeys[8].y += 80 * UIzoomLevel;
+			niceHotKeys[9].x -= 80 * UIzoomLevel;
+			niceHotKeys[9].y += 0 * UIzoomLevel;
 			break;
 		case 2:
-			for (int i = 0; i < nch.length; i++)
-				nch[i] = new Point((int) (frameWidth / 2 - 35 * UIzoomLevel), (int) (frameHeight - 180 * UIzoomLevel));
+			for (int i = 0; i < niceHotKeys.length; i++)
+				niceHotKeys[i] = new Point((int) (frameWidth / 2 - 35 * UIzoomLevel), (int) (frameHeight - 180 * UIzoomLevel));
 
-			nch[1].x -= 240 * UIzoomLevel;
-			nch[1].y += 40 * UIzoomLevel;
-			nch[2].x -= 160 * UIzoomLevel;
-			nch[2].y += 0 * UIzoomLevel;
-			nch[3].x -= 80 * UIzoomLevel;
-			nch[3].y += 0 * UIzoomLevel;
-			nch[4].x -= 0 * UIzoomLevel;
-			nch[4].y += 0 * UIzoomLevel;
-			nch[5].x += 80 * UIzoomLevel;
-			nch[5].y += 0 * UIzoomLevel;
-			nch[9].x -= 130 * UIzoomLevel;
-			nch[9].y += 80 * UIzoomLevel;
-			nch[8].x -= 50 * UIzoomLevel;
-			nch[8].y += 80 * UIzoomLevel;
-			nch[7].x += 30 * UIzoomLevel;
-			nch[7].y += 80 * UIzoomLevel;
-			nch[6].x += 110 * UIzoomLevel;
-			nch[6].y += 80 * UIzoomLevel;
-			nch[0].x += 190 * UIzoomLevel;
-			nch[0].y += 40 * UIzoomLevel;
+			niceHotKeys[1].x -= 240 * UIzoomLevel;
+			niceHotKeys[1].y += 40 * UIzoomLevel;
+			niceHotKeys[2].x -= 160 * UIzoomLevel;
+			niceHotKeys[2].y += 0 * UIzoomLevel;
+			niceHotKeys[3].x -= 80 * UIzoomLevel;
+			niceHotKeys[3].y += 0 * UIzoomLevel;
+			niceHotKeys[4].x -= 0 * UIzoomLevel;
+			niceHotKeys[4].y += 0 * UIzoomLevel;
+			niceHotKeys[5].x += 80 * UIzoomLevel;
+			niceHotKeys[5].y += 0 * UIzoomLevel;
+			niceHotKeys[9].x -= 130 * UIzoomLevel;
+			niceHotKeys[9].y += 80 * UIzoomLevel;
+			niceHotKeys[8].x -= 50 * UIzoomLevel;
+			niceHotKeys[8].y += 80 * UIzoomLevel;
+			niceHotKeys[7].x += 30 * UIzoomLevel;
+			niceHotKeys[7].y += 80 * UIzoomLevel;
+			niceHotKeys[6].x += 110 * UIzoomLevel;
+			niceHotKeys[6].y += 80 * UIzoomLevel;
+			niceHotKeys[0].x += 190 * UIzoomLevel;
+			niceHotKeys[0].y += 40 * UIzoomLevel;
 			break;
 		default:
 			break;

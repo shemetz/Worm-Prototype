@@ -1,3 +1,8 @@
 /mainClasses/
 /mainResourcesPackage/
 /abilities/
+/AStarPathFinder$Node.class
+/AStarPathFinder$SortedList.class
+/AStarPathFinder.class
+/PathFinder.class
+/pathfinding/

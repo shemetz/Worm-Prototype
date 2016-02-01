@@ -3111,7 +3111,7 @@ public class Environment
 					}
 					if (d instanceof NPC)
 					{
-						Person p = (Person) d;
+						NPC p = (NPC) d;
 						// center
 						buffer.setColor(new Color(160, 255, 160));
 						buffer.drawRect((int) (p.x - 1), (int) (p.y - 1), 3, 3);
@@ -3131,6 +3131,28 @@ public class Environment
 						buffer.setColor(Color.red);
 						buffer.drawLine((int) (p.x), (int) (p.y), (int) (p.x + p.strengthOfAttemptedMovement * 100 * Math.cos(p.directionOfAttemptedMovement)),
 								(int) (p.y + p.strengthOfAttemptedMovement * 100 * Math.sin(p.directionOfAttemptedMovement)));
+						// // paths (commented out)
+						// if (p.strategy == NPC.Strategy.AGGRESSIVE)
+						// {
+						// buffer.setColor(Color.red);
+						// buffer.setStroke(new BasicStroke(3));
+						// for (int i = 0; i < p.path.size() - 1; i++)
+						// buffer.drawLine(p.path.get(i).x, p.path.get(i).y, p.path.get(i + 1).x, p.path.get(i + 1).y);
+						// for (int i = 0; i < p.path.size(); i++)
+						// buffer.drawRect(p.path.get(i).x - 1, p.path.get(i).y - 1, 3, 3);
+						// buffer.setColor(Color.black);
+						// buffer.setStroke(new BasicStroke(1));
+						// for (Person p2 : people)
+						// if (!p2.equals(p))
+						// {
+						// buffer.translate(5, 3);
+						// List<Point> path = p.pathFind(p2.Point()); // THIS REALLY SHOULDN'T HAPPEN EVERY FRAME TODO TODO TODO
+						// if (path != null)
+						// for (int i = 0; i < path.size() - 1; i++)
+						// buffer.drawLine(path.get(i).x, path.get(i).y, path.get(i + 1).x, path.get(i + 1).y);
+						// }
+						// buffer.translate(-5 * (people.size() - 1), -3 * (people.size() - 1));
+						// }
 					}
 					if (d instanceof ForceField)
 					{

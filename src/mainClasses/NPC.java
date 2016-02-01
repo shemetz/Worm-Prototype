@@ -2,10 +2,16 @@ package mainClasses;
 
 import java.awt.Point;
 import java.awt.geom.Point2D;
+import java.util.ArrayList;
+import java.util.List;
 
 import abilities.Ball_E;
 import abilities.Beam_E;
 import abilities.Punch;
+import pathfinding.AStarPathFinder;
+import pathfinding.EnvMap;
+import pathfinding.Mover;
+import pathfinding.Path;
 
 public class NPC extends Person
 {
@@ -32,26 +38,30 @@ public class NPC extends Person
 	// PANIC = run aimlessly, not stopping, randomly rotating (panic).
 	// PUNCH_CHASING = move towards the target, and punch them when able.
 
-	boolean	hasAllies;
+	boolean		hasAllies				= false;
 
-	int		targetID		= -1;
-	boolean	rightOrLeft;			// true = right or CW. false = left or CCW.
-	boolean	justCollided	= false;
-	boolean	justGotHit		= false;
-	double	instinctDelayTime;
-	double	timeSinceLastInstinct;
-	double	angleOfLastInstinct;
+	int			targetID				= -1;
+	boolean		rightOrLeft				= false;			// true = right or CW. false = left or CCW.
+	boolean		justCollided			= false;
+	boolean		justGotHit				= false;
+	double		instinctDelayTime;
+	double		timeSinceLastInstinct;
+	double		angleOfLastInstinct;
+	double		timeSinceLastDistCheck	= 0;
+	double		lastDistPow2			= Double.MAX_VALUE;
+	List<Point>	path;
+	EnvMap		envMap					= null;
 
 	public NPC(int x1, int y1, Strategy s1)
 	{
 		super(x1, y1);
-		hasAllies = false;
 		// TEMP
+		hasAllies = false;
 		strategy = s1;
 		tactic = Tactic.NO_TARGET;
-		rightOrLeft = true;
 		timeSinceLastInstinct = instinctDelayTime;
 		angleOfLastInstinct = 0;
+		path = new ArrayList<Point>();
 		rename(); // random npc name - no abilities yet
 	}
 
@@ -75,11 +85,16 @@ public class NPC extends Person
 			return false;
 		if (enemy.dead)
 			return false;
+
 		return true;
 	}
 
 	void frameAIupdate(double deltaTime, int frameNum, Environment env, Main main)
 	{
+		// Refresh environment map every 0.5 seconds
+		if (frameNum % 25 == 0 || envMap == null)
+			refreshMap(env);
+
 		// choose target
 		switch (this.tactic)
 		{
@@ -88,15 +103,30 @@ public class NPC extends Person
 		case PUNCH_CHASING:
 			if (frameNum % 25 == 0) // don't check a lot of times in a short period
 			{
-				// Choose as target the closest enemy. There's no range limit to this. TODO
-				double shortestDistanceToTargetPow2 = Double.MAX_VALUE;
+				// Choose as target the closest enemy (considering pathfinding).
+				List<Person> possibleTargets = new ArrayList<Person>();
 				for (Person p2 : env.people)
 					if (this.viableTarget(p2))
-						if (Methods.DistancePow2(this.x, this.y, p2.x, p2.y) < shortestDistanceToTargetPow2)
+						possibleTargets.add(p2);
+				if (!possibleTargets.isEmpty())
+				{
+					int bestTargetIndex = 0;
+					double shortestPathLength = Integer.MAX_VALUE;
+					for (int i = 0; i < possibleTargets.size(); i++)
+					{
+						List<Point> pathToTarget = pathFind(possibleTargets.get(i).Point());
+						if (pathToTarget != null)
 						{
-							shortestDistanceToTargetPow2 = Methods.DistancePow2(this.x, this.y, p2.x, p2.y);
-							this.targetID = p2.id;
+							double pathLength = pathLength(pathToTarget);
+							if (pathLength < shortestPathLength)
+							{
+								shortestPathLength = pathLength;
+								bestTargetIndex = i;
+							}
 						}
+					}
+					this.targetID = possibleTargets.get(bestTargetIndex).id;
+				}
 			}
 			break;
 		case NO_TARGET:
@@ -122,10 +152,6 @@ public class NPC extends Person
 			{
 			case PUNCH_CHASING:
 				// move towards target and punch them.
-				this.rotate(angleToTarget, deltaTime);
-				this.directionOfAttemptedMovement = angleToTarget;
-				this.strengthOfAttemptedMovement = 1;
-				this.target = new Point((int) targetPerson.x, (int) targetPerson.y);
 				Ability punch = null;
 				int index = -1;
 				for (int i = 0; i < this.abilities.size(); i++)
@@ -136,14 +162,49 @@ public class NPC extends Person
 					}
 				if (punch == null)
 					break;
-				double maxDistanceNeeded = punch.range + targetPerson.radius / 2;
+				this.timeSinceLastDistCheck += deltaTime;
+				if (distanceToTargetPow2 > Math.pow(96, 2)) // If distance to target > 2 blocks
+				{
+					if (this.timeSinceLastDistCheck >= 1) // once per second. that variable is reduced by 1 soon after this
+						path = pathFind(targetPerson.Point());
+
+					// move according to pathfinding
+					updatePath();
+					if (this.path != null && !this.path.isEmpty())
+					{
+						angleToTarget = Math.atan2(this.path.get(0).y - this.y, this.path.get(0).x - this.x);
+						this.rotate(angleToTarget, deltaTime);
+						this.directionOfAttemptedMovement = angleToTarget;
+						this.strengthOfAttemptedMovement = 1;
+						this.target = new Point(this.path.get(0).x, this.path.get(0).y);
+					} else
+					{
+						this.strengthOfAttemptedMovement = 0;
+						this.target = this.Point();
+						// TODO. target suddenly inaccesible?
+					}
+				} else
+				{
+					this.rotate(angleToTarget, deltaTime);
+					this.directionOfAttemptedMovement = angleToTarget;
+					this.strengthOfAttemptedMovement = 1;
+					this.target = new Point((int) targetPerson.x, (int) targetPerson.y);
+				}
+				double maxDistanceNeeded = punch.range + targetPerson.radius;
 				for (ArcForceField aff : env.AFFs)
 					if (aff.target.equals(targetPerson) && aff.arc == 2 * Math.PI)
 						maxDistanceNeeded = punch.range + aff.maxRadius;
 				if (distanceToTargetPow2 < Math.pow(maxDistanceNeeded, 2))
 					main.pressAbilityKey(index, true, this);
 				else if (punch.cooldownLeft <= 0)
+				{
 					main.pressAbilityKey(index, false, this); // stop punching
+				}
+				if (this.timeSinceLastDistCheck >= 1) // Check distance every second
+				{
+					this.lastDistPow2 = distanceToTargetPow2;
+					this.timeSinceLastDistCheck -= 1;
+				}
 				break;
 			case CIRCLE_STRAFING:
 				// move around target. Also, get close to it or away from it to get into the "circle strafing" range.
@@ -240,18 +301,27 @@ public class NPC extends Person
 				// try to switch tactics
 				if (this.strategy.equals(Strategy.AGGRESSIVE))
 				{
-					// Choose as target the closest enemy.
-					double shortestDistanceToTargetPow2 = Double.MAX_VALUE;
+					// Choose as target the closest enemy (considering pathfinding).
+					List<Person> possibleTargets = new ArrayList<Person>();
 					for (Person p2 : env.people)
 						if (this.viableTarget(p2))
+							possibleTargets.add(p2);
+					if (!possibleTargets.isEmpty())
+					{
+						int bestTargetIndex = 0;
+						double shortestPathLength = Integer.MAX_VALUE;
+						for (int i = 0; i < possibleTargets.size(); i++)
 						{
-							if (Methods.DistancePow2(this.x, this.y, p2.x, p2.y) < shortestDistanceToTargetPow2)
+							double pathLength = pathLength(pathFind(possibleTargets.get(i).Point()));
+							if (pathLength < shortestPathLength)
 							{
-								shortestDistanceToTargetPow2 = Methods.DistancePow2(this.x, this.y, p2.x, p2.y);
-								this.targetID = p2.id; // not necessary?
-								targetPerson = p2;
+								shortestPathLength = pathLength;
+								bestTargetIndex = i;
 							}
 						}
+						targetPerson = possibleTargets.get(bestTargetIndex);
+						this.targetID = targetPerson.id; // not necessary?
+					}
 					if (targetPerson != null)
 						if (Methods.DistancePow2(this.x, this.y, targetPerson.x, targetPerson.y) < 600 * 600) // 600 sounds like an OK number
 							if (this.mana > 0.4 * this.maxMana)
@@ -290,10 +360,7 @@ public class NPC extends Person
 			this.tactic = Tactic.NO_TARGET;
 		else if (this.strategy.equals(Strategy.AGGRESSIVE))
 		{
-			if (this.tactic.equals(Tactic.CIRCLE_STRAFING) && this.mana <= 0.1 * this.maxMana)
 				this.tactic = Tactic.PUNCH_CHASING;
-			else if (this.tactic.equals(Tactic.PUNCH_CHASING) && this.mana >= 0.9 * this.maxMana)
-				this.tactic = Tactic.CIRCLE_STRAFING;
 		}
 		if (prevTactic != this.tactic)
 		{
@@ -330,6 +397,172 @@ public class NPC extends Person
 				this.strengthOfAttemptedMovement = 1;
 				this.timeSinceLastInstinct += deltaTime;
 			}
+	}
+
+	void refreshMap(Environment env)
+	{
+		envMap = new EnvMap(env);
+	}
+
+	List<Point> pathFind(Point targetPoint)
+	{
+		AStarPathFinder pathFinder = new AStarPathFinder(envMap, 50, false);
+
+		Mover mover = Mover(); // TODO make it real
+		Path foundPath = pathFinder.findPath(mover, (int) (x / 96), (int) (y / 96), targetPoint.x / 96, targetPoint.y / 96);
+		if (foundPath != null)
+		{
+			// transform into a list of grid points
+			List<Point> blargl = new ArrayList<Point>();
+			for (int i = 0; i < foundPath.getLength(); i++)
+			{
+				blargl.add(new Point(foundPath.getX(i), foundPath.getY(i)));
+			}
+
+			double minDistancePow2 = Math.pow(radius, 2);
+
+			// Refine bestPath
+
+			// 1: Merge every two adjacent DIFFERENT lines to one diagonal line if possible
+			int prevPathLength;
+			do
+			{
+				prevPathLength = blargl.size();
+				bigloop: for (int i = 0; i < blargl.size() - 2; i++)
+				{
+					Point A = blargl.get(i);
+					Point B = blargl.get(i + 1);
+					Point C = blargl.get(i + 2);
+					// check if points are not on same line
+					// if AC is horizontal
+					if (A.x == C.x && B.x == C.x)
+						continue bigloop;
+					// if AC is vertical.
+					if (A.y == C.y && B.y == C.y)
+						continue bigloop;
+					// match the gradients
+					if ((A.x - C.x) * (A.y - C.y) == (C.x - B.x) * (C.y - B.y))
+						continue bigloop;
+					boolean OKToMerge = true;
+					int minX = Math.min(A.x, Math.min(B.x, C.x));
+					int maxX = Math.max(A.x, Math.max(B.x, C.x));
+					int minY = Math.min(A.y, Math.min(B.y, C.y));
+					int maxY = Math.max(A.y, Math.max(B.y, C.y));
+					// check if it's OK to merge
+					loop: for (int xx = minX; xx <= maxX; xx++)
+						for (int yy = minY; yy <= maxY; yy++)
+							if (envMap.blocked(mover, xx, yy))
+								if (Methods.LineToPointDistancePow2(A, C, new Point(xx, yy)) < minDistancePow2)
+								{
+									OKToMerge = false;
+									break loop;
+								}
+					if (OKToMerge)
+					{
+						blargl.remove(i + 1);
+						i--;
+					}
+				}
+
+			} while (prevPathLength < blargl.size());
+			// 2: Merge every three points on the same line into two points
+			do
+			{
+				prevPathLength = blargl.size();
+				for (int i = 0; i < blargl.size() - 2; i++)
+				{
+					Point A = blargl.get(i);
+					Point B = blargl.get(i + 1);
+					Point C = blargl.get(i + 2);
+					// check if points are on same line
+					boolean OKToMerge = false;
+					// if AC is horizontal
+					if (A.x == C.x && B.x == C.x)
+						OKToMerge = true;
+					// if AC is vertical.
+					if (A.y == C.y && B.y == C.y)
+						OKToMerge = true;
+					// match the gradients
+					if ((A.x - C.x) * (A.y - C.y) == (C.x - B.x) * (C.y - B.y))
+						OKToMerge = true;
+					if (OKToMerge)
+					{
+						blargl.remove(i + 1);
+						i--;
+					}
+				}
+
+			} while (prevPathLength < blargl.size());
+
+			// transform into a list of points
+			List<Point> bestPath = new ArrayList<Point>();
+			for (int i = 0; i < blargl.size(); i++)
+				bestPath.add(new Point(blargl.get(i).x * 96 + 96 / 2, blargl.get(i).y * 96 + 96 / 2));
+			return bestPath;
+		} else
+			return null; // no path possible
+	}
+
+	void updatePath()
+	{
+		// remove first point if in same tile
+		if (path != null && !path.isEmpty())
+			if ((int) (path.get(0).x / 96) == (int) (x / 96) && (int) (path.get(0).y / 96) == (int) (y / 96))
+				path.remove(0);
+	}
+
+	int pathLength(List<Point> p)
+	{
+		if (p == null || p.isEmpty())
+			return 0;
+
+		int sum = 0;
+		for (int i = 0; i < p.size() - 1; i++)
+			sum += approximateDistance(p.get(i + 1).x - p.get(i).x, p.get(i + 1).y - p.get(i).y);
+		return sum;
+	}
+
+	/*
+	 * Taken from this 13 years old website:
+	 * 
+	 * http://www.flipcode.com/archives/Fast_Approximate_Distance_Functions.shtml
+	 */
+	int approximateDistance(int dx, int dy)
+	{
+		int min, max, approx;
+
+		if (dx < 0)
+			dx = -dx;
+		if (dy < 0)
+			dy = -dy;
+
+		if (dx < dy)
+		{
+			min = dx;
+			max = dy;
+		} else
+		{
+			min = dy;
+			max = dx;
+		}
+
+		approx = (max * 1007) + (min * 441);
+		if (max < (min << 4))
+			approx -= (max * 40);
+
+		// add 512 for proper rounding
+		return ((approx + 512) >> 10);
+	}
+
+	Mover Mover()
+	{
+		class NPCMover implements Mover
+		{
+			public NPCMover()
+			{
+			}
+		}
+		return new NPCMover();
 	}
 
 	boolean moveAwayFromDangerousObjects(Environment env, boolean considerAttempt)
