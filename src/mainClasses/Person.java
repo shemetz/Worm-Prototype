@@ -9,6 +9,7 @@ import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import abilities.Elemental_Void;
 import abilities.Sprint;
@@ -638,7 +639,7 @@ public class Person extends RndPhysObj implements Mover
 
 	public void activateDNA()
 	{
-		abilities = PowerGenerator.generateAbilities(DNA);
+		abilities.addAll(PowerGenerator.generateAbilities(DNA));
 	}
 
 	public void trigger()
@@ -648,6 +649,17 @@ public class Person extends RndPhysObj implements Mover
 		activateDNA();
 		if (this instanceof NPC)
 			rename();
+	}
+
+	public void tempTrigger()
+	{
+		// like trigger(), but only with currently implemented abilities, and also entirely random :/
+
+		// give 3 random abilities, levels 3, 5, 7
+		Random rand = new Random();
+		abilities.add(Ability.ability(Ability.implementedAbilities.get(rand.nextInt(Ability.implementedAbilities.size())) + " <" + EP.elementList[rand.nextInt(12)] + ">", 3));
+		abilities.add(Ability.ability(Ability.implementedAbilities.get(rand.nextInt(Ability.implementedAbilities.size())) + " <" + EP.elementList[rand.nextInt(12)] + ">", 5));
+		abilities.add(Ability.ability(Ability.implementedAbilities.get(rand.nextInt(Ability.implementedAbilities.size())) + " <" + EP.elementList[rand.nextInt(12)] + ">", 7));
 	}
 
 	public void rename()

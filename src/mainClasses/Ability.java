@@ -5,6 +5,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
@@ -48,38 +49,38 @@ import mainResourcesPackage.SoundEffect;
 
 public class Ability
 {
-	protected static List<String>	descriptions				= new ArrayList<String>();
-	protected static boolean[][]	elementalAttacksPossible	= new boolean[12][7];												// [element][ability]
-	protected static int[][]		elementalAttackNumbers		= new int[12][3];
-	protected static String[]		elementalAttacks			= new String[]
-																	{ "Ball", "Beam", "Shield", "Wall", "Spray", "Strike", "Pool" };
+	final static List<String> implementedAbilities = Arrays.asList("Portals", "Elemental Void", "Precision I", "Protective Bubble I", "Sprint", "Strength I", "Strength II", "Strength III", "Punch",
+			"Heal I", "Heal II", "Force Shield", "Ranged Explosion", "Flight I", "Flight II", "Telekinetic Flight", "Blink", "Ghost Mode I", "Strong Force Field", "Beam", "Ball", "Shield", "Pool",
+			"Wall", "Spray", "Toughness III", "Sense Life", "Sense Mana and Stamina", "Sense Powers", "Elemental Combat I");
+
+	protected static List<String> descriptions = new ArrayList<String>();
+	protected static boolean[][] elementalAttacksPossible = new boolean[12][7]; // [element][ability]
+	protected static int[][] elementalAttackNumbers = new int[12][3];
+	protected static String[] elementalAttacks = new String[]
+	{ "Ball", "Beam", "Shield", "Wall", "Spray", "Strike", "Pool" };
 
 	// permanent variables of the ability
-	protected String				name;																							// name of the ability
-	protected int					level;																							// 1-10. AKA "level". Measures how powerful the ability is.
-	protected double				cooldown;																						// Duration in which power doesn't work after using it. -1 = passive, 0 = no cooldown
-	protected double				cost;																							// -1 = passive. Is a cost in mana, stamina or charge...depending on the power.
-	protected double				costPerSecond;																					// applies to some abilities. Is a cost in mana, stamina or charge...depending on the power.
-	protected int					range;																							// distance from user in which ability can be used. For some abilities - how far they go before stopping. -1 = not
-																																	// ranged, or only
-	// direction-aiming.
-	protected double				areaRadius;																						// radius of area of effect of ability.
-	protected boolean				instant;																						// Instant abilities don't aim, they immediately activate after a single click. Maintained abilities are always
-																																	// instant.
-	public boolean					toggleable;
-	protected boolean				maintainable;																					// Maintained abilities are instant, and require you to continue holding the button to use them (they're continuous
-																																	// abilities).
-	protected boolean				stopsMovement;																					// Does the power stop the person from moving?
-	protected String				costType;																						// "none", "mana", "stamina", "charge" or "life". Abilities that use multiple don't exist, I think.
-	public double					arc;																							// used for abilities with an arc - the Spray ability
+	protected String name; // name of the ability
+	protected int level; // 1-10. AKA "level". Measures how powerful the ability is.
+	protected double cooldown; // Duration in which power doesn't work after using it. -1 = passive, 0 = no cooldown
+	protected double cost; // -1 = passive. Is a cost in mana, stamina or charge...depending on the power.
+	protected double costPerSecond; // applies to some abilities. Is a cost in mana, stamina or charge...depending on the power.
+	protected int range; // distance from user in which ability can be used. For some abilities - how far they go before stopping. -1 = not ranged, or only direction-aiming.
+	protected double areaRadius; // radius of area of effect of ability.
+	protected boolean instant; // Instant abilities don't aim, they immediately activate after a single click. Maintained abilities are always instant.
+	public boolean toggleable;
+	protected boolean maintainable; // Maintained abilities are instant, and require you to continue holding the button to use them (they're continuous abilities).
+	protected boolean stopsMovement; // Does the power stop the person from moving?
+	protected String costType; // "none", "mana", "stamina", "charge" or "life". Abilities that use multiple don't exist, I think.
+	public double arc; // used for abilities with an arc - the Spray ability
 
 	// changing variables of the ability
-	protected double				timeLeft;																						// how much time the ability has been on.
-	protected double				cooldownLeft;																					// if cooldown is -1 (passive), then a cooldownLeft of 0 means the ability hasn't been initialized yet
-	protected boolean				on;																								// For maintained and on/off abilities - whether or not the power is active.
-	protected int					elementNum;
+	protected double timeLeft; // how much time the ability has been on.
+	protected double cooldownLeft; // if cooldown is -1 (passive), then a cooldownLeft of 0 means the ability hasn't been initialized yet
+	protected boolean on; // For maintained and on/off abilities - whether or not the power is active.
+	protected int elementNum;
 
-	protected String[]				tags;																							// list of tags.
+	protected String[] tags; // list of tags.
 	// possible tags are:
 	// offensive, projectile
 
@@ -88,10 +89,10 @@ public class Ability
 	// Fire Beam 7: name = "Beam <Fire>"; points = 7; cooldown = 0.5; cost = 0; costPerSecond = 5 / <fire damage>; range = 500*points; areaRadius = -1; instant = true; maintainable = true; stopsMovement = false; onOff = false; costType = "mana";
 
 	// for special effects:
-	protected String				rangeType					= "";
-	protected int					frameNum					= 0;																// used in child classes
+	protected String rangeType = "";
+	protected int frameNum = 0; // used in child classes
 
-	protected List<SoundEffect>		sounds						= new ArrayList<SoundEffect>();
+	protected List<SoundEffect> sounds = new ArrayList<SoundEffect>();
 
 	@SuppressWarnings("unused")
 	public void use(Environment env, Person user, Point target)
@@ -141,9 +142,9 @@ public class Ability
 
 	public void toggle()
 	{
-		MAIN.errorMessage("Toggleable ability was toggled, but the toggle method that toggled was not overridden. toggle.  (ability is "+name+")");
+		MAIN.errorMessage("Toggleable ability was toggled, but the toggle method that toggled was not overridden. toggle.  (ability is " + name + ")");
 	}
-	
+
 	void addTags()
 	{
 		// tags
@@ -251,7 +252,8 @@ public class Ability
 			for (int i = 0; i < descriptions.size(); i++)
 				if (descriptions.get(i).substring(0, descriptions.get(i).indexOf('(') - 1).equals(name.substring(0, name.indexOf("<") - 1)))
 					return descriptions.get(i);
-		} else
+		}
+		else
 			for (int i = 0; i < descriptions.size(); i++)
 				if (descriptions.get(i).substring(0, descriptions.get(i).indexOf('(') - 1).equals(name))
 					return descriptions.get(i);
@@ -424,7 +426,8 @@ public class Ability
 				i++;
 			}
 			in.close();
-		} catch (IOException e)
+		}
+		catch (IOException e)
 		{
 			e.printStackTrace();
 			MAIN.errorMessage("(there was a bug, I think)");
@@ -455,6 +458,11 @@ public class Ability
 		{
 			element = abilityName.substring(abilityName.indexOf("<") + 1, abilityName.indexOf(">"));
 			trimmedAbilityName = abilityName.substring(0, abilityName.indexOf("<") - 1);
+		}
+		if (!implementedAbilities.contains(trimmedAbilityName))
+		{
+			MAIN.errorMessage();
+			return null;
 		}
 		switch (trimmedAbilityName)
 		{
@@ -508,7 +516,7 @@ public class Ability
 			return new Wall_E(element, pnts);
 		case "Spray":
 			return new Spray_E(element, pnts);
-		case "Strike":
+		case "Strike": // NOT DONE
 			return new Strike_E(element, pnts);
 		case "Toughness III":
 			return new Toughness_III(pnts);
@@ -516,19 +524,19 @@ public class Ability
 			return new Sense_Life(pnts);
 		case "Sense Mana and Stamina":
 			return new Sense_Mana_and_Stamina(pnts);
-		case "Sense Movement":
+		case "Sense Movement": // NOT DONE
 			return new Sense_Movement(pnts);
-		case "Sense Structure":
+		case "Sense Structure": // NOT DONE
 			return new Sense_Structure(pnts);
-		case "Sense Parahumans":
+		case "Sense Parahumans": // NOT DONE
 			return new Sense_Parahumans(pnts);
 		case "Sense Powers":
 			return new Sense_Powers(pnts);
-		case "Sense Element":
+		case "Sense Element": // NOT DONE
 			return new Sense_Element_E(element, pnts);
 		case "Elemental Combat I":
 			return new Elemental_Combat_I_E(element, pnts);
-		case "Elemental Combat II":
+		case "Elemental Combat II": // NOT DONE
 			return new Elemental_Combat_II_E(element, pnts);
 		default:
 			MAIN.errorMessage("Donald trump peninsula error - " + abilityName);

@@ -36,7 +36,7 @@ public class Portals extends Ability
 		p2 = null;
 		minPortalLength = 100;
 		maxPortalLength = 2000;
-		minimumDistanceBetweenPortalsPow2 = 80 * 80;
+		minimumDistanceBetweenPortalsPow2 = 120 * 120;
 		sounds.add(new SoundEffect("Portal_1.wav"));
 		sounds.add(new SoundEffect("Portal_2.wav"));
 	}
@@ -134,7 +134,7 @@ public class Portals extends Ability
 	{
 
 	}
-	
+
 	public void toggle()
 	{
 		alignPortals = !alignPortals;

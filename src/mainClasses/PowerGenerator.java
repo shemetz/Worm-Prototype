@@ -1,4 +1,5 @@
 package mainClasses;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -127,7 +128,7 @@ public class PowerGenerator
 			majors.remove(i);
 			i--;
 		}
-		//Sort the abilities first by points, and then by alphabetical name
+		// Sort the abilities first by points, and then by alphabetical name
 		abilities.sort(Ability.pointsThenAlphabetical);
 		return abilities;
 	}
@@ -345,7 +346,7 @@ public class PowerGenerator
 			}
 			break;
 		default:
-			//no error message here, this is actually what happens with like 70% of the abilities
+			// no error message here, this is actually what happens with like 70% of the abilities
 			break;
 		}
 		if (s.startsWith("Resist Element") || s.startsWith("Absorb Element") || s.startsWith("Elemental Resistance"))
@@ -386,7 +387,9 @@ public class PowerGenerator
 		}
 		if (!alreadyExists)
 		{
-			abilities.add(Ability.ability(s, points));
+			Ability ability = Ability.ability(s, points);
+			if (ability != null) // function above will return null if the ability isn't implemented in the game yet
+				abilities.add(ability);
 		} else
 		{
 			addAbility(abilities, "noob", points);
