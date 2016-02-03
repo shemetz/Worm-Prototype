@@ -6,7 +6,7 @@ import java.util.Random;
 import mainClasses.Ability;
 import mainClasses.EP;
 import mainClasses.Environment;
-import mainClasses.Main;
+import mainClasses.MAIN;
 import mainClasses.Methods;
 import mainClasses.Person;
 import mainClasses.Player;
@@ -28,7 +28,7 @@ public class Sense_Powers extends Ability
 		rangeType = "Circle area";
 		instant = true;
 		
-		details = new int[Main.numOfElements];
+		details = new int[MAIN.numOfElements];
 		for (int i = 0; i < details.length; i++)
 			details[i] = 0;
 		timer = 0;

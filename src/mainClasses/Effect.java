@@ -24,13 +24,13 @@ public class Effect
 	@SuppressWarnings("unused")
 	public void apply(Person target)
 	{
-		Main.errorMessage("Error message. 1234567");
+		MAIN.errorMessage("Error message. 1234567");
 	}
 
 	@SuppressWarnings("unused")
 	public void unapply(Person target)
 	{
-		Main.errorMessage("String literal out of exception campaign");
+		MAIN.errorMessage("String literal out of exception campaign");
 	}
 
 	public void update(Person target, double deltaTime)
@@ -55,13 +55,13 @@ public class Effect
 				animFrame = 0;
 			break;
 		default:
-			Main.errorMessage(
+			MAIN.errorMessage(
 					"They call me 'Bell',\nThey call me 'Stacey',\nThey call me 'her',\nThey call me 'Jane',\nThat's not my name!\nThat's not my name!\nThat's not my name!\nThat's not my...name!\n");
-			Main.errorMessage();
-			if (Main.random.nextInt(5) == 0)
+			MAIN.errorMessage();
+			if (MAIN.random.nextInt(5) == 0)
 			{
-				Main.errorMessage("(ame, ame, ame)");
-				Main.errorMessage();
+				MAIN.errorMessage("(ame, ame, ame)");
+				MAIN.errorMessage();
 			}
 			break;
 		}

@@ -35,6 +35,7 @@ public class Portal extends Drawable
 		end = new Point3D((int) (x + Math.cos(angle) * length * 0.5), (int) (y + Math.sin(angle) * length * 0.5), z);
 		image = new BufferedImage((int) length, (int) length, BufferedImage.TYPE_INT_ARGB);
 		slope = length / 6 / 6;
+		this.sound = new SoundEffect("Portal_1.wav"); // is not used, but is needed, temporarily
 	}
 
 	public void playPortalSound()

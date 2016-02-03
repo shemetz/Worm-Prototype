@@ -236,7 +236,7 @@ public class Person extends RndPhysObj implements Mover
 	public void updateSubStats()
 	{
 		// should always be overridden.
-		Main.errorMessage("WHO IS THIS PERSON");
+		MAIN.errorMessage("WHO IS THIS PERSON");
 	}
 
 	public void basicUpdateSubStats()
@@ -297,10 +297,10 @@ public class Person extends RndPhysObj implements Mover
 	public void initAnimation()
 	{
 		// randomize look. TODO
-		int legs = Main.random.nextInt(2);
-		int chest = Main.random.nextInt(2);
-		int head = Main.random.nextInt(2);
-		int hair = Main.random.nextInt(2);
+		int legs = MAIN.random.nextInt(2);
+		int chest = MAIN.random.nextInt(2);
+		int head = MAIN.random.nextInt(2);
+		int hair = MAIN.random.nextInt(2);
 		List<Integer> n = new ArrayList<Integer>();
 		n.add(legs);
 		n.add(chest);
@@ -447,7 +447,7 @@ public class Person extends RndPhysObj implements Mover
 			// Nothing, right? TODO
 			break;
 		default:
-			Main.errorMessage("Non-cased animState: " + animState);
+			MAIN.errorMessage("Non-cased animState: " + animState);
 			break;
 		}
 		// remember - if the animation has repeating frames of the same image, they are just added several times to the list.
@@ -567,7 +567,7 @@ public class Person extends RndPhysObj implements Mover
 			break;
 		case 8:
 			// shouldn't happen
-			Main.errorMessage("Oh, poop!");
+			MAIN.errorMessage("Oh, poop!");
 			break;
 		case 9:
 			switch (animState)
@@ -624,7 +624,7 @@ public class Person extends RndPhysObj implements Mover
 			animFrame = 0;
 			break;
 		default:
-			Main.errorMessage("Non-cased animNum: " + newAnimState);
+			MAIN.errorMessage("Non-cased animNum: " + newAnimState);
 			break;
 		}
 
@@ -795,7 +795,7 @@ public class Person extends RndPhysObj implements Mover
 			if (z <= cameraZed) // when in Ghost Mode, people are drawn as if they are higher on the Z axis, in order to make them be drawn above walls. cameraZed will be 1 lower than actual.
 			{
 				buffer.translate(x, y);
-				buffer.scale(z * Main.heightZoomRatio + 1, z * Main.heightZoomRatio + 1);
+				buffer.scale(z * MAIN.heightZoomRatio + 1, z * MAIN.heightZoomRatio + 1);
 				buffer.translate(-x, -y);
 				buffer.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
 				buffer.setXORMode(new Color(0, 0, 0, 0));
@@ -814,13 +814,13 @@ public class Person extends RndPhysObj implements Mover
 					buffer.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
 				}
 				buffer.translate(x, y);
-				buffer.scale(1 / (z * Main.heightZoomRatio + 1), 1 / (z * Main.heightZoomRatio + 1));
+				buffer.scale(1 / (z * MAIN.heightZoomRatio + 1), 1 / (z * MAIN.heightZoomRatio + 1));
 				buffer.translate(-x, -y);
 			}
 		} else if (z <= cameraZed)
 		{
 			buffer.translate(x, y);
-			buffer.scale(z * Main.heightZoomRatio + 1, z * Main.heightZoomRatio + 1);
+			buffer.scale(z * MAIN.heightZoomRatio + 1, z * MAIN.heightZoomRatio + 1);
 			buffer.translate(-x, -y);
 			buffer.rotate(rotation - 0.5 * Math.PI, (int) (x), (int) (y));
 			// Special shadows
@@ -844,7 +844,7 @@ public class Person extends RndPhysObj implements Mover
 				}
 			buffer.rotate(-rotation + 0.5 * Math.PI, (int) (x), (int) (y));
 			buffer.translate(x, y);
-			buffer.scale(1 / (z * Main.heightZoomRatio + 1), 1 / (z * Main.heightZoomRatio + 1));
+			buffer.scale(1 / (z * MAIN.heightZoomRatio + 1), 1 / (z * MAIN.heightZoomRatio + 1));
 			buffer.translate(-x, -y);
 		}
 	}
@@ -909,7 +909,7 @@ public class Person extends RndPhysObj implements Mover
 		if (z <= cameraZed)
 		{
 			buffer.translate(x, y);
-			buffer.scale(z * Main.heightZoomRatio + 1, z * Main.heightZoomRatio + 1);
+			buffer.scale(z * MAIN.heightZoomRatio + 1, z * MAIN.heightZoomRatio + 1);
 			buffer.translate(-x, -y);
 			buffer.rotate(cameraRotation, x, y);
 			for (UIText ui : uitexts)
@@ -920,7 +920,7 @@ public class Person extends RndPhysObj implements Mover
 			}
 			buffer.rotate(-cameraRotation, x, y);
 			buffer.translate(x, y);
-			buffer.scale(1 / (z * Main.heightZoomRatio + 1), 1 / (z * Main.heightZoomRatio + 1));
+			buffer.scale(1 / (z * MAIN.heightZoomRatio + 1), 1 / (z * MAIN.heightZoomRatio + 1));
 			buffer.translate(-x, -y);
 		}
 
@@ -980,7 +980,7 @@ public class Person extends RndPhysObj implements Mover
 	{
 		// Only a single randomly selected part of the armor parts gets hit by an attack. For example, a thrown spear, fireball or bullet will only either hit the chest, or the head, or the legs, or the arms of a person.
 		int n = -1;
-		switch (Main.random.nextInt(20))
+		switch (MAIN.random.nextInt(20))
 		// quote:
 		// "It's arms 25%, legs 25%, head 15%, torso 35%"
 		{
@@ -1013,7 +1013,7 @@ public class Person extends RndPhysObj implements Mover
 			n = 2; // chest
 			break;
 		default:
-			Main.errorMessage("Ph'nglui mglw'nafh Cthulhu R'lyeh wgah'nagl fhtagn");
+			MAIN.errorMessage("Ph'nglui mglw'nafh Cthulhu R'lyeh wgah'nagl fhtagn");
 			break;
 		}
 		Armor a = armorParts[n];
@@ -1026,7 +1026,7 @@ public class Person extends RndPhysObj implements Mover
 		if (damage < a.armorRating * effectiveness) // armor blocks damage
 		{
 			// 10% chance of armor degrade
-			if (Main.random.nextDouble() < 0.1)
+			if (MAIN.random.nextDouble() < 0.1)
 				a.reduce(a.maxArmorRating * 0.03 * effectiveness);
 			return 0;
 		} else // armor reduces damage
@@ -1043,7 +1043,7 @@ public class Person extends RndPhysObj implements Mover
 	{
 		if (lastIDgiven >= Integer.MAX_VALUE)
 		{
-			Main.errorMessage("HAHAHAHAHAHAHAHA what the fuck?");
+			MAIN.errorMessage("HAHAHAHAHAHAHAHA what the fuck?");
 			lastIDgiven = Integer.MIN_VALUE;
 		}
 		return lastIDgiven++;

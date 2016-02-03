@@ -102,7 +102,7 @@ public class Methods
 
 		if ((xDelta == 0) && (yDelta == 0))
 		{
-			Main.errorMessage("That's not a line");
+			MAIN.errorMessage("That's not a line");
 			return null;
 		}
 
@@ -131,7 +131,7 @@ public class Methods
 
 		if ((xDelta == 0) && (yDelta == 0))
 		{
-			Main.errorMessage("That's not a line");
+			MAIN.errorMessage("That's not a line");
 			return -1;
 		}
 
@@ -156,7 +156,7 @@ public class Methods
 
 		if ((xDelta == 0) && (yDelta == 0))
 		{
-			Main.errorMessage("That's not a line");
+			MAIN.errorMessage("That's not a line");
 			return null;
 		}
 

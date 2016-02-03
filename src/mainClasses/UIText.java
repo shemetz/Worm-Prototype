@@ -50,7 +50,7 @@ public class UIText
 			color = new Color(255, 255, 255); // dark gray
 			break;
 		default:
-			Main.errorMessage("Unknown UItext damage type number: " + type);
+			MAIN.errorMessage("Unknown UItext damage type number: " + type);
 			color = Color.white;
 			break;
 		}

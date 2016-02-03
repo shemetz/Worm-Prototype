@@ -283,7 +283,7 @@ public class NameGenerator
 
 		} catch (IOException e)
 		{
-			Main.errorMessage("something wrong in name generation");
+			MAIN.errorMessage("something wrong in name generation");
 			e.printStackTrace();
 		}
 	}

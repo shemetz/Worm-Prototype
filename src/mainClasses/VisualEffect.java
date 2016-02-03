@@ -88,7 +88,7 @@ public class VisualEffect
 				frame = -1;
 			break;
 		default:
-			Main.errorMessage("[1] Unused effect type has no update case:  " + type);
+			MAIN.errorMessage("[1] Unused effect type has no update case:  " + type);
 			break;
 		}
 
@@ -145,7 +145,7 @@ public class VisualEffect
 			}
 			break;
 		default:
-			Main.errorMessage("[2] Unused effect type has no draw case:  " + type);
+			MAIN.errorMessage("[2] Unused effect type has no draw case:  " + type);
 			break;
 		}
 	}

@@ -59,7 +59,7 @@ import effects.Burning;
 import mainClasses.NPC.Strategy;
 import mainResourcesPackage.SoundEffect;
 
-public class Main extends JFrame implements KeyListener, MouseListener, MouseMotionListener, MouseWheelListener, ComponentListener, WindowFocusListener
+public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMotionListener, MouseWheelListener, ComponentListener, WindowFocusListener
 {
 	// Current version of the program
 	private static final long	serialVersionUID		= 1;
@@ -68,7 +68,8 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 	final double				TAU						= 2 * Math.PI;
 
 	// CONSTANTS
-	final boolean				movementVariation		= true;																											// if true = player is slower when walking sideways and backwards
+	final boolean				movementVariation		= true;
+	boolean						portalCameraRotation	= true;																											// if true = player is slower when walking sideways and backwards
 	int							frameWidth				= 1280,
 										frameHeight = 800;
 	Timer						frameTimer;																																// Each frame of this timer redraws the frame
@@ -134,14 +135,23 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 	Line2D						drawLine				= null;																											// temp
 	Rectangle2D					drawRect				= null;																											// also temp
 
-	// Pause (tab)
-	boolean						tab						= false,
-										tab2 = true;
-	int							tabHoverAbility			= -1;																											// ability player is hovering above which, with the mouse
+	// Pause
+	boolean						paused					= false,
+										extraPauseBoolean = true;
+	int							pauseHoverAbility		= -1;																											// ability player is hovering above which, with the mouse
 
 	// FPS checks
 	long						lastLoopTime			= System.nanoTime();
 	int							FPS						= -1;
+
+	// Pause menus
+	enum Menu
+	{
+		NO, ABILITIES, ESC
+	};
+
+	Menu			menu	= Menu.NO;
+	List<MenuText>	menuStuff;
 
 	// METHODS
 	void frame()
@@ -211,7 +221,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		}
 		// change wind direction
 		if (frameNum % 200 == 0 && random.nextDouble() < 0.3)
-			env.windDirection = new Point(Main.random.nextInt(11) - 5, Main.random.nextInt(11) - 5);
+			env.windDirection = new Point(MAIN.random.nextInt(11) - 5, MAIN.random.nextInt(11) - 5);
 
 		// UI TEXTS
 		for (int i = 0; i < env.uitexts.size(); i++)
@@ -620,6 +630,11 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		int diffX = (int) ((player.x - camera.x) * deltaTime * cameraSmoothing * zoomLevel);
 		int diffY = (int) ((player.y - camera.y) * deltaTime * cameraSmoothing * zoomLevel);
 		int diffZ = (int) ((player.z + cameraHeight - camera.z) * zoomLevel);
+		if (portalCameraRotation && player.portalCameraRotation != 0)
+		{
+			cameraRotation += player.portalCameraRotation;
+			player.portalCameraRotation = 0;
+		}
 		camera.x += diffX;
 		camera.y += diffY;
 		camera.z += diffZ;
@@ -668,7 +683,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		}
 	}
 
-	void tabFrame()
+	void pauseFrame()
 	{
 		// TODO
 	}
@@ -975,6 +990,8 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		niceHotKeys = new Point[10];
 		updateNiceHotkeys();
 
+		menuStuff = new ArrayList<MenuText>();
+
 		// ~~~TEMPORARY TESTING~~~
 
 		env = new Environment(500, 500);
@@ -1130,22 +1147,22 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 
 	void playerPressHotkey(int n, boolean press)
 	{
-		if (!tab || !press)
+		if (!paused || !press)
 		{
 			keyPressFixingMethod(n, press);
 		} else
 		{
 			// Unbinding hotkeys
-			if (press && (tabHoverAbility == -1 || !player.abilities.get(tabHoverAbility).hasTag("passive"))) // the order of the || is important
+			if (press && (pauseHoverAbility == -1 || !player.abilities.get(pauseHoverAbility).hasTag("passive"))) // the order of the || is important
 			{
-				if (tabHoverAbility == -1 && hotkeySelected == n - 1)
+				if (pauseHoverAbility == -1 && hotkeySelected == n - 1)
 					hotkeySelected = -1;
-				player.hotkeys[n - 1] = tabHoverAbility;
+				player.hotkeys[n - 1] = pauseHoverAbility;
 				updateNiceHotkeys();
 			}
 			player.abilityAiming = -1;
 
-			// if keys are released during tab it is a problem? TODO test
+			// if keys are released during pause it is a problem? TODO test
 		}
 	}
 
@@ -1286,8 +1303,8 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 
 		if (hotkeySelected != -1 && player.hotkeys[hotkeySelected] != -1)
 			drawRange(buffer, player.abilities.get(player.hotkeys[hotkeySelected]));
-		if (tabHoverAbility != -1)
-			drawRange(buffer, player.abilities.get(tabHoverAbility));
+		if (pauseHoverAbility != -1)
+			drawRange(buffer, player.abilities.get(pauseHoverAbility));
 		if (hotkeyHovered != -1 && player.hotkeys[hotkeyHovered] != -1)
 			drawRange(buffer, player.abilities.get(player.hotkeys[hotkeyHovered]));
 		if (player.abilityAiming != -1)
@@ -1310,10 +1327,10 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 
 		zoomLevel *= (player.z * heightZoomRatio + 1);
 		// User Interface
-		if (tab)
-			drawTab(buffer);
 		drawPlayerStats(buffer);
 		drawHotkeysAndEffects(buffer);
+		if (paused)
+			drawPause(buffer);
 
 		if (timeSinceLastScreenshot < 2)
 			drawScreenshot(buffer);
@@ -1387,13 +1404,13 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 				double distancePow2 = Methods.DistancePow2(player.x, player.y, p.x, p.y);
 
 				buffer.translate(p.x, p.y);
-				buffer.scale(p.z * Main.heightZoomRatio + 1, p.z * Main.heightZoomRatio + 1);
+				buffer.scale(p.z * MAIN.heightZoomRatio + 1, p.z * MAIN.heightZoomRatio + 1);
 				buffer.translate(-p.x, -p.y);
 
 				p.drawData(buffer, distancePow2 < drawLifeDistancePow2, distancePow2 < drawManaDistancePow2, distancePow2 < drawStaminaDistancePow2, cameraRotation);
 
 				buffer.translate(p.x, p.y);
-				buffer.scale(1 / (p.z * Main.heightZoomRatio + 1), 1 / (p.z * Main.heightZoomRatio + 1));
+				buffer.scale(1 / (p.z * MAIN.heightZoomRatio + 1), 1 / (p.z * MAIN.heightZoomRatio + 1));
 				buffer.translate(-p.x, -p.y);
 			}
 		}
@@ -1654,7 +1671,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 				}
 
 				// selected power during tab
-				if (tab && (player.hotkeys[i] == tabHoverAbility || i == hotkeyHovered))
+				if (paused && (player.hotkeys[i] == pauseHoverAbility || i == hotkeyHovered))
 				{
 					buffer.setStroke(new BasicStroke(1));
 					buffer.setColor(Color.yellow);
@@ -1695,9 +1712,9 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		}
 	}
 
-	void drawTab(Graphics2D buffer)
+	void drawPause(Graphics2D buffer)
 	{
-		// Should only be called if tab == true
+		// Should only be called if paused == true
 
 		// Cover screen with dark transparent rectangle
 		buffer.setColor(new Color(0, 0, 0, 40));
@@ -1710,66 +1727,76 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		buffer.drawString("~PAUSED~", frameWidth / 2 - (int) (230 * UIzoomLevel), frameHeight / 4 + (int) (20 * UIzoomLevel));
 		scaleBuffer(buffer, frameWidth / 2, frameHeight / 4, 1 / UIzoomLevel);
 
-		int rectStartX = (int) (frameWidth / 2 - player.abilities.size() * 80 / 2 * UIzoomLevel);
-		int rectStartY = (int) (frameHeight * 3 / 4);
-		int rectWidth = (int) (player.abilities.size() * 80 * UIzoomLevel);
-		int extraUp = screenmx > rectStartX - 50 * UIzoomLevel && screenmx < rectStartX + rectWidth + 130 * UIzoomLevel && screenmy > rectStartY - 70 * UIzoomLevel
-				&& screenmy < rectStartY + 100 * UIzoomLevel ? 0 : (int) (-40 * UIzoomLevel);
-
-		// Ability breakdown rectangle
-		buffer.setColor(new Color(255, 255, 255, 130));
-		buffer.setStroke(new BasicStroke(1));
-		buffer.fillRect((int) (rectStartX - 50 * UIzoomLevel), (int) (rectStartY - 70 * UIzoomLevel - extraUp), (int) (rectWidth + 80 * UIzoomLevel), (int) (UIzoomLevel * 170 + extraUp));
-		buffer.setColor(new Color(0, 0, 0));
-		buffer.drawRect((int) (rectStartX - 50 * UIzoomLevel), (int) (rectStartY - 70 * UIzoomLevel - extraUp), (int) (rectWidth + 80 * UIzoomLevel), (int) (UIzoomLevel * 170 + extraUp));
-		// // Waste of time, really:
-		// buffer.setStroke(new BasicStroke(8));
-		// buffer.drawLine(rectStartX - 50, rectStartY - 70 - extraUp, rectStartX - 20, rectStartY - 70 - extraUp);
-		// buffer.drawLine(rectStartX - 50, rectStartY - 70 - extraUp, rectStartX - 50, rectStartY - 40 - extraUp);
-		// buffer.drawLine(rectStartX - 50, rectStartY + 100, rectStartX - 50, rectStartY + 70);
-		// buffer.drawLine(rectStartX - 50, rectStartY + 100, rectStartX - 20, rectStartY + 100);
-		// buffer.drawLine(rectStartX + rectWidth - 50 - 20 + 100, rectStartY + 100, rectStartX + rectWidth - 50 - 20 + 70, rectStartY + 100);
-		// buffer.drawLine(rectStartX + rectWidth - 50 - 20 + 100, rectStartY + 100, rectStartX + rectWidth - 50 - 20 + 100, rectStartY + 70);
-		// buffer.drawLine(rectStartX + rectWidth - 50 - 20 + 100, rectStartY - 70 - extraUp, rectStartX + rectWidth - 50 - 20 + 70, rectStartY - 70 - extraUp);
-		// buffer.drawLine(rectStartX + rectWidth - 50 - 20 + 100, rectStartY - 70 - extraUp, rectStartX + rectWidth - 50 - 20 + 100, rectStartY - 40 - extraUp);
-
-		buffer.setFont(new Font("Sans-Serif", Font.BOLD, (int) (12 * UIzoomLevel)));
-		for (int i = 0; i < player.abilities.size(); i++)
+		// buttons and stuff:
+		for (MenuText m : menuStuff)
 		{
-			Ability ability = player.abilities.get(i);
-			if (ability.cost == -1)
+			buffer.setColor(new Color(0, 0, 0, 100));
+			buffer.fillRect(m.x, m.y, m.width, m.height);
+			buffer.setColor(Color.black);
+			buffer.setStroke(new BasicStroke(5));
+			buffer.drawRect(m.x, m.y, m.width, m.height);
+			if (m.selected)
 			{
-				buffer.setStroke(new BasicStroke((float) (3 * UIzoomLevel), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, (float) (10.0f), new float[]
-				{ (float) (10.0f * UIzoomLevel) }, 0.0f));
-				buffer.setColor(new Color(0, 0, 0, 90));
-			} else
-			{
-				buffer.setStroke(new BasicStroke((float) (3 * UIzoomLevel)));
-				buffer.setColor(Color.black);
+				buffer.setColor(Color.orange);
+				buffer.setStroke(new BasicStroke(3));
+				buffer.drawRect(m.x, m.y, m.width, m.height);
 			}
-			// icons
-			scaleBuffer(buffer, (int) (rectStartX + i * 80 * UIzoomLevel + 0 * UIzoomLevel), (int) (rectStartY + 0 * UIzoomLevel), UIzoomLevel);
-			buffer.drawImage(Resources.icons.get(ability.name), (int) (rectStartX + i * 80 * UIzoomLevel), (int) (rectStartY), this);
-			scaleBuffer(buffer, (int) (rectStartX + i * 80 * UIzoomLevel + 0 * UIzoomLevel), (int) (rectStartY + 0 * UIzoomLevel), 1 / UIzoomLevel);
-			buffer.drawRect((int) (rectStartX + i * 80 * UIzoomLevel), rectStartY, (int) (60 * UIzoomLevel), (int) (60 * UIzoomLevel));
-			if (i == tabHoverAbility || (hotkeyHovered != -1 && i == player.hotkeys[hotkeyHovered]))
-			{
-				buffer.setStroke(new BasicStroke(1));
-				buffer.setColor(Color.yellow);
-				buffer.drawRect((int) (frameWidth / 2 - player.abilities.size() * 80 / 2 * UIzoomLevel + i * 80 * UIzoomLevel), frameHeight * 3 / 4, (int) (60 * UIzoomLevel),
-						(int) (60 * UIzoomLevel));
-			}
-			// Key bound to that ability
-			int timesAssigned = 0;
-			for (int j = 0; j < player.hotkeys.length; j++)
-				if (player.hotkeys[j] == i)
-				{
-					timesAssigned++;
-					buffer.drawString(hotkeyStrings[j], (int) (rectStartX + i * 80 * UIzoomLevel + 12 * UIzoomLevel), (int) (rectStartY + 60 * UIzoomLevel + timesAssigned * 16 * UIzoomLevel));
-				}
+			buffer.setFont(new Font("Sans-Serif", Font.PLAIN, 40));
+			buffer.drawString(m.text, m.x + 5, m.y + m.height / 2 + 13); // TODO
 		}
 
-		// TODO add some funny stuff. Also, menu buttons.
+		if (menu == Menu.ABILITIES)
+		{
+
+			int rectStartX = (int) (frameWidth / 2 - player.abilities.size() * 80 / 2 * UIzoomLevel);
+			int rectStartY = (int) (frameHeight * 3 / 4);
+			int rectWidth = (int) (player.abilities.size() * 80 * UIzoomLevel);
+			int extraUp = screenmx > rectStartX - 50 * UIzoomLevel && screenmx < rectStartX + rectWidth + 130 * UIzoomLevel && screenmy > rectStartY - 70 * UIzoomLevel
+					&& screenmy < rectStartY + 100 * UIzoomLevel ? 0 : (int) (-40 * UIzoomLevel);
+
+			// Ability breakdown rectangle
+			buffer.setColor(new Color(255, 255, 255, 130));
+			buffer.setStroke(new BasicStroke(1));
+			buffer.fillRect(0, (int) (rectStartY - 70 * UIzoomLevel - extraUp), frameWidth, (int) (UIzoomLevel * 170 + extraUp));
+			buffer.setColor(new Color(0, 0, 0));
+			buffer.drawRect(0, (int) (rectStartY - 70 * UIzoomLevel - extraUp), frameWidth, (int) (UIzoomLevel * 170 + extraUp));
+
+			buffer.setFont(new Font("Sans-Serif", Font.BOLD, (int) (12 * UIzoomLevel)));
+			for (int i = 0; i < player.abilities.size(); i++)
+			{
+				Ability ability = player.abilities.get(i);
+				if (ability.cost == -1)
+				{
+					buffer.setStroke(new BasicStroke((float) (3 * UIzoomLevel), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, (float) (10.0f), new float[]
+					{ (float) (10.0f * UIzoomLevel) }, 0.0f));
+					buffer.setColor(new Color(0, 0, 0, 90));
+				} else
+				{
+					buffer.setStroke(new BasicStroke((float) (3 * UIzoomLevel)));
+					buffer.setColor(Color.black);
+				}
+				// icons
+				scaleBuffer(buffer, (int) (rectStartX + i * 80 * UIzoomLevel + 0 * UIzoomLevel), (int) (rectStartY + 0 * UIzoomLevel), UIzoomLevel);
+				buffer.drawImage(Resources.icons.get(ability.name), (int) (rectStartX + i * 80 * UIzoomLevel), (int) (rectStartY), this);
+				scaleBuffer(buffer, (int) (rectStartX + i * 80 * UIzoomLevel + 0 * UIzoomLevel), (int) (rectStartY + 0 * UIzoomLevel), 1 / UIzoomLevel);
+				buffer.drawRect((int) (rectStartX + i * 80 * UIzoomLevel), rectStartY, (int) (60 * UIzoomLevel), (int) (60 * UIzoomLevel));
+				if (i == pauseHoverAbility || (hotkeyHovered != -1 && i == player.hotkeys[hotkeyHovered]))
+				{
+					buffer.setStroke(new BasicStroke(1));
+					buffer.setColor(Color.yellow);
+					buffer.drawRect((int) (frameWidth / 2 - player.abilities.size() * 80 / 2 * UIzoomLevel + i * 80 * UIzoomLevel), frameHeight * 3 / 4, (int) (60 * UIzoomLevel),
+							(int) (60 * UIzoomLevel));
+				}
+				// Key bound to that ability
+				int timesAssigned = 0;
+				for (int j = 0; j < player.hotkeys.length; j++)
+					if (player.hotkeys[j] == i)
+					{
+						timesAssigned++;
+						buffer.drawString(hotkeyStrings[j], (int) (rectStartX + i * 80 * UIzoomLevel + 12 * UIzoomLevel), (int) (rectStartY + 60 * UIzoomLevel + timesAssigned * 16 * UIzoomLevel));
+					}
+			}
+		}
 	}
 
 	void checkPlayerMovementKeys()
@@ -1789,17 +1816,17 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 			player.wasdPortalArray[1] = player.leftPressed;
 			player.wasdPortalArray[2] = player.downPressed;
 			player.wasdPortalArray[3] = player.rightPressed;
-		} else if (player.movementAxisRotation != 0)
+		} else if (player.portalMovementRotation != 0)
 		{
 			if ((player.wasdPortalArray[0] != player.upPressed) || (player.wasdPortalArray[1] != player.leftPressed) || (player.wasdPortalArray[2] != player.downPressed)
 					|| (player.wasdPortalArray[3] != player.rightPressed))
-				player.movementAxisRotation = 0;
+				player.portalMovementRotation = 0;
 		}
 		if (horiAccel == 0 && vertAccel == 0)
 		{
 			player.strengthOfAttemptedMovement = 0;
 			player.flyDirection = 0;
-			player.movementAxisRotation = 0; // If you stop, portal sickness cancels
+			player.portalMovementRotation = 0; // If you stop, portal sickness cancels
 			if (player.leftMousePressed && !player.maintaining && !player.dead)
 			{
 				// rotate to where mouse point is
@@ -1809,7 +1836,10 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		} else
 		{
 			player.strengthOfAttemptedMovement = 1;
-			player.directionOfAttemptedMovement = Math.atan2(vertAccel, horiAccel) + cameraRotation + player.movementAxisRotation;
+			if (portalCameraRotation)
+				player.directionOfAttemptedMovement = Math.atan2(vertAccel, horiAccel) + cameraRotation;
+			else
+				player.directionOfAttemptedMovement = Math.atan2(vertAccel, horiAccel) + cameraRotation + player.portalMovementRotation;
 
 			// Reduce effect of portal axis change. Commented out because "keep moving until you release keys" feels better.
 			// if (player.movementAxisRotation > 0)
@@ -2121,6 +2151,73 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 			s.stop();
 	}
 
+	void pause(Menu target, boolean bool)
+	{
+		if (target != null && !bool && target != menu && menu != Menu.NO) // switch between pause menus
+		{
+			menu = target;
+			updatePauseMenu();
+			return;
+		}
+		if (bool) // pause key pressed
+		{
+			menu = target;
+			if (!paused)
+				pauseAllSounds(true);
+			paused = true;
+		} else // pause key released
+		{
+			extraPauseBoolean = !extraPauseBoolean;
+			paused = !extraPauseBoolean;
+			if (!paused)
+				menu = Menu.NO;
+			tooltip = "";
+			if (!paused)
+			{
+				pauseHoverAbility = -1;
+				pauseAllSounds(false);
+			}
+		}
+		updatePauseMenu();
+		mousePositionHoverChecks();
+	}
+
+	void updatePauseMenu()
+	{
+		menuStuff.clear(); // remove all current stuff
+		switch (menu)
+		{
+		case ABILITIES:
+			menuStuff.add(new MenuText(frameWidth / 2 - 78, frameHeight / 2 - 30, 156, 60, "Resume"));
+			break;
+		case ESC:
+			menuStuff.add(new MenuText(frameWidth / 2 - 78, frameHeight / 2 - 30, 156, 60, "Resume"));
+			menuStuff.add(new MenuText(frameWidth / 2 - 137, frameHeight / 2 - 100, 274, 60, "exit_game"));
+			break;
+		case NO:
+			break;
+		default:
+			errorMessage("What's on the menu?");
+			break;
+		}
+	}
+
+	void pressMenuButton(MenuText m)
+	{
+		switch (m.type)
+		{
+		case RESUME:
+			pause(null, false);
+			break;
+		case EXIT_GAME:
+			System.exit(0);
+			break;
+		default:
+			errorMessage("Been there done that messed around, I'm having fun, don't put me down");
+			break;
+		}
+	}
+
 	public void keyPressed(KeyEvent e)
 	{
 		switch (e.getKeyCode())
@@ -2129,8 +2226,8 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 			stopAllSounds();
 			restart();
 			break;
-		case KeyEvent.VK_ESCAPE:// Exit
-			System.exit(0);
+		case KeyEvent.VK_ESCAPE:// Pause menu
+			pause(Menu.ESC, true);
 			break;
 		case KeyEvent.VK_A:
 			player.leftPressed = true;
@@ -2194,8 +2291,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 			player.rotateButtonPressed = true;
 			break;
 		case KeyEvent.VK_TAB:
-			tab = true;
-			checkDisplayHotkeyPowers();
+			pause(Menu.ABILITIES, true);
 			break;
 
 		// hotkeys 1, 2, 3....10
@@ -2239,6 +2335,9 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 			if (hotkeysLook >= 3)
 				hotkeysLook = 0;
 			updateNiceHotkeys();
+			break;
+		case KeyEvent.VK_F4:
+			portalCameraRotation = !portalCameraRotation;
 			break;
 		case KeyEvent.VK_F12:
 			if (timeSinceLastScreenshot > 0.1)
@@ -2289,15 +2388,12 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		case KeyEvent.VK_O:
 			player.rotateButtonPressed = false;
 			break;
-		case KeyEvent.VK_TAB:
-			tab2 = !tab2;
-			tab = !tab2;
-			tooltip = "";
-			if (!tab)
-				tabHoverAbility = -1;
-			pauseAllSounds(tab);
+		case KeyEvent.VK_ESCAPE:
+			pause(Menu.ESC, false);
 			break;
-
+		case KeyEvent.VK_TAB:
+			pause(Menu.ABILITIES, false);
+			break;
 		case KeyEvent.VK_SHIFT:
 			playerPressHotkey(2, false);
 			break;
@@ -2331,7 +2427,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		}
 	}
 
-	public Main()
+	public MAIN()
 	{
 
 		restart();
@@ -2370,10 +2466,10 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 	{
 		public void actionPerformed(ActionEvent e)
 		{
-			if (!tab)
+			if (!paused)
 				frame(); // extra method is because the actionlistener {{}}; thingie is buggy in Eclipse
 			else
-				tabFrame();
+				pauseFrame();
 			// repaint
 			repaint();
 		}
@@ -2440,7 +2536,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 	public static void main(String[] args)
 	{
 		@SuppressWarnings("unused")
-		Main main = new Main();
+		MAIN main = new MAIN();
 	}
 
 	public void componentResized(ComponentEvent e)
@@ -2457,8 +2553,8 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 
 	public void windowLostFocus(WindowEvent arg0)
 	{
-		tab = true;
-		tab2 = false;
+		paused = true;
+		extraPauseBoolean = false;
 		tooltip = "";
 	}
 
@@ -2537,7 +2633,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 
 		updateMousePosition();
 
-		checkDisplayHotkeyPowers();
+		mousePositionHoverChecks();
 	}
 
 	public void mouseMoved(MouseEvent me)
@@ -2550,7 +2646,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 
 		updateMousePosition();
 
-		checkDisplayHotkeyPowers();
+		mousePositionHoverChecks();
 	}
 
 	// IGNORE
@@ -2594,6 +2690,14 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 				player.abilities.get(player.abilityAiming).toggle();
 			else if (hotkeySelected != -1 && player.abilities.get(player.hotkeys[hotkeySelected]).toggleable)
 				player.abilities.get(player.hotkeys[hotkeySelected]).toggle();
+
+			MenuText pressedThing = null;
+			for (MenuText m : menuStuff)
+				if (m.selected) // cursor on it will make it selected
+					if (m.clickable)
+						pressedThing = m;
+			if (pressedThing != null)
+				pressMenuButton(pressedThing);
 		}
 		if (me.getButton() == MouseEvent.BUTTON2) // Mid Click
 		{
@@ -2603,10 +2707,10 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		{
 			player.rightMousePressed = true;
 			// view extended hotkey tooltips
-			checkDisplayHotkeyPowers();
+			mousePositionHoverChecks();
 
 			// disable aimed ability
-			if (!tab)
+			if (!paused)
 			{
 				if (player.abilityMaintaining != -1)
 				{
@@ -2644,16 +2748,17 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 		if (me.getButton() == MouseEvent.BUTTON3) // right Click
 		{
 			player.rightMousePressed = false;
-			checkDisplayHotkeyPowers();
+			mousePositionHoverChecks();
 		}
 	}
 
-	void checkDisplayHotkeyPowers()
+	void mousePositionHoverChecks()
 	{
 		// both hotkey tooltips and effect tooltips, currently.
 		boolean foundOne = false;
 		for (int i = 0; i < player.hotkeys.length; i++)
 		{
+			// hotkey bar
 			if (player.hotkeys[i] != -1)
 			{
 				if (screenmx > niceHotKeys[i].x && screenmy > niceHotKeys[i].y && screenmx < niceHotKeys[i].x + 60 && screenmy < niceHotKeys[i].y + 60)
@@ -2670,6 +2775,7 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 				}
 			}
 		}
+		// effects
 		for (int i = 0; i < player.effects.size(); i++)
 		{
 			if (screenmx > frameWidth - 30 - i * 80 - 60 && screenmy > frameHeight - 90 && screenmx < frameWidth - 30 - i * 80 && screenmy < frameHeight - 90 + 60)
@@ -2688,28 +2794,33 @@ public class Main extends JFrame implements KeyListener, MouseListener, MouseMot
 			tooltip = "";
 		}
 
-		if (tab)
-		{
-			tabHoverAbility = -1;
-			for (int i = 0; i < player.abilities.size(); i++)
-				if (screenmx > frameWidth / 2 - player.abilities.size() * 80 / 2 * UIzoomLevel + i * 80 * UIzoomLevel && screenmy > frameHeight * 3 / 4
-						&& screenmx < frameWidth / 2 - player.abilities.size() * 80 / 2 * UIzoomLevel + i * 80 * UIzoomLevel + 60 * UIzoomLevel && screenmy < frameHeight * 3 / 4 + 60 * UIzoomLevel)
-				{
-
-					// int rectStartX = (int) (frameWidth / 2 - player.abilities.size() * 80 / 2 * UIzoomLevel);
-					// int rectStartY = (int) (frameHeight * 3 / 4);
-					// buffer.drawRect((int) (rectStartX + i * 80 * UIzoomLevel), rectStartY, (int) (60 * UIzoomLevel), (int) (60 * UIzoomLevel));
-					tabHoverAbility = i;
-					tooltipPoint = new Point((int) (frameWidth / 2 - player.abilities.size() * 80 / 2 * UIzoomLevel + i * 80 * UIzoomLevel + 8 * UIzoomLevel),
-							(int) (frameHeight * 3 / 4 - 10 * UIzoomLevel));
-					tooltip = player.abilities.get(i).niceName();
-					if (player.rightMousePressed)
+		if (paused)
+			if (menu == Menu.ABILITIES)
+			{
+				pauseHoverAbility = -1;
+				for (int i = 0; i < player.abilities.size(); i++)
+					if (screenmx > frameWidth / 2 - player.abilities.size() * 80 / 2 * UIzoomLevel + i * 80 * UIzoomLevel && screenmy > frameHeight * 3 / 4
+							&& screenmx < frameWidth / 2 - player.abilities.size() * 80 / 2 * UIzoomLevel + i * 80 * UIzoomLevel + 60 * UIzoomLevel
+							&& screenmy < frameHeight * 3 / 4 + 60 * UIzoomLevel)
 					{
-						tooltip += " " + player.abilities.get(i).level + "\n" + player.abilities.get(i).getFluff();
-						tooltipPoint.y -= 30;
+
+						// int rectStartX = (int) (frameWidth / 2 - player.abilities.size() * 80 / 2 * UIzoomLevel);
+						// int rectStartY = (int) (frameHeight * 3 / 4);
+						// buffer.drawRect((int) (rectStartX + i * 80 * UIzoomLevel), rectStartY, (int) (60 * UIzoomLevel), (int) (60 * UIzoomLevel));
+						pauseHoverAbility = i;
+						tooltipPoint = new Point((int) (frameWidth / 2 - player.abilities.size() * 80 / 2 * UIzoomLevel + i * 80 * UIzoomLevel + 8 * UIzoomLevel),
+								(int) (frameHeight * 3 / 4 - 10 * UIzoomLevel));
+						tooltip = player.abilities.get(i).niceName();
+						if (player.rightMousePressed)
+						{
+							tooltip += " " + player.abilities.get(i).level + "\n" + player.abilities.get(i).getFluff();
+							tooltipPoint.y -= 30;
+						}
 					}
-				}
-		}
+			}
+
+		for (MenuText m : menuStuff)
+			m.selected = m.contains(screenmx, screenmy);
 	}
 
 	Point[] niceHotkeyDefault = new Point[]

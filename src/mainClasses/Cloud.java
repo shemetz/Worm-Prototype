@@ -40,13 +40,13 @@ public class Cloud extends Drawable
 		if (z <= cameraZed)
 		{
 			buffer.translate(x, y);
-			buffer.scale(z * Main.heightZoomRatio + 1, z * Main.heightZoomRatio + 1);
+			buffer.scale(z * MAIN.heightZoomRatio + 1, z * MAIN.heightZoomRatio + 1);
 			buffer.translate(-x, -y);
 
 			buffer.drawImage(image, (int) x - image.getWidth() / 2, (int) y - image.getHeight() / 2, null);
 
 			buffer.translate(x, y);
-			buffer.scale(1 / (z * Main.heightZoomRatio + 1), 1 / (z * Main.heightZoomRatio + 1));
+			buffer.scale(1 / (z * MAIN.heightZoomRatio + 1), 1 / (z * MAIN.heightZoomRatio + 1));
 			buffer.translate(-x, -y);
 		}
 	}

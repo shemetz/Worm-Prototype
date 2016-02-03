@@ -97,21 +97,21 @@ public class Ability
 	public void use(Environment env, Person user, Point target)
 	{
 		// to be written in child classes
-		Main.errorMessage("DANGER WARNING LEVEL - DEMON. NO USE METHOD FOUND FOR THIS ABILITY: " + name);
+		MAIN.errorMessage("DANGER WARNING LEVEL - DEMON. NO USE METHOD FOUND FOR THIS ABILITY: " + name);
 	}
 
 	@SuppressWarnings("unused")
 	public void maintain(Environment env, Person user, Point target, double deltaTime)
 	{
 		// to be written in child classes
-		Main.errorMessage("A man, a plan, a canal, Panama. no maintain for this ability. " + name);
+		MAIN.errorMessage("A man, a plan, a canal, Panama. no maintain for this ability. " + name);
 	}
 
 	@SuppressWarnings("unused")
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
 	{
 		// to be written in child classes
-		Main.errorMessage("Time Wroth Lime Broth Crime Froth Grime Sloth.. no updatePlayerTargeting for this ability. " + name);
+		MAIN.errorMessage("Time Wroth Lime Broth Crime Froth Grime Sloth.. no updatePlayerTargeting for this ability. " + name);
 	}
 
 	public Ability(String n, int p)
@@ -141,7 +141,7 @@ public class Ability
 
 	public void toggle()
 	{
-		Main.errorMessage("Toggleable ability was toggled, but the toggle method that toggled was not overridden. toggle.  (ability is "+name+")");
+		MAIN.errorMessage("Toggleable ability was toggled, but the toggle method that toggled was not overridden. toggle.  (ability is "+name+")");
 	}
 	
 	void addTags()
@@ -154,12 +154,12 @@ public class Ability
 				{
 					String text = getDescription(name);
 					if (text.indexOf("\n") == -1)
-						Main.errorMessage("ability class go to this line and solve this. name was " + name + " and text was: " + text);
+						MAIN.errorMessage("ability class go to this line and solve this. name was " + name + " and text was: " + text);
 					text = text.substring(text.indexOf("\n") + 1, text.indexOf("\n", text.indexOf("\n") + 1)); // skip first line, delete fluff and description
 					tag(text);
 					break tagloop;
 				}
-			Main.errorMessage("[Ablt] There has been no tag found for the ability:   " + name);
+			MAIN.errorMessage("[Ablt] There has been no tag found for the ability:   " + name);
 		}
 	}
 
@@ -370,7 +370,7 @@ public class Ability
 			BufferedReader in = new BufferedReader(new InputStreamReader(Ability.class.getResourceAsStream("abilities.txt"), "UTF-8"));
 			if (!in.ready())
 			{
-				Main.errorMessage("EMPTY FILE - ABILITIES");
+				MAIN.errorMessage("EMPTY FILE - ABILITIES");
 				in.close();
 				return;
 			}
@@ -393,7 +393,7 @@ public class Ability
 			in = new BufferedReader(new InputStreamReader(Ability.class.getResourceAsStream("elementalCombatPossibilities.csv"), "UTF-8"));
 			if (!in.ready())
 			{
-				Main.errorMessage("EMPTY FILE - ELEMENTAL COMBAT ATTACKS");
+				MAIN.errorMessage("EMPTY FILE - ELEMENTAL COMBAT ATTACKS");
 				in.close();
 				return;
 			}
@@ -427,7 +427,7 @@ public class Ability
 		} catch (IOException e)
 		{
 			e.printStackTrace();
-			Main.errorMessage("(there was a bug, I think)");
+			MAIN.errorMessage("(there was a bug, I think)");
 		}
 	}
 
@@ -531,7 +531,7 @@ public class Ability
 		case "Elemental Combat II":
 			return new Elemental_Combat_II_E(element, pnts);
 		default:
-			Main.errorMessage("Donald trump peninsula error - " + abilityName);
+			MAIN.errorMessage("Donald trump peninsula error - " + abilityName);
 
 			return null;
 		// Just because the game isn't finished yet and I still haven't made all 151 ability methods:

@@ -51,7 +51,7 @@ public class EP
 		case "Force Field":
 			return 4; // shock
 		default:
-			Main.errorMessage("5555: Unknown element! " + element);
+			MAIN.errorMessage("5555: Unknown element! " + element);
 			return -1;
 		}
 	}
@@ -81,7 +81,7 @@ public class EP
 		case 12: //force field - applies to bubbles
 			return 4;
 		default:
-			Main.errorMessage("2112: Unknown damage type! " + eNum);
+			MAIN.errorMessage("2112: Unknown damage type! " + eNum);
 			return -1;
 		}
 	}
@@ -103,7 +103,7 @@ public class EP
 		case 9:
 			return "Phantom";
 		default:
-			Main.errorMessage("GuillotineTit: Unknown damage type! " + damageTypeNum);
+			MAIN.errorMessage("GuillotineTit: Unknown damage type! " + damageTypeNum);
 			return "WTF";
 		}
 	}

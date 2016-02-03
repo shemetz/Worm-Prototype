@@ -135,7 +135,7 @@ public class Beam extends Drawable
 		if (z <= cameraZed && endType != -1)
 		{
 			buffer.translate(x, y);
-			buffer.scale(z * Main.heightZoomRatio + 1, z * Main.heightZoomRatio + 1);
+			buffer.scale(z * MAIN.heightZoomRatio + 1, z * MAIN.heightZoomRatio + 1);
 			buffer.translate(-x, -y);
 
 			// middle
@@ -159,7 +159,7 @@ public class Beam extends Drawable
 			buffer.rotate(-angle, start.x, start.y);
 
 			buffer.translate(x, y);
-			buffer.scale(1 / (z * Main.heightZoomRatio + 1), 1 / (z * Main.heightZoomRatio + 1));
+			buffer.scale(1 / (z * MAIN.heightZoomRatio + 1), 1 / (z * MAIN.heightZoomRatio + 1));
 			buffer.translate(-x, -y);
 
 			// end is in the next method

@@ -90,7 +90,7 @@ public class NPC extends Person
 		return true;
 	}
 
-	void frameAIupdate(double deltaTime, int frameNum, Environment env, Main main)
+	void frameAIupdate(double deltaTime, int frameNum, Environment env, MAIN main)
 	{
 		// Refresh environment map every 0.5 seconds
 		if (frameNum % 25 == 0 || envMap == null)
@@ -280,7 +280,7 @@ public class NPC extends Person
 				}
 				break;
 			default:
-				Main.errorMessage("6j93k, no target-tactic - " + this.tactic);
+				MAIN.errorMessage("6j93k, no target-tactic - " + this.tactic);
 				break;
 			}
 		} else // no-target tactics
@@ -349,7 +349,7 @@ public class NPC extends Person
 				break;
 
 			default:
-				Main.errorMessage("shpontzilontz. no no-target-tactic - " + this.tactic);
+				MAIN.errorMessage("shpontzilontz. no no-target-tactic - " + this.tactic);
 				break;
 			}
 		// tactic-switching decisions. TODO make it make sense
@@ -554,7 +554,7 @@ public class NPC extends Person
 								portal = p;
 					if (portal == null)
 					{
-						Main.errorMessage("	");
+						MAIN.errorMessage("	");
 						return;
 					}
 

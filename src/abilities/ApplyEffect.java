@@ -7,7 +7,7 @@ import java.util.List;
 import mainClasses.Ability;
 import mainClasses.Effect;
 import mainClasses.Environment;
-import mainClasses.Main;
+import mainClasses.MAIN;
 import mainClasses.Methods;
 import mainClasses.Person;
 import mainClasses.Player;
@@ -82,7 +82,7 @@ public class ApplyEffect extends Ability
 				}
 			break;
 		default:
-			Main.errorMessage(targetingType);
+			MAIN.errorMessage(targetingType);
 			break;
 		}
 	}
@@ -172,7 +172,7 @@ public class ApplyEffect extends Ability
 
 	public Effect effect()
 	{
-		Main.errorMessage("This needs to be a special effect....this is not supposed to be an ApplyEffect");
+		MAIN.errorMessage("This needs to be a special effect....this is not supposed to be an ApplyEffect");
 		return null;
 	}
 

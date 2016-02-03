@@ -243,7 +243,7 @@ public class Resources
 				numOfPermutations = 2;
 				break;
 			default:
-				Main.errorMessage("Unknown body part number: " + i);
+				MAIN.errorMessage("Unknown body part number: " + i);
 				break;
 			}
 			for (int j = 0; j < numOfPermutations; j++)

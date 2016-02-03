@@ -124,13 +124,13 @@ public class Environment
 		// random cloud generation
 		for (int i = 0; i < numOfClouds; i++)
 		{
-			int x = Main.random.nextInt(widthPixels * 3) - widthPixels;
-			int y = Main.random.nextInt(heightPixels * 3) - heightPixels;
-			int z = minCloudHeight + Main.random.nextInt(maxCloudHeight - minCloudHeight);
-			int type = Main.random.nextInt(Resources.clouds.size());
+			int x = MAIN.random.nextInt(widthPixels * 3) - widthPixels;
+			int y = MAIN.random.nextInt(heightPixels * 3) - heightPixels;
+			int z = minCloudHeight + MAIN.random.nextInt(maxCloudHeight - minCloudHeight);
+			int type = MAIN.random.nextInt(Resources.clouds.size());
 			clouds.add(new Cloud(x, y, z, type));
 		}
-		windDirection = new Point(Main.random.nextInt(11) - 5, Main.random.nextInt(11) - 5);
+		windDirection = new Point(MAIN.random.nextInt(11) - 5, MAIN.random.nextInt(11) - 5);
 	}
 
 	private int			healthSum		= 0,
@@ -1031,7 +1031,10 @@ public class Environment
 				intersectedPortal.playPortalSound();
 				p.timeSincePortal = 0.1; // For a period of time after portaling, you can't move through more portals.
 				if (p instanceof Player)
-					((Player) p).movementAxisRotation += angleChange; // player's keys will keep pushing character relative to previous rotation
+				{
+					((Player) p).portalMovementRotation += angleChange; // player's keys will keep pushing character relative to previous rotation
+					((Player) p).portalCameraRotation += angleChange; // player's camera will rotate
+				}
 				if (p instanceof NPC)
 					((NPC) p).path = ((NPC) p).pathFind(new Point((int) (p.x + 1 * Math.cos(newAngle)), (int) (p.y + 1 * Math.sin(newAngle))));
 			} else
@@ -1572,7 +1575,7 @@ public class Environment
 			return;
 		if (intersectionPoint == null)
 		{
-			Main.errorMessage("what what what what? Um");
+			MAIN.errorMessage("what what what what? Um");
 			return;
 		}
 		Point roundedIntersectionPoint = new Point((int) intersectionPoint.getX(), (int) intersectionPoint.getY());
@@ -1659,7 +1662,7 @@ public class Environment
 			v.fixPosition();
 			break;
 		default:
-			Main.errorMessage("tutorial times 4: how to write an error message 404");
+			MAIN.errorMessage("tutorial times 4: how to write an error message 404");
 			break;
 		}
 	}
@@ -2217,7 +2220,7 @@ public class Environment
 			}
 			break;
 		default:
-			Main.errorMessage("Dragon and Defiant, sitting in a tree, K-I-S-S-I-S-S-I-P-P-I");
+			MAIN.errorMessage("Dragon and Defiant, sitting in a tree, K-I-S-S-I-S-S-I-P-P-I");
 			break;
 		}
 
@@ -2308,7 +2311,7 @@ public class Environment
 			debris.add(new Debris(b.x, b.y, b.z, Math.random() * 2 * Math.PI, b.elementNum, 500));
 			break;
 		default:
-			Main.errorMessage("I'm sorry, I couldn't find any results for \"debris\". Perhaps you meant \"Deborah Peters\"?");
+			MAIN.errorMessage("I'm sorry, I couldn't find any results for \"debris\". Perhaps you meant \"Deborah Peters\"?");
 			break;
 		}
 	}
@@ -2512,7 +2515,7 @@ public class Environment
 			}
 			break;
 		default:
-			Main.errorMessage("\"Shit's wrecked!\" Yamana shouts. He points at the wrecked shit.");
+			MAIN.errorMessage("\"Shit's wrecked!\" Yamana shouts. He points at the wrecked shit.");
 			break;
 		}
 	}
@@ -2533,7 +2536,7 @@ public class Environment
 					debris.add(new Debris(x, y, 0, i, n, 300));
 			break;
 		default:
-			Main.errorMessage("Error message 7: BEBHMAXBRI0903 T");
+			MAIN.errorMessage("Error message 7: BEBHMAXBRI0903 T");
 			break;
 		}
 	}
@@ -2641,7 +2644,7 @@ public class Environment
 					damage *= 1.25;
 				break;
 			default:
-				Main.errorMessage("It's elementary! " + elementNum + "...?");
+				MAIN.errorMessage("It's elementary! " + elementNum + "...?");
 				break;
 			}
 
@@ -2853,7 +2856,7 @@ public class Environment
 				// debugging
 				if (arg0 == null || arg0.image == null)
 				{
-					Main.errorMessage("ummm what? no image found for " + arg0 + " or maybe it's null");
+					MAIN.errorMessage("ummm what? no image found for " + arg0 + " or maybe it's null");
 					return true;
 				}
 				if (arg0.image.getWidth() == 1 && arg0.image.getHeight() == 1) // for stuff like Beam images
@@ -2913,7 +2916,6 @@ public class Environment
 						// pools
 						if (poolTypes[x][y] != -1)
 						{
-							System.out.println(System.nanoTime());
 							buffer.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.1f + 0.009f * poolHealths[x][y]));
 							buffer.drawImage(poolImages[x][y], x * squareSize, y * squareSize, null);
 							buffer.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
