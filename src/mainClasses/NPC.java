@@ -481,7 +481,7 @@ public class NPC extends Person
 					// check if it's OK to merge
 					loop: for (int xx = minX; xx <= maxX; xx++)
 						for (int yy = minY; yy <= maxY; yy++)
-							if (envMap.blocked(this, xx, yy))
+							if (envMap.getCost(this, A.x,A.y, xx, yy) > 1)
 								if (Methods.LineToPointDistancePow2(A, C, new Point(xx, yy)) < minDistancePow2)
 								{
 									OKToMerge = false;

@@ -59,7 +59,7 @@ public class Heal_I extends ApplyEffect
 			{
 				healTextTimer -= 1;
 				for (Person p : targets)
-					p.uitexts.add(new UIText(0, 0, "" + lifeRegenBuff, 2));
+					p.uitexts.add(new UIText(0, 0, "" + (int)lifeRegenBuff, 2));
 			}
 		}
 	}

@@ -799,8 +799,8 @@ public class Environment
 			p.insideWall = false; // pretty important
 		else if (velocityLeft == 0)
 		{
-			moveQuantumX = 0; //was NaN
-			moveQuantumY = 0; //was NaN
+			moveQuantumX = 0; // was NaN
+			moveQuantumY = 0; // was NaN
 		}
 		Rectangle2D personRect = new Rectangle2D.Double((int) p.x - p.radius, (int) p.y - p.radius, p.radius * 2, p.radius * 2); // for FF collisions
 		while (velocityLeft > 0)
@@ -839,11 +839,6 @@ public class Environment
 								if (p.z > 0.1 && p.z <= 1 && p.zVel < 0) // if falling into a wall
 								{
 									p.z = 1; // standing on a wall
-									for (Ability a : p.abilities) // stop flying when landing this way
-										if (a.hasTag("flight"))
-										{
-											a.use(this, p, p.target);
-										}
 									p.zVel = 0;
 									if (p instanceof NPC)
 										((NPC) p).justCollided = true;
@@ -2382,8 +2377,9 @@ public class Environment
 			return;
 		}
 		wallHealths[i][j] -= (int) (damage - wallArmor);
-		if (showDamageNumbers)
-			uitexts.add(new UIText(i * squareSize + squareSize / 2 - 10, j * squareSize + squareSize / 2 - 10, "" + (int) (damage - wallArmor), 5));
+		// commented out:
+		// if (showDamageNumbers)
+		// uitexts.add(new UIText(i * squareSize + squareSize / 2 - 10, j * squareSize + squareSize / 2 - 10, "" + (int) (damage - wallArmor), 5));
 		if (wallHealths[i][j] <= 0)
 			destroyWall(i, j);
 		if (damage > 30 && damageType == 0) // hits additional walls if high and blunt damage
@@ -2408,8 +2404,9 @@ public class Environment
 		if (damage - wallArmor < 1)
 			return;
 		wallHealths[i][j] -= (int) (damage - wallArmor);
-		if (showDamageNumbers)
-			uitexts.add(new UIText(i * squareSize + squareSize / 2 - 10, j * squareSize + squareSize / 2 - 10, "" + (int) (damage - wallArmor), 5));
+		// commented out:
+		// if (showDamageNumbers)
+		// uitexts.add(new UIText(i * squareSize + squareSize / 2 - 10, j * squareSize + squareSize / 2 - 10, "" + (int) (damage - wallArmor), 5));
 		if (wallHealths[i][j] <= 0)
 			destroyWall(i, j);
 		connectWall(i, j); // update cracks
@@ -2573,7 +2570,26 @@ public class Environment
 
 	public void sprayDropDebris(SprayDrop sd)
 	{
-		debris.add(new Debris(sd.x, sd.y, sd.z, sd.angle(), sd.elementNum, true, 0.8));
+		switch (sd.elementNum)
+		{
+		case 0: // fire
+		case 1: // water
+		case 5: // ice
+		case 7: // acid
+		case 8: // lava
+		case 9: // flesh
+			debris.add(new Debris(sd.x, sd.y, sd.z, sd.angle(), sd.elementNum, true, 0.8));
+			break;
+		case 2: // wind
+		case 3: // electricity
+		case 4: // metal
+		case 6: // energy
+		case 10: // earth
+		case 11: // plant
+			break;
+		default:
+			MAIN.errorMessage("...");
+		}
 	}
 
 	public void otherDebris(double x, double y, int n, String type, int frameNum)
@@ -2703,6 +2719,10 @@ public class Environment
 			if (p instanceof NPC)
 				if (damage >= 1 || Math.random() < 0.01) // so that beams don't always trigger this
 					((NPC) p).justGotHit = true;
+
+			// Grunt sound, if damage is bad enough
+			if (damage >= 0.05 * p.maxLife)
+				p.sounds.get(2 + (int) (Math.random() * 5)).play(); // grunt
 
 			// dealing the actual damage!
 			p.damage(damage);
@@ -2947,11 +2967,11 @@ public class Environment
 		// Combat UI
 		if (showDamageNumbers)
 		{
-			for (UIText ui : uitexts) //TODO add height to environment UITexts
+			for (UIText ui : uitexts) // TODO add height to environment UITexts
 			{
 				ui.draw(buffer, 0, 0);
 			}
-			for (Person p: people)
+			for (Person p : people)
 				p.drawUITexts(buffer, cameraZed, cameraRotation);
 		}
 	}

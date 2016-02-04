@@ -8,6 +8,7 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -97,6 +98,9 @@ public class Person extends RndPhysObj implements Mover
 	public double inaccuracyAngleTarget = 0;
 	public double timeUntilNextInaccuracyAngleChange = 0;
 
+	// stuff
+	String voiceType; // Male, Female. TODO add more
+
 	// Inventory and stuff?
 	public List<Item> inventory;
 	public Armor[] body; // head, chest, arms, legs
@@ -135,6 +139,17 @@ public class Person extends RndPhysObj implements Mover
 		timeSinceLastHit = 0;
 		timeBetweenDamageTexts = 0;
 		waitingDamage = 0;
+		switch ((int) (Math.random() * 2))
+		{
+		case 0:
+			voiceType = "M";
+			break;
+		case 1:
+			voiceType = "F";
+			break;
+		default:
+			MAIN.errorMessage("Got my A machines on the table got my B machines in the drawer");
+		}
 		panic = false;
 		target = new Point(-1, -1);
 		initAnimation();
@@ -289,6 +304,9 @@ public class Person extends RndPhysObj implements Mover
 	{
 		sounds.add(new SoundEffect("Scorched.wav")); // 0 - when a beam hits you
 		sounds.get(0).endUnlessMaintained = true;
+		sounds.add(new SoundEffect("Person Fall.wav")); // 1 - fall damage
+		for (int i = 1; i <= 5; i++)
+			sounds.add(new SoundEffect(voiceType + "_Grunt_" + i + ".wav")); // 2-6 - pain/grunt
 	}
 
 	public void stopAllSounds()
@@ -660,17 +678,42 @@ public class Person extends RndPhysObj implements Mover
 
 		// give 3 random abilities, levels 5
 		Random rand = new Random();
-		for (int i = 0; i < 3;)
+		List<String> possibleAbilities = new ArrayList<String>();
+		possibleAbilities.addAll(Ability.implementedAbilities);
+		possibleAbilities.remove("Punch");
+		possibleAbilities.remove("Sprint");
+		possibleAbilities.remove("Elemental Combat I");
+		for (int i = 0; i < 10;)
 		{
-			String str;
-			if (rand.nextBoolean())
-				str = Ability.implementedAbilities.get(rand.nextInt(Ability.implementedAbilities.size())) + " <" + EP.elementList[rand.nextInt(12)] + ">";
-			else
-				str = Ability.implementedAbilities.get(rand.nextInt(Ability.implementedAbilities.size()));
+			String str = possibleAbilities.get(rand.nextInt(possibleAbilities.size()));
 			if (Resources.icons.get(str) != null)
 			{
 				abilities.add(Ability.ability(str, 5));
 				i++;
+				possibleAbilities.remove(str);
+			}
+			else // is an elemental ability
+			{
+				List<String> elements = new ArrayList<String>();
+				for (int j = 0; j < 12; j++)
+					elements.add(EP.elementList[j]);
+				Collections.shuffle(elements);
+				boolean found = false;
+				while (!elements.isEmpty())
+				{
+					String elementString = " <" + elements.get(0) + ">";
+					if (Resources.icons.get(str + elementString) != null)
+					{
+						abilities.add(Ability.ability(str + elementString, 5));
+						i++;
+						elements.clear();
+						found = true;
+					}
+					else
+						elements.remove(0);
+				}
+				if (!found)
+					possibleAbilities.remove(str); // all elements for this ability were used
 			}
 		}
 	}

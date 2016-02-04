@@ -6,8 +6,8 @@ import java.util.List;
 
 public class Ball extends RndPhysObj
 {
-	public int		elementNum;
-	public int		points;
+	public int elementNum;
+	public int points;
 	final int ballMass = 10;
 	public Person creator;
 	public List<Evasion> evasions;
@@ -22,8 +22,39 @@ public class Ball extends RndPhysObj
 		creator = creator1;
 		changeImage(Resources.balls[elementNum]); // Not all the same size!!!
 
-		// TODO make mass, radius and velocity depend on element
-		radius = 30;
+		switch (elementNum)
+		{
+		case 0: // fire
+			radius = 20;
+			break;
+		case 1: // water
+			break;
+		case 2: // wind
+			break;
+		case 3: // electricity
+			break;
+		case 4: // metal
+			break;
+		case 5: // ice
+			break;
+		case 6: // energy
+			radius = 15;
+			break;
+		case 7: // acid
+			radius = 45;
+			break;
+		case 8: // lava
+			break;
+		case 9: // flesh
+			break;
+		case 10: // earth
+			radius = 30;
+			break;
+		case 11: // plant
+			break;
+		default:
+			MAIN.errorMessage("Oh why did I force myself to have default cases for every switch case ;-;");
+		}
 		height = 1;
 		mass = ballMass;
 		double velocity = Ball.giveVelocity(p1); // pixels per second. Below 330 and the character would probably accidentally touch them while running
@@ -37,7 +68,7 @@ public class Ball extends RndPhysObj
 	{
 		evasions.add(new Evasion(p.id));
 	}
-	
+
 	public static double giveVelocity(int pnts)
 	{
 		// TODO perhaps give different speeds to different elements.

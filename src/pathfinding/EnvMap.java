@@ -19,6 +19,8 @@ public class EnvMap implements TileBasedMap
 
 	public EnvMap(Environment env)
 	{
+		// Only in Z == 0 !!!
+
 		width = env.width;
 		height = env.height;
 		wallTypes = new int[width][height];
@@ -36,37 +38,40 @@ public class EnvMap implements TileBasedMap
 			}
 		for (ForceField ff : env.FFs)
 		{
-			for (int x = (int) (ff.x - ff.length / 2) / SQUARE; x <= (int) (ff.x + ff.length / 2) / SQUARE; x++)
-				for (int y = (int) (ff.y - ff.length / 2) / SQUARE; y <= (int) (ff.y + ff.length / 2) / SQUARE; y++)
-					FFs[x][y] = true; // TODO make it real
+			if (ff.z < 1)
+				for (int x = (int) (ff.x - ff.length / 2) / SQUARE; x <= (int) (ff.x + ff.length / 2) / SQUARE; x++)
+					for (int y = (int) (ff.y - ff.length / 2) / SQUARE; y <= (int) (ff.y + ff.length / 2) / SQUARE; y++)
+						FFs[x][y] = true; // TODO make it real
 		}
 		for (Portal p : env.portals)
-			if (p.partner != null)
-			{
-				for (int x = Math.max((int) (p.x - p.length / 2) / SQUARE, 0); x <= Math.min((int) (p.x + p.length / 2) / SQUARE, env.width - 1); x++)
-					for (int y = Math.max((int) (p.y - p.length / 2) / SQUARE, 0); y <= Math.min((int) (p.y + p.length / 2) / SQUARE, env.height - 1); y++)
-						if (Methods.getSegmentPointDistancePow2(p.start.x, p.start.y, p.end.x, p.end.y, x * SQUARE + SQUARE / 2, y * SQUARE + SQUARE / 2) < SQUARE / 2 * SQUARE / 2)
-						{
-							if (Methods.DistancePow2(p.start.x, p.start.y, x * SQUARE + SQUARE / 2, y * SQUARE + SQUARE / 2) < SQUARE / 2 * SQUARE / 2)
-							{
-								wallTypes[x][y] = -2; // portal tips are basically walls
-							}
-							else if (Methods.DistancePow2(p.end.x, p.end.y, x * SQUARE + SQUARE / 2, y * SQUARE + SQUARE / 2) < SQUARE / 2 * SQUARE / 2)
-							{
-								wallTypes[x][y] = -2; // portal tips are basically walls
-							}
-							else
-							{
-								// the coordinates that being in this tile will get you to
-								double angleChange = p.partner.angle - p.angle;
-								double angleRelativeToPortal = Math.atan2((y + 0.5) * SQUARE - p.y, (x + 0.5) * SQUARE - p.x);
-								double distanceRelativeToPortal = Math.sqrt(Methods.DistancePow2(p.x, p.y, (x + 0.5) * SQUARE, (y + 0.5) * SQUARE));
-								double destinationX = p.partner.x + distanceRelativeToPortal * Math.cos(angleRelativeToPortal + angleChange);
-								double destinationY = p.partner.y + distanceRelativeToPortal * Math.sin(angleRelativeToPortal + angleChange);
-								portals[x][y] = new Point((int) (destinationX / SQUARE), (int) (destinationY / SQUARE));
-							}
-						}
-			}
+			if (p.z < 1)
+				if (p.partner != null)
+					if (p.partner.z < 1)
+					{
+						for (int x = Math.max((int) (p.x - p.length / 2) / SQUARE, 0); x <= Math.min((int) (p.x + p.length / 2) / SQUARE, env.width - 1); x++)
+							for (int y = Math.max((int) (p.y - p.length / 2) / SQUARE, 0); y <= Math.min((int) (p.y + p.length / 2) / SQUARE, env.height - 1); y++)
+								if (Methods.getSegmentPointDistancePow2(p.start.x, p.start.y, p.end.x, p.end.y, x * SQUARE + SQUARE / 2, y * SQUARE + SQUARE / 2) < SQUARE / 2 * SQUARE / 2)
+								{
+									if (Methods.DistancePow2(p.start.x, p.start.y, x * SQUARE + SQUARE / 2, y * SQUARE + SQUARE / 2) < SQUARE / 2 * SQUARE / 2)
+									{
+										wallTypes[x][y] = -2; // portal tips are basically walls
+									}
+									else if (Methods.DistancePow2(p.end.x, p.end.y, x * SQUARE + SQUARE / 2, y * SQUARE + SQUARE / 2) < SQUARE / 2 * SQUARE / 2)
+									{
+										wallTypes[x][y] = -2; // portal tips are basically walls
+									}
+									else
+									{
+										// the coordinates that being in this tile will get you to
+										double angleChange = p.partner.angle - p.angle;
+										double angleRelativeToPortal = Math.atan2((y + 0.5) * SQUARE - p.y, (x + 0.5) * SQUARE - p.x);
+										double distanceRelativeToPortal = Math.sqrt(Methods.DistancePow2(p.x, p.y, (x + 0.5) * SQUARE, (y + 0.5) * SQUARE));
+										double destinationX = p.partner.x + distanceRelativeToPortal * Math.cos(angleRelativeToPortal + angleChange);
+										double destinationY = p.partner.y + distanceRelativeToPortal * Math.sin(angleRelativeToPortal + angleChange);
+										portals[x][y] = new Point((int) (destinationX / SQUARE), (int) (destinationY / SQUARE));
+									}
+								}
+					}
 	}
 
 	public int getWidthInTiles()

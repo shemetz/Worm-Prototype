@@ -1231,11 +1231,63 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		if (p.z < 0)
 		{
 			p.z = 0;
+		}
+
+		if (p.z > 0)
+		{
+
+			// air resistance
+			double density = 1.2; // density of air in 20 degree celsius, according to Wikipedia.
+			double dragCoefficient = 0.47; // drag coefficient of a sphere. A human body is spherical.
+			double area = 0.0004340277 * p.radius * p.radius; // Measured myself, asked around in the WD IRC, this seems like a good-enough value. //TODO add 0.1 to this if the person is wearing special armor or a cape
+			double drag = 0.5 * density * velocity * velocity * area * dragCoefficient / p.mass; // acceleration, not force
+			velocity -= drag * deltaTime;
+			p.xVel = velocity * Math.cos(moveDirectionAngle);
+			p.yVel = velocity * Math.sin(moveDirectionAngle);
+			if (p.zVel < 0) // falling
+			{
+				double zDrag = 0.5 * density * p.zVel * p.zVel * area * dragCoefficient / p.mass;
+				p.zVel += zDrag * deltaTime;
+			}
+
+		}
+		// landing
+		if (p.abilityTryingToRepetitivelyUse != -1 && p.flySpeed != -1 && p.abilities.get(p.abilityTryingToRepetitivelyUse).name.equals("Punch"))
+		{
+			return 0;
+		}
+		if (p.z <= 1 && p.z >= 0 && p.zVel < -200 * gravity * deltaTime)
+		{
+			boolean safeLanding = false;
 			for (Ability a : p.abilities) // stop flying when landing this way
 				if (a.hasTag("flight") && a.on)
 				{
-					a.use(env, p, p.target);
+					// if landed on a wall
+					if (!p.ghostMode && env.wallTypes[(int) (p.x) / squareSize][(int) (p.y) / squareSize] != -1)
+					{
+						p.z = 1;
+						a.use(env, p, p.target);
+						safeLanding = true;
+						p.zVel = 0;
+					}
+					else if (p.z <= 0.1)
+					{
+						p.z = 0;
+						a.use(env, p, p.target);
+						safeLanding = true;
+						p.zVel = 0;
+					}
+					else
+						return 0;
 				}
+			if (!safeLanding)
+			{
+				// fall damage
+				double damage = p.zVel * p.zVel * 0.0002;
+				env.hitPerson(p, damage, 0, 0, -1); // blunt
+				if (p.zVel * p.zVel * p.mass * 0.0001 > 15)
+					p.sounds.get(2).play(); // fall hit
+			}
 		}
 		if (p.z < 0.1 || (p.z == 1 && !p.ghostMode && env.wallTypes[(int) (p.x) / squareSize][(int) (p.y) / squareSize] != -1)) // on ground or on a wall
 		{
@@ -1264,25 +1316,6 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			p.xVel = velocity * Math.cos(moveDirectionAngle);
 			p.yVel = velocity * Math.sin(moveDirectionAngle);
 			return friction;
-		}
-
-		if (p.z > 0)
-		{
-
-			// air resistance
-			double density = 1.2; // density of air in 20 degree celsius, according to Wikipedia.
-			double dragCoefficient = 0.47; // drag coefficient of a sphere. A human body is spherical.
-			double area = 0.0004340277 * p.radius * p.radius; // Measured myself, asked around in the WD IRC, this seems like a good-enough value. //TODO add 0.1 to this if the person is wearing special armor or a cape
-			double drag = 0.5 * density * velocity * velocity * area * dragCoefficient / p.mass; // acceleration, not force
-			velocity -= drag * deltaTime;
-			p.xVel = velocity * Math.cos(moveDirectionAngle);
-			p.yVel = velocity * Math.sin(moveDirectionAngle);
-			if (p.zVel < 0) // falling
-			{
-				double zDrag = 0.5 * density * p.zVel * p.zVel * area * dragCoefficient / p.mass;
-				p.zVel += zDrag * deltaTime;
-			}
-
 		}
 
 		return 0;
@@ -1354,6 +1387,21 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		drawHotkeysAndEffects(buffer);
 		if (paused)
 			drawPause(buffer);
+		// Tooltip
+		if (tooltipPoint.x != -1) // can also check y but that's silly
+		{
+			buffer.setColor(Color.black);
+			buffer.setFont(new Font("Serif", Font.PLAIN, (int) (20 * UIzoomLevel)));
+			int i = tooltip.indexOf("\n");
+			if (i != -1) // if extended tooltip
+			{
+				buffer.drawString(tooltip.substring(0, i), tooltipPoint.x, tooltipPoint.y);
+				buffer.setFont(new Font("Serif", Font.ITALIC, 20));
+				buffer.drawString(tooltip.substring(i + 1), tooltipPoint.x - 8, tooltipPoint.y + 25);
+			}
+			else
+				buffer.drawString(tooltip, tooltipPoint.x, tooltipPoint.y);
+		}
 
 		if (timeSinceLastScreenshot < 2)
 			drawScreenshot(buffer);
@@ -1723,22 +1771,6 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			buffer.drawImage(Resources.icons.get(player.effects.get(i).name), (int) (frameWidth - 90 * UIzoomLevel - i * 80 * UIzoomLevel), (int) (frameHeight - 90 * UIzoomLevel), this);
 			buffer.drawRect((int) (frameWidth - 90 * UIzoomLevel - i * 80 * UIzoomLevel), (int) (frameHeight - 90 * UIzoomLevel), (int) (60 * UIzoomLevel), (int) (60 * UIzoomLevel));
 		}
-
-		// tooltip
-		if (tooltipPoint.x != -1) // can also check y but that's silly
-		{
-			buffer.setColor(Color.black);
-			buffer.setFont(new Font("Serif", Font.PLAIN, (int) (20 * UIzoomLevel)));
-			int i = tooltip.indexOf("\n");
-			if (i != -1) // if extended tooltip
-			{
-				buffer.drawString(tooltip.substring(0, i), tooltipPoint.x, tooltipPoint.y);
-				buffer.setFont(new Font("Serif", Font.ITALIC, 20));
-				buffer.drawString(tooltip.substring(i + 1), tooltipPoint.x - 8, tooltipPoint.y + 25);
-			}
-			else
-				buffer.drawString(tooltip, tooltipPoint.x, tooltipPoint.y);
-		}
 	}
 
 	void drawPause(Graphics2D buffer)
@@ -1770,6 +1802,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				buffer.setStroke(new BasicStroke(3));
 				buffer.drawRect(m.x, m.y, m.width, m.height);
 			}
+			// color depends
 			buffer.setFont(new Font("Sans-Serif", Font.PLAIN, 40));
 			buffer.drawString(m.text, m.x + 5, m.y + m.height / 2 + 13); // TODO
 		}
@@ -1819,6 +1852,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				}
 				// Key bound to that ability
 				int timesAssigned = 0;
+				buffer.setColor(Color.black);
 				for (int j = 0; j < player.hotkeys.length; j++)
 					if (player.hotkeys[j] == i)
 					{
@@ -1934,7 +1968,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			{
 				p.switchAnimation(9); // slowing down / hover animation
 				// glide down slowly
-				if (p.xVel * p.xVel + p.yVel * p.yVel < p.flySpeed * p.flySpeed * 0.05)
+				if (p.xVel * p.xVel + p.yVel * p.yVel < 300 * 300) // 500 - min speed for keeping height
 					p.zVel = -0.3 * p.flySpeed * 5 * deltaTime;
 				else
 					p.zVel = 0;
@@ -2065,7 +2099,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 						p.yVel += Math.sin(p.directionOfAttemptedMovement) * deltaTime * 100 * p.strengthOfAttemptedMovement * p.runAccel / 100;
 					}
 
-					if (p.z < 1.1 && p.z > 0.6)
+					if (p.z <= 1.1 && p.z > 0.6)
 					{
 						p.zVel = 0;
 						p.z = 1.1;
@@ -2074,7 +2108,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 						p.zVel = -0.7 * p.flySpeed * 5 * deltaTime; // glide down
 					else if (p.z > 1.1) // to avoid weird flickering
 						p.zVel = -0.2 * p.flySpeed * 5 * deltaTime; // glide down
-					if (p.z < 0.6)
+					if (p.z <= 0.6)
 						p.zVel = 0.7 * p.flySpeed * 5 * deltaTime; // glide...up
 				}
 			}

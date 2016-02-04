@@ -11,17 +11,17 @@ import mainResourcesPackage.SoundEffect;
 public class Portal extends Drawable
 {
 	// Portals are flat and in midair
-	public Portal	partner;
+	public Portal partner;
 	// X and Y are for center
-	public double	length;
-	public double	angle;
-	public Point3D	start;
-	public Point3D	end;
-	boolean			blackOrWhite;
-	Color			black	= Color.black;
-	Color			white	= Color.white;
-	double			slope;
-	SoundEffect		sound;
+	public double length;
+	public double angle;
+	public Point3D start;
+	public Point3D end;
+	boolean blackOrWhite;
+	Color black = Color.black;
+	Color white = Color.white;
+	double slope;
+	SoundEffect sound;
 
 	public Portal(double x_, double y_, double z_, double angle1, double length1)
 	{
@@ -63,13 +63,31 @@ public class Portal extends Drawable
 
 	public void drawShadow(Graphics2D buffer, double shadowX, double shadowY)
 	{
+		if (z > 1)
+		{
+			buffer.translate(x, y);
+			buffer.scale(z * MAIN.heightZoomRatio + 1, z * MAIN.heightZoomRatio + 1);
+			buffer.translate(-x, -y);
 
+			buffer.setColor(new Color(0, 0, 0, 128));
+			buffer.setStroke(new BasicStroke(2));
+
+			buffer.drawLine((int) (start.x), (int) (start.y), (int) (end.x), (int) (end.y));
+
+			buffer.translate(x, y);
+			buffer.scale(1 / (z * MAIN.heightZoomRatio + 1), 1 / (z * MAIN.heightZoomRatio + 1));
+			buffer.translate(-x, -y);
+		}
 	}
 
 	public void draw(Graphics2D buffer, double cameraZed)
 	{
 		if (z <= cameraZed)
 		{
+			buffer.translate(x, y);
+			buffer.scale(z * MAIN.heightZoomRatio + 1, z * MAIN.heightZoomRatio + 1);
+			buffer.translate(-x, -y);
+
 			buffer.setStroke(new BasicStroke(2));
 
 			buffer.setColor((blackOrWhite ? black : white));
@@ -92,6 +110,10 @@ public class Portal extends Drawable
 						(int) (start.y - i * Math.sin(angle + Math.PI / 2) + i * i * slope * Math.sin(angle)), (int) (end.x - i * Math.cos(angle + Math.PI / 2) - i * i * slope * Math.cos(angle)),
 						(int) (end.y - i * Math.sin(angle + Math.PI / 2) - i * i * slope * Math.sin(angle)));
 			}
+
+			buffer.translate(x, y);
+			buffer.scale(1 / (z * MAIN.heightZoomRatio + 1), 1 / (z * MAIN.heightZoomRatio + 1));
+			buffer.translate(-x, -y);
 		}
 	}
 

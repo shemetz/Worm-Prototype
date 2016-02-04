@@ -35,39 +35,55 @@ public class UIText
 		case 0: // black text
 			color = Color.black;
 			altColor = Color.white;
+			fontSize = 16;
 			break;
 		case 1: // damage text
 			color = Color.red;
 			altColor = Color.black;
+			fontSize = Integer.parseInt(text) * 2;
+			fontSize = Math.max(12, fontSize);
+			fontSize = Math.min(50, fontSize);
 			break;
 		case 2: // heal text
 			color = Color.green;
 			altColor = Color.black;
+			fontSize = 16;
 			break;
 		case 3: // shield / Force Field damage text
 			color = new Color(0, 220, 255); // cyan-ish
 			altColor = Color.black;
+			fontSize = Integer.parseInt(text) * 2;
+			fontSize = Math.max(12, fontSize);
+			fontSize = Math.min(30, fontSize);
 			break;
 		case 4: // armor damage text
 			color = Color.yellow;
 			altColor = Color.black;
+			fontSize = 16;
+			fontSize = Integer.parseInt(text) * 2;
+			fontSize = Math.max(12, fontSize);
+			fontSize = Math.min(30, fontSize);
 			break;
 		case 5: // object damage text (e.g. walls)
 			color = new Color(80, 80, 80); // dark gray
 			altColor = Color.white;
+			fontSize = 16;
+			fontSize = Integer.parseInt(text) * 2;
+			fontSize = Math.max(12, fontSize);
+			fontSize = Math.min(30, fontSize);
 			break;
 		case 6: // evasion text
 			color = new Color(255, 255, 255); // dark gray
 			altColor = Color.white;
+			fontSize = 22;
 			break;
 		default:
 			MAIN.errorMessage("Unknown UItext damage type number: " + type);
 			color = Color.white;
 			altColor = Color.black;
+			fontSize = 16;
 			break;
 		}
-		// TODO make it different
-		fontSize = 16;
 	}
 
 	public void draw(Graphics2D buffer, double originX, double originY)
