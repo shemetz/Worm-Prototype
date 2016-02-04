@@ -481,29 +481,31 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 					if (p instanceof NPC)
 						((NPC) p).justCollided = true;
 				}
-			// push away from walls
-			for (int x = (int) ((aff.x - aff.maxRadius) / squareSize); x < (int) ((aff.x + aff.maxRadius) / squareSize) + 1; x++)
-				for (int y = (int) ((aff.y - aff.maxRadius) / squareSize); y < (int) ((aff.y + aff.maxRadius) / squareSize) + 1; y++)
-					if (env.wallTypes[x][y] != -1)
-						for (int x2 = x; x2 < x + 2; x2++)
-							for (int y2 = y; y2 < y + 2; y2++)
-							{
-								double distanceToWallPow2 = Math.pow(squareSize * (y2) - aff.target.y, 2) + Math.pow(squareSize * (x2) - aff.target.x, 2);
-								if (distanceToWallPow2 < aff.maxRadius * aff.maxRadius)
+			// push away from walls, if bubble
+			// TODO fix this
+			if (aff.arc >= 2 * Math.PI)
+				for (int x = (int) ((aff.x - aff.maxRadius) / squareSize); x < (int) ((aff.x + aff.maxRadius) / squareSize) + 1; x++)
+					for (int y = (int) ((aff.y - aff.maxRadius) / squareSize); y < (int) ((aff.y + aff.maxRadius) / squareSize) + 1; y++)
+						if (env.wallTypes[x][y] != -1)
+							for (int x2 = x; x2 < x + 2; x2++)
+								for (int y2 = y; y2 < y + 2; y2++)
 								{
-									double angleToWall = Math.atan2(squareSize * (y2) - aff.target.y, squareSize * (x2) - aff.target.x);
-									double pushStrength = 10000;
-									double xMax = 10.03 * pushStrength * Math.cos(angleToWall);
-									double yMax = 10.03 * pushStrength * Math.sin(angleToWall);
-									Person p = aff.target;
-									if ((xMax > 0 && p.xVel < xMax) || (xMax < 0 && p.xVel > xMax))
-										p.xVel -= deltaTime * pushStrength * Math.cos(angleToWall);
-									if ((yMax > 0 && p.yVel < yMax) || (yMax < 0 && p.yVel > yMax))
-										p.yVel -= deltaTime * pushStrength * Math.sin(angleToWall);
-									if (p instanceof NPC)
-										((NPC) p).justCollided = true;
+									double distanceToWallPow2 = Math.pow(squareSize * (y2) - aff.target.y, 2) + Math.pow(squareSize * (x2) - aff.target.x, 2);
+									if (distanceToWallPow2 < aff.maxRadius * aff.maxRadius)
+									{
+										double angleToWall = Math.atan2(squareSize * (y2) - aff.target.y, squareSize * (x2) - aff.target.x);
+										double pushStrength = 10000;
+										double xMax = 10.03 * pushStrength * Math.cos(angleToWall);
+										double yMax = 10.03 * pushStrength * Math.sin(angleToWall);
+										Person p = aff.target;
+										if ((xMax > 0 && p.xVel < xMax) || (xMax < 0 && p.xVel > xMax))
+											p.xVel -= deltaTime * pushStrength * Math.cos(angleToWall);
+										if ((yMax > 0 && p.yVel < yMax) || (yMax < 0 && p.yVel > yMax))
+											p.yVel -= deltaTime * pushStrength * Math.sin(angleToWall);
+										if (p instanceof NPC)
+											((NPC) p).justCollided = true;
+									}
 								}
-							}
 			if (aff.life <= 0)
 			{
 				for (Person p : env.people)
@@ -1009,7 +1011,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 
 		// ~~~TEMPORARY TESTING~~~
 
-		env = new Environment(500, 500);
+		env = new Environment(50, 50);
 
 		// outer bounds - grey walls
 		for (int i = 0; i < env.width; i++)
@@ -1054,8 +1056,6 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 
 		player = new Player(96 * 20, 96 * 20);
 		player.tempTrigger();
-		player.abilities.add(Ability.ability("Portals", 5));
-		player.abilities.add(Ability.ability("Portals", 5));
 		// player.abilities.add(Ability.ability("Force Shield", 5));
 		// player.abilities.add(Ability.ability("Protective Bubble I", 5));
 		// player.abilities.add(Ability.ability("Spray <Acid>", 5));
@@ -1391,10 +1391,10 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 					buffer.setStroke(new BasicStroke(4));
 					double radius = frameHeight / 3;
 					int[] elementIndexes = new int[]
-					{ 21, 22, 7, 23, 15, 11, 16, 31, 5, 2, 15, 12, 19, 1, 17, 25, 4, 30, 20, 26, 9, 6, 27, 13, 24, 10, 8, 28, 0, 32, 29, 3, 18 };
+					{ 21, 22, 7, 23, 15, 11, 16, 30, 5, 2, 15, 12, 19, 1, 17, 25, 4, 20, 26, 9, 6, 27, 13, 24, 10, 8, 28, 0, 31, 29, 3, 18 };
 					String[] colorHexCodes = new String[]
 					{ "C6FF7C", "A7C841", "A8A30D", "6D6B08", "156B08", "5DAE00", "00E493", "8FFFC2", "84FFFF", "CDE8FF", "D1CDFF", "91C6FF", "1ECAFF", "0094FF", "0800FF", "404E74", "999999",
-							"D5C6CD", "000000", "FFE2EC", "FF75AE", "E751FF", "8131C6", "4F2472", "693F59", "8C2F14", "D32B00", "E57600", "FF6A00", "FF9F00", "FFC97F", "FFD800", "FFF9A8" };
+							"000000", "FFE2EC", "FF75AE", "E751FF", "8131C6", "4F2472", "693F59", "8C2F14", "D32B00", "E57600", "FF6A00", "FF9F00", "FFC97F", "FFD800", "FFF9A8" };
 					Point center = new Point((int) (player.x), (int) (player.y));
 					buffer.translate(center.x, center.y);
 					buffer.rotate(cameraRotation);
@@ -2301,6 +2301,9 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			break;
 		case KeyEvent.VK_6:
 			env.addPool((mx) / 96, (my) / 96, 5, true);
+			break;
+		case KeyEvent.VK_9:
+			env.people.add(new NPC(mx, my, NPC.Strategy.AGGRESSIVE));
 			break;
 		case KeyEvent.VK_0:
 			if (player.ctrlPressed)

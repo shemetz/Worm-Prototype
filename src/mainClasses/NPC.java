@@ -39,19 +39,19 @@ public class NPC extends Person
 	// PANIC = run aimlessly, not stopping, randomly rotating (panic).
 	// PUNCH_CHASING = move towards the target, and punch them when able.
 
-	boolean			hasAllies				= false;
+	boolean hasAllies = false;
 
-	int				targetID				= -1;
-	boolean			rightOrLeft				= false;			// true = right or CW. false = left or CCW.
-	boolean			justCollided			= false;
-	boolean			justGotHit				= false;
-	double			instinctDelayTime;
-	double			timeSinceLastInstinct;
-	double			angleOfLastInstinct;
-	double			timeSinceLastDistCheck	= 0;
-	double			lastDistPow2			= Double.MAX_VALUE;
-	List<WayPoint>	path;
-	EnvMap			envMap					= null;
+	int targetID = -1;
+	boolean rightOrLeft = false; // true = right or CW. false = left or CCW.
+	boolean justCollided = false;
+	boolean justGotHit = false;
+	double instinctDelayTime;
+	double timeSinceLastInstinct;
+	double angleOfLastInstinct;
+	double timeSinceLastDistCheck = 0;
+	double lastDistPow2 = Double.MAX_VALUE;
+	List<WayPoint> path;
+	EnvMap envMap = null;
 
 	public NPC(int x1, int y1, Strategy s1)
 	{
@@ -127,7 +127,8 @@ public class NPC extends Person
 						}
 					}
 					this.targetID = possibleTargets.get(bestTargetIndex).id;
-				} else
+				}
+				else
 					;// NPCs will just punch the corpse of the last person they attacked. I guess that's fine.
 			}
 			break;
@@ -168,24 +169,25 @@ public class NPC extends Person
 				if (distanceToTargetPow2 > Math.pow(96, 2)) // If distance to target > 2 blocks
 				{
 					if (this.timeSinceLastDistCheck >= 1) // once per second. that variable is reduced by 1 soon after this
-						path = pathFind(targetPerson.Point());
+					{
+						Point targetPoint = new Point((int)(targetPerson.x + targetPerson.xVel*deltaTime*4), (int)(targetPerson.y + targetPerson.yVel*deltaTime*4));
+						path = pathFind(targetPoint);
+					}
 
 					// move according to pathfinding
 					updatePath(env);
 					if (this.path != null && !this.path.isEmpty())
 					{
 						angleToTarget = Math.atan2(this.path.get(0).y - this.y, this.path.get(0).x - this.x);
-						this.rotate(angleToTarget, deltaTime);
-						this.directionOfAttemptedMovement = angleToTarget;
-						this.strengthOfAttemptedMovement = 1;
 						this.target = new Point(this.path.get(0).x, this.path.get(0).y);
-					} else
-					{
-						this.strengthOfAttemptedMovement = 0;
-						this.target = this.Point();
-						// TODO. target suddenly inaccesible?
 					}
-				} else
+
+					// even if path is finished, will just walk towards targeted person
+					this.rotate(angleToTarget, deltaTime);
+					this.directionOfAttemptedMovement = angleToTarget;
+					this.strengthOfAttemptedMovement = 1;
+				}
+				else
 				{
 					this.rotate(angleToTarget, deltaTime);
 					this.directionOfAttemptedMovement = angleToTarget;
@@ -283,7 +285,8 @@ public class NPC extends Person
 				MAIN.errorMessage("6j93k, no target-tactic - " + this.tactic);
 				break;
 			}
-		} else // no-target tactics
+		}
+		else // no-target tactics
 			switch (this.tactic)
 			{
 			case PANIC:
@@ -437,8 +440,8 @@ public class NPC extends Person
 				// Is it through a portal?
 				if (Math.pow(foundPath.getX(i - 1) - foundPath.getX(i), 2) + Math.pow(foundPath.getX(i - 1) - foundPath.getX(i), 2) > possibleMovement * possibleMovement)
 				{
-					//set the byPortal of the previous one to true
-					blargl.get(blargl.size()-1).byPortal = true;
+					// set the byPortal of the previous one to true
+					blargl.get(blargl.size() - 1).byPortal = true;
 				}
 				blargl.add(wp);
 			}
@@ -491,7 +494,8 @@ public class NPC extends Person
 					}
 				}
 
-			} while (prevPathLength > blargl.size());
+			}
+			while (prevPathLength > blargl.size());
 			// 2: Merge every three points on the same line into two points
 			do
 			{
@@ -522,7 +526,8 @@ public class NPC extends Person
 					}
 				}
 
-			} while (prevPathLength > blargl.size());
+			}
+			while (prevPathLength > blargl.size());
 
 			// transform into a list of points
 			List<WayPoint> bestPath = new ArrayList<WayPoint>();
@@ -531,7 +536,8 @@ public class NPC extends Person
 				bestPath.add(new WayPoint(blargl.get(i).x * 96 + 96 / 2, blargl.get(i).y * 96 + 96 / 2, blargl.get(i).byPortal));
 			}
 			return bestPath;
-		} else
+		}
+		else
 			return null; // no path possible
 	}
 
@@ -565,7 +571,8 @@ public class NPC extends Person
 					waypoint.x = (int) (portal.x + distToWayPoint * Math.cos(newAngle));
 					waypoint.y = (int) (portal.y + distToWayPoint * Math.sin(newAngle));
 					waypoint.portalWasUsed = true;
-				} else if (Methods.DistancePow2(waypoint, Point()) > 96 * 96 * 4) // sort of right
+				}
+				else if (Methods.DistancePow2(waypoint, Point()) > 96 * 96 * 4) // sort of right
 				{
 					System.out.println("this is supposed to happen");
 					path.remove(0);
@@ -680,7 +687,8 @@ public class NPC extends Person
 		{
 			this.directionOfAttemptedMovement = Math.atan2(yElement, xElement);
 			this.angleOfLastInstinct = this.directionOfAttemptedMovement;
-		} else // attempted movement would be half-decided by attempt
+		}
+		else // attempted movement would be half-decided by attempt
 		{
 			this.directionOfAttemptedMovement = Methods.meanAngle(Math.atan2(yElement, xElement), this.directionOfAttemptedMovement);
 			this.angleOfLastInstinct = this.directionOfAttemptedMovement;

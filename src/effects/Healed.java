@@ -6,9 +6,9 @@ import mainClasses.Person;
 
 public class Healed extends Effect
 {
-	public Healed(int strength1, Ability creatorAbility1)
+	public Healed(double lifeRegenBuff, Ability creatorAbility1)
 	{
-		super("Healed", -1, strength1, creatorAbility1);
+		super("Healed", -1, lifeRegenBuff, creatorAbility1);
 		stackable = true;
 	}
 

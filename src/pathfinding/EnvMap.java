@@ -10,12 +10,12 @@ import mainClasses.Portal;
 
 public class EnvMap implements TileBasedMap
 {
-	public final int	SQUARE	= 96;
-	public int[][]		wallTypes;
-	public int[][]		poolTypes;
-	public boolean[][]	FFs;
-	public Point[][]	portals;		// the coordinates that being in this tile will get you to
-	public int			width, height;
+	public final int SQUARE = 96;
+	public int[][] wallTypes;
+	public int[][] poolTypes;
+	public boolean[][] FFs;
+	public Point[][] portals; // the coordinates that being in this tile will get you to
+	public int width, height;
 
 	public EnvMap(Environment env)
 	{
@@ -43,17 +43,19 @@ public class EnvMap implements TileBasedMap
 		for (Portal p : env.portals)
 			if (p.partner != null)
 			{
-				for (int x = (int) (p.x - p.length / 2) / SQUARE; x <= (int) (p.x + p.length / 2) / SQUARE; x++)
-					for (int y = (int) (p.y - p.length / 2) / SQUARE; y <= (int) (p.y + p.length / 2) / SQUARE; y++)
+				for (int x = Math.max((int) (p.x - p.length / 2) / SQUARE, 0); x <= Math.min((int) (p.x + p.length / 2) / SQUARE, env.width - 1); x++)
+					for (int y = Math.max((int) (p.y - p.length / 2) / SQUARE, 0); y <= Math.min((int) (p.y + p.length / 2) / SQUARE, env.height - 1); y++)
 						if (Methods.getSegmentPointDistancePow2(p.start.x, p.start.y, p.end.x, p.end.y, x * SQUARE + SQUARE / 2, y * SQUARE + SQUARE / 2) < SQUARE / 2 * SQUARE / 2)
 						{
 							if (Methods.DistancePow2(p.start.x, p.start.y, x * SQUARE + SQUARE / 2, y * SQUARE + SQUARE / 2) < SQUARE / 2 * SQUARE / 2)
 							{
 								wallTypes[x][y] = -2; // portal tips are basically walls
-							} else if (Methods.DistancePow2(p.end.x, p.end.y, x * SQUARE + SQUARE / 2, y * SQUARE + SQUARE / 2) < SQUARE / 2 * SQUARE / 2)
+							}
+							else if (Methods.DistancePow2(p.end.x, p.end.y, x * SQUARE + SQUARE / 2, y * SQUARE + SQUARE / 2) < SQUARE / 2 * SQUARE / 2)
 							{
 								wallTypes[x][y] = -2; // portal tips are basically walls
-							} else
+							}
+							else
 							{
 								// the coordinates that being in this tile will get you to
 								double angleChange = p.partner.angle - p.angle;

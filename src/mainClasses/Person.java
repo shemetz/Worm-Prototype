@@ -20,93 +20,93 @@ import pathfinding.Mover;
 
 public class Person extends RndPhysObj implements Mover
 {
-	public int							id;
-	public String						name;
+	public int id;
+	public String name;
 
-	public int							animState;
-	public int							animFrame;
+	public int animState;
+	public int animFrame;
 
-	public List<EP>						DNA;
-	public List<Ability>				abilities;
-	public List<Effect>					effects;
-	public List<UIText>					uitexts;
+	public List<EP> DNA;
+	public List<Ability> abilities;
+	public List<Effect> effects;
+	public List<UIText> uitexts;
 
 	// STATS
-	public int							STRENGTH;
-	public int							FITNESS;
-	public int							DEXTERITY;
-	public int							WITS;
-	public int							KNOWLEDGE;
-	public int							SOCIAL;
+	public int STRENGTH;
+	public int FITNESS;
+	public int DEXTERITY;
+	public int WITS;
+	public int KNOWLEDGE;
+	public int SOCIAL;
 
 	// SUB-STATS
-	public int							maxLife;
-	public int							maxMana;
-	public int							maxStamina;
-	public double						lifeRegen;															// per second. during combat.
-	public double						manaRegen;															// ^
-	public double						staminaRegen;														// ^
-	public double						runSpeed;															// maximum speed in pixel/sec in a single direction while running on dry earth.
-	public double						runAccel;
-	public int							naturalArmor;
-	public double						punchSpeed;
-	public double						accuracy;															// from 0 to 1. 0 = 90 degree miss, 1 = 0 degree miss, 0.5 = 45 degree miss.
-	public double						missAngle;
-	public double						runningStaminaCost;													// per second
-	public double						sprintingStaminaCost;												// ^
-	public double						evasion;															// chance of an attack missing you
-	public double						criticalChance;														// chance of a critical hit
-	public double						pushbackResistance;													// pushback immunity
+	public int maxLife;
+	public int maxMana;
+	public int maxStamina;
+	public double lifeRegen; // per second. during combat.
+	public double manaRegen; // ^
+	public double staminaRegen; // ^
+	public double runSpeed; // maximum speed in pixel/sec in a single direction while running on dry earth.
+	public double runAccel;
+	public int naturalArmor;
+	public double punchSpeed;
+	public double accuracy; // from 0 to 1. 0 = 90 degree miss, 1 = 0 degree miss, 0.5 = 45 degree miss.
+	public double missAngle;
+	public double runningStaminaCost; // per second
+	public double sprintingStaminaCost; // ^
+	public double evasion; // chance of an attack missing you
+	public double criticalChance; // chance of a critical hit
+	public double pushbackResistance; // pushback immunity
 
 	// Rest of the variables
-	public double						life;
-	public double						mana;
-	public double						stamina;
-	public double						charge;
-	public boolean						insideWall;
-	public boolean						ghostMode;
-	public boolean						panic;																// used for panic purposes
-	public boolean						prone;																// while ducking or slipping
-	public boolean						dead;
-	public double						slippedTimeLeft;
-	public int							imgW, imgH;															// For drawing purposes only
-	public boolean						inCombat;
-	public boolean						maintaining;														// whether or not the person is using a maintained ability like Shield or Escalating Scream
-	public double						timeSinceLastHit;
-	public double						timeBetweenDamageTexts;
-	public double						waitingDamage;
-	public Point						target;
-	public boolean						lastHandUsedIsRight					= false;
-	public boolean						punchedSomething					= false;
-	public boolean						notMoving							= false;
-	public boolean						notAnimating						= false;
-	public double						directionOfAttemptedMovement		= 0;
-	public double						strengthOfAttemptedMovement			= 0;							// between 0 and 1
-	public double						flyDirection						= 0;							// 1 = up, -1 = down.
-	public int							abilityTryingToRepetitivelyUse		= -1;
-	public int							abilityAiming						= -1;
-	public int							abilityMaintaining					= -1;
-	public int							commanderID;														// ID of the person's group's leader. If individual, commanderID is the same as id.
-	public double						lastSpeed							= 0;							// used for ease of calculation sometimes.
-	public boolean						holdingVine							= false;						// true if the person is using a Plant Beam (vine) and grabbling an enemy.
-	public double						flySpeed							= -1;
-	public double						timeSincePortal						= 0;
+	public double life;
+	public double mana;
+	public double stamina;
+	public double charge;
+	public boolean insideWall;
+	public boolean ghostMode;
+	public boolean panic; // used for panic purposes
+	public boolean prone; // while ducking or slipping
+	public boolean dead;
+	public double slippedTimeLeft;
+	public int imgW, imgH; // For drawing purposes only
+	public boolean inCombat;
+	public boolean maintaining; // whether or not the person is using a maintained ability like Shield or Escalating Scream
+	public double timeSinceLastHit;
+	public double timeBetweenDamageTexts;
+	public double waitingDamage;
+	public Point target;
+	public boolean lastHandUsedIsRight = false;
+	public boolean punchedSomething = false;
+	public boolean notMoving = false;
+	public boolean notAnimating = false;
+	public double directionOfAttemptedMovement = 0;
+	public double strengthOfAttemptedMovement = 0; // between 0 and 1
+	public double flyDirection = 0; // 1 = up, -1 = down.
+	public int abilityTryingToRepetitivelyUse = -1;
+	public int abilityAiming = -1;
+	public int abilityMaintaining = -1;
+	public int commanderID; // ID of the person's group's leader. If individual, commanderID is the same as id.
+	public double lastSpeed = 0; // used for ease of calculation sometimes.
+	public boolean holdingVine = false; // true if the person is using a Plant Beam (vine) and grabbling an enemy.
+	public double flySpeed = -1;
+	public double timeSincePortal = 0;
 
 	// for continuous inaccuracy stuff like beams
-	public double						inaccuracyAngle						= 0;
-	public double						inaccuracyAngleTarget				= 0;
-	public double						timeUntilNextInaccuracyAngleChange	= 0;
+	public double inaccuracyAngle = 0;
+	public double inaccuracyAngleTarget = 0;
+	public double timeUntilNextInaccuracyAngleChange = 0;
 
 	// Inventory and stuff?
-	public List<Item>					inventory;
-	public Armor[]						body;																// head, chest, arms, legs
-	public Armor[]						armorParts;															// head, chest, arms, legs
+	public List<Item> inventory;
+	public Armor[] body; // head, chest, arms, legs
+	public Armor[] armorParts; // head, chest, arms, legs
 
 	// Animation
-	public List<List<BufferedImage>>	animation;
+	public List<List<BufferedImage>> animation;
 
 	// Sounds
-	public List<SoundEffect>			sounds								= new ArrayList<SoundEffect>();
+	public List<SoundEffect> sounds = new ArrayList<SoundEffect>();
 
 	public Person(double x1, double y1)
 	{
@@ -172,7 +172,8 @@ public class Person extends RndPhysObj implements Mover
 						e2.strength = Math.max(e.strength, e2.strength);
 						e2.timeLeft = e.duration;
 						return;
-					} else
+					}
+					else
 					{
 						// remove old effect
 						e2.unapply(this);
@@ -186,7 +187,8 @@ public class Person extends RndPhysObj implements Mover
 		{
 			e.apply(this);
 			effects.add(e);
-		} else // DELETES OLDEST EFFECT WITH SAME NAME AND STRENGTH
+		}
+		else // DELETES OLDEST EFFECT WITH SAME NAME AND STRENGTH
 		{
 			int oldestEffectIndex = -1;
 			for (int i = 0; i < effects.size(); i++)
@@ -378,7 +380,8 @@ public class Person extends RndPhysObj implements Mover
 				// head and hair, which do not
 				for (int i = 2; i < 4; i++)
 					g2d.drawImage(Resources.bodyPart.get(i).get(n.get(i)).get(stateNum).get(0), 0, 0, null);
-			} else
+			}
+			else
 				for (int i = 0; i < 4; i++)
 					g2d.drawImage(Resources.bodyPart.get(i).get(n.get(i)).get(stateNum).get(frameNum), 0, 0, null);
 
@@ -655,11 +658,21 @@ public class Person extends RndPhysObj implements Mover
 	{
 		// like trigger(), but only with currently implemented abilities, and also entirely random :/
 
-		// give 3 random abilities, levels 3, 5, 7
+		// give 3 random abilities, levels 5
 		Random rand = new Random();
-		abilities.add(Ability.ability(Ability.implementedAbilities.get(rand.nextInt(Ability.implementedAbilities.size())) + " <" + EP.elementList[rand.nextInt(12)] + ">", 3));
-		abilities.add(Ability.ability(Ability.implementedAbilities.get(rand.nextInt(Ability.implementedAbilities.size())) + " <" + EP.elementList[rand.nextInt(12)] + ">", 5));
-		abilities.add(Ability.ability(Ability.implementedAbilities.get(rand.nextInt(Ability.implementedAbilities.size())) + " <" + EP.elementList[rand.nextInt(12)] + ">", 7));
+		for (int i = 0; i < 3;)
+		{
+			String str;
+			if (rand.nextBoolean())
+				str = Ability.implementedAbilities.get(rand.nextInt(Ability.implementedAbilities.size())) + " <" + EP.elementList[rand.nextInt(12)] + ">";
+			else
+				str = Ability.implementedAbilities.get(rand.nextInt(Ability.implementedAbilities.size()));
+			if (Resources.icons.get(str) != null)
+			{
+				abilities.add(Ability.ability(str, 5));
+				i++;
+			}
+		}
 	}
 
 	public void rename()
@@ -698,7 +711,8 @@ public class Person extends RndPhysObj implements Mover
 		{
 			timeUntilNextInaccuracyAngleChange -= deltaTime;
 			inaccuracyAngle = Methods.lerpAngle(inaccuracyAngle, inaccuracyAngleTarget, 2.15 * deltaTime); // 2.15 because I felt like it
-		} else
+		}
+		else
 		{
 			timeUntilNextInaccuracyAngleChange = 0.5;
 			inaccuracyAngleTarget = (1 - 2 * Math.random()) * missAngle;
@@ -710,7 +724,8 @@ public class Person extends RndPhysObj implements Mover
 			life += lifeRegen * deltaTime;
 			mana += manaRegen * deltaTime;
 			stamina += staminaRegen * deltaTime;
-		} else
+		}
+		else
 		{
 			life += lifeRegen * 3 * deltaTime;
 			mana += manaRegen * 1.5 * deltaTime;
@@ -751,7 +766,8 @@ public class Person extends RndPhysObj implements Mover
 					a.cooldownLeft -= 1 * deltaTime;
 				if (a.cooldownLeft < 0)
 					a.cooldownLeft = 0;
-			} else if (a.cooldownLeft == 0) // check if this passive ability is unactivated
+			}
+			else if (a.cooldownLeft == 0) // check if this passive ability is unactivated
 			{
 				a.use(null, this, null); // such elegant
 				a.cooldownLeft = -1;
@@ -778,7 +794,8 @@ public class Person extends RndPhysObj implements Mover
 			slippedTimeLeft = 3;
 			prone = true;
 			evasion = 0.8 * evasion; // reducing evasion
-		} else
+		}
+		else
 		{
 			slippedTimeLeft = 0;
 			prone = false;
@@ -829,7 +846,8 @@ public class Person extends RndPhysObj implements Mover
 				buffer.scale(1 / (z * MAIN.heightZoomRatio + 1), 1 / (z * MAIN.heightZoomRatio + 1));
 				buffer.translate(-x, -y);
 			}
-		} else if (z <= cameraZed)
+		}
+		else if (z <= cameraZed)
 		{
 			buffer.translate(x, y);
 			buffer.scale(z * MAIN.heightZoomRatio + 1, z * MAIN.heightZoomRatio + 1);
@@ -925,11 +943,7 @@ public class Person extends RndPhysObj implements Mover
 			buffer.translate(-x, -y);
 			buffer.rotate(cameraRotation, x, y);
 			for (UIText ui : uitexts)
-			{
-				buffer.setColor(new Color(ui.color.getRed(), ui.color.getGreen(), ui.color.getBlue(), ui.transparency));
-				buffer.setFont(new Font("Sans-Serif", Font.BOLD, ui.fontSize));
-				buffer.drawString(ui.text, (int) x + ui.x, (int) y + ui.y);
-			}
+				ui.draw(buffer, x, y);
 			buffer.rotate(-cameraRotation, x, y);
 			buffer.translate(x, y);
 			buffer.scale(1 / (z * MAIN.heightZoomRatio + 1), 1 / (z * MAIN.heightZoomRatio + 1));
@@ -984,6 +998,11 @@ public class Person extends RndPhysObj implements Mover
 
 	public void rotate(double rotationAngle, double deltaTime)
 	{
+		if (rotationAngle == Double.NaN)
+		{
+			MAIN.errorMessage("NaN, NaN NaN NaN NaN NaN NaN NaN, NaN, Katamari Damaci");
+			return;
+		}
 		final double lerp_constant = 7;
 		this.rotation += (((((rotationAngle - this.rotation) % (Math.PI * 2)) + (Math.PI * 3)) % (Math.PI * 2)) - Math.PI) * lerp_constant * deltaTime;
 	}
@@ -1041,7 +1060,8 @@ public class Person extends RndPhysObj implements Mover
 			if (MAIN.random.nextDouble() < 0.1)
 				a.reduce(a.maxArmorRating * 0.03 * effectiveness);
 			return 0;
-		} else // armor reduces damage
+		}
+		else // armor reduces damage
 		{
 			damage -= a.armorRating * effectiveness;
 			a.reduce(a.maxArmorRating * 0.03 * effectiveness);
