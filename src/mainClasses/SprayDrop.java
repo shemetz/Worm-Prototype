@@ -56,7 +56,7 @@ public class SprayDrop extends RndPhysObj
 		if (z <= cameraZed)
 		{
 			buffer.translate(x, y);
-			buffer.scale(z * Main.heightZoomRatio + 1, z * Main.heightZoomRatio + 1);
+			buffer.scale(z * MAIN.heightZoomRatio + 1, z * MAIN.heightZoomRatio + 1);
 			buffer.translate(-x, -y);
 
 			buffer.rotate(rotation, x, y);
@@ -64,7 +64,7 @@ public class SprayDrop extends RndPhysObj
 			buffer.rotate(-rotation, x, y);
 
 			buffer.translate(x, y);
-			buffer.scale(1 / (z * Main.heightZoomRatio + 1), 1 / (z * Main.heightZoomRatio + 1));
+			buffer.scale(1 / (z * MAIN.heightZoomRatio + 1), 1 / (z * MAIN.heightZoomRatio + 1));
 			buffer.translate(-x, -y);
 		}
 	}

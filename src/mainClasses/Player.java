@@ -13,7 +13,8 @@ public class Player extends Person
 	public boolean		spacePressed			= false;
 	public boolean		rotateButtonPressed		= false;
 	public boolean		successfulTarget;
-	public double		movementAxisRotation	= 0;
+	public double		portalMovementRotation	= 0;
+	public double		portalCameraRotation	= 0;
 	public boolean[]	wasdPortalArray;									// used to disable/enable movement axis rotation
 
 	// maybe hotkeys shouldn't belong to the player?

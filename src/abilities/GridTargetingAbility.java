@@ -6,7 +6,7 @@ import java.awt.geom.Rectangle2D;
 
 import mainClasses.Ability;
 import mainClasses.Environment;
-import mainClasses.Main;
+import mainClasses.MAIN;
 import mainClasses.Person;
 import mainClasses.Player;
 
@@ -63,6 +63,6 @@ public class GridTargetingAbility extends Ability
 
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
 	{
-		Main.errorMessage("No no no, you need to EXTEND this class and OVERRIDE this method, goddammit");
+		MAIN.errorMessage("No no no, you need to EXTEND this class and OVERRIDE this method, goddammit");
 	}
 }

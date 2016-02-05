@@ -8,6 +8,7 @@ import mainClasses.Methods;
 import mainClasses.Person;
 import mainClasses.Player;
 import mainClasses.Portal;
+import mainResourcesPackage.SoundEffect;
 
 public class Portals extends Ability
 {
@@ -28,22 +29,29 @@ public class Portals extends Ability
 		cooldown = 0;
 		range = 1000;
 		rangeType = "Ranged circular area";
+		toggleable = true;
 
 		alignPortals = false;
 		p1 = null;
 		p2 = null;
 		minPortalLength = 100;
 		maxPortalLength = 2000;
-		minimumDistanceBetweenPortalsPow2 = 80 * 80;
+		minimumDistanceBetweenPortalsPow2 = 120 * 120;
+		sounds.add(new SoundEffect("Portal_1.wav"));
+		sounds.add(new SoundEffect("Portal_2.wav"));
 	}
 
 	public void use(Environment env, Person user, Point target)
 	{
 		if (holdTarget == null)
+		{
+			alignPortals = false;
 			return;
+		}
 		if (p2 != null)
 		{
 			removePortals(env);
+			alignPortals = false;
 			holdTarget = null;
 			return;
 		}
@@ -67,6 +75,7 @@ public class Portals extends Ability
 		}
 		if (user.mana >= cost)
 		{
+			setSounds(user.Point());
 			if (p1 == null)
 			{
 				double length = Math.min(maxPortalLength, Math.sqrt(Methods.DistancePow2(holdTarget.x, holdTarget.y, target.x, target.y)));
@@ -74,6 +83,7 @@ public class Portals extends Ability
 				p1 = new Portal(holdTarget.x + length / 2 * Math.cos(angle), holdTarget.y + length / 2 * Math.sin(angle), user.z, angle, length);
 				env.portals.add(p1);
 				user.mana -= cost;
+				sounds.get(0).play();
 			} else if (p2 == null)
 			{
 				double length = p1.length;
@@ -88,9 +98,11 @@ public class Portals extends Ability
 					p1.join(p2);
 					on = true;
 					user.mana -= cost;
+					sounds.get(1).play();
 				}
 			}
 		}
+		alignPortals = false;
 		holdTarget = null;
 	}
 
@@ -123,15 +135,16 @@ public class Portals extends Ability
 
 	}
 
+	public void toggle()
+	{
+		alignPortals = !alignPortals;
+	}
+
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
 	{
 		player.targetType = "portals";
 		if (holdTarget == null) // when starting to hold mouse
 			holdTarget = new Point(target.x, target.y);
-		if (player.leftMousePressed) // Parallel portals
-			alignPortals = true;
-		else
-			alignPortals = false;
 		if (player.rightMousePressed) // cancel
 			holdTarget = null;
 	}

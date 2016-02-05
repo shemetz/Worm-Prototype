@@ -4,7 +4,6 @@ import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.Frame;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -24,53 +23,52 @@ import mainResourcesPackage.SoundEffect;
 
 public class Environment
 {
-	public final double				TAU					= Math.PI * 2;
-	public final int				numOfClouds			= 0;
-	public final int				minCloudHeight		= 60,
-											maxCloudHeight = 400;
-	public final static double[]	floorFriction		= new double[]
-															{ 0.6 };													// depending on floor type
-	public final static double[]	poolFriction		= new double[]
-															{ -1, 0.3, -1, -1, 0.8, 0.2, -1, 0.6, 0.7, 0.3, 0.8, 0.6 };	// depending on pool type
-	public final static double[]	wallFriction		= new double[]
-															{ -1, 0.3, -1, -1, 0.8, 0.2, -1, 0.6, 0.7, 0.3, 0.8, 0.6 };	// depending on wall type
-	public boolean					devMode				= false;
-	public boolean					showDamageNumbers	= true;
-	public Point					windDirection;
-	public double					shadowX, shadowY;
+	public final double TAU = Math.PI * 2;
+	public final int numOfClouds = 0;
+	public final int minCloudHeight = 60, maxCloudHeight = 400;
+	public final static double[] floorFriction = new double[]
+	{ 0.6 }; // depending on floor type
+	public final static double[] poolFriction = new double[]
+	{ -1, 0.3, -1, -1, 0.8, 0.2, -1, 0.6, 0.7, 0.3, 0.8, 0.6 }; // depending on pool type
+	public final static double[] wallFriction = new double[]
+	{ -1, 0.3, -1, -1, 0.8, 0.2, -1, 0.6, 0.7, 0.3, 0.8, 0.6 }; // depending on wall type
+	public boolean devMode = false;
+	public boolean showDamageNumbers = true;
+	public Point windDirection;
+	public double shadowX, shadowY;
 
-	public final static int			squareSize			= 96;
-	public final int				elementalNum;
+	public final static int squareSize = 96;
+	public final int elementalNum;
 	// All of these shouldn't be ints, they range from -1 to 12. :/
-	public int[][]					wallHealths;																		// 2D array of wall healths. -1 = no wall. 100 = full health wall.
-	public int[][]					wallTypes;																			// 2D array of wall types. Types are equal to the wall's element. -1 = no wall.
-	public int[][]					poolHealths;																		// ditto, for pools
-	public int[][]					poolTypes;																			// ditto, for pools
-	public BufferedImage[][]		poolImages;																			// cropped images, to join the pool corners
-	public int[][]					cornerCracks;
-	public int[][][]				wCornerStyles;																		// x, y, element; corners on the *UP-LEFT* corner of the corresponding square. +1 = +90 degrees clockwise
-	public int[][][]				pCornerStyles;																		// x, y, element; the int means both the shape and its rotation
-	public int[][][]				pCornerTransparencies;
-	public int[][]					floorTypes;																			// -1 = no floor. 0 = ground.
-	public int						width, height, widthPixels, heightPixels;											// used for camera-blocking purposes
+	public int[][] wallHealths; // 2D array of wall healths. -1 = no wall. 100 = full health wall.
+	public int[][] wallTypes; // 2D array of wall types. Types are equal to the wall's element. -1 = no wall.
+	public int[][] poolHealths; // ditto, for pools
+	public int[][] poolTypes; // ditto, for pools
+	public BufferedImage[][] poolImages; // cropped images, to join the pool corners
+	public int[][] cornerCracks;
+	public int[][][] wCornerStyles; // x, y, element; corners on the *UP-LEFT* corner of the corresponding square. +1 = +90 degrees clockwise
+	public int[][][] pCornerStyles; // x, y, element; the int means both the shape and its rotation
+	public int[][][] pCornerTransparencies;
+	public int[][] floorTypes; // -1 = no floor. 0 = ground.
+	public int width, height, widthPixels, heightPixels; // used for camera-blocking purposes
 	// 0 1 2 3 4 5 6 7 8 9 10 11
 	// "Fire", "Water", "Wind", "Electricity", "Metal", "Ice", "Energy", "Acid", "Lava", "Flesh", "Earth", "Plant"
 
-	public List<VisualEffect>		visualEffects;
-	public List<ArcForceField>		AFFs;																				// Arc Force Fields
-	public List<Person>				people;
-	public List<Ball>				balls;
-	public List<Debris>				debris;
-	public List<UIText>				uitexts;
-	public List<ForceField>			FFs;																				// Force Fields
-	public List<Cloud>				clouds;
-	public List<Beam>				beams;
-	public List<Vine>				vines;
-	public List<SprayDrop>			sprayDrops;
-	public List<Portal>				portals;
+	public List<VisualEffect> visualEffects;
+	public List<ArcForceField> AFFs; // Arc Force Fields
+	public List<Person> people;
+	public List<Ball> balls;
+	public List<Debris> debris;
+	public List<UIText> uitexts;
+	public List<ForceField> FFs; // Force Fields
+	public List<Cloud> clouds;
+	public List<Beam> beams;
+	public List<Vine> vines;
+	public List<SprayDrop> sprayDrops;
+	public List<Portal> portals;
 
 	// Sounds
-	public List<SoundEffect>		ongoingSounds		= new ArrayList<SoundEffect>();
+	public List<SoundEffect> ongoingSounds = new ArrayList<SoundEffect>();
 
 	public Environment(int width1, int height1)
 	{
@@ -125,18 +123,17 @@ public class Environment
 		// random cloud generation
 		for (int i = 0; i < numOfClouds; i++)
 		{
-			int x = Main.random.nextInt(widthPixels * 3) - widthPixels;
-			int y = Main.random.nextInt(heightPixels * 3) - heightPixels;
-			int z = minCloudHeight + Main.random.nextInt(maxCloudHeight - minCloudHeight);
-			int type = Main.random.nextInt(Resources.clouds.size());
+			int x = MAIN.random.nextInt(widthPixels * 3) - widthPixels;
+			int y = MAIN.random.nextInt(heightPixels * 3) - heightPixels;
+			int z = minCloudHeight + MAIN.random.nextInt(maxCloudHeight - minCloudHeight);
+			int type = MAIN.random.nextInt(Resources.clouds.size());
 			clouds.add(new Cloud(x, y, z, type));
 		}
-		windDirection = new Point(Main.random.nextInt(11) - 5, Main.random.nextInt(11) - 5);
+		windDirection = new Point(MAIN.random.nextInt(11) - 5, MAIN.random.nextInt(11) - 5);
 	}
 
-	private int			healthSum		= 0,
-								poolNum = 0;
-	private boolean[][]	checkedSquares	= new boolean[width][height];
+	private int healthSum = 0, poolNum = 0;
+	private boolean[][] checkedSquares = new boolean[width][height];
 
 	boolean moveBall(Ball b, double deltaTime)
 	{
@@ -159,7 +156,8 @@ public class Environment
 				moveQuantumX *= velocityLeft;
 				moveQuantumY *= velocityLeft;
 				velocityLeft = 0;
-			} else
+			}
+			else
 				// non-last parts of movement
 				velocityLeft--;
 			// Move p a fraction
@@ -215,7 +213,8 @@ public class Environment
 										b.x += moveQuantumX;
 										b.y += moveQuantumY;
 									}
-								} else
+								}
+								else
 								{
 									damageWall(i / squareSize, j / squareSize, b.getDamage() + b.getPushback(), EP.damageType(b.elementNum));
 									// debris
@@ -249,7 +248,8 @@ public class Environment
 									b.xVel = -b.xVel;
 								if (b.y - b.radius < p.y + 0.5 * p.radius || b.y + b.radius > p.y - 0.5 * p.radius)
 									b.yVel = -b.yVel;
-							} else
+							}
+							else
 							{
 								// damage person
 								if (checkForEvasion(p))
@@ -296,7 +296,8 @@ public class Environment
 							{
 								if (angleToBall > minAngle && angleToBall < maxAngle)
 									withinAngles = true;
-							} else if (angleToBall > minAngle || angleToBall > maxAngle)
+							}
+							else if (angleToBall > minAngle || angleToBall > maxAngle)
 								withinAngles = true;
 						}
 						if (withinAngles)
@@ -324,7 +325,8 @@ public class Environment
 									// avoiding it some more
 									b.x += moveQuantumX;
 									b.y += moveQuantumY;
-								} else if (distancePow2 > aff.maxRadius * aff.maxRadius
+								}
+								else if (distancePow2 > aff.maxRadius * aff.maxRadius
 										&& (aff.elementNum == 12 || (EP.damageType(aff.elementNum) > 1 && EP.damageType(aff.elementNum) == EP.damageType(b.elementNum)))) // if bubble, or damage resistance
 								{
 									// bounce
@@ -344,7 +346,8 @@ public class Environment
 									b.yVel = velocity * Math.sin(newBallAngle);
 									b.x -= 4 * moveQuantumX; // avoid ball stickiness
 									b.y -= 4 * moveQuantumY;
-								} else
+								}
+								else
 								{
 									// TODO damage depends on ball speed maybe?a
 									// TODO water strong against fire, electricity unblockable by some and entirely blockable by others, , bouncing from metal, etc.
@@ -394,7 +397,8 @@ public class Environment
 							for (int i = 0; i < 7; i++)
 								debris.add(new Debris(b.x, b.y, b.z, b.angle() + 4 + i * (4) / 6, b.elementNum, 500));
 							return false;
-						} else
+						}
+						else
 						{
 							if (Methods.LineToPointDistancePow2(ff.p[0], ff.p[1], ballCenter) < ballRadiusPow2)
 							{
@@ -413,7 +417,8 @@ public class Environment
 									b.x += moveQuantumX;
 									b.y += moveQuantumY;
 								}
-							} else if (Methods.LineToPointDistancePow2(ff.p[2], ff.p[3], ballCenter) < ballRadiusPow2)
+							}
+							else if (Methods.LineToPointDistancePow2(ff.p[2], ff.p[3], ballCenter) < ballRadiusPow2)
 							{
 								// TODO cool sparks
 								if (bounce)
@@ -448,7 +453,8 @@ public class Environment
 									b.x += moveQuantumX;
 									b.y += moveQuantumY;
 								}
-							} else if (Methods.LineToPointDistancePow2(ff.p[3], ff.p[0], ballCenter) < ballRadiusPow2)
+							}
+							else if (Methods.LineToPointDistancePow2(ff.p[3], ff.p[0], ballCenter) < ballRadiusPow2)
 							{
 								// TODO cool sparks
 								if (bounce)
@@ -481,7 +487,8 @@ public class Environment
 						if (bounce)
 						{
 							// TODO balls bounce from each other (shouldn't be hard)
-						} else
+						}
+						else
 						{
 							if (b.mass > b2.mass)
 							{
@@ -491,12 +498,14 @@ public class Environment
 								b2.xVel = 0;
 								b2.yVel = 0;
 								b2.mass = 0;
-							} else if (b2.mass > b.mass)
+							}
+							else if (b2.mass > b.mass)
 							{
 								ballDebris(b, "shatter", b.angle());
 								b2.mass -= b.mass;
 								return false;
-							} else // equal masses
+							}
+							else // equal masses
 							{
 								ballDebris(b2, "shatter", b2.angle());
 								ballDebris(b, "shatter", b.angle());
@@ -529,6 +538,7 @@ public class Environment
 			double velocity = b.velocity();
 			b.xVel = velocity * Math.cos(newAngle);
 			b.yVel = velocity * Math.sin(newAngle);
+			intersectedPortal.playPortalSound();
 		}
 
 		// ball gravity
@@ -647,7 +657,8 @@ public class Environment
 							{
 								if (angleToDrop > minAngle && angleToDrop < maxAngle)
 									withinAngles = true;
-							} else if (angleToDrop > minAngle || angleToDrop > maxAngle)
+							}
+							else if (angleToDrop > minAngle || angleToDrop > maxAngle)
 								withinAngles = true;
 						}
 						if (withinAngles)
@@ -688,7 +699,8 @@ public class Environment
 
 						sprayDropDebris(sd);
 						return false;
-					} else
+					}
+					else
 					{
 						boolean yes = false;
 						if (Methods.LineToPointDistancePow2(ff.p[0], ff.p[1], dropCenter) < ballRadiusPow2)
@@ -785,6 +797,11 @@ public class Environment
 		// This function moves the physics object one pixel towards their direction, until they can't move anymore or they collide with something.
 		if (velocityLeft > 0)
 			p.insideWall = false; // pretty important
+		else if (velocityLeft == 0)
+		{
+			moveQuantumX = 0; // was NaN
+			moveQuantumY = 0; // was NaN
+		}
 		Rectangle2D personRect = new Rectangle2D.Double((int) p.x - p.radius, (int) p.y - p.radius, p.radius * 2, p.radius * 2); // for FF collisions
 		while (velocityLeft > 0)
 		{
@@ -792,7 +809,8 @@ public class Environment
 			{ // last part of movement
 				moveQuantumX *= velocityLeft;
 				moveQuantumY *= velocityLeft;
-			} else
+			}
+			else
 				// non-last parts of movement
 				velocityLeft -= 1;
 			// Move p a fraction
@@ -821,15 +839,11 @@ public class Environment
 								if (p.z > 0.1 && p.z <= 1 && p.zVel < 0) // if falling into a wall
 								{
 									p.z = 1; // standing on a wall
-									for (Ability a : p.abilities) // stop flying when landing this way
-										if (a.hasTag("flight"))
-										{
-											a.use(this, p, p.target);
-										}
 									p.zVel = 0;
 									if (p instanceof NPC)
 										((NPC) p).justCollided = true;
-								} else if (p.z < 1)
+								}
+								else if (p.z < 1)
 								{
 									double prevVelocity = velocityLeft;
 									if (collideWithWall(p, i / squareSize, j / squareSize))
@@ -854,7 +868,8 @@ public class Environment
 										}
 									}
 								}
-							} else // to avoid ghosts reappearing inside walls
+							}
+							else // to avoid ghosts reappearing inside walls
 								p.insideWall = true;
 						}
 					}
@@ -1022,16 +1037,23 @@ public class Environment
 				double distanceRelativeToPortal = Math.sqrt(Methods.DistancePow2(intersectedPortal.x, intersectedPortal.y, p.x, p.y));
 				p.x = intersectedPortal.partner.x + distanceRelativeToPortal * Math.cos(angleRelativeToPortal + angleChange);
 				p.y = intersectedPortal.partner.y + distanceRelativeToPortal * Math.sin(angleRelativeToPortal + angleChange);
-				p.z = intersectedPortal.partner.z; // not quite, but who cares
+				p.z += intersectedPortal.partner.z - intersectedPortal.z;
 				p.rotation += angleChange;
 				double newAngle = p.angle() + angleChange;
 				double velocity = p.velocity();
 				p.xVel = velocity * Math.cos(newAngle);
 				p.yVel = velocity * Math.sin(newAngle);
+				intersectedPortal.playPortalSound();
 				p.timeSincePortal = 0.1; // For a period of time after portaling, you can't move through more portals.
 				if (p instanceof Player)
-					((Player) p).movementAxisRotation += angleChange; // player's keys will keep pushing character relative to previous rotation
-			} else
+				{
+					((Player) p).portalMovementRotation += angleChange; // player's keys will keep pushing character relative to previous rotation
+					((Player) p).portalCameraRotation += angleChange; // player's camera will rotate
+				}
+				if (p instanceof NPC)
+					((NPC) p).path = ((NPC) p).pathFind(new Point((int) (p.x + 1 * Math.cos(newAngle)), (int) (p.y + 1 * Math.sin(newAngle))));
+			}
+			else
 			{
 				// Tried to move through portal too soon after previous one
 				p.x -= moveQuantumX;
@@ -1052,6 +1074,12 @@ public class Environment
 			p.xVel = 0;
 			p.yVel = 0;
 		}
+
+		// rotate if corpse
+		double someConstant = 0.1623542545; // whatever
+		if (p.dead)
+			if (moveQuantumY != 0 || moveQuantumX != 0)
+				p.rotate(Math.atan2(moveQuantumY, moveQuantumX), someConstant * deltaTime);
 	}
 
 	public boolean personAFFCollision(Person p, ArcForceField aff)
@@ -1085,7 +1113,8 @@ public class Environment
 					{
 						if (angleToPerson > minAngle && angleToPerson < maxAngle)
 							withinAngles = true;
-					} else if (angleToPerson > minAngle || angleToPerson < maxAngle)
+					}
+					else if (angleToPerson > minAngle || angleToPerson < maxAngle)
 						withinAngles = true;
 					if (withinAngles)
 					{
@@ -1094,7 +1123,8 @@ public class Environment
 							return true;
 						return false;
 					}
-				} else // much easier
+				}
+				else // much easier
 				{
 					double distancePow2 = Methods.DistancePow2(aff.x, aff.y, p.x, p.y);
 					if (distancePow2 < Math.pow(p.radius + aff.maxRadius, 2))
@@ -1129,7 +1159,8 @@ public class Environment
 			if (p.y < intersectRect.y + 0.5 * intersectRect.height)
 				p.yVel = -Math.abs(p.yVel) * bounceEfficiency;
 			return true;
-		} else
+		}
+		else
 		{
 			// extra debris
 			for (int i = 0; i < 5; i++)
@@ -1231,7 +1262,8 @@ public class Environment
 				double angle = Math.atan2(v.end.y - v.start.y, v.end.x - v.start.x);
 				v.end.x += vineSpeed * Math.cos(angle);
 				v.end.y += vineSpeed * Math.sin(angle);
-			} else if (v.endPauseTimeLeft < 0)
+			}
+			else if (v.endPauseTimeLeft < 0)
 				v.endPauseTimeLeft = 0;
 			else
 				v.endPauseTimeLeft -= deltaTime;
@@ -1285,12 +1317,14 @@ public class Environment
 									{
 										intersectionP = intersection;
 										shortestDistancePow2 = distancePow2;
-									} else
+									}
+									else
 									{
 										lines.remove(i);
 										i--;
 									}
-								} else
+								}
+								else
 								{
 									lines.remove(i);
 									i--;
@@ -1338,12 +1372,14 @@ public class Environment
 							intersectionP = intersection;
 							shortestDistancePow2 = distancePow2;
 							intersectionPoint = intersection;
-						} else
+						}
+						else
 						{
 							lines.remove(i);
 							i--;
 						}
-					} else
+					}
+					else
 					{
 						lines.remove(i);
 						i--;
@@ -1420,7 +1456,8 @@ public class Environment
 											closestPointMax.getX() - 12 * Math.cos(angleToCollisionPointMax + Math.PI / 2),
 											closestPointMax.getY() - 12 * Math.sin(angleToCollisionPointMax + Math.PI / 2)));
 								}
-							} else if (angleToCollisionPointMax < maxAngle || angleToCollisionPointMax > minAngle)
+							}
+							else if (angleToCollisionPointMax < maxAngle || angleToCollisionPointMax > minAngle)
 							{
 								points.add(closestPointMax);
 								lines.add(new Line2D.Double(closestPointMax.getX() + 12 * Math.cos(angleToCollisionPointMax + Math.PI / 2),
@@ -1440,7 +1477,8 @@ public class Environment
 											closestPointMin.getX() - 12 * Math.cos(angleToCollisionPointMin + Math.PI / 2),
 											closestPointMin.getY() - 12 * Math.sin(angleToCollisionPointMin + Math.PI / 2)));
 								}
-							} else if (angleToCollisionPointMin < maxAngle || angleToCollisionPointMin > minAngle)
+							}
+							else if (angleToCollisionPointMin < maxAngle || angleToCollisionPointMin > minAngle)
 							{
 								points.add(closestPointMin);
 								lines.add(new Line2D.Double(closestPointMin.getX() + 12 * Math.cos(angleToCollisionPointMin + Math.PI / 2),
@@ -1469,13 +1507,15 @@ public class Environment
 							{
 								intersectionP = intersection;
 								shortestDistancePow2 = distancePow2;
-							} else
+							}
+							else
 							{
 								points.remove(i);
 								lines.remove(i);
 								i--;
 							}
-						} else
+						}
+						else
 						{
 							points.remove(i);
 							lines.remove(i);
@@ -1554,11 +1594,22 @@ public class Environment
 				}
 		}
 
+		// 7 Portals
+		Portal collidedPortal = null;
+		for (Portal p : portals)
+			if (v.z < p.highestPoint() && v.highestPoint() > p.z)
+				if (vineLine.intersectsLine(p.Line2D()))
+				{
+					collidedPortal = p;
+					collisionType = 7;
+					intersectionPoint = Methods.getLineLineIntersection(collidedPortal.Line2D(), vineLine);
+				}
+
 		if (collisionType == -1)
 			return;
 		if (intersectionPoint == null)
 		{
-			Main.errorMessage("what what what what? Um");
+			MAIN.errorMessage("what what what what? Um");
 			return;
 		}
 		Point roundedIntersectionPoint = new Point((int) intersectionPoint.getX(), (int) intersectionPoint.getY());
@@ -1636,8 +1687,16 @@ public class Environment
 			v.rotate(originalAngle, deltaTime * 2);
 			v.fixPosition();
 			break;
+		case 7: // portal
+			v.retract();
+			v.end.x = roundedIntersectionPoint.x;
+			v.end.y = roundedIntersectionPoint.y;
+			if (v.state != 2)
+				v.retract();
+			v.fixPosition();
+			break;
 		default:
-			Main.errorMessage("tutorial times 4: how to write an error message 404");
+			MAIN.errorMessage("tutorial times 4: how to write an error message 404");
 			break;
 		}
 	}
@@ -1692,12 +1751,14 @@ public class Environment
 										intersectionP = intersection;
 										shortestDistancePow2 = distancePow2;
 										collisionLine = lines.get(i);
-									} else
+									}
+									else
 									{
 										lines.remove(i);
 										i--;
 									}
-								} else
+								}
+								else
 								{
 									lines.remove(i);
 									i--;
@@ -1747,12 +1808,14 @@ public class Environment
 								intersectionP = intersection;
 								shortestDistancePow2 = distancePow2;
 								collisionLine = lines.get(i);
-							} else
+							}
+							else
 							{
 								lines.remove(i);
 								i--;
 							}
-						} else
+						}
+						else
 						{
 							lines.remove(i);
 							i--;
@@ -1832,7 +1895,8 @@ public class Environment
 													closestPointMax.getX() - 12 * Math.cos(angleToCollisionPointMax + Math.PI / 2),
 													closestPointMax.getY() - 12 * Math.sin(angleToCollisionPointMax + Math.PI / 2)));
 										}
-									} else if (angleToCollisionPointMax < maxAngle || angleToCollisionPointMax > minAngle)
+									}
+									else if (angleToCollisionPointMax < maxAngle || angleToCollisionPointMax > minAngle)
 									{
 										points.add(closestPointMax);
 										lines.add(new Line2D.Double(closestPointMax.getX() + 12 * Math.cos(angleToCollisionPointMax + Math.PI / 2),
@@ -1853,7 +1917,8 @@ public class Environment
 													closestPointMin.getX() - 12 * Math.cos(angleToCollisionPointMin + Math.PI / 2),
 													closestPointMin.getY() - 12 * Math.sin(angleToCollisionPointMin + Math.PI / 2)));
 										}
-									} else if (angleToCollisionPointMin < maxAngle || angleToCollisionPointMin > minAngle)
+									}
+									else if (angleToCollisionPointMin < maxAngle || angleToCollisionPointMin > minAngle)
 									{
 										points.add(closestPointMin);
 										lines.add(new Line2D.Double(closestPointMin.getX() + 12 * Math.cos(angleToCollisionPointMin + Math.PI / 2),
@@ -1871,7 +1936,8 @@ public class Environment
 							points.add(Methods.getSegmentIntersection(l1, beamLine));
 							lines.add(l2);
 							points.add(Methods.getSegmentIntersection(l2, beamLine));
-						} else // much easier
+						}
+						else // much easier
 						if (Methods.LineToPointDistancePow2(b.start.Point(), b.end.Point(), aff.target.Point()) < aff.maxRadius * aff.maxRadius)
 						{
 							Point2D closestPointToSegment = Methods.getClosestPointOnSegment(beamLine.getX1(), beamLine.getY1(), beamLine.getX2(), beamLine.getY2(), aff.x, aff.y);
@@ -1908,13 +1974,15 @@ public class Environment
 									intersectionP = intersection;
 									shortestDistancePow2 = distancePow2;
 									collisionLine = lines.get(i);
-								} else
+								}
+								else
 								{
 									points.remove(i);
 									lines.remove(i);
 									i--;
 								}
-							} else
+							}
+							else
 							{
 								points.remove(i);
 								lines.remove(i);
@@ -1970,12 +2038,14 @@ public class Environment
 								intersectionP = intersection;
 								shortestDistancePow2 = distancePow2;
 								collisionLine = lines.get(i);
-							} else
+							}
+							else
 							{
 								lines.remove(i);
 								i--;
 							}
-						} else
+						}
+						else
 						{
 							lines.remove(i);
 							i--;
@@ -2038,19 +2108,19 @@ public class Environment
 
 		// Portals - 6
 		Portal collidedPortal = null;
-		double minimumDistanceFromStart = 10; //to avoid post-portal beams hitting their own exit portal
+		double minimumDistanceFromStart = 10; // to avoid post-portal beams hitting their own exit portal
 		for (Portal p : portals)
 		{
 			if (p.partner != null && p.highestPoint() > b.z && b.highestPoint() > p.z && beamLine.intersectsLine(p.Line2D()))
 			{
 				Point2D intersection = Methods.getSegmentIntersection(beamLine, p.Line2D());
 				if (intersection != null)
-					if (Methods.DistancePow2(b.start, intersection) > minimumDistanceFromStart*minimumDistanceFromStart)
-				{
-					collisionLine = p.Line2D();
-					collisionType = 6;
-					collidedPortal = p;
-				}
+					if (Methods.DistancePow2(b.start, intersection) > minimumDistanceFromStart * minimumDistanceFromStart)
+					{
+						collisionLine = p.Line2D();
+						collisionType = 6;
+						collidedPortal = p;
+					}
 			}
 		}
 
@@ -2105,7 +2175,8 @@ public class Environment
 					if (diagonal1.intersectsLine(beam2Line) || diagonal2.intersectsLine(beam2Line)) // only happens (i think) when you create a beam inside a force field
 					{
 						; // is bad. TODO make this code slightly shorter?
-					} else
+					}
+					else
 					{
 						beams.add(b2);
 						moveBeam(b2, true, deltaTime); // Recursion!!!
@@ -2195,7 +2266,7 @@ public class Environment
 			}
 			break;
 		default:
-			Main.errorMessage("Dragon and Defiant, sitting in a tree, K-I-S-S-I-S-S-I-P-P-I");
+			MAIN.errorMessage("Dragon and Defiant, sitting in a tree, K-I-S-S-I-S-S-I-P-P-I");
 			break;
 		}
 
@@ -2286,7 +2357,7 @@ public class Environment
 			debris.add(new Debris(b.x, b.y, b.z, Math.random() * 2 * Math.PI, b.elementNum, 500));
 			break;
 		default:
-			Main.errorMessage("I'm sorry, I couldn't find any results for \"debris\". Perhaps you meant \"Deborah Peters\"?");
+			MAIN.errorMessage("I'm sorry, I couldn't find any results for \"debris\". Perhaps you meant \"Deborah Peters\"?");
 			break;
 		}
 	}
@@ -2306,8 +2377,9 @@ public class Environment
 			return;
 		}
 		wallHealths[i][j] -= (int) (damage - wallArmor);
-		if (showDamageNumbers)
-			uitexts.add(new UIText(i * squareSize + squareSize / 2 - 10, j * squareSize + squareSize / 2 - 10, "" + (int) (damage - wallArmor), 5));
+		// commented out:
+		// if (showDamageNumbers)
+		// uitexts.add(new UIText(i * squareSize + squareSize / 2 - 10, j * squareSize + squareSize / 2 - 10, "" + (int) (damage - wallArmor), 5));
 		if (wallHealths[i][j] <= 0)
 			destroyWall(i, j);
 		if (damage > 30 && damageType == 0) // hits additional walls if high and blunt damage
@@ -2332,8 +2404,9 @@ public class Environment
 		if (damage - wallArmor < 1)
 			return;
 		wallHealths[i][j] -= (int) (damage - wallArmor);
-		if (showDamageNumbers)
-			uitexts.add(new UIText(i * squareSize + squareSize / 2 - 10, j * squareSize + squareSize / 2 - 10, "" + (int) (damage - wallArmor), 5));
+		// commented out:
+		// if (showDamageNumbers)
+		// uitexts.add(new UIText(i * squareSize + squareSize / 2 - 10, j * squareSize + squareSize / 2 - 10, "" + (int) (damage - wallArmor), 5));
 		if (wallHealths[i][j] <= 0)
 			destroyWall(i, j);
 		connectWall(i, j); // update cracks
@@ -2490,14 +2563,33 @@ public class Environment
 			}
 			break;
 		default:
-			Main.errorMessage("\"Shit's wrecked!\" Yamana shouts. He points at the wrecked shit.");
+			MAIN.errorMessage("\"Shit's wrecked!\" Yamana shouts. He points at the wrecked shit.");
 			break;
 		}
 	}
 
 	public void sprayDropDebris(SprayDrop sd)
 	{
-		debris.add(new Debris(sd.x, sd.y, sd.z, sd.angle(), sd.elementNum, true, 0.8));
+		switch (sd.elementNum)
+		{
+		case 0: // fire
+		case 1: // water
+		case 5: // ice
+		case 7: // acid
+		case 8: // lava
+		case 9: // flesh
+			debris.add(new Debris(sd.x, sd.y, sd.z, sd.angle(), sd.elementNum, true, 0.8));
+			break;
+		case 2: // wind
+		case 3: // electricity
+		case 4: // metal
+		case 6: // energy
+		case 10: // earth
+		case 11: // plant
+			break;
+		default:
+			MAIN.errorMessage("...");
+		}
 	}
 
 	public void otherDebris(double x, double y, int n, String type, int frameNum)
@@ -2511,7 +2603,7 @@ public class Environment
 					debris.add(new Debris(x, y, 0, i, n, 300));
 			break;
 		default:
-			Main.errorMessage("Error message 7: BEBHMAXBRI0903 T");
+			MAIN.errorMessage("Error message 7: BEBHMAXBRI0903 T");
 			break;
 		}
 	}
@@ -2551,7 +2643,8 @@ public class Environment
 				{
 					damage = 0;
 					pushback = 0;
-				} else // burn or shock damage deal more while ethereal
+				}
+				else // burn or shock damage deal more while ethereal
 				{
 					damage *= 3;
 					pushback = 0;
@@ -2619,13 +2712,17 @@ public class Environment
 					damage *= 1.25;
 				break;
 			default:
-				Main.errorMessage("It's elementary! " + elementNum + "...?");
+				MAIN.errorMessage("It's elementary! " + elementNum + "...?");
 				break;
 			}
 
 			if (p instanceof NPC)
 				if (damage >= 1 || Math.random() < 0.01) // so that beams don't always trigger this
 					((NPC) p).justGotHit = true;
+
+			// Grunt sound, if damage is bad enough
+			if (damage >= 0.05 * p.maxLife)
+				p.sounds.get(2 + (int) (Math.random() * 5)).play(); // grunt
 
 			// dealing the actual damage!
 			p.damage(damage);
@@ -2811,39 +2908,7 @@ public class Environment
 		sound.play();
 	}
 
-	public void drawFloor(Graphics2D buffer, Frame that, final Rectangle bounds)
-	{
-		// Pools (and floors)
-		for (int x = 0; x < width; x++)
-			if (x * squareSize > bounds.getMinX() - squareSize && x * squareSize < bounds.getMaxX())
-				for (int y = 0; y < height; y++)
-					if (y * squareSize > bounds.getMinY() - squareSize && y * squareSize < bounds.getMaxY())
-					{
-						// floor
-						if (floorTypes[x][y] != -1)
-							buffer.drawImage(Resources.floor[floorTypes[x][y]], x * squareSize, y * squareSize, that);
-						// pools
-						if (poolTypes[x][y] != -1)
-						{
-							buffer.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.1f + 0.009f * poolHealths[x][y]));
-							buffer.drawImage(poolImages[x][y], x * squareSize, y * squareSize, that);
-							buffer.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
-						}
-						// pool corners
-						for (int i = elementalNum - 1; i >= 0; i--)
-							// decreasing order because I want earth walls to be bottomest and earth is one of the last elements
-							if (pCornerStyles[x][y][i] != -1)
-							{
-								BufferedImage cornerImg = Resources.pCorner[i][getStyle(pCornerStyles[x][y][i])];
-								cornerImg = Methods.rotate(cornerImg, 0.5 * Math.PI * Environment.getAngle(pCornerStyles[x][y][i]), that);
-								buffer.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.1f + 0.009f * pCornerTransparencies[x][y][i]));
-								buffer.drawImage(cornerImg, x * squareSize - squareSize / 2, y * squareSize - squareSize / 2, that);
-								buffer.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
-							}
-					}
-	}
-
-	public void draw(Graphics2D buffer, Frame that, int cameraZed, final Rectangle bounds, double cameraRotation)
+	public void draw(Graphics2D buffer, int cameraZed, final Rectangle bounds, double cameraRotation)
 	{
 		List<Drawable> drawableThings = new ArrayList<Drawable>();
 		drawableThings.addAll(people);
@@ -2863,7 +2928,7 @@ public class Environment
 				// debugging
 				if (arg0 == null || arg0.image == null)
 				{
-					Main.errorMessage("ummm what? no image found for " + arg0 + " or maybe it's null");
+					MAIN.errorMessage("ummm what? no image found for " + arg0 + " or maybe it's null");
 					return true;
 				}
 				if (arg0.image.getWidth() == 1 && arg0.image.getHeight() == 1) // for stuff like Beam images
@@ -2894,22 +2959,55 @@ public class Environment
 		drawDrawables(buffer, cameraZed, cameraRotation, drawableThings, -1, 1);
 
 		// Walls and wall corners
-		drawWalls(buffer, bounds, that);
+		drawWalls(buffer, bounds);
 
 		// Clouds, people, balls, force fields, debris, arc force fields, beams, vines, drops
 		drawDrawables(buffer, cameraZed, cameraRotation, drawableThings, 1, Integer.MAX_VALUE);
 
 		// Combat UI
 		if (showDamageNumbers)
-			for (UIText ui : uitexts)
+		{
+			for (UIText ui : uitexts) // TODO add height to environment UITexts
 			{
-				buffer.setColor(new Color(ui.color.getRed(), ui.color.getGreen(), ui.color.getBlue(), ui.transparency));
-				buffer.setFont(new Font("Sans-Serif", Font.BOLD, ui.fontSize));
-				buffer.drawString(ui.text, ui.x, ui.y);
+				ui.draw(buffer, 0, 0);
 			}
+			for (Person p : people)
+				p.drawUITexts(buffer, cameraZed, cameraRotation);
+		}
 	}
 
-	public void drawWalls(Graphics2D buffer, Rectangle bounds, Frame that)
+	public void drawFloor(Graphics2D buffer, final Rectangle bounds)
+	{
+		// Pools (and floors)
+		for (int x = 0; x < width; x++)
+			if (x * squareSize > bounds.getMinX() - squareSize && x * squareSize < bounds.getMaxX())
+				for (int y = 0; y < height; y++)
+					if (y * squareSize > bounds.getMinY() - squareSize && y * squareSize < bounds.getMaxY())
+					{
+						// floor
+						if (floorTypes[x][y] != -1)
+							buffer.drawImage(Resources.floor[floorTypes[x][y]], x * squareSize, y * squareSize, null);
+						// pools
+						if (poolTypes[x][y] != -1)
+						{
+							buffer.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.1f + 0.009f * poolHealths[x][y]));
+							buffer.drawImage(poolImages[x][y], x * squareSize, y * squareSize, null);
+							buffer.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
+						}
+						// pool corners
+						for (int i = elementalNum - 1; i >= 0; i--)
+							// decreasing order because I want earth walls to be bottomest and earth is one of the last elements
+							if (pCornerStyles[x][y][i] != -1)
+							{
+								BufferedImage cornerImg = Resources.pCorner[i][getCornerStyle(pCornerStyles[x][y][i])][Environment.getCornerAngle(pCornerStyles[x][y][i])];
+								buffer.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.1f + 0.009f * pCornerTransparencies[x][y][i]));
+								buffer.drawImage(cornerImg, x * squareSize - squareSize / 2, y * squareSize - squareSize / 2, null);
+								buffer.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
+							}
+					}
+	}
+
+	public void drawWalls(Graphics2D buffer, Rectangle bounds)
 	{
 		for (int x = 0; x < width; x++)
 			if (x * squareSize > bounds.getMinX() - squareSize && x * squareSize < bounds.getMaxX())
@@ -2921,7 +3019,8 @@ public class Environment
 						{
 							buffer.setColor(new Color(165, 165, 165));
 							buffer.fillRect(x * squareSize, y * squareSize, squareSize, squareSize);
-						} else if (wallTypes[x][y] != -1)
+						}
+						else if (wallTypes[x][y] != -1)
 						{
 							buffer.drawImage(Resources.wall[wallTypes[x][y]], x * squareSize, y * squareSize, null);
 							if (wallHealths[x][y] <= 25)
@@ -2935,8 +3034,7 @@ public class Environment
 						for (int i = elementalNum - 1; i >= 0; i--)
 							if (wCornerStyles[x][y][i] != -1)
 							{
-								BufferedImage cornerImg = Resources.wCorner[i][getStyle(wCornerStyles[x][y][i])];
-								cornerImg = Methods.rotate(cornerImg, 0.5 * Math.PI * Environment.getAngle(wCornerStyles[x][y][i]), that);
+								BufferedImage cornerImg = Resources.wCorner[i][getCornerStyle(wCornerStyles[x][y][i])][Environment.getCornerAngle(wCornerStyles[x][y][i])];
 								buffer.drawImage(cornerImg, x * squareSize - squareSize / 2, y * squareSize - squareSize / 2, null);
 
 								// cracks
@@ -2964,8 +3062,6 @@ public class Environment
 					// copypasta code from down below... :(
 					//
 					Person p = (Person) d;
-					if (showDamageNumbers)
-						p.drawUITexts(buffer, cameraZed, cameraRotation);
 					if (devMode) // draws helpful things in the x,y of the object. (NOT Z AXIS)
 					{
 						// center
@@ -2990,7 +3086,8 @@ public class Environment
 					}
 					//
 				}
-			} else if (d.z >= minZ && d.z < maxZ) // what will basically almost always happen for everything
+			}
+			else if (d.z >= minZ && d.z < maxZ) // what will basically almost always happen for everything
 			{
 				// important drawings:
 				d.drawShadow(buffer, shadowX, shadowY);
@@ -3092,7 +3189,7 @@ public class Environment
 					}
 					if (d instanceof NPC)
 					{
-						Person p = (Person) d;
+						NPC p = (NPC) d;
 						// center
 						buffer.setColor(new Color(160, 255, 160));
 						buffer.drawRect((int) (p.x - 1), (int) (p.y - 1), 3, 3);
@@ -3112,6 +3209,40 @@ public class Environment
 						buffer.setColor(Color.red);
 						buffer.drawLine((int) (p.x), (int) (p.y), (int) (p.x + p.strengthOfAttemptedMovement * 100 * Math.cos(p.directionOfAttemptedMovement)),
 								(int) (p.y + p.strengthOfAttemptedMovement * 100 * Math.sin(p.directionOfAttemptedMovement)));
+
+						if (p.path != null)
+						{// path
+							buffer.setColor(Color.red);
+							buffer.setStroke(new BasicStroke(3));
+							for (int i = 0; i < p.path.size() - 1; i++)
+								buffer.drawLine(p.path.get(i).x, p.path.get(i).y, p.path.get(i + 1).x, p.path.get(i + 1).y);
+							for (int i = 0; i < p.path.size(); i++)
+							{
+								if (p.path.get(i).byPortal)
+									buffer.setColor(Color.PINK);
+								else
+									buffer.setColor(Color.red);
+								buffer.drawRect(p.path.get(i).x - 1, p.path.get(i).y - 1, 3, 3);
+							}
+						}
+
+						// // other paths (commented out)
+						// if (p.strategy == NPC.Strategy.AGGRESSIVE)
+						// {
+						//
+						// buffer.setColor(Color.black);
+						// buffer.setStroke(new BasicStroke(1));
+						// for (Person p2 : people)
+						// if (!p2.equals(p))
+						// {
+						// buffer.translate(5, 3);
+						// List<Point> path = p.pathFind(p2.Point()); // THIS REALLY SHOULDN'T HAPPEN EVERY FRAME TODO TODO TODO
+						// if (path != null)
+						// for (int i = 0; i < path.size() - 1; i++)
+						// buffer.drawLine(path.get(i).x, path.get(i).y, path.get(i + 1).x, path.get(i + 1).y);
+						// }
+						// buffer.translate(-5 * (people.size() - 1), -3 * (people.size() - 1));
+						// }
 					}
 					if (d instanceof ForceField)
 					{
@@ -3271,7 +3402,8 @@ public class Environment
 			{
 				wCornerStyles[x][y][e] = -1;
 				cornerCracks[x][y] = -1;
-			} else
+			}
+			else
 			{
 				// damage crack images
 				int damageNumbers = 0;
@@ -3361,25 +3493,27 @@ public class Environment
 		// else, I don't have time for this shit
 	}
 
-	static int getAngle(int x)
+	static int getCornerAngle(int n)
 	{
 		int ans = 0;
-		if (x < 4)
-			ans = x;
-		if (x >= 4)
-			ans = x - 4;
-		if (x >= 6)
-			ans = x - 6;
+		if (n < 4)
+			ans = n;
+		if (n >= 4)
+			ans = n - 4;
+		if (n >= 6)
+			ans = n - 6;
+		if (n == 10)
+			return 0;
 		return ans;
 	}
 
-	static int getStyle(int x)
+	static int getCornerStyle(int n)
 	{
-		if (x < 4)
+		if (n < 4)
 			return 0;
-		if (x < 6)
+		if (n < 6)
 			return 1;
-		if (x < 10)
+		if (n < 10)
 			return 2;
 		else
 			return 3;

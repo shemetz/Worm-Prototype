@@ -86,7 +86,7 @@ public class ForceField extends Drawable
 		if (z < cameraZed)
 		{
 			buffer.translate(x, y);
-			buffer.scale(z * Main.heightZoomRatio + 1, z * Main.heightZoomRatio + 1);
+			buffer.scale(z * MAIN.heightZoomRatio + 1, z * MAIN.heightZoomRatio + 1);
 			buffer.translate(-x, -y);
 			buffer.rotate(rotation, (int) (x), (int) (y));
 			buffer.setColor(new Color(140, 255, 0, 48 + 80 * (int) life / maxLife)); // fill color
@@ -103,7 +103,7 @@ public class ForceField extends Drawable
 			buffer.drawRect((int) (x - 0.5 * length), (int) (y - 0.5 * width), length, width);
 			buffer.rotate(-rotation, (int) (x), (int) (y));
 			buffer.translate(x, y);
-			buffer.scale(1 / (z * Main.heightZoomRatio + 1), 1 / (z * Main.heightZoomRatio + 1));
+			buffer.scale(1 / (z * MAIN.heightZoomRatio + 1), 1 / (z * MAIN.heightZoomRatio + 1));
 			buffer.translate(-x, -y);
 		}
 	}

@@ -1,4 +1,5 @@
 package mainClasses;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -127,7 +128,7 @@ public class PowerGenerator
 			majors.remove(i);
 			i--;
 		}
-		//Sort the abilities first by points, and then by alphabetical name
+		// Sort the abilities first by points, and then by alphabetical name
 		abilities.sort(Ability.pointsThenAlphabetical);
 		return abilities;
 	}
@@ -155,7 +156,7 @@ public class PowerGenerator
 				s = "Bubble";
 				break;
 			default:
-				Main.errorMessage("A random number generator is doing wacky things!");
+				MAIN.errorMessage("A random number generator is doing wacky things!");
 				break;
 			}
 			break;
@@ -169,7 +170,7 @@ public class PowerGenerator
 				s = "Slow Target";
 				break;
 			default:
-				Main.errorMessage("Haha, what?");
+				MAIN.errorMessage("Haha, what?");
 				break;
 			}
 			break;
@@ -186,7 +187,7 @@ public class PowerGenerator
 				s = "Chronobiology";
 				break;
 			default:
-				Main.errorMessage("Ummmm this isn't supposed to happen");
+				MAIN.errorMessage("Ummmm this isn't supposed to happen");
 				break;
 			}
 			break;
@@ -200,7 +201,7 @@ public class PowerGenerator
 				s = "Slow-Motion";
 				break;
 			default:
-				Main.errorMessage("lolwut");
+				MAIN.errorMessage("lolwut");
 				break;
 			}
 			break;
@@ -217,7 +218,7 @@ public class PowerGenerator
 				s = "Undo I";
 				break;
 			default:
-				Main.errorMessage("HAHAHAHAHAHAHAHAHAHAHAHAHA what?");
+				MAIN.errorMessage("HAHAHAHAHAHAHAHAHAHAHAHAHA what?");
 				break;
 			}
 			break;
@@ -234,7 +235,7 @@ public class PowerGenerator
 				s = "Undo II";
 				break;
 			default:
-				Main.errorMessage("This was totally supposed to happen?");
+				MAIN.errorMessage("This was totally supposed to happen?");
 				break;
 			}
 			break;
@@ -251,7 +252,7 @@ public class PowerGenerator
 				s = "Undo III";
 				break;
 			default:
-				Main.errorMessage("I'm running out of original error messages here!");
+				MAIN.errorMessage("I'm running out of original error messages here!");
 				break;
 			}
 			break;
@@ -271,7 +272,7 @@ public class PowerGenerator
 				s = "Buff Power";
 				break;
 			default:
-				Main.errorMessage("ERROR: SOMETHING WENT WRONG");
+				MAIN.errorMessage("ERROR: SOMETHING WENT WRONG");
 				break;
 			}
 			break;
@@ -300,7 +301,7 @@ public class PowerGenerator
 				s = "Sense Parahumans";
 				break;
 			default:
-				Main.errorMessage("ERROR: WHAT IS LIFE?");
+				MAIN.errorMessage("ERROR: WHAT IS LIFE?");
 				break;
 			}
 			break;
@@ -340,12 +341,12 @@ public class PowerGenerator
 				s = "Buff Strength";
 				break;
 			default:
-				Main.errorMessage("INSUFFICIENT DATA FOR MEANINGFUL ANSWER");
+				MAIN.errorMessage("INSUFFICIENT DATA FOR MEANINGFUL ANSWER");
 				break;
 			}
 			break;
 		default:
-			//no error message here, this is actually what happens with like 70% of the abilities
+			// no error message here, this is actually what happens with like 70% of the abilities
 			break;
 		}
 		if (s.startsWith("Resist Element") || s.startsWith("Absorb Element") || s.startsWith("Elemental Resistance"))
@@ -386,7 +387,9 @@ public class PowerGenerator
 		}
 		if (!alreadyExists)
 		{
-			abilities.add(Ability.ability(s, points));
+			Ability ability = Ability.ability(s, points);
+			if (ability != null) // function above will return null if the ability isn't implemented in the game yet
+				abilities.add(ability);
 		} else
 		{
 			addAbility(abilities, "noob", points);
@@ -444,7 +447,7 @@ public class PowerGenerator
 			BufferedReader in = new BufferedReader(new InputStreamReader(PowerGenerator.class.getResourceAsStream("combinations.csv"), "UTF-8"));
 			if (!in.ready())
 			{
-				Main.errorMessage("EMPTY FILE - COMBINATIONS");
+				MAIN.errorMessage("EMPTY FILE - COMBINATIONS");
 				in.close();
 				return;
 			}
@@ -478,7 +481,7 @@ public class PowerGenerator
 			in = new BufferedReader(new InputStreamReader(Ability.class.getResourceAsStream("standalones.csv"), "UTF-8"));
 			if (!in.ready())
 			{
-				Main.errorMessage("EMPTY FILE - STANDALONES");
+				MAIN.errorMessage("EMPTY FILE - STANDALONES");
 				in.close();
 				return;
 			}
@@ -505,7 +508,7 @@ public class PowerGenerator
 		} catch (IOException e)
 		{
 			e.printStackTrace();
-			Main.errorMessage("(there was a bug)");
+			MAIN.errorMessage("(there was a bug)");
 		}
 		;
 	}

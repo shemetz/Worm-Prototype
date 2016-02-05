@@ -2,10 +2,17 @@ package mainClasses;
 
 import java.awt.Point;
 import java.awt.geom.Point2D;
+import java.util.ArrayList;
+import java.util.List;
 
 import abilities.Ball_E;
 import abilities.Beam_E;
 import abilities.Punch;
+import pathfinding.AStarPathFinder;
+import pathfinding.EnvMap;
+import pathfinding.Mover;
+import pathfinding.Path;
+import pathfinding.WayPoint;
 
 public class NPC extends Person
 {
@@ -32,26 +39,30 @@ public class NPC extends Person
 	// PANIC = run aimlessly, not stopping, randomly rotating (panic).
 	// PUNCH_CHASING = move towards the target, and punch them when able.
 
-	boolean	hasAllies;
+	boolean hasAllies = false;
 
-	int		targetID		= -1;
-	boolean	rightOrLeft;			// true = right or CW. false = left or CCW.
-	boolean	justCollided	= false;
-	boolean	justGotHit		= false;
-	double	instinctDelayTime;
-	double	timeSinceLastInstinct;
-	double	angleOfLastInstinct;
+	int targetID = -1;
+	boolean rightOrLeft = false; // true = right or CW. false = left or CCW.
+	boolean justCollided = false;
+	boolean justGotHit = false;
+	double instinctDelayTime;
+	double timeSinceLastInstinct;
+	double angleOfLastInstinct;
+	double timeSinceLastDistCheck = 0;
+	double lastDistPow2 = Double.MAX_VALUE;
+	List<WayPoint> path;
+	EnvMap envMap = null;
 
 	public NPC(int x1, int y1, Strategy s1)
 	{
 		super(x1, y1);
-		hasAllies = false;
 		// TEMP
+		hasAllies = false;
 		strategy = s1;
 		tactic = Tactic.NO_TARGET;
-		rightOrLeft = true;
 		timeSinceLastInstinct = instinctDelayTime;
 		angleOfLastInstinct = 0;
+		path = new ArrayList<WayPoint>();
 		rename(); // random npc name - no abilities yet
 	}
 
@@ -75,11 +86,16 @@ public class NPC extends Person
 			return false;
 		if (enemy.dead)
 			return false;
+
 		return true;
 	}
 
-	void frameAIupdate(double deltaTime, int frameNum, Environment env, Main main)
+	void frameAIupdate(double deltaTime, int frameNum, Environment env, MAIN main)
 	{
+		// Refresh environment map every 0.5 seconds
+		if (frameNum % 25 == 0 || envMap == null)
+			refreshMap(env);
+
 		// choose target
 		switch (this.tactic)
 		{
@@ -88,15 +104,32 @@ public class NPC extends Person
 		case PUNCH_CHASING:
 			if (frameNum % 25 == 0) // don't check a lot of times in a short period
 			{
-				// Choose as target the closest enemy. There's no range limit to this. TODO
-				double shortestDistanceToTargetPow2 = Double.MAX_VALUE;
+				// Choose as target the closest enemy (considering pathfinding).
+				List<Person> possibleTargets = new ArrayList<Person>();
 				for (Person p2 : env.people)
 					if (this.viableTarget(p2))
-						if (Methods.DistancePow2(this.x, this.y, p2.x, p2.y) < shortestDistanceToTargetPow2)
+						possibleTargets.add(p2);
+				if (!possibleTargets.isEmpty())
+				{
+					int bestTargetIndex = 0;
+					double shortestPathLength = Integer.MAX_VALUE;
+					for (int i = 0; i < possibleTargets.size(); i++)
+					{
+						List<WayPoint> pathToTarget = pathFind(possibleTargets.get(i).Point());
+						if (pathToTarget != null)
 						{
-							shortestDistanceToTargetPow2 = Methods.DistancePow2(this.x, this.y, p2.x, p2.y);
-							this.targetID = p2.id;
+							double pathLength = pathLength(pathToTarget);
+							if (pathLength < shortestPathLength)
+							{
+								shortestPathLength = pathLength;
+								bestTargetIndex = i;
+							}
 						}
+					}
+					this.targetID = possibleTargets.get(bestTargetIndex).id;
+				}
+				else
+					;// NPCs will just punch the corpse of the last person they attacked. I guess that's fine.
 			}
 			break;
 		case NO_TARGET:
@@ -122,10 +155,6 @@ public class NPC extends Person
 			{
 			case PUNCH_CHASING:
 				// move towards target and punch them.
-				this.rotate(angleToTarget, deltaTime);
-				this.directionOfAttemptedMovement = angleToTarget;
-				this.strengthOfAttemptedMovement = 1;
-				this.target = new Point((int) targetPerson.x, (int) targetPerson.y);
 				Ability punch = null;
 				int index = -1;
 				for (int i = 0; i < this.abilities.size(); i++)
@@ -136,14 +165,50 @@ public class NPC extends Person
 					}
 				if (punch == null)
 					break;
-				double maxDistanceNeeded = punch.range + targetPerson.radius / 2;
+				this.timeSinceLastDistCheck += deltaTime;
+				if (distanceToTargetPow2 > Math.pow(96, 2)) // If distance to target > 2 blocks
+				{
+					if (this.timeSinceLastDistCheck >= 1) // once per second. that variable is reduced by 1 soon after this
+					{
+						Point targetPoint = new Point((int)(targetPerson.x + targetPerson.xVel*deltaTime*4), (int)(targetPerson.y + targetPerson.yVel*deltaTime*4));
+						path = pathFind(targetPoint);
+					}
+
+					// move according to pathfinding
+					updatePath(env);
+					if (this.path != null && !this.path.isEmpty())
+					{
+						angleToTarget = Math.atan2(this.path.get(0).y - this.y, this.path.get(0).x - this.x);
+						this.target = new Point(this.path.get(0).x, this.path.get(0).y);
+					}
+
+					// even if path is finished, will just walk towards targeted person
+					this.rotate(angleToTarget, deltaTime);
+					this.directionOfAttemptedMovement = angleToTarget;
+					this.strengthOfAttemptedMovement = 1;
+				}
+				else
+				{
+					this.rotate(angleToTarget, deltaTime);
+					this.directionOfAttemptedMovement = angleToTarget;
+					this.strengthOfAttemptedMovement = 1;
+					this.target = new Point((int) targetPerson.x, (int) targetPerson.y);
+				}
+				double maxDistanceNeeded = punch.range + targetPerson.radius;
 				for (ArcForceField aff : env.AFFs)
 					if (aff.target.equals(targetPerson) && aff.arc == 2 * Math.PI)
 						maxDistanceNeeded = punch.range + aff.maxRadius;
 				if (distanceToTargetPow2 < Math.pow(maxDistanceNeeded, 2))
 					main.pressAbilityKey(index, true, this);
 				else if (punch.cooldownLeft <= 0)
+				{
 					main.pressAbilityKey(index, false, this); // stop punching
+				}
+				if (this.timeSinceLastDistCheck >= 1) // Check distance every second
+				{
+					this.lastDistPow2 = distanceToTargetPow2;
+					this.timeSinceLastDistCheck -= 1;
+				}
 				break;
 			case CIRCLE_STRAFING:
 				// move around target. Also, get close to it or away from it to get into the "circle strafing" range.
@@ -217,10 +282,11 @@ public class NPC extends Person
 				}
 				break;
 			default:
-				Main.errorMessage("6j93k, no target-tactic - " + this.tactic);
+				MAIN.errorMessage("6j93k, no target-tactic - " + this.tactic);
 				break;
 			}
-		} else // no-target tactics
+		}
+		else // no-target tactics
 			switch (this.tactic)
 			{
 			case PANIC:
@@ -240,18 +306,27 @@ public class NPC extends Person
 				// try to switch tactics
 				if (this.strategy.equals(Strategy.AGGRESSIVE))
 				{
-					// Choose as target the closest enemy.
-					double shortestDistanceToTargetPow2 = Double.MAX_VALUE;
+					// Choose as target the closest enemy (considering pathfinding).
+					List<Person> possibleTargets = new ArrayList<Person>();
 					for (Person p2 : env.people)
 						if (this.viableTarget(p2))
+							possibleTargets.add(p2);
+					if (!possibleTargets.isEmpty())
+					{
+						int bestTargetIndex = 0;
+						double shortestPathLength = Integer.MAX_VALUE;
+						for (int i = 0; i < possibleTargets.size(); i++)
 						{
-							if (Methods.DistancePow2(this.x, this.y, p2.x, p2.y) < shortestDistanceToTargetPow2)
+							double pathLength = pathLength(pathFind(possibleTargets.get(i).Point()));
+							if (pathLength < shortestPathLength)
 							{
-								shortestDistanceToTargetPow2 = Methods.DistancePow2(this.x, this.y, p2.x, p2.y);
-								this.targetID = p2.id; // not necessary?
-								targetPerson = p2;
+								shortestPathLength = pathLength;
+								bestTargetIndex = i;
 							}
 						}
+						targetPerson = possibleTargets.get(bestTargetIndex);
+						this.targetID = targetPerson.id; // not necessary?
+					}
 					if (targetPerson != null)
 						if (Methods.DistancePow2(this.x, this.y, targetPerson.x, targetPerson.y) < 600 * 600) // 600 sounds like an OK number
 							if (this.mana > 0.4 * this.maxMana)
@@ -277,7 +352,7 @@ public class NPC extends Person
 				break;
 
 			default:
-				Main.errorMessage("shpontzilontz. no no-target-tactic - " + this.tactic);
+				MAIN.errorMessage("shpontzilontz. no no-target-tactic - " + this.tactic);
 				break;
 			}
 		// tactic-switching decisions. TODO make it make sense
@@ -290,10 +365,7 @@ public class NPC extends Person
 			this.tactic = Tactic.NO_TARGET;
 		else if (this.strategy.equals(Strategy.AGGRESSIVE))
 		{
-			if (this.tactic.equals(Tactic.CIRCLE_STRAFING) && this.mana <= 0.1 * this.maxMana)
-				this.tactic = Tactic.PUNCH_CHASING;
-			else if (this.tactic.equals(Tactic.PUNCH_CHASING) && this.mana >= 0.9 * this.maxMana)
-				this.tactic = Tactic.CIRCLE_STRAFING;
+			this.tactic = Tactic.PUNCH_CHASING;
 		}
 		if (prevTactic != this.tactic)
 		{
@@ -330,6 +402,204 @@ public class NPC extends Person
 				this.strengthOfAttemptedMovement = 1;
 				this.timeSinceLastInstinct += deltaTime;
 			}
+
+		// Group tactics - stay a bit away from any non-enemy
+		double forceX = this.strengthOfAttemptedMovement * Math.cos(this.directionOfAttemptedMovement), forceY = this.strengthOfAttemptedMovement * Math.sin(this.directionOfAttemptedMovement);
+		for (Person p : env.people)
+			if (!p.equals(this) && !this.viableTarget(p))
+			{
+				double angle = Math.atan2(this.y - p.y, this.x - p.x);
+				// ~5000 = what you'd expect, but leads to many problems (people running into sideways walls).
+				double amount = 1000 / Methods.DistancePow2(p.Point(), this.Point());
+				forceX += amount * Math.cos(angle);
+				forceY += amount * Math.sin(angle);
+			}
+		this.directionOfAttemptedMovement = Math.atan2(forceY, forceX);
+	}
+
+	void refreshMap(Environment env)
+	{
+		envMap = new EnvMap(env);
+	}
+
+	List<WayPoint> pathFind(Point targetPoint)
+	{
+		AStarPathFinder pathFinder = new AStarPathFinder(envMap, 50, false);
+
+		Path foundPath = pathFinder.findPath(this, (int) (x / 96), (int) (y / 96), targetPoint.x / 96, targetPoint.y / 96);
+		if (foundPath != null)
+		{
+			// transform into a list of grid points
+			List<WayPoint> blargl = new ArrayList<WayPoint>();
+			double possibleMovement = Math.sqrt(1 + 1); // obvs
+
+			blargl.add(new WayPoint(foundPath.getX(0), foundPath.getY(0)));
+			for (int i = 1; i < foundPath.getLength(); i++)
+			{
+				WayPoint wp = new WayPoint(foundPath.getX(i), foundPath.getY(i));
+				// Is it through a portal?
+				if (Math.pow(foundPath.getX(i - 1) - foundPath.getX(i), 2) + Math.pow(foundPath.getX(i - 1) - foundPath.getX(i), 2) > possibleMovement * possibleMovement)
+				{
+					// set the byPortal of the previous one to true
+					blargl.get(blargl.size() - 1).byPortal = true;
+				}
+				blargl.add(wp);
+			}
+
+			double minDistancePow2 = Math.pow(radius, 2);
+
+			// Refine bestPath
+
+			// 1: Merge every two adjacent DIFFERENT lines to one diagonal line if possible
+			int prevPathLength;
+			do
+			{
+				prevPathLength = blargl.size();
+				bigloop: for (int i = 0; i < blargl.size() - 2; i++)
+				{
+					Point A = blargl.get(i);
+					Point B = blargl.get(i + 1);
+					Point C = blargl.get(i + 2);
+					// check if points are not on same line
+					// if AC is horizontal
+					if (A.x == C.x && B.x == C.x)
+						continue bigloop;
+					// if AC is vertical.
+					if (A.y == C.y && B.y == C.y)
+						continue bigloop;
+					// match the gradients
+					if ((A.x - C.x) * (A.y - C.y) == (C.x - B.x) * (C.y - B.y))
+						continue bigloop;
+					// not through a Portal
+					if (blargl.get(i + 1).byPortal)
+						continue bigloop;
+					boolean OKToMerge = true;
+					int minX = Math.min(A.x, Math.min(B.x, C.x));
+					int maxX = Math.max(A.x, Math.max(B.x, C.x));
+					int minY = Math.min(A.y, Math.min(B.y, C.y));
+					int maxY = Math.max(A.y, Math.max(B.y, C.y));
+					// check if it's OK to merge
+					loop: for (int xx = minX; xx <= maxX; xx++)
+						for (int yy = minY; yy <= maxY; yy++)
+							if (envMap.getCost(this, A.x,A.y, xx, yy) > 1)
+								if (Methods.LineToPointDistancePow2(A, C, new Point(xx, yy)) < minDistancePow2)
+								{
+									OKToMerge = false;
+									break loop;
+								}
+					if (OKToMerge)
+					{
+						blargl.remove(i + 1);
+						i--;
+					}
+				}
+
+			}
+			while (prevPathLength > blargl.size());
+			// 2: Merge every three points on the same line into two points
+			do
+			{
+				prevPathLength = blargl.size();
+				for (int i = 0; i < blargl.size() - 2; i++)
+				{
+					Point A = blargl.get(i);
+					Point B = blargl.get(i + 1);
+					Point C = blargl.get(i + 2);
+					// check if points are on same line
+					boolean OKToMerge = false;
+					// if AC is horizontal
+					if (A.x == C.x && B.x == C.x)
+						OKToMerge = true;
+					// if AC is vertical.
+					if (A.y == C.y && B.y == C.y)
+						OKToMerge = true;
+					// match the gradients
+					if ((A.x - C.x) * (A.y - C.y) == (C.x - B.x) * (C.y - B.y))
+						OKToMerge = true;
+					// not through a Portal
+					if (blargl.get(i + 1).byPortal)
+						OKToMerge = false;
+					if (OKToMerge)
+					{
+						blargl.remove(i + 1);
+						i--;
+					}
+				}
+
+			}
+			while (prevPathLength > blargl.size());
+
+			// transform into a list of points
+			List<WayPoint> bestPath = new ArrayList<WayPoint>();
+			for (int i = 0; i < blargl.size(); i++)
+			{
+				bestPath.add(new WayPoint(blargl.get(i).x * 96 + 96 / 2, blargl.get(i).y * 96 + 96 / 2, blargl.get(i).byPortal));
+			}
+			return bestPath;
+		}
+		else
+			return null; // no path possible
+	}
+
+	void updatePath(Environment env)
+	{
+		if (path != null && !path.isEmpty())
+		{
+			WayPoint waypoint = path.get(0);
+			// remove first point if in same tile
+			if ((int) (waypoint.x / 96) == (int) (x / 96) && (int) (waypoint.y / 96) == (int) (y / 96))
+				if (waypoint.byPortal == false)
+					path.remove(0);
+				else if (!waypoint.portalWasUsed)
+				{
+					// find relevant portal
+					Portal portal = null;
+					for (Portal p : env.portals)
+						if (Methods.LineToPointDistancePow2(p.start, p.end, waypoint) < 96 * 96 * 2)
+							if (Methods.DistancePow2(p.x, p.y, waypoint.x, waypoint.y) < p.length * p.length)
+								portal = p;
+					if (portal == null)
+					{
+						MAIN.errorMessage("	");
+						return;
+					}
+
+					// move waypoint to other side of *same* portal, like a mirror, to make the NPC move towards it.
+					double prevAngle = Math.atan2(this.y - portal.y, this.x - portal.x);
+					double newAngle = portal.angle - (prevAngle - portal.angle);
+					double distToWayPoint = Math.sqrt(Methods.DistancePow2(waypoint.x, waypoint.y, portal.x, portal.y));
+					waypoint.x = (int) (portal.x + distToWayPoint * Math.cos(newAngle));
+					waypoint.y = (int) (portal.y + distToWayPoint * Math.sin(newAngle));
+					waypoint.portalWasUsed = true;
+				}
+				else if (Methods.DistancePow2(waypoint, Point()) > 96 * 96 * 4) // sort of right
+				{
+					System.out.println("this is supposed to happen");
+					path.remove(0);
+				}
+		}
+	}
+
+	int pathLength(List<WayPoint> p)
+	{
+		if (p == null || p.isEmpty())
+			return 0;
+
+		int sum = 0;
+		for (int i = 0; i < p.size() - 1; i++)
+			sum += Math.sqrt(Methods.DistancePow2(p.get(i + 1).x, p.get(i + 1).y, p.get(i).x, p.get(i).y));
+		return sum;
+	}
+
+	Mover Mover()
+	{
+		class NPCMover implements Mover
+		{
+			public NPCMover()
+			{
+			}
+		}
+		return new NPCMover();
 	}
 
 	boolean moveAwayFromDangerousObjects(Environment env, boolean considerAttempt)
@@ -417,7 +687,8 @@ public class NPC extends Person
 		{
 			this.directionOfAttemptedMovement = Math.atan2(yElement, xElement);
 			this.angleOfLastInstinct = this.directionOfAttemptedMovement;
-		} else // attempted movement would be half-decided by attempt
+		}
+		else // attempted movement would be half-decided by attempt
 		{
 			this.directionOfAttemptedMovement = Methods.meanAngle(Math.atan2(yElement, xElement), this.directionOfAttemptedMovement);
 			this.angleOfLastInstinct = this.directionOfAttemptedMovement;

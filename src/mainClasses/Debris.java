@@ -18,9 +18,9 @@ public class Debris extends Drawable
 		angle = a1;
 		rotation = a1; // yes yes
 		elementNum = e1;
-		type = Main.random.nextInt(6);
+		type = MAIN.random.nextInt(6);
 		velocity = v1;
-		velocity *= Main.random.nextDouble() * 1.4 + 0.3;
+		velocity *= MAIN.random.nextDouble() * 1.4 + 0.3;
 		image = Resources.debris[elementNum][type];
 		shadow = Resources.debrisShadows[elementNum][type];
 		radius = image.getWidth() / 2;
@@ -36,7 +36,7 @@ public class Debris extends Drawable
 			angle = a1;
 			rotation = a1; // yes yes
 			elementNum = e1;
-			type = Main.random.nextInt(6);
+			type = MAIN.random.nextInt(6);
 			if (type >= 3)
 				timeLeft1 /= 2;
 			velocity = 0;
@@ -46,7 +46,7 @@ public class Debris extends Drawable
 
 			timeLeft = timeLeft1;
 		} else
-			Main.errorMessage("wtf? @ Debris");
+			MAIN.errorMessage("wtf? @ Debris");
 	}
 
 	public void update(double deltaTime)
@@ -94,7 +94,7 @@ public class Debris extends Drawable
 		if (z <= cameraZed)
 		{
 			buffer.translate(x, y);
-			buffer.scale(z * Main.heightZoomRatio + 1, z * Main.heightZoomRatio + 1);
+			buffer.scale(z * MAIN.heightZoomRatio + 1, z * MAIN.heightZoomRatio + 1);
 			buffer.translate(-x, -y);
 
 			buffer.rotate(rotation, x, y);
@@ -102,7 +102,7 @@ public class Debris extends Drawable
 			buffer.rotate(-rotation, x, y);
 
 			buffer.translate(x, y);
-			buffer.scale(1 / (z * Main.heightZoomRatio + 1), 1 / (z * Main.heightZoomRatio + 1));
+			buffer.scale(1 / (z * MAIN.heightZoomRatio + 1), 1 / (z * MAIN.heightZoomRatio + 1));
 			buffer.translate(-x, -y);
 		}
 	}

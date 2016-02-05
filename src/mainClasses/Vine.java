@@ -144,7 +144,7 @@ public class Vine extends Drawable // Vines are plant beams, sort of
 		if (z <= cameraZed && state != -1)
 		{
 			buffer.translate(x, y);
-			buffer.scale(z * Main.heightZoomRatio + 1, z * Main.heightZoomRatio + 1);
+			buffer.scale(z * MAIN.heightZoomRatio + 1, z * MAIN.heightZoomRatio + 1);
 			buffer.translate(-x, -y);
 			// middle
 			int vineDistance = (int) Math.sqrt(Methods.DistancePow2(start.x, start.y, end.x, end.y));
@@ -179,7 +179,7 @@ public class Vine extends Drawable // Vines are plant beams, sort of
 			}
 
 			buffer.translate(x, y);
-			buffer.scale(1 / (z * Main.heightZoomRatio + 1), 1 / (z * Main.heightZoomRatio + 1));
+			buffer.scale(1 / (z * MAIN.heightZoomRatio + 1), 1 / (z * MAIN.heightZoomRatio + 1));
 			buffer.translate(-x, -y);
 		}
 	}

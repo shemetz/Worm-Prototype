@@ -84,7 +84,11 @@ public class NameGenerator
 				break;
 			}
 		} else
-			name = "Muggle " + noun("general");
+		{
+			// Muggle names
+			String firstName = firstName();
+			name = firstName;
+		}
 
 		// Small chance of coolness
 		char[] cs = name.toCharArray();
@@ -155,6 +159,14 @@ public class NameGenerator
 		else
 			num = EP.toInt(element);
 		return elementRelatedAdjs.get(num).get(random.nextInt(elementRelatedAdjs.get(num).size()));
+	}
+
+	public static String firstName()
+	{
+		if (random.nextBoolean())
+			return females.get(random.nextInt(males.size()));
+		else
+			return males.get(random.nextInt(males.size()));
 	}
 
 	public static String alliterative(List<String> wordsToPickFrom, String toMatch)
@@ -271,7 +283,7 @@ public class NameGenerator
 
 		} catch (IOException e)
 		{
-			Main.errorMessage("something wrong in name generation");
+			MAIN.errorMessage("something wrong in name generation");
 			e.printStackTrace();
 		}
 	}
