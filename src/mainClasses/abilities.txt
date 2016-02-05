@@ -653,7 +653,7 @@ Costs 1 Mana.
 Slow Target (Activated)
 debuff offensive defensive cost cooldown duration point
 Slow somebody down by 90%, while making them tougher.
-For a period of 2*Level seconds, a target slows down to 1/10 of what it was before. While it is slow, the target receives 10% less damage and pushback with the exception of the Sting shard, AKA Ghost Weapons II, which can damage it.It  is affected by gravity and movement, times 0.1. When the effect ends the target’s speed is multiplied by 10 again.
+For a period of 2*Level seconds, a target slows down to 1/10 of what it was before. While it is slow, the target receives 10% damage and pushback with the exception of the Sting shard, AKA Ghost Weapons II, which can damage it.It  is affected by gravity and movement, times 0.1. When the effect ends the target’s speed is multiplied by 10 again.
 Cooldown: 3*Level seconds.
 Costs 5 Mana.
 

@@ -51,6 +51,7 @@ public class Ball extends RndPhysObj
 			radius = 30;
 			break;
 		case 11: // plant
+			radius = 30;
 			break;
 		default:
 			MAIN.errorMessage("Oh why did I force myself to have default cases for every switch case ;-;");

@@ -9,5 +9,10 @@ public class E_Resistant extends Effect
 	{
 		super(element+" Resistant", -1, strength1, CA);
 		stackable = true;
+		removeOnDeath = false;
+	}
+	public void nextFrame(int frameNum)
+	{
+		
 	}
 }

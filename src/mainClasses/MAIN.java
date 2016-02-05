@@ -56,6 +56,7 @@ import abilities.Shield_E;
 import abilities.Sprint;
 import abilities.TeleportAbility;
 import effects.Burning;
+import effects.Tangled;
 import mainClasses.NPC.Strategy;
 import mainResourcesPackage.SoundEffect;
 
@@ -290,11 +291,14 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 						a.use(env, p, null);
 				// Remove all effects
 				for (int i = 0; i < p.effects.size(); i++)
+					if (p.effects.get(i).removeOnDeath)
 				{
 					p.effects.get(i).unapply(p);
 					p.effects.remove(i);
 					i--;
 				}
+					else
+						p.effects.get(i).timeLeft = -1;
 			}
 			else
 			{
@@ -377,10 +381,15 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 					case 8: // lava
 						env.hitPerson(p, 20, 0, 0, 8, deltaTime); // burn damage
 						if (frameNum % 50 == 0 && random.nextDouble() < 0.7) // burn chance is 70% in lava
-							// p.affect(new Burning(0,null), true);
-							break;
+							p.affect(new Burning(0, null), true);
+						break;
 					case 10: // earth spikes
 						env.hitPerson(p, 25, 0, 0, 10, deltaTime);
+						break;
+					case 11: // plant vines/spikes
+						env.hitPerson(p, 5, 0, 0, 11, deltaTime);
+						if (frameNum % 50 == 0 && random.nextDouble() < 0.7) // tangle chance is 70% in lava
+							p.affect(new Tangled(0, null), true);
 						break;
 					default:
 						errorMessage("Unknown pool type: " + type);
@@ -388,19 +397,26 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 					}
 				}
 			}
-			// once per second, damage for burn and test for extinguishing fire
 			if (frameNum % 50 == 0)
 			{
+				int tangleDamage = 0;
 				for (int i = 0; i < p.effects.size(); i++)
 				{
 					Effect e = p.effects.get(i);
+					// once per second, damage for burn and test for extinguishing fire
 					if (e instanceof Burning)
 					{
 						env.hitPerson(p, e.strength, 0, 0, 2);
 						if (random.nextDouble() < 0.25) // 25% chance to stop burning, per second
 							p.affect(e, false);
 					}
+					// damage from Tangled
+					if (e instanceof Tangled)
+						tangleDamage += ((Tangled) e).damage;
 				}
+
+				env.hitPerson(p, tangleDamage, 0, 0, -1); //not 11!!!! don't!
+
 			}
 		}
 
@@ -1056,14 +1072,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 
 		player = new Player(96 * 20, 96 * 20);
 		player.tempTrigger();
-		// player.abilities.add(Ability.ability("Force Shield", 5));
-		// player.abilities.add(Ability.ability("Protective Bubble I", 5));
-		// player.abilities.add(Ability.ability("Spray <Acid>", 5));
-		// player.abilities.add(Ability.ability("Ball <Fire>", 5));
-		// player.abilities.add(Ability.ability("Heal I", 5));
-		// player.abilities.add(Ability.ability("Flight I", 5));
-		// player.abilities.add(Ability.ability("Blink", 5));
-		// player.abilities.add(Ability.ability("Beam <Energy>", 5));
+		player.abilities.add(Ability.ability("Ball <Plant>", 5));
 		player.updateAbilities(); // Because we added some abilities and the hotkeys haven't been updated
 		env.people.add(player);
 		camera = new Point3D((int) player.x, (int) player.y, (int) player.z + 25);
@@ -2006,6 +2015,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			p.switchAnimation(0);
 			return;
 		}
+
 		// Okay, get ready
 		if (!p.prone)
 		{
@@ -2046,6 +2056,10 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 								staminaMultiplier *= a.costPerSecond;
 								runMultiplier *= 2;
 							}
+						// Tangled
+						for (Effect e : p.effects)
+							if (e instanceof Tangled)
+								runMultiplier *= 0.66; // Speed decreased by 33% per vine (stacking multiplicatively)
 
 						// making sure dude/dudette has enough stamina
 						double timesStaminaFitsIntoStaminaCost = p.stamina / (p.runningStaminaCost * deltaTime * staminaMultiplier);

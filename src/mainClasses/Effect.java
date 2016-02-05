@@ -9,6 +9,7 @@ public class Effect
 	public int animFrame;
 	public boolean stackable;
 	public Ability creatorAbility; // to avoid same ability giving same effect multiple times to same person
+	public boolean removeOnDeath;
 
 	public Effect(String type, double duration1, double lifeRegenBuff, Ability creatorAbility1)
 	{
@@ -42,28 +43,9 @@ public class Effect
 		}
 	}
 
+	@SuppressWarnings("unused")
 	public void nextFrame(int frameNum)
 	{
-		switch (name)
-		{
-		case "Healed":
-			break;
-		case "Burning":
-			if (frameNum % 17 == 0)
-				animFrame++;
-			if (animFrame >= Resources.effects.get(0).size())
-				animFrame = 0;
-			break;
-		default:
-			MAIN.errorMessage(
-					"They call me 'Bell',\nThey call me 'Stacey',\nThey call me 'her',\nThey call me 'Jane',\nThat's not my name!\nThat's not my name!\nThat's not my name!\nThat's not my...name!\n");
-			MAIN.errorMessage();
-			if (MAIN.random.nextInt(5) == 0)
-			{
-				MAIN.errorMessage("(ame, ame, ame)");
-				MAIN.errorMessage();
-			}
-			break;
-		}
+		MAIN.errorMessage("Please don't kill me! I have a dog and kids!");
 	}
 }

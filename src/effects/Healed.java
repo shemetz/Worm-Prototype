@@ -10,6 +10,7 @@ public class Healed extends Effect
 	{
 		super("Healed", -1, lifeRegenBuff, creatorAbility1);
 		stackable = true;
+		removeOnDeath = true;
 	}
 
 	public void apply(Person target)
@@ -20,5 +21,9 @@ public class Healed extends Effect
 	public void unapply(Person target)
 	{
 		target.lifeRegen -= 2 * strength;
+	}
+	public void nextFrame(int frameNum)
+	{
+		
 	}
 }

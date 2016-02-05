@@ -19,6 +19,7 @@ import java.util.function.Predicate;
 
 import effects.Burning;
 import effects.E_Resistant;
+import effects.Tangled;
 import mainResourcesPackage.SoundEffect;
 
 public class Environment
@@ -1652,6 +1653,9 @@ public class Environment
 				v.grabbledThing = collidedPerson;
 				v.state = 1;
 				v.fixPosition();
+
+				// damage
+				hitPerson(collidedPerson, v.getDamage() * deltaTime, 0, 0, 11, deltaTime);
 			}
 			break;
 		case 4: // person (intersected)
@@ -2662,7 +2666,7 @@ public class Environment
 			double randomNumber = Math.random(); // for elemental effect checks
 
 			// Elemental effects!
-			if (percentageOfTheDamage == 0.02) // as it does whenever it is not 1, most likely
+			if (percentageOfTheDamage <= 0.02) // as it does whenever it is not 1, most likely. still, TODO make this good code
 				randomNumber *= 4.1; // This is roughly the right amount to keep it a 15% chance per second
 			switch (elementNum)
 			{
@@ -2687,7 +2691,7 @@ public class Environment
 			case 11: // plant
 				// Tangle
 				if (randomNumber < 0.50) // 50% chance
-					;// TODO
+					p.affect(new Tangled(1, null), true);
 			case 2: // wind
 			case 4: // metal
 				// +50% pushback
@@ -2706,10 +2710,7 @@ public class Environment
 						damage *= 1.25;
 					else
 						pushback *= 1.5;
-			case -1: // blunt damage (punches do this)
-				// +25% damage
-				if (randomNumber < 0.15) // 15% chance
-					damage *= 1.25;
+			case -1: // blunt/"normal" damage
 				break;
 			default:
 				MAIN.errorMessage("It's elementary! " + elementNum + "...?");
@@ -2721,7 +2722,7 @@ public class Environment
 					((NPC) p).justGotHit = true;
 
 			// Grunt sound, if damage is bad enough
-			if (damage >= 0.05 * p.maxLife)
+			if (damage >= 0.15 * p.maxLife)
 				p.sounds.get(2 + (int) (Math.random() * 5)).play(); // grunt
 
 			// dealing the actual damage!
