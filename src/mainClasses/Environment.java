@@ -6,7 +6,9 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.Polygon;
 import java.awt.Rectangle;
+import java.awt.geom.Area;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -2680,29 +2682,35 @@ public class Environment
 				// Slip
 				if (randomNumber < 0.15) // 15% chance
 					p.slip(true);
+				break;
 			case 3: // electricity
 				// Stun
 				if (randomNumber < 0.15) // 15% chance
 					;// TODO
+				break;
 			case 5: // ice
 				// Freeze
 				if (randomNumber < 0.15) // 15% chance
 					;// TODO
+				break;
 			case 11: // plant
 				// Tangle
 				if (randomNumber < 0.50) // 50% chance
 					p.affect(new Tangled(1, null), true);
+				break;
 			case 2: // wind
 			case 4: // metal
 				// +50% pushback
 				if (randomNumber < 0.15) // 15% chance
 					pushback *= 1.5;
+				break;
 			case 6: // energy
 			case 7: // acid
 			case 9: // flesh
 				// +25% damage
 				if (randomNumber < 0.15) // 15% chance
 					damage *= 1.25;
+				break;
 			case 10: // earth
 				// +25% damage or +50% pushback
 				if (randomNumber < 0.15) // 15% chance
@@ -2710,6 +2718,7 @@ public class Environment
 						damage *= 1.25;
 					else
 						pushback *= 1.5;
+				break;
 			case -1: // blunt/"normal" damage
 				break;
 			default:
@@ -3287,6 +3296,80 @@ public class Environment
 				}
 			}
 		}
+	}
+
+	public Area updateVisibility(Person person, final Rectangle bounds, int[][] seenBefore)
+	{
+		final int precision = 300;
+		final double maxDistance = 100000000;
+		final double minDistance = 0;
+		final double extra = 95;
+
+		Line2D top = new Line2D.Double(bounds.getX(), bounds.getY(), bounds.getX() + bounds.getWidth(), bounds.getY());
+		Line2D left = new Line2D.Double(bounds.getX(), bounds.getY(), bounds.getX(), bounds.getY() + bounds.getHeight());
+		Line2D bottom = new Line2D.Double(bounds.getX(), bounds.getY() + bounds.getHeight(), bounds.getX() + bounds.getWidth(), bounds.getY() + bounds.getHeight());
+		Line2D right = new Line2D.Double(bounds.getX() + bounds.getWidth(), bounds.getY(), bounds.getX() + bounds.getWidth(), bounds.getY() + bounds.getHeight());
+		List<Line2D> boundsLines = new ArrayList<Line2D>();
+		boundsLines.add(top);
+		boundsLines.add(left);
+		boundsLines.add(bottom);
+		boundsLines.add(right);
+
+		double visibilityFromAbovePow2 = Math.pow(person.flightVisionDistance * person.z, 2);
+
+		Polygon visibleAreaPolygon = new Polygon();
+		for (double angle = 0; angle <= TAU; angle += TAU / precision)
+		{
+			Point2D start = new Point2D.Double(person.x + minDistance * Math.cos(angle), person.y + minDistance * Math.sin(angle));
+			Line2D line = new Line2D.Double(start.getX(), start.getY(), start.getX() + maxDistance * Math.cos(angle), start.getY() + maxDistance * Math.sin(angle));
+			Point2D closestPoint = null;
+			double shortestDistPow2 = Double.MAX_VALUE;
+			// bounds intersection first
+			for (Line2D l : boundsLines)
+			{
+				Point2D closest = Methods.getSegmentIntersection(line, l);
+				if (closest != null)
+				{
+					double distPow2 = Methods.DistancePow2(line.getP1(), closest);
+					if (distPow2 < shortestDistPow2)
+					{
+						shortestDistPow2 = distPow2;
+						line.setLine(start, closest);
+						closestPoint = closest;
+					}
+				}
+			}
+			// walls
+			for (int x = 0; x < width; x++)
+				if (x * squareSize > bounds.getMinX() - squareSize && x * squareSize < bounds.getMaxX())
+					for (int y = 0; y < height; y++)
+						if (y * squareSize > bounds.getMinY() - squareSize && y * squareSize < bounds.getMaxY())
+							if (wallTypes[x][y] != -1) // TODO check for transparent walls if there exist any
+								if (wallTypes[x][y] == -2 || Methods.DistancePow2(x * squareSize + squareSize / 2, y * squareSize + squareSize / 2, start.getX(), start.getY()) > visibilityFromAbovePow2)
+								{
+									Rectangle2D wallRect = new Rectangle2D.Double(x * squareSize, y * squareSize, squareSize, squareSize);
+									if (line.intersects(wallRect))
+									{
+										Point2D closest = Methods.getClosestIntersectionPoint(line, wallRect);
+										if (closest != null)
+										{
+											double distPow2 = Methods.DistancePow2(line.getP1(), closest);
+											if (distPow2 < shortestDistPow2)
+											{
+												shortestDistPow2 = distPow2;
+												line.setLine(start, closest);
+												closestPoint = closest;
+											}
+										}
+									}
+								}
+
+			// update seenBefore
+			seenBefore[(int) (closestPoint.getX() + 1 * Math.cos(angle)) / squareSize][(int) (closestPoint.getY() + 1 * Math.sin(angle)) / squareSize] = 1;
+
+			visibleAreaPolygon.addPoint((int) (closestPoint.getX() + extra * Math.cos(angle)), (int) (closestPoint.getY() + extra * Math.sin(angle)));
+		}
+		return new Area(visibleAreaPolygon);
 	}
 
 	public void addWall(int x, int y, int elementalType, boolean fullHealth)

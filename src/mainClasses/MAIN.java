@@ -69,8 +69,8 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 	final double TAU = 2 * Math.PI;
 
 	// CONSTANTS
-	final boolean movementVariation = true;
-	boolean portalCameraRotation = true; // if true = player is slower when walking sideways and backwards
+	final boolean movementVariation = true; // if true = player is slower when walking sideways and backwards
+	boolean portalCameraRotation = false;
 	int frameWidth = 1280, frameHeight = 800;
 	Timer frameTimer; // Each frame of this timer redraws the frame
 	int frameTimerDelay = 20; // Every 20 milliseconds the frameTimer will do its stuff. =50 FPS
@@ -292,11 +292,11 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				// Remove all effects
 				for (int i = 0; i < p.effects.size(); i++)
 					if (p.effects.get(i).removeOnDeath)
-				{
-					p.effects.get(i).unapply(p);
-					p.effects.remove(i);
-					i--;
-				}
+					{
+						p.effects.get(i).unapply(p);
+						p.effects.remove(i);
+						i--;
+					}
 					else
 						p.effects.get(i).timeLeft = -1;
 			}
@@ -415,7 +415,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 						tangleDamage += ((Tangled) e).damage;
 				}
 
-				env.hitPerson(p, tangleDamage, 0, 0, -1); //not 11!!!! don't!
+				env.hitPerson(p, tangleDamage, 0, 0, -1); // not 11!!!! don't!
 
 			}
 		}
@@ -1011,6 +1011,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 	// Start of the program. Set-up stuff happens here!
 	void restart()
 	{
+		frameTimer.stop();
 		System.setProperty("sun.java2d.opengl", "True");
 
 		EPgenerator.initializeFHRE();
@@ -1072,7 +1073,6 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 
 		player = new Player(96 * 20, 96 * 20);
 		player.tempTrigger();
-		player.abilities.add(Ability.ability("Ball <Plant>", 5));
 		player.updateAbilities(); // Because we added some abilities and the hotkeys haven't been updated
 		env.people.add(player);
 		camera = new Point3D((int) player.x, (int) player.y, (int) player.z + 25);
@@ -1102,6 +1102,8 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			env.remove((int) (p.x + p.radius) / squareSize, (int) (p.y - p.radius) / squareSize);
 			env.remove((int) (p.x + p.radius) / squareSize, (int) (p.y + p.radius) / squareSize);
 		}
+
+		frameTimer.start();
 	}
 
 	void pressAbilityKey(int abilityIndex, boolean press, Person p)
@@ -1335,6 +1337,8 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		// NOTICE! THE ORDER OF DRAWING OPERATIONS IS ACTUALLY IMPORTANT!
 		Graphics2D buffer = (Graphics2D) g;
 
+		buffer.setColor(Color.black);
+		buffer.fillRect(0, 0, frameWidth, frameHeight);
 		zoomLevel /= (player.z * heightZoomRatio + 1);
 		// Move "camera" to position
 		buffer.scale(zoomLevel, zoomLevel);
@@ -1360,10 +1364,33 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			halfBoundsDiagonal = halfBoundsDiagonal * (player.z * heightZoomRatio + 1) / zoomLevel;
 			bounds = new Rectangle((int) (camera.x - halfBoundsDiagonal), (int) (camera.y - halfBoundsDiagonal), (int) (halfBoundsDiagonal * 2), (int) (halfBoundsDiagonal * 2));
 		}
+		buffer.setClip(player.rememberArea);
 		env.drawFloor(buffer, bounds);
 		drawBottomEffects(buffer);
 		// environment not including effects and clouds
 		env.draw(buffer, (int) camera.z, bounds, cameraRotation);
+
+		// visibility
+		if (player.seenBefore == null) // TODO move this to initialization in restart() probably
+		{
+			player.seenBefore = new int[env.width][env.height];
+			player.rememberArea = new Area();
+		}
+		if (player.visibleArea == null || frameNum % 5 == 0)
+		{
+			player.visibleArea = env.updateVisibility(player, bounds, player.seenBefore);
+			player.rememberArea.add(player.visibleArea);
+		}
+		Area notVisible = new Area(new Rectangle2D.Double(bounds.getMinX(), bounds.getMinY(), bounds.getWidth(), bounds.getHeight()));
+		notVisible.subtract(player.rememberArea);
+		Area memory = new Area(new Rectangle2D.Double(bounds.getMinX(), bounds.getMinY(), bounds.getWidth(), bounds.getHeight()));
+		memory.subtract(player.visibleArea);
+		memory.subtract(notVisible);
+		buffer.setClip(memory);
+		buffer.setColor(new Color(0, 0, 0, 128));
+		buffer.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
+		buffer.setClip(null);
+
 		drawTopEffects(buffer);
 
 		if (hotkeySelected != -1 && player.hotkeys[hotkeySelected] != -1)
@@ -1694,12 +1721,26 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			buffer.setColor(Color.black);
 			if (player.hotkeys[i] != -1)
 			{
+				// key
+				buffer.setColor(Color.black);
+				for (int a = -1; a <= 1; a += 2)
+					for (int b = -1; b <= 1; b += 2)
+						buffer.drawString(hotkeyStrings[i], x + a + (int) (12 * UIzoomLevel), y + b + (int) (76 * UIzoomLevel));
+				buffer.setColor(Color.white);
 				buffer.drawString(hotkeyStrings[i], x + (int) (12 * UIzoomLevel), y + (int) (76 * UIzoomLevel));
+
+				// rectangle outline
+				buffer.setStroke(new BasicStroke((float) (3 * UIzoomLevel)));
+				buffer.setColor(Color.black);
+				buffer.drawRect(x, y, (int) (60 * UIzoomLevel), (int) (60 * UIzoomLevel));
+				// rectangle fill
+				buffer.setColor(new Color(255, 255, 255, 89));
+				buffer.fillRect(x, y, (int) (60 * UIzoomLevel), (int) (60 * UIzoomLevel));
+				// ability icon
 				Ability ability = player.abilities.get(player.hotkeys[i]);
 				scaleBuffer(buffer, x, y, UIzoomLevel);
 				buffer.drawImage(Resources.icons.get(ability.name), x, y, this);
 				scaleBuffer(buffer, x, y, 1 / UIzoomLevel);
-				buffer.drawRect(x, y, (int) (60 * UIzoomLevel), (int) (60 * UIzoomLevel));
 
 				// Cooldown and mana notifications
 				if (ability.cooldownLeft != 0)
@@ -2526,6 +2567,8 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 	public MAIN()
 	{
 
+		frameTimer = new Timer(frameTimerDelay, frameListener);
+		frameTimer.setInitialDelay(0);
 		restart();
 		this.addWindowListener(new WindowAdapter()
 		{
@@ -2552,9 +2595,6 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		addMouseMotionListener(this);
 		addComponentListener(this);
 		addWindowFocusListener(this);
-		frameTimer = new Timer(frameTimerDelay, frameListener);
-		frameTimer.setInitialDelay(0);
-		frameTimer.start();
 	}
 
 	// IGNORE
@@ -2586,10 +2626,10 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		}
 		if (bufferImage != null)
 		{
-			bufferImage.flush();
+			// bufferImage.flush();
 			bufferImage = null;
 		}
-		System.gc(); // Garbage cleaner
+		// System.gc(); // Garbage cleaner. useless line?
 
 		// create the new image with the size of the panel
 		bufferImage = createImage(bufferWidth, bufferHeight);

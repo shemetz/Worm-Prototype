@@ -8,7 +8,7 @@ public class Ball extends RndPhysObj
 {
 	public int elementNum;
 	public int points;
-	final int ballMass = 10;
+	final int ballMass = 10; //TODO different per element, maybe depends on radius
 	public Person creator;
 	public List<Evasion> evasions;
 	public boolean critical = false;
@@ -34,6 +34,7 @@ public class Ball extends RndPhysObj
 		case 3: // electricity
 			break;
 		case 4: // metal
+			radius = 30;
 			break;
 		case 5: // ice
 			break;

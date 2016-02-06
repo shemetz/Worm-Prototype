@@ -212,7 +212,8 @@ public class Punch extends Ability
 								continue;
 							if (Methods.DistancePow2(user.target, aff.target.Point()) > aff.maxRadius * aff.maxRadius) // outer arc
 								continue;
-							if (Methods.DistancePow2(user.target, aff.target.Point()) < aff.minRadius * aff.minRadius) // inner arc
+							double extra = 30; // extra "inwards" distance
+							if (Methods.DistancePow2(user.target, aff.target.Point()) < Math.pow(aff.minRadius - extra, 2)) // inner arc
 								continue;
 							boolean withinAngles = false;
 							if (aff.arc == 2 * Math.PI)
@@ -220,22 +221,13 @@ public class Punch extends Ability
 							else
 							{
 								double angleToPunch = Math.atan2(user.target.y - aff.y, user.target.x - aff.x);
+								while (aff.rotation < -Math.PI)
+									aff.rotation += 2 * Math.PI;
+								while (aff.rotation >= Math.PI)
+									aff.rotation -= 2 * Math.PI;
 								double minAngle = aff.rotation - aff.arc / 2;
-								while (minAngle < 0)
-									minAngle += 2 * Math.PI;
-								while (minAngle >= 2 * Math.PI)
-									minAngle -= 2 * Math.PI;
 								double maxAngle = aff.rotation + aff.arc / 2;
-								while (maxAngle < 0)
-									maxAngle += 2 * Math.PI;
-								while (maxAngle > 2 * Math.PI)
-									maxAngle -= 2 * Math.PI;
-								if (minAngle < maxAngle)
-								{
-									if (angleToPunch > minAngle && angleToPunch < maxAngle)
-										withinAngles = true;
-								}
-								else if (angleToPunch > minAngle || angleToPunch > maxAngle)
+								if (angleToPunch > minAngle && angleToPunch < maxAngle)
 									withinAngles = true;
 							}
 							if (withinAngles) // check angles

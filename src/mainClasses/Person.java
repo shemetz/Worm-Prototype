@@ -6,6 +6,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -51,6 +52,7 @@ public class Person extends RndPhysObj implements Mover
 	public double runSpeed; // maximum speed in pixel/sec in a single direction while running on dry earth.
 	public double runAccel;
 	public int naturalArmor;
+	public int flightVisionDistance; // in pixels. is multiplied by height, in meters, while flying
 	public double punchSpeed;
 	public double accuracy; // from 0 to 1. 0 = 90 degree miss, 1 = 0 degree miss, 0.5 = 45 degree miss.
 	public double missAngle;
@@ -101,6 +103,9 @@ public class Person extends RndPhysObj implements Mover
 
 	// stuff
 	String voiceType; // Male, Female. TODO add more
+	public Area visibleArea = null;
+	public Area rememberArea = null;
+	public int[][] seenBefore;
 
 	// Inventory and stuff?
 	public List<Item> inventory;
@@ -270,6 +275,7 @@ public class Person extends RndPhysObj implements Mover
 		punchSpeed = 0.55 - Math.min(0.15, 0.02 * FITNESS);
 		runAccel = 1000 * FITNESS;
 		runSpeed = 100 * FITNESS;
+		flightVisionDistance = 100 * WITS;
 		accuracy = 1 - 0.6 / ((double) DEXTERITY + 1);
 		updateAccuracy();
 		runningStaminaCost = 0.6;
@@ -337,66 +343,65 @@ public class Person extends RndPhysObj implements Mover
 		animationVine = new ArrayList<List<BufferedImage>>();
 
 		increaseAnimationListSize(); // stand
-
 		insertFullBodyAnimation(0, 0, n);
-		increaseAnimationListSize(); // walk
 
+		increaseAnimationListSize(); // walk
 		insertFullBodyAnimation(1, 1, n);
 		insertFullBodyAnimation(1, 0, n);
 		insertFullBodyAnimation(1, 1, n);
 		insertFullBodyAnimation(1, 2, n);
 		insertFullBodyAnimation(1, 3, n);
 		insertFullBodyAnimation(1, 2, n);
+
 		increaseAnimationListSize(); // hold shield
-
 		insertFullBodyAnimation(2, 0, n);
+
 		increaseAnimationListSize(); // slip
-
 		insertFullBodyAnimation(3, 0, n);
-		increaseAnimationListSize(); // get up from slip
 
+		increaseAnimationListSize(); // get up from slip
 		insertFullBodyAnimation(4, 0, n);
 		insertFullBodyAnimation(4, 1, n);
 		insertFullBodyAnimation(4, 2, n);
-		increaseAnimationListSize(); // punch with right arm
 
+		increaseAnimationListSize(); // punch with right arm
 		insertFullBodyAnimation(5, 0, n);
 		insertFullBodyAnimation(5, 0, n);
 		insertFullBodyAnimation(5, 1, n);
-		increaseAnimationListSize(); // punch with left arm
 
+		increaseAnimationListSize(); // punch with left arm
 		insertFullBodyAnimation(6, 0, n);
 		insertFullBodyAnimation(6, 0, n);
 		insertFullBodyAnimation(6, 1, n);
-		increaseAnimationListSize(); // fly
 
+		increaseAnimationListSize(); // fly
 		insertFullBodyAnimation(7, 0, n);
 		insertFullBodyAnimation(7, 1, n);
 		insertFullBodyAnimation(7, 2, n);
 		insertFullBodyAnimation(7, 1, n);
+
 		increaseAnimationListSize(); // fly-hover transition
+		insertFullBodyAnimation(8, 0, n);
+		insertFullBodyAnimation(8, 0, n);
 
-		insertFullBodyAnimation(8, 0, n);
-		insertFullBodyAnimation(8, 0, n);
 		increaseAnimationListSize(); // hover
-
 		insertFullBodyAnimation(9, 0, n);
-		increaseAnimationListSize(); // flypunch preparation (arms backwards, ready...)
 
+		increaseAnimationListSize(); // flypunch preparation (arms backwards, ready...)
 		insertFullBodyAnimation(10, 0, n);
 		insertFullBodyAnimation(10, 1, n);
 		insertFullBodyAnimation(10, 2, n);
 		insertFullBodyAnimation(10, 1, n);
+
 		increaseAnimationListSize(); // flypunch (left)
+		insertFullBodyAnimation(11, 0, n);
+		insertFullBodyAnimation(11, 0, n);
 
-		insertFullBodyAnimation(11, 0, n);
-		insertFullBodyAnimation(11, 0, n);
 		increaseAnimationListSize(); // flypunch (right)
+		insertFullBodyAnimation(12, 0, n);
+		insertFullBodyAnimation(12, 0, n);
 
-		insertFullBodyAnimation(12, 0, n);
-		insertFullBodyAnimation(12, 0, n);
 		increaseAnimationListSize(); // dead
-
 		insertFullBodyAnimation(13, 0, n);
 
 		changeImage();

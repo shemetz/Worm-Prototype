@@ -39,9 +39,9 @@ public class Shield_E extends Ability
 			if (cost / 5 > user.mana || cooldownLeft > 0)
 				return;
 
-			arc = Math.PI / 2; //arc of shield
+			arc = Math.PI / 2; // arc of shield
 			double minRadius = 80, maxRadius = 92;
-			shield = new ArcForceField(user, angle, arc, minRadius, maxRadius, (int) (level * 10), this.getElementNum(), "Shield <"+this.getElement()+">");
+			shield = new ArcForceField(user, angle, arc, minRadius, maxRadius, (int) (level * 10), this.getElementNum(), "Shield <" + this.getElement() + ">");
 			boolean nope = false;
 			for (Person p : env.people)
 				if (env.personAFFCollision(p, shield))
@@ -57,13 +57,15 @@ public class Shield_E extends Ability
 				user.switchAnimation(2);
 				user.notMoving = stopsMovement;
 				user.notAnimating = true;
-			} else
+			}
+			else
 			{
 				env.shieldDebris(shield, "deactivate");
 				cooldownLeft = 0.25;
 				shield = null;
 			}
-		} else if (on)
+		}
+		else if (on)
 		// deactivating the shield
 		{
 			double remainingFFhealth = 0;
@@ -92,15 +94,11 @@ public class Shield_E extends Ability
 		{
 			double targetAngle = Math.atan2(target.y - user.y, target.x - user.x);
 			user.rotate(targetAngle, deltaTime);
-			
+
 			user.mana -= costPerSecond * deltaTime;
-			for (ArcForceField a : env.AFFs)
-				if (a.target.equals(user))
-				{
-					a.rotation = user.rotation;
-					if (a.extraLife > 0)
-						user.mana -= cost * deltaTime;
-				}
+			shield.rotation = user.rotation;
+			if (shield.extraLife > 0)
+				user.mana -= cost * deltaTime;
 		}
 	}
 
