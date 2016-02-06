@@ -790,12 +790,13 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			buffer.setStroke(new BasicStroke(1));
 			buffer.setColor(new Color(182, 255, 0));
 			Shape thing = new Ellipse2D.Double(player.x - ability.range, player.y - ability.range, 2 * ability.range, 2 * ability.range);
-			buffer.setClip(thing);
+			Shape originalClip = buffer.getClip();
+			buffer.clip(thing);
 			for (int x = (int) (player.x - ability.range) / 18 * 18; x < (int) (player.x + ability.range + 18) / 18 * 18; x += 18)
 				buffer.drawLine(x, (int) (player.y - ability.range), x, (int) (player.y + ability.range));
 			for (int y = (int) (player.y - ability.range) / 18 * 18; y < (int) (player.y + ability.range + 18) / 18 * 18; y += 18)
 				buffer.drawLine((int) (player.x - ability.range), y, (int) (player.x + ability.range), y);
-			buffer.setClip(null);
+			buffer.setClip(originalClip);
 			buffer.drawOval((int) (player.x - ability.range), (int) (player.y - ability.range), ability.range * 2, ability.range * 2);
 
 			// more resource-intensive method ahead, that does the exact same thing :)

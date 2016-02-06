@@ -4,16 +4,17 @@ import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Polygon;
+import java.awt.Shape;
 import java.awt.image.BufferedImage;
 
 public class Drawable
 {
-	public double			x, y, z;					// x and y are of the center of the image (and object). z is in "meters". //TODO make z be "centimeters" / "pixels" (multiply or divide lots of things by 100)
-	public double			rotation			= 0;
-	public int				radius;
-	public double			height;						// z is the bottom or the middle of an object; height is the leftover.
-	public BufferedImage	image, shadow;
-	public Portal			intersectedPortal	= null;
+	public double x, y, z; // x and y are of the center of the image (and object). z is in "meters". //TODO make z be "centimeters" / "pixels" (multiply or divide lots of things by 100)
+	public double rotation = 0;
+	public int radius;
+	public double height; // z is the bottom or the middle of an object; height is the leftover.
+	public BufferedImage image, shadow;
+	public Portal intersectedPortal = null;
 
 	public Drawable()
 	{
@@ -32,8 +33,8 @@ public class Drawable
 		buffer.fillRect((int) x - 10, (int) y - 10, 20, 20);
 	}
 
-	static int		shadowFuzziness	= 6;
-	static float	shadowOpacity	= 0.6f;	// between 0f (transparent shadow) and 1f (opaque shadow)
+	static int shadowFuzziness = 6;
+	static float shadowOpacity = 0.6f; // between 0f (transparent shadow) and 1f (opaque shadow)
 
 	public void changeImage(BufferedImage image1)
 	{
@@ -81,18 +82,19 @@ public class Drawable
 		double k = (p.end.x - p.start.x) * (this.y - p.start.y) - (p.end.y - p.start.y) * (this.x - p.start.x);
 		// k is >0 if this is below p, <0 if this is above p, or 0 if this is in the middle of p
 
+		Shape originalClip = buffer.getClip();
 		Polygon clip = getClipOfPortal(p, k > 0);
-		buffer.setClip(clip);
+		buffer.clip(clip);
 		trueDraw(buffer, cameraZed);
-		buffer.setClip(null);
+		buffer.setClip(originalClip);
 		clip = getClipOfPortal(p.partner, k <= 0);
-		buffer.setClip(clip);
+		buffer.clip(clip);
 		buffer.translate(p.partner.x - p.x, p.partner.y - p.y);
 		buffer.rotate(p.partner.angle - p.angle, p.x, p.y);
 		trueDraw(buffer, cameraZed);
 		buffer.rotate(-p.partner.angle + p.angle, p.x, p.y);
 		buffer.translate(-p.partner.x + p.x, -p.partner.y + p.y);
-		buffer.setClip(null);
+		buffer.setClip(originalClip);
 
 		// If you change this method, change drawShadow too
 	}
@@ -113,18 +115,19 @@ public class Drawable
 		double k = (p.end.x - p.start.x) * (this.y - p.start.y) - (p.end.y - p.start.y) * (this.x - p.start.x);
 		// k is >0 if this is below p, <0 if this is above p, or 0 if this is in the middle of p
 
+		Shape originalClip = buffer.getClip();
 		Polygon clip = getClipOfPortal(p, k > 0);
-		buffer.setClip(clip);
+		buffer.clip(clip);
 		trueDrawShadow(buffer, shadowX, shadowY);
-		buffer.setClip(null);
+		buffer.setClip(originalClip);
 		clip = getClipOfPortal(p.partner, k <= 0);
-		buffer.setClip(clip);
+		buffer.clip(clip);
 		buffer.translate(p.partner.x - p.x, p.partner.y - p.y);
 		buffer.rotate(p.partner.angle - p.angle, p.x, p.y);
 		trueDrawShadow(buffer, shadowX, shadowY);
 		buffer.rotate(-p.partner.angle + p.angle, p.x, p.y);
 		buffer.translate(-p.partner.x + p.x, -p.partner.y + p.y);
-		buffer.setClip(null);
+		buffer.setClip(originalClip);
 	}
 
 	public Polygon getClipOfPortal(Portal p, boolean direction)
