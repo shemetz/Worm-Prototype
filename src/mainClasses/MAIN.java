@@ -1364,34 +1364,43 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			halfBoundsDiagonal = halfBoundsDiagonal * (player.z * heightZoomRatio + 1) / zoomLevel;
 			bounds = new Rectangle((int) (camera.x - halfBoundsDiagonal), (int) (camera.y - halfBoundsDiagonal), (int) (halfBoundsDiagonal * 2), (int) (halfBoundsDiagonal * 2));
 		}
-		buffer.setClip(player.rememberArea);
-		env.drawFloor(buffer, bounds);
-		drawBottomEffects(buffer);
-		// environment not including effects and clouds
-		env.draw(buffer, (int) camera.z, bounds, cameraRotation);
 
-		// visibility
-		if (player.seenBefore == null) // TODO move this to initialization in restart() probably
+		if (player.limitedVisibility)
 		{
-			player.seenBefore = new int[env.width][env.height];
-			player.rememberArea = new Area();
+			// visibility
+			if (player.seenBefore == null) // TODO move this to initialization in restart() probably
+			{
+				player.seenBefore = new int[env.width][env.height];
+				player.rememberArea = new Area();
+			}
+			if (player.visibleArea == null || frameNum % 1 == 0)
+			{
+				player.visibleArea = env.updateVisibility(player, bounds, player.seenBefore); // 4-5 ms
+				player.rememberArea.add(player.visibleArea);
+			}
+			buffer.setClip(player.visibleArea); 
+			env.drawFloor(buffer, bounds); 
+			drawBottomEffects(buffer);
+			// environment not including effects and clouds
+			env.draw(buffer, (int) camera.z, bounds, cameraRotation); 
+			Area memory = new Area();
+			memory.add(player.rememberArea);
+			memory.subtract(player.visibleArea);
+			buffer.setClip(memory);
+			env.drawFloor(buffer, bounds); 
+			env.drawWalls(buffer, bounds); 
+			buffer.setColor(new Color(0, 0, 0, 128));
+			buffer.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
+			drawTopEffects(buffer);
+			buffer.setClip(null);
 		}
-		if (player.visibleArea == null || frameNum % 1 == 0)
+		else
 		{
-			player.visibleArea = env.updateVisibility(player, bounds, player.seenBefore);
-			player.rememberArea.add(player.visibleArea);
+			env.drawFloor(buffer, bounds); 
+			drawBottomEffects(buffer);
+			env.draw(buffer, (int) camera.z, bounds, cameraRotation); 
+			drawTopEffects(buffer);
 		}
-		Area notVisible = new Area(new Rectangle2D.Double(bounds.getMinX(), bounds.getMinY(), bounds.getWidth(), bounds.getHeight()));
-		notVisible.subtract(player.rememberArea);
-		Area memory = new Area(new Rectangle2D.Double(bounds.getMinX(), bounds.getMinY(), bounds.getWidth(), bounds.getHeight()));
-		memory.subtract(player.visibleArea);
-		memory.subtract(notVisible);
-		buffer.setClip(memory);
-		buffer.setColor(new Color(0, 0, 0, 128));
-		buffer.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
-		buffer.setClip(null);
-
-		drawTopEffects(buffer);
 
 		if (hotkeySelected != -1 && player.hotkeys[hotkeySelected] != -1)
 			drawRange(buffer, player.abilities.get(player.hotkeys[hotkeySelected]));
@@ -1507,19 +1516,21 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		{
 			// does not draw info above player
 			if (!p.equals(player) && p.z <= camera.z)
-			{
-				double distancePow2 = Methods.DistancePow2(player.x, player.y, p.x, p.y);
+				// only if inside visible area
+				if (!player.limitedVisibility || player.visibleArea.contains(p.x, p.y))
+				{
+					double distancePow2 = Methods.DistancePow2(player.x, player.y, p.x, p.y);
 
-				buffer.translate(p.x, p.y);
-				buffer.scale(p.z * MAIN.heightZoomRatio + 1, p.z * MAIN.heightZoomRatio + 1);
-				buffer.translate(-p.x, -p.y);
+					buffer.translate(p.x, p.y);
+					buffer.scale(p.z * MAIN.heightZoomRatio + 1, p.z * MAIN.heightZoomRatio + 1);
+					buffer.translate(-p.x, -p.y);
 
-				p.drawData(buffer, distancePow2 < drawLifeDistancePow2, distancePow2 < drawManaDistancePow2, distancePow2 < drawStaminaDistancePow2, cameraRotation);
+					p.drawData(buffer, distancePow2 < drawLifeDistancePow2, distancePow2 < drawManaDistancePow2, distancePow2 < drawStaminaDistancePow2, cameraRotation);
 
-				buffer.translate(p.x, p.y);
-				buffer.scale(1 / (p.z * MAIN.heightZoomRatio + 1), 1 / (p.z * MAIN.heightZoomRatio + 1));
-				buffer.translate(-p.x, -p.y);
-			}
+					buffer.translate(p.x, p.y);
+					buffer.scale(1 / (p.z * MAIN.heightZoomRatio + 1), 1 / (p.z * MAIN.heightZoomRatio + 1));
+					buffer.translate(-p.x, -p.y);
+				}
 		}
 	}
 

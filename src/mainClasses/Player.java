@@ -1,5 +1,7 @@
 package mainClasses;
 
+import java.awt.image.BufferedImage;
+
 public class Player extends Person
 {
 	public int[] hotkeys; // Mid-Click, Shift, Q, E, R, F, V, C, X, Z
@@ -16,6 +18,8 @@ public class Player extends Person
 	public double portalMovementRotation = 0;
 	public double portalCameraRotation = 0;
 	public boolean[] wasdPortalArray; // used to disable/enable movement axis rotation
+	BufferedImage memoryImage = null;
+	boolean limitedVisibility = false;
 
 	// maybe hotkeys shouldn't belong to the player?
 
