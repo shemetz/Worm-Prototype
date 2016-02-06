@@ -1376,7 +1376,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			player.seenBefore = new int[env.width][env.height];
 			player.rememberArea = new Area();
 		}
-		if (player.visibleArea == null || frameNum % 5 == 0)
+		if (player.visibleArea == null || frameNum % 1 == 0)
 		{
 			player.visibleArea = env.updateVisibility(player, bounds, player.seenBefore);
 			player.rememberArea.add(player.visibleArea);

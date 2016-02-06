@@ -3300,7 +3300,7 @@ public class Environment
 
 	public Area updateVisibility(Person person, final Rectangle bounds, int[][] seenBefore)
 	{
-		final int precision = 300;
+		final int precision = 720; // honestly even 300 is fine
 		final double maxDistance = 100000000;
 		final double minDistance = 0;
 		final double extra = 95;
@@ -3345,7 +3345,8 @@ public class Environment
 					for (int y = 0; y < height; y++)
 						if (y * squareSize > bounds.getMinY() - squareSize && y * squareSize < bounds.getMaxY())
 							if (wallTypes[x][y] != -1) // TODO check for transparent walls if there exist any
-								if (wallTypes[x][y] == -2 || Methods.DistancePow2(x * squareSize + squareSize / 2, y * squareSize + squareSize / 2, start.getX(), start.getY()) > visibilityFromAbovePow2)
+								if (wallTypes[x][y] == -2
+										|| Methods.DistancePow2(x * squareSize + squareSize / 2, y * squareSize + squareSize / 2, start.getX(), start.getY()) > visibilityFromAbovePow2)
 								{
 									Rectangle2D wallRect = new Rectangle2D.Double(x * squareSize, y * squareSize, squareSize, squareSize);
 									if (line.intersects(wallRect))
@@ -3365,7 +3366,13 @@ public class Environment
 								}
 
 			// update seenBefore
-			seenBefore[(int) (closestPoint.getX() + 1 * Math.cos(angle)) / squareSize][(int) (closestPoint.getY() + 1 * Math.sin(angle)) / squareSize] = 1;
+			int x = (int) (closestPoint.getX() + 1 * Math.cos(angle)) / squareSize;
+			x = Math.max(0, x);
+			x = Math.max(x, width - 1);
+			int y = (int) (closestPoint.getY() + 1 * Math.sin(angle)) / squareSize;
+			y = Math.max(0, y);
+			y = Math.max(y, height - 1);
+			seenBefore[x][y] = 1;
 
 			visibleAreaPolygon.addPoint((int) (closestPoint.getX() + extra * Math.cos(angle)), (int) (closestPoint.getY() + extra * Math.sin(angle)));
 		}
