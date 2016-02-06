@@ -83,12 +83,12 @@ public class Drawable
 		// k is >0 if this is below p, <0 if this is above p, or 0 if this is in the middle of p
 
 		Shape originalClip = buffer.getClip();
-		Polygon clip = getClipOfPortal(p, k > 0);
-		buffer.clip(clip);
+		Polygon clip = p.getClip(k > 0);
+		buffer.setClip(clip);
 		trueDraw(buffer, cameraZed);
 		buffer.setClip(originalClip);
-		clip = getClipOfPortal(p.partner, k <= 0);
-		buffer.clip(clip);
+		clip = p.partner.getClip(k <= 0);
+		buffer.setClip(clip);
 		buffer.translate(p.partner.x - p.x, p.partner.y - p.y);
 		buffer.rotate(p.partner.angle - p.angle, p.x, p.y);
 		trueDraw(buffer, cameraZed);
@@ -116,32 +116,18 @@ public class Drawable
 		// k is >0 if this is below p, <0 if this is above p, or 0 if this is in the middle of p
 
 		Shape originalClip = buffer.getClip();
-		Polygon clip = getClipOfPortal(p, k > 0);
-		buffer.clip(clip);
+		Polygon clip = p.getClip(k > 0);
+		buffer.setClip(clip);
 		trueDrawShadow(buffer, shadowX, shadowY);
 		buffer.setClip(originalClip);
-		clip = getClipOfPortal(p.partner, k <= 0);
-		buffer.clip(clip);
+		clip = p.partner.getClip(k <= 0);
+		buffer.setClip(clip);
 		buffer.translate(p.partner.x - p.x, p.partner.y - p.y);
 		buffer.rotate(p.partner.angle - p.angle, p.x, p.y);
 		trueDrawShadow(buffer, shadowX, shadowY);
 		buffer.rotate(-p.partner.angle + p.angle, p.x, p.y);
 		buffer.translate(-p.partner.x + p.x, -p.partner.y + p.y);
 		buffer.setClip(originalClip);
-	}
-
-	public Polygon getClipOfPortal(Portal p, boolean direction)
-	{
-
-		int k = direction ? 1 : -1;
-		Polygon clip = new Polygon();
-		clip.addPoint((int) (p.x - Math.cos(p.angle) * p.length * 1), (int) (p.y - Math.sin(p.angle) * p.length * 1));
-		clip.addPoint((int) (p.x + Math.cos(p.angle) * p.length * 1), (int) (p.y + Math.sin(p.angle) * p.length * 1));
-		clip.addPoint((int) (p.x + Math.cos(p.angle) * p.length * 1 + Math.cos(p.angle + Math.PI / 2) * p.length * 1 * k),
-				(int) (p.y + Math.sin(p.angle) * p.length * 1 + Math.sin(p.angle + Math.PI / 2) * p.length * 1 * k));
-		clip.addPoint((int) (p.x - Math.cos(p.angle) * p.length * 1 + Math.cos(p.angle + Math.PI / 2) * p.length * 1 * k),
-				(int) (p.y - Math.sin(p.angle) * p.length * 1 + Math.sin(p.angle + Math.PI / 2) * p.length * 1 * k));
-		return clip;
 	}
 
 	public double highestPoint()

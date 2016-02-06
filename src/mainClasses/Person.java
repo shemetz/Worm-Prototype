@@ -1005,7 +1005,7 @@ public class Person extends RndPhysObj implements Mover
 			s += " (RIP)";
 			buffer.setColor(new Color(50, 50, 50)); // dark gray
 		}
-		buffer.drawString(s, (int) (x - s.length() / 2 * 10), (int) (y - radius - 18));
+		buffer.drawString(s, (int) (x - s.length() / 2 * 10), (int) (y - radius - 28));
 
 		// Does not draw data if the person is dead
 		if (!dead)

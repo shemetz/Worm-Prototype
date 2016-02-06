@@ -12,6 +12,7 @@ public class UIText
 	Color altColor; // drawn behind the color
 	int fontSize;
 	int transparency;
+	int type;
 
 	public UIText(int x1, int y1, String t1, Color c1)
 	{
@@ -24,12 +25,13 @@ public class UIText
 		transparency = 255;
 	}
 
-	public UIText(int x1, int y1, String text1, int type)
+	public UIText(int x1, int y1, String text1, int type1)
 	{
 		x = x1;
 		y = y1;
 		text = text1;
 		transparency = 255;
+		type = type1;
 		switch (type)
 		{
 		case 0: // black text
@@ -84,6 +86,15 @@ public class UIText
 			fontSize = 16;
 			break;
 		}
+	}
+	
+	public void addAmount(int amount)
+	{
+		//assumes type = damage type
+		text = ""+(Integer.parseInt(text)+amount);
+		fontSize = Integer.parseInt(text) * 2;
+		fontSize = Math.max(12, fontSize);
+		fontSize = Math.min(50, fontSize);
 	}
 
 	public void draw(Graphics2D buffer, double originX, double originY)

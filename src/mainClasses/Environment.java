@@ -2731,8 +2731,9 @@ public class Environment
 					((NPC) p).justGotHit = true;
 
 			// Grunt sound, if damage is bad enough
-			if (damage >= 0.15 * p.maxLife)
-				p.sounds.get(2 + (int) (Math.random() * 5)).play(); // grunt
+			if (!p.dead)
+				if (damage >= 0.15 * p.maxLife)
+					p.sounds.get(2 + (int) (Math.random() * 5)).play(); // grunt
 
 			// dealing the actual damage!
 			p.damage(damage);
@@ -2752,6 +2753,14 @@ public class Environment
 				}
 				p.timeBetweenDamageTexts = 0;
 			}
+			else if (percentageOfTheDamage == 1)
+				if (!p.uitexts.isEmpty())
+				{
+					UIText lastDamageText = p.uitexts.get(p.uitexts.size() - 1);
+					if (lastDamageText.type == 1) // TODO use enums!
+						lastDamageText.addAmount((int) p.waitingDamage);
+					p.waitingDamage -= (int) p.waitingDamage;
+				}
 		}
 		// PUSHBACK
 		double velocityPush = pushback * 3000 / (p.mass + 10 * p.STRENGTH); // the 3000 is subject to change
@@ -3303,7 +3312,7 @@ public class Environment
 		final int precision = 720; // honestly even 300 is fine
 		final double maxDistance = 100000000;
 		final double minDistance = 0;
-		final double extra = 95;
+		final double extra = 70;
 
 		Line2D top = new Line2D.Double(bounds.getX(), bounds.getY(), bounds.getX() + bounds.getWidth(), bounds.getY());
 		Line2D left = new Line2D.Double(bounds.getX(), bounds.getY(), bounds.getX(), bounds.getY() + bounds.getHeight());
@@ -3320,7 +3329,7 @@ public class Environment
 		Polygon visibleAreaPolygon = new Polygon();
 		for (double angle = 0; angle <= TAU; angle += TAU / precision)
 		{
-			Point2D start = new Point2D.Double(person.x + minDistance * Math.cos(angle), person.y + minDistance * Math.sin(angle));
+			Point2D start = new Point2D.Double(bounds.getCenterX() + minDistance * Math.cos(angle), bounds.getCenterY() + minDistance * Math.sin(angle));
 			Line2D line = new Line2D.Double(start.getX(), start.getY(), start.getX() + maxDistance * Math.cos(angle), start.getY() + maxDistance * Math.sin(angle));
 			Point2D closestPoint = null;
 			double shortestDistPow2 = Double.MAX_VALUE;

@@ -1,6 +1,6 @@
 package mainClasses;
 
-import java.awt.image.BufferedImage;
+import java.awt.geom.Area;
 
 public class Player extends Person
 {
@@ -18,8 +18,8 @@ public class Player extends Person
 	public double portalMovementRotation = 0;
 	public double portalCameraRotation = 0;
 	public boolean[] wasdPortalArray; // used to disable/enable movement axis rotation
-	BufferedImage memoryImage = null;
-	boolean limitedVisibility = false;
+	Area visibleRememberArea = null;
+	boolean limitedVisibility = true;
 
 	// maybe hotkeys shouldn't belong to the player?
 

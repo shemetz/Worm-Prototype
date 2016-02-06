@@ -3,6 +3,7 @@ package mainClasses;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Polygon;
 import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
 
@@ -22,6 +23,8 @@ public class Portal extends Drawable
 	Color white = Color.white;
 	double slope;
 	SoundEffect sound;
+	Polygon clip1;
+	Polygon clip2;
 
 	public Portal(double x_, double y_, double z_, double angle1, double length1)
 	{
@@ -36,6 +39,32 @@ public class Portal extends Drawable
 		image = new BufferedImage((int) length, (int) length, BufferedImage.TYPE_INT_ARGB);
 		slope = length / 6 / 6;
 		this.sound = new SoundEffect("Portal_1.wav"); // is not used, but is needed, temporarily
+		setClips();
+	}
+
+	public void setClips()
+	{
+		int k = 1;
+		clip1 = new Polygon();
+		clip1.addPoint((int) (x - Math.cos(angle) * length * 1), (int) (y - Math.sin(angle) * length * 1));
+		clip1.addPoint((int) (x + Math.cos(angle) * length * 1), (int) (y + Math.sin(angle) * length * 1));
+		clip1.addPoint((int) (x + Math.cos(angle) * length * 1 + Math.cos(angle + Math.PI / 2) * length * 1 * k),
+				(int) (y + Math.sin(angle) * length * 1 + Math.sin(angle + Math.PI / 2) * length * 1 * k));
+		clip1.addPoint((int) (x - Math.cos(angle) * length * 1 + Math.cos(angle + Math.PI / 2) * length * 1 * k),
+				(int) (y - Math.sin(angle) * length * 1 + Math.sin(angle + Math.PI / 2) * length * 1 * k));
+		k = -1;
+		clip2 = new Polygon();
+		clip2.addPoint((int) (x - Math.cos(angle) * length * 1), (int) (y - Math.sin(angle) * length * 1));
+		clip2.addPoint((int) (x + Math.cos(angle) * length * 1), (int) (y + Math.sin(angle) * length * 1));
+		clip2.addPoint((int) (x + Math.cos(angle) * length * 1 + Math.cos(angle + Math.PI / 2) * length * 1 * k),
+				(int) (y + Math.sin(angle) * length * 1 + Math.sin(angle + Math.PI / 2) * length * 1 * k));
+		clip2.addPoint((int) (x - Math.cos(angle) * length * 1 + Math.cos(angle + Math.PI / 2) * length * 1 * k),
+				(int) (y - Math.sin(angle) * length * 1 + Math.sin(angle + Math.PI / 2) * length * 1 * k));
+	}
+
+	public Polygon getClip(boolean direction)
+	{
+		return direction ? clip1 : clip2;
 	}
 
 	public void playPortalSound()
