@@ -81,6 +81,21 @@ public class ApplyEffect extends Ability
 						targets.add(p);
 				}
 			break;
+		case TARGETED:
+			targets.clear();
+			double closest = -1;
+			for (Person p: env.people){
+				if (viableTarget(p, user)){
+					double distancePow2 = Methods.DistancePow2(user.target.x, user.target.y, p.x, p.y);
+					System.out.println(distancePow2);
+					if (distancePow2 < closest || closest == -1){
+						closest = distancePow2;
+						targets.clear();
+						targets.add(p);
+					}
+				}
+			}
+			break;
 		default:
 			MAIN.errorMessage(targetingType);
 			break;

@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
+import abilities.SlowTarget;
 import abilities.Ball_E;
 import abilities.Beam_E;
 import abilities.Blink;
@@ -51,7 +52,7 @@ public class Ability
 {
 	final static List<String> implementedAbilities = Arrays.asList("Portals", "Elemental Void", "Precision I", "Protective Bubble I", "Sprint", "Strength I", "Strength II", "Strength III", "Punch",
 			"Heal I", "Heal II", "Force Shield", "Ranged Explosion", "Flight I", "Flight II", "Telekinetic Flight", "Blink", "Ghost Mode I", "Strong Force Field", "Beam", "Ball", "Shield", "Pool",
-			"Wall", "Spray", "Toughness III", "Sense Life", "Sense Mana and Stamina", "Sense Powers", "Elemental Combat I");
+			"Wall", "Spray", "Toughness III", "Sense Life", "Sense Mana and Stamina", "Sense Powers", "Elemental Combat I", "Slow Target");
 
 	protected static List<String> descriptions = new ArrayList<String>();
 	protected static boolean[][] elementalAttacksPossible = new boolean[12][7]; // [element][ability]
@@ -538,6 +539,8 @@ public class Ability
 			return new Elemental_Combat_I_E(element, pnts);
 		case "Elemental Combat II": // NOT DONE
 			return new Elemental_Combat_II_E(element, pnts);
+		case "Slow Target":
+			return new SlowTarget(pnts);
 		default:
 			MAIN.errorMessage("Donald trump peninsula error - " + abilityName);
 
