@@ -839,13 +839,13 @@ public class Person extends RndPhysObj implements Mover
 		if (inCombat)
 		{
 			life += lifeRegen * deltaTime;
-			mana += manaRegen * deltaTime;
+			mana += manaRegen * deltaTime / timeEffect; // mana regen is unaffected by time shenanigans
 			stamina += staminaRegen * deltaTime;
 		}
 		else
 		{
 			life += lifeRegen * 3 * deltaTime;
-			mana += manaRegen * 1.5 * deltaTime;
+			mana += manaRegen * 1.5 * deltaTime / timeEffect; // mana regen is unaffected by time shenanigans
 			stamina += staminaRegen * 1.5 * deltaTime;
 		}
 

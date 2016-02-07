@@ -16,11 +16,11 @@ public class Chronobiology extends Ability
 	public Chronobiology(int p)
 	{
 		super("Chronobiology", p);
-		cost = 5; // to switch
+		cost = 3; // to switch
 		costType = "mana";
 		instant = true;
 
-		amount = 1 + 0.3 * level;
+		amount = 1 + 0.2 * level;
 		on = true; // on = fast, off = slow
 	}
 
