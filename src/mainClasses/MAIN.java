@@ -56,6 +56,7 @@ import abilities.Shield_E;
 import abilities.Sprint;
 import abilities.TeleportAbility;
 import effects.Burning;
+import effects.Tangled;
 import mainClasses.NPC.Strategy;
 import mainResourcesPackage.SoundEffect;
 
@@ -68,8 +69,8 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 	final double TAU = 2 * Math.PI;
 
 	// CONSTANTS
-	final boolean movementVariation = true;
-	boolean portalCameraRotation = true; // if true = player is slower when walking sideways and backwards
+	final boolean movementVariation = true; // if true = player is slower when walking sideways and backwards
+	boolean portalCameraRotation = false;
 	int frameWidth = 1280, frameHeight = 800;
 	Timer frameTimer; // Each frame of this timer redraws the frame
 	int frameTimerDelay = 20; // Every 20 milliseconds the frameTimer will do its stuff. =50 FPS
@@ -91,6 +92,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 	{ "M-Click", "  Shift  ", "     Q", "     E", "     R", "     F", "     V", "     C", "     X", "     Z" };
 	FontRenderContext frc;
 	Font tooltipFont = new Font("Serif", Font.PLAIN, 12);
+	Font FPSFont = new Font("Sans-Serif", Font.PLAIN, 20);
 	DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
 	static Random random = new Random();
 	Point[] niceHotKeys;
@@ -140,6 +142,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 
 	// FPS checks
 	long lastLoopTime = System.nanoTime();
+	boolean showFPS = false;
 	int FPS = -1;
 
 	// Pause menus
@@ -290,11 +293,14 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 						a.use(env, p, null);
 				// Remove all effects
 				for (int i = 0; i < p.effects.size(); i++)
-				{
-					p.effects.get(i).unapply(p);
-					p.effects.remove(i);
-					i--;
-				}
+					if (p.effects.get(i).removeOnDeath)
+					{
+						p.effects.get(i).unapply(p);
+						p.effects.remove(i);
+						i--;
+					}
+					else
+						p.effects.get(i).timeLeft = -1;
 			}
 			else
 			{
@@ -377,10 +383,15 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 					case 8: // lava
 						env.hitPerson(p, 20, 0, 0, 8, deltaTime); // burn damage
 						if (frameNum % 50 == 0 && random.nextDouble() < 0.7) // burn chance is 70% in lava
-							// p.affect(new Burning(0,null), true);
-							break;
+							p.affect(new Burning(0, null), true);
+						break;
 					case 10: // earth spikes
 						env.hitPerson(p, 25, 0, 0, 10, deltaTime);
+						break;
+					case 11: // plant vines/spikes
+						env.hitPerson(p, 5, 0, 0, 11, deltaTime);
+						if (frameNum % 50 == 0 && random.nextDouble() < 0.7) // tangle chance is 70% in lava
+							p.affect(new Tangled(0, null), true);
 						break;
 					default:
 						errorMessage("Unknown pool type: " + type);
@@ -388,19 +399,26 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 					}
 				}
 			}
-			// once per second, damage for burn and test for extinguishing fire
 			if (frameNum % 50 == 0)
 			{
+				int tangleDamage = 0;
 				for (int i = 0; i < p.effects.size(); i++)
 				{
 					Effect e = p.effects.get(i);
+					// once per second, damage for burn and test for extinguishing fire
 					if (e instanceof Burning)
 					{
 						env.hitPerson(p, e.strength, 0, 0, 2);
 						if (random.nextDouble() < 0.25) // 25% chance to stop burning, per second
 							p.affect(e, false);
 					}
+					// damage from Tangled
+					if (e instanceof Tangled)
+						tangleDamage += ((Tangled) e).damage;
 				}
+
+				env.hitPerson(p, tangleDamage, 0, 0, -1); // not 11!!!! don't!
+
 			}
 		}
 
@@ -753,7 +771,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			buffer.setStroke(dashedStroke3);
 			GridTargetingAbility gAbility = (GridTargetingAbility) ability;
 			gAbility.UPT(env, player);
-			if (player.abilityAiming == -1 || player.abilityMaintaining == player.hotkeys[hotkeySelected])
+			if (player.abilityAiming == -1 || ability.on)
 			{
 				if (gAbility.canBuildInTarget)
 					buffer.setColor(Color.green);
@@ -774,12 +792,13 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			buffer.setStroke(new BasicStroke(1));
 			buffer.setColor(new Color(182, 255, 0));
 			Shape thing = new Ellipse2D.Double(player.x - ability.range, player.y - ability.range, 2 * ability.range, 2 * ability.range);
-			buffer.setClip(thing);
+			Shape originalClip = buffer.getClip();
+			buffer.clip(thing);
 			for (int x = (int) (player.x - ability.range) / 18 * 18; x < (int) (player.x + ability.range + 18) / 18 * 18; x += 18)
 				buffer.drawLine(x, (int) (player.y - ability.range), x, (int) (player.y + ability.range));
 			for (int y = (int) (player.y - ability.range) / 18 * 18; y < (int) (player.y + ability.range + 18) / 18 * 18; y += 18)
 				buffer.drawLine((int) (player.x - ability.range), y, (int) (player.x + ability.range), y);
-			buffer.setClip(null);
+			buffer.setClip(originalClip);
 			buffer.drawOval((int) (player.x - ability.range), (int) (player.y - ability.range), ability.range * 2, ability.range * 2);
 
 			// more resource-intensive method ahead, that does the exact same thing :)
@@ -995,6 +1014,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 	// Start of the program. Set-up stuff happens here!
 	void restart()
 	{
+		frameTimer.stop();
 		System.setProperty("sun.java2d.opengl", "True");
 
 		EPgenerator.initializeFHRE();
@@ -1094,6 +1114,8 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			env.remove((int) (p.x + p.radius) / squareSize, (int) (p.y - p.radius) / squareSize);
 			env.remove((int) (p.x + p.radius) / squareSize, (int) (p.y + p.radius) / squareSize);
 		}
+
+		frameTimer.start();
 	}
 
 	void pressAbilityKey(int abilityIndex, boolean press, Person p)
@@ -1327,6 +1349,8 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		// NOTICE! THE ORDER OF DRAWING OPERATIONS IS ACTUALLY IMPORTANT!
 		Graphics2D buffer = (Graphics2D) g;
 
+		buffer.setColor(Color.black);
+		buffer.fillRect(0, 0, frameWidth, frameHeight);
 		zoomLevel /= (player.z * heightZoomRatio + 1);
 		// Move "camera" to position
 		buffer.scale(zoomLevel, zoomLevel);
@@ -1352,11 +1376,41 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			halfBoundsDiagonal = halfBoundsDiagonal * (player.z * heightZoomRatio + 1) / zoomLevel;
 			bounds = new Rectangle((int) (camera.x - halfBoundsDiagonal), (int) (camera.y - halfBoundsDiagonal), (int) (halfBoundsDiagonal * 2), (int) (halfBoundsDiagonal * 2));
 		}
-		env.drawFloor(buffer, bounds);
-		drawBottomEffects(buffer);
-		// environment not including effects and clouds
-		env.draw(buffer, (int) camera.z, bounds, cameraRotation);
-		drawTopEffects(buffer);
+
+		if (player.limitedVisibility)
+		{
+			// visibility
+			if (player.seenBefore == null) // TODO move this to initialization in restart() probably
+			{
+				player.seenBefore = new int[env.width][env.height];
+				player.rememberArea = new Area();
+			}
+			if (player.visibleArea == null || frameNum % 2 == 0)
+			{
+				player.visibleArea = env.updateVisibility(player, bounds, player.seenBefore); // maybe this slows down the game a tiny bit
+				player.rememberArea.add(player.visibleArea);
+				double viewRangeDistance = Math.max(player.flightVisionDistance * player.z, 1350);
+				Ellipse2D viewRange = new Ellipse2D.Double(player.x - viewRangeDistance, player.y - viewRangeDistance, 2 * viewRangeDistance, 2 * viewRangeDistance);
+				player.visibleRememberArea = new Area();
+				player.visibleRememberArea.add(player.rememberArea);
+				player.visibleRememberArea.intersect(new Area(viewRange));
+			}
+			// Draws everything within the player's view range that is inside the rememberArea.
+			buffer.setClip(player.visibleRememberArea);
+			env.drawFloor(buffer, bounds);
+			drawBottomEffects(buffer);
+			env.draw(buffer, (int) camera.z, bounds, cameraRotation);
+			drawTopEffects(buffer);
+			buffer.setClip(null);
+		}
+
+		else
+		{
+			env.drawFloor(buffer, bounds);
+			drawBottomEffects(buffer);
+			env.draw(buffer, (int) camera.z, bounds, cameraRotation);
+			drawTopEffects(buffer);
+		}
 
 		if (hotkeySelected != -1 && player.hotkeys[hotkeySelected] != -1)
 			drawRange(buffer, player.abilities.get(player.hotkeys[hotkeySelected]));
@@ -1408,9 +1462,17 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			drawScreenshot(buffer);
 
 		// FPS
-		buffer.setColor(Color.white);
-		buffer.setFont(tooltipFont);
-		buffer.drawString("" + FPS, frameWidth - 50, 50);
+		if (showFPS)
+		{
+			buffer.setFont(FPSFont);
+			buffer.setColor(Color.white);
+			buffer.drawString("" + FPS, frameWidth - 50 - 1, 50 - 1);
+			buffer.drawString("" + FPS, frameWidth - 50 + 1, 50 - 1);
+			buffer.drawString("" + FPS, frameWidth - 50 - 1, 50 + 1);
+			buffer.drawString("" + FPS, frameWidth - 50 + 1, 50 + 1);
+			buffer.setColor(Color.black);
+			buffer.drawString("" + FPS, frameWidth - 50, 50);
+		}
 	}
 
 	void drawExtraPeopleInfo(Graphics2D buffer)
@@ -1472,19 +1534,21 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		{
 			// does not draw info above player
 			if (!p.equals(player) && p.z <= camera.z)
-			{
-				double distancePow2 = Methods.DistancePow2(player.x, player.y, p.x, p.y);
+				// only if inside visible area
+				if (!player.limitedVisibility || player.visibleArea.contains(p.x, p.y))
+				{
+					double distancePow2 = Methods.DistancePow2(player.x, player.y, p.x, p.y);
 
-				buffer.translate(p.x, p.y);
-				buffer.scale(p.z * MAIN.heightZoomRatio + 1, p.z * MAIN.heightZoomRatio + 1);
-				buffer.translate(-p.x, -p.y);
+					buffer.translate(p.x, p.y);
+					buffer.scale(p.z * MAIN.heightZoomRatio + 1, p.z * MAIN.heightZoomRatio + 1);
+					buffer.translate(-p.x, -p.y);
 
-				p.drawData(buffer, distancePow2 < drawLifeDistancePow2, distancePow2 < drawManaDistancePow2, distancePow2 < drawStaminaDistancePow2, cameraRotation);
+					p.drawData(buffer, distancePow2 < drawLifeDistancePow2, distancePow2 < drawManaDistancePow2, distancePow2 < drawStaminaDistancePow2, cameraRotation);
 
-				buffer.translate(p.x, p.y);
-				buffer.scale(1 / (p.z * MAIN.heightZoomRatio + 1), 1 / (p.z * MAIN.heightZoomRatio + 1));
-				buffer.translate(-p.x, -p.y);
-			}
+					buffer.translate(p.x, p.y);
+					buffer.scale(1 / (p.z * MAIN.heightZoomRatio + 1), 1 / (p.z * MAIN.heightZoomRatio + 1));
+					buffer.translate(-p.x, -p.y);
+				}
 		}
 	}
 
@@ -1679,90 +1743,105 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		buffer.setFont(new Font("Sans-Serif", Font.BOLD, (int) (12 * UIzoomLevel)));
 		frc = buffer.getFontRenderContext();
 		for (int i = 0; i < player.hotkeys.length; i++)
-		{
-			int x = niceHotKeys[i].x;
-			int y = niceHotKeys[i].y;
-			buffer.setStroke(new BasicStroke((float) (3 * UIzoomLevel)));
-			buffer.setColor(Color.black);
-			if (player.hotkeys[i] != -1)
+			if (niceHotKeys[i] != null)
 			{
-				buffer.drawString(hotkeyStrings[i], x + (int) (12 * UIzoomLevel), y + (int) (76 * UIzoomLevel));
-				Ability ability = player.abilities.get(player.hotkeys[i]);
-				scaleBuffer(buffer, x, y, UIzoomLevel);
-				buffer.drawImage(Resources.icons.get(ability.name), x, y, this);
-				scaleBuffer(buffer, x, y, 1 / UIzoomLevel);
-				buffer.drawRect(x, y, (int) (60 * UIzoomLevel), (int) (60 * UIzoomLevel));
-
-				// Cooldown and mana notifications
-				if (ability.cooldownLeft != 0)
-				{// note that when the cooldown is over it will "jump" from low transparency to full transparency
-					buffer.setColor(new Color(0, 0, 0, (int) (130 + 100 * ability.cooldownLeft / ability.cooldown)));
-					buffer.fillRect(x + (int) (UIzoomLevel), y + (int) (1 * UIzoomLevel), (int) (59 * UIzoomLevel), (int) (59 * UIzoomLevel));
-				}
-				if (ability.cost > player.mana)
+				int x = niceHotKeys[i].x;
+				int y = niceHotKeys[i].y;
+				buffer.setStroke(new BasicStroke((float) (3 * UIzoomLevel)));
+				buffer.setColor(Color.black);
+				if (player.hotkeys[i] != -1)
 				{
-					if (ability.justName().equals("Pool") && ability.cost - 1.5 <= player.mana)
-						buffer.setColor(Color.yellow); // can only build low-cost pools next to other stuffs
-					else if (ability.justName().equals("Wall") && 0.3 <= player.mana)
-						buffer.setColor(Color.yellow); // repairing walls
-					else
-						buffer.setColor(Color.red);
-					buffer.drawRect(x + (int) (-3 * UIzoomLevel), y + (int) (-3 * UIzoomLevel), (int) (66 * UIzoomLevel), (int) (66 * UIzoomLevel));
-				}
+					// key
+					buffer.setColor(Color.black);
+					for (int a = -1; a <= 1; a += 2)
+						for (int b = -1; b <= 1; b += 2)
+							buffer.drawString(hotkeyStrings[i], x + a + (int) (12 * UIzoomLevel), y + b + (int) (76 * UIzoomLevel));
+					buffer.setColor(Color.white);
+					buffer.drawString(hotkeyStrings[i], x + (int) (12 * UIzoomLevel), y + (int) (76 * UIzoomLevel));
 
-				// ON/OFF
-				if (ability.on)
-				{
-					buffer.setColor(Color.cyan);
-					buffer.setStroke(new BasicStroke(2));
-					buffer.drawRect(x + (int) (1 * UIzoomLevel), y + (int) (1 * UIzoomLevel), (int) (59 * UIzoomLevel), (int) (59 * UIzoomLevel));
-				}
-				else if (ability instanceof Portals) // if portals ability
-					if (((Portals) ability).p1 != null)
+					// rectangle outline
+					buffer.setStroke(new BasicStroke((float) (3 * UIzoomLevel)));
+					buffer.setColor(Color.black);
+					buffer.drawRect(x, y, (int) (60 * UIzoomLevel), (int) (60 * UIzoomLevel));
+					// rectangle fill
+					buffer.setColor(new Color(255, 255, 255, 89));
+					buffer.fillRect(x, y, (int) (60 * UIzoomLevel), (int) (60 * UIzoomLevel));
+					// ability icon
+					Ability ability = player.abilities.get(player.hotkeys[i]);
+					scaleBuffer(buffer, x, y, UIzoomLevel);
+					buffer.drawImage(Resources.icons.get(ability.name), x, y, this);
+					scaleBuffer(buffer, x, y, 1 / UIzoomLevel);
+
+					// Cooldown and mana notifications
+					if (ability.cooldownLeft != 0)
+					{// note that when the cooldown is over it will "jump" from low transparency to full transparency
+						buffer.setColor(new Color(0, 0, 0, (int) (130 + 100 * ability.cooldownLeft / ability.cooldown)));
+						buffer.fillRect(x + (int) (UIzoomLevel), y + (int) (1 * UIzoomLevel), (int) (59 * UIzoomLevel), (int) (59 * UIzoomLevel));
+					}
+					if (ability.cost > player.mana)
 					{
-						// draw half of the "on" sign
-						buffer.setColor(Color.cyan);
-						buffer.setStroke(new BasicStroke(2));
-						buffer.drawLine(x + (int) (1 * UIzoomLevel), y + (int) (1 * UIzoomLevel), x + (int) (1 * UIzoomLevel + 59 * UIzoomLevel), y + (int) (1 * UIzoomLevel));
-						buffer.drawLine(x + (int) (1 * UIzoomLevel), y + (int) (1 * UIzoomLevel), x + (int) (1 * UIzoomLevel), y + (int) (1 * UIzoomLevel + 59 * UIzoomLevel));
+						if (ability.justName().equals("Pool") && ability.cost - 1.5 <= player.mana)
+							buffer.setColor(Color.yellow); // can only build low-cost pools next to other stuffs
+						else if (ability.justName().equals("Wall") && 0.3 <= player.mana)
+							buffer.setColor(Color.yellow); // repairing walls
+						else
+							buffer.setColor(Color.red);
+						buffer.drawRect(x + (int) (-3 * UIzoomLevel), y + (int) (-3 * UIzoomLevel), (int) (66 * UIzoomLevel), (int) (66 * UIzoomLevel));
 					}
 
-				// current power
-				if (player.hotkeys[i] == player.abilityAiming || player.hotkeys[i] == player.abilityMaintaining || player.hotkeys[i] == player.abilityTryingToRepetitivelyUse)
-				{
-					buffer.setColor(Color.green);
-					buffer.setStroke(new BasicStroke(2));
-					buffer.drawRect(x + (int) (1 * UIzoomLevel), y + (int) (1 * UIzoomLevel), (int) (59 * UIzoomLevel), (int) (59 * UIzoomLevel));
-				}
+					// ON/OFF
+					if (ability.on)
+					{
+						buffer.setColor(Color.cyan);
+						buffer.setStroke(new BasicStroke(2));
+						buffer.drawRect(x + (int) (1 * UIzoomLevel), y + (int) (1 * UIzoomLevel), (int) (59 * UIzoomLevel), (int) (59 * UIzoomLevel));
+					}
+					else if (ability instanceof Portals) // if portals ability
+						if (((Portals) ability).p1 != null)
+						{
+							// draw half of the "on" sign
+							buffer.setColor(Color.cyan);
+							buffer.setStroke(new BasicStroke(2));
+							buffer.drawLine(x + (int) (1 * UIzoomLevel), y + (int) (1 * UIzoomLevel), x + (int) (1 * UIzoomLevel + 59 * UIzoomLevel), y + (int) (1 * UIzoomLevel));
+							buffer.drawLine(x + (int) (1 * UIzoomLevel), y + (int) (1 * UIzoomLevel), x + (int) (1 * UIzoomLevel), y + (int) (1 * UIzoomLevel + 59 * UIzoomLevel));
+						}
 
-				// selected power for targeting
-				if (i == hotkeySelected)
-				{
-					int uiz = (int) UIzoomLevel;
-					buffer.setColor(Color.cyan);
-					buffer.fillRect(x + uiz, y + (int) (62 * UIzoomLevel), (int) (58 * UIzoomLevel), (int) (4 * UIzoomLevel)); // bottom
-					buffer.fillRect(x + uiz, y + (int) (-5 * UIzoomLevel), (int) (58 * UIzoomLevel), (int) (4 * UIzoomLevel)); // top
-					buffer.fillRect(x + (int) (-5 * UIzoomLevel), y + uiz, (int) (4 * UIzoomLevel), (int) (58 * UIzoomLevel)); // left
-					buffer.fillRect(x + (int) (62 * UIzoomLevel), y + uiz, (int) (4 * UIzoomLevel), (int) (58 * UIzoomLevel)); // right
-				}
+					// current power
+					if (player.hotkeys[i] == player.abilityAiming || player.hotkeys[i] == player.abilityMaintaining || player.hotkeys[i] == player.abilityTryingToRepetitivelyUse)
+					{
+						buffer.setColor(Color.green);
+						buffer.setStroke(new BasicStroke(2));
+						buffer.drawRect(x + (int) (1 * UIzoomLevel), y + (int) (1 * UIzoomLevel), (int) (59 * UIzoomLevel), (int) (59 * UIzoomLevel));
+					}
 
-				// selected power during tab
-				if (paused && (player.hotkeys[i] == pauseHoverAbility || i == hotkeyHovered))
-				{
-					buffer.setStroke(new BasicStroke(1));
-					buffer.setColor(Color.yellow);
-					buffer.drawRect(x, y, (int) (60 * UIzoomLevel), (int) (60 * UIzoomLevel));
+					// selected power for targeting
+					if (i == hotkeySelected)
+					{
+						int uiz = (int) UIzoomLevel;
+						buffer.setColor(Color.cyan);
+						buffer.fillRect(x + uiz, y + (int) (62 * UIzoomLevel), (int) (58 * UIzoomLevel), (int) (4 * UIzoomLevel)); // bottom
+						buffer.fillRect(x + uiz, y + (int) (-5 * UIzoomLevel), (int) (58 * UIzoomLevel), (int) (4 * UIzoomLevel)); // top
+						buffer.fillRect(x + (int) (-5 * UIzoomLevel), y + uiz, (int) (4 * UIzoomLevel), (int) (58 * UIzoomLevel)); // left
+						buffer.fillRect(x + (int) (62 * UIzoomLevel), y + uiz, (int) (4 * UIzoomLevel), (int) (58 * UIzoomLevel)); // right
+					}
+
+					// selected power during tab
+					if (paused && (player.hotkeys[i] == pauseHoverAbility || i == hotkeyHovered))
+					{
+						buffer.setStroke(new BasicStroke(1));
+						buffer.setColor(Color.yellow);
+						buffer.drawRect(x, y, (int) (60 * UIzoomLevel), (int) (60 * UIzoomLevel));
+					}
 				}
+				else
+				// no power in that space
+				{
+					// buffer.setStroke(dashedStroke3);
+					// buffer.setColor(new Color(0, 0, 0, 90));
+					// buffer.drawRect(x, y, (int) (60 * UIzoomLevel), (int) (60 * UIzoomLevel));
+				}
+				// remember - black rectangle after icon
 			}
-			else
-			// no power in that space
-			{
-				// buffer.setStroke(dashedStroke3);
-				// buffer.setColor(new Color(0, 0, 0, 90));
-				// buffer.drawRect(x, y, (int) (60 * UIzoomLevel), (int) (60 * UIzoomLevel));
-			}
-			// remember - black rectangle after icon
-		}
 
 		buffer.setStroke(new BasicStroke((float) (3 * UIzoomLevel)));
 		buffer.setColor(Color.black);
@@ -2007,6 +2086,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			p.switchAnimation(0);
 			return;
 		}
+
 		// Okay, get ready
 		if (!p.prone)
 		{
@@ -2047,6 +2127,10 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 								staminaMultiplier *= a.costPerSecond;
 								runMultiplier *= 2;
 							}
+						// Tangled
+						for (Effect e : p.effects)
+							if (e instanceof Tangled)
+								runMultiplier *= 0.66; // Speed decreased by 33% per vine (stacking multiplicatively)
 
 						// making sure dude/dudette has enough stamina
 						double timesStaminaFitsIntoStaminaCost = p.stamina / (p.runningStaminaCost * deltaTime * staminaMultiplier);
@@ -2421,6 +2505,9 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		case KeyEvent.VK_F4:
 			portalCameraRotation = !portalCameraRotation;
 			break;
+		case KeyEvent.VK_F5:
+			showFPS = !showFPS;
+			break;
 		case KeyEvent.VK_F12:
 			if (timeSinceLastScreenshot > 0.1)
 				try
@@ -2513,6 +2600,8 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 	public MAIN()
 	{
 
+		frameTimer = new Timer(frameTimerDelay, frameListener);
+		frameTimer.setInitialDelay(0);
 		restart();
 		this.addWindowListener(new WindowAdapter()
 		{
@@ -2539,9 +2628,6 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		addMouseMotionListener(this);
 		addComponentListener(this);
 		addWindowFocusListener(this);
-		frameTimer = new Timer(frameTimerDelay, frameListener);
-		frameTimer.setInitialDelay(0);
-		frameTimer.start();
 	}
 
 	// IGNORE
@@ -2573,10 +2659,10 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		}
 		if (bufferImage != null)
 		{
-			bufferImage.flush();
+			// bufferImage.flush();
 			bufferImage = null;
 		}
-		System.gc(); // Garbage cleaner
+		// System.gc(); // Garbage cleaner. useless line?
 
 		// create the new image with the size of the panel
 		bufferImage = createImage(bufferWidth, bufferHeight);

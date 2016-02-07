@@ -170,7 +170,7 @@ public class NPC extends Person
 				{
 					if (this.timeSinceLastDistCheck >= 1) // once per second. that variable is reduced by 1 soon after this
 					{
-						Point targetPoint = new Point((int)(targetPerson.x + targetPerson.xVel*deltaTime*4), (int)(targetPerson.y + targetPerson.yVel*deltaTime*4));
+						Point targetPoint = new Point((int) (targetPerson.x + targetPerson.xVel * deltaTime * 4), (int) (targetPerson.y + targetPerson.yVel * deltaTime * 4));
 						path = pathFind(targetPoint);
 					}
 
@@ -196,8 +196,17 @@ public class NPC extends Person
 				}
 				double maxDistanceNeeded = punch.range + targetPerson.radius;
 				for (ArcForceField aff : env.AFFs)
-					if (aff.target.equals(targetPerson) && aff.arc == 2 * Math.PI)
-						maxDistanceNeeded = punch.range + aff.maxRadius;
+					if (aff.target.equals(targetPerson))
+					{
+						// angle check
+						double angleToMe = Math.atan2(this.y - targetPerson.y, this.x - targetPerson.x);
+						while (aff.rotation > Math.PI)
+							aff.rotation -= 2 * Math.PI;
+						while (aff.rotation < -Math.PI)
+							aff.rotation += 2 * Math.PI;
+						if (angleToMe > aff.rotation - aff.arc / 2 && angleToMe < aff.rotation + aff.arc / 2)
+							maxDistanceNeeded = punch.range + aff.maxRadius;
+					}
 				if (distanceToTargetPow2 < Math.pow(maxDistanceNeeded, 2))
 					main.pressAbilityKey(index, true, this);
 				else if (punch.cooldownLeft <= 0)
@@ -481,7 +490,7 @@ public class NPC extends Person
 					// check if it's OK to merge
 					loop: for (int xx = minX; xx <= maxX; xx++)
 						for (int yy = minY; yy <= maxY; yy++)
-							if (envMap.getCost(this, A.x,A.y, xx, yy) > 1)
+							if (envMap.getCost(this, A.x, A.y, xx, yy) > 1)
 								if (Methods.LineToPointDistancePow2(A, C, new Point(xx, yy)) < minDistancePow2)
 								{
 									OKToMerge = false;

@@ -33,7 +33,6 @@ public class ArcForceField extends Drawable
 		waitingDamage = 0;
 		timeBetweenDamageTexts = 0;
 		type = type1;
-		int frame = 0;
 		if (elementNum < 12) // normal elemental shields
 		{
 			life = 1;
@@ -44,7 +43,6 @@ public class ArcForceField extends Drawable
 			extraLife = 0;
 		}
 		updateImage();
-		changeImage(Resources.arcForceFields[elementNum][frame]);
 	}
 
 	public void update(double deltaTime)

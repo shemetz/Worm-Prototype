@@ -6,6 +6,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,6 +17,7 @@ import abilities.Elemental_Void;
 import abilities.Sprint;
 import effects.Burning;
 import effects.Healed;
+import effects.Tangled;
 import mainResourcesPackage.SoundEffect;
 import pathfinding.Mover;
 
@@ -50,6 +52,7 @@ public class Person extends RndPhysObj implements Mover
 	public double runSpeed; // maximum speed in pixel/sec in a single direction while running on dry earth.
 	public double runAccel;
 	public int naturalArmor;
+	public int flightVisionDistance; // in pixels. is multiplied by height, in meters, while flying
 	public double punchSpeed;
 	public double accuracy; // from 0 to 1. 0 = 90 degree miss, 1 = 0 degree miss, 0.5 = 45 degree miss.
 	public double missAngle;
@@ -101,6 +104,9 @@ public class Person extends RndPhysObj implements Mover
 
 	// stuff
 	String voiceType; // Male, Female. TODO add more
+	public Area visibleArea = null;
+	public Area rememberArea = null;
+	public int[][] seenBefore;
 
 	// Inventory and stuff?
 	public List<Item> inventory;
@@ -108,7 +114,9 @@ public class Person extends RndPhysObj implements Mover
 	public Armor[] armorParts; // head, chest, arms, legs
 
 	// Animation
-	public List<List<BufferedImage>> animation;
+	public List<List<BufferedImage>> animationBottom;
+	public List<List<BufferedImage>> animationTop;
+	public List<List<BufferedImage>> animationVine;
 
 	// Sounds
 	public List<SoundEffect> sounds = new ArrayList<SoundEffect>();
@@ -153,10 +161,10 @@ public class Person extends RndPhysObj implements Mover
 		}
 		panic = false;
 		target = new Point(-1, -1);
-		initAnimation();
-		initSounds();
 		imgW = 96;
 		imgH = 96;
+		initAnimation();
+		initSounds();
 		initStats();
 
 		body = new Armor[4];
@@ -268,6 +276,7 @@ public class Person extends RndPhysObj implements Mover
 		punchSpeed = 0.55 - Math.min(0.15, 0.02 * FITNESS);
 		runAccel = 1000 * FITNESS;
 		runSpeed = 100 * FITNESS;
+		flightVisionDistance = 100 * WITS;
 		accuracy = 1 - 0.6 / ((double) DEXTERITY + 1);
 		updateAccuracy();
 		runningStaminaCost = 0.6;
@@ -329,84 +338,122 @@ public class Person extends RndPhysObj implements Mover
 		n.add(head);
 		n.add(hair);
 
-		animation = new ArrayList<List<BufferedImage>>();
+		animationBottom = new ArrayList<List<BufferedImage>>();
+		animationTop = new ArrayList<List<BufferedImage>>();
 
-		animation.add(new ArrayList<BufferedImage>()); // stand
+		animationVine = new ArrayList<List<BufferedImage>>();
+
+		increaseAnimationListSize(); // stand
 		insertFullBodyAnimation(0, 0, n);
-		animation.add(new ArrayList<BufferedImage>()); // walk
+
+		increaseAnimationListSize(); // walk
 		insertFullBodyAnimation(1, 1, n);
 		insertFullBodyAnimation(1, 0, n);
 		insertFullBodyAnimation(1, 1, n);
 		insertFullBodyAnimation(1, 2, n);
 		insertFullBodyAnimation(1, 3, n);
 		insertFullBodyAnimation(1, 2, n);
-		animation.add(new ArrayList<BufferedImage>()); // hold shield
+
+		increaseAnimationListSize(); // hold shield
 		insertFullBodyAnimation(2, 0, n);
-		animation.add(new ArrayList<BufferedImage>()); // slip
+
+		increaseAnimationListSize(); // slip
 		insertFullBodyAnimation(3, 0, n);
-		animation.add(new ArrayList<BufferedImage>()); // get up from slip
+
+		increaseAnimationListSize(); // get up from slip
 		insertFullBodyAnimation(4, 0, n);
 		insertFullBodyAnimation(4, 1, n);
 		insertFullBodyAnimation(4, 2, n);
-		animation.add(new ArrayList<BufferedImage>()); // punch with right arm
+
+		increaseAnimationListSize(); // punch with right arm
 		insertFullBodyAnimation(5, 0, n);
 		insertFullBodyAnimation(5, 0, n);
 		insertFullBodyAnimation(5, 1, n);
-		animation.add(new ArrayList<BufferedImage>()); // punch with left arm
+
+		increaseAnimationListSize(); // punch with left arm
 		insertFullBodyAnimation(6, 0, n);
 		insertFullBodyAnimation(6, 0, n);
 		insertFullBodyAnimation(6, 1, n);
-		animation.add(new ArrayList<BufferedImage>()); // fly
+
+		increaseAnimationListSize(); // fly
 		insertFullBodyAnimation(7, 0, n);
 		insertFullBodyAnimation(7, 1, n);
 		insertFullBodyAnimation(7, 2, n);
 		insertFullBodyAnimation(7, 1, n);
-		animation.add(new ArrayList<BufferedImage>()); // fly-hover--transition
+
+		increaseAnimationListSize(); // fly-hover transition
 		insertFullBodyAnimation(8, 0, n);
 		insertFullBodyAnimation(8, 0, n);
-		animation.add(new ArrayList<BufferedImage>()); // hover
+
+		increaseAnimationListSize(); // hover
 		insertFullBodyAnimation(9, 0, n);
-		animation.add(new ArrayList<BufferedImage>()); // flypunch preparation (arms backwards, ready...)
+
+		increaseAnimationListSize(); // flypunch preparation (arms backwards, ready...)
 		insertFullBodyAnimation(10, 0, n);
 		insertFullBodyAnimation(10, 1, n);
 		insertFullBodyAnimation(10, 2, n);
 		insertFullBodyAnimation(10, 1, n);
-		animation.add(new ArrayList<BufferedImage>()); // flypunch (right arm)
+
+		increaseAnimationListSize(); // flypunch (left)
 		insertFullBodyAnimation(11, 0, n);
 		insertFullBodyAnimation(11, 0, n);
-		animation.add(new ArrayList<BufferedImage>()); // flypunch (right arm)
+
+		increaseAnimationListSize(); // flypunch (right)
 		insertFullBodyAnimation(12, 0, n);
 		insertFullBodyAnimation(12, 0, n);
-		animation.add(new ArrayList<BufferedImage>()); // dead
+
+		increaseAnimationListSize(); // dead
 		insertFullBodyAnimation(13, 0, n);
 
-		changeImage(animation.get(animState).get(animFrame));
+		changeImage();
+	}
+
+	void increaseAnimationListSize()
+	{
+		animationBottom.add(new ArrayList<BufferedImage>());
+		animationTop.add(new ArrayList<BufferedImage>());
+		animationVine.add(new ArrayList<BufferedImage>());
 	}
 
 	public void insertFullBodyAnimation(int stateNum, int frameNum, List<Integer> n)
 	{
-		// following line might be wrong. It should just start as a transparent 96x96 image.
-		BufferedImage img = new BufferedImage(96, 96, BufferedImage.TYPE_INT_ARGB);
-		// temporary fix because I haven't drawn all the pictures yet; NOT in the final game! TODO
-		if (img != null)
+		// legs and chest, which change look depending on the frame
+		if (stateNum < 4)
 		{
+			BufferedImage img = new BufferedImage(imgW, imgH, BufferedImage.TYPE_INT_ARGB);
 			Graphics2D g2d = img.createGraphics();
-			// legs and chest, which change look depending on the frame
-			if (stateNum < 4)
-			{
-				for (int i = 0; i < 2; i++)
-					g2d.drawImage(Resources.bodyPart.get(i).get(n.get(i)).get(stateNum).get(frameNum), 0, 0, null); // first get is 0-1 for legs/chest, second get is for the stand state, third get is for the first stand frame
-				// head and hair, which do not
-				for (int i = 2; i < 4; i++)
-					g2d.drawImage(Resources.bodyPart.get(i).get(n.get(i)).get(stateNum).get(0), 0, 0, null);
-			}
-			else
-				for (int i = 0; i < 4; i++)
-					g2d.drawImage(Resources.bodyPart.get(i).get(n.get(i)).get(stateNum).get(frameNum), 0, 0, null);
+			for (int i = 0; i < 2; i++)
+				g2d.drawImage(Resources.bodyPart.get(i).get(n.get(i)).get(stateNum).get(frameNum), 0, 0, null); // first get is 0-1 for legs/chest, second get is for the stand state, third get is for the first stand frame
+			// wat. you mean third, fourth, fifth
 
+			animationBottom.get(stateNum).add(img);
 			g2d.dispose();
+			img = new BufferedImage(imgW, imgH, BufferedImage.TYPE_INT_ARGB);
+			g2d = img.createGraphics();
+			// head and hair, which do not
+			for (int i = 2; i < 4; i++)
+				g2d.drawImage(Resources.bodyPart.get(i).get(n.get(i)).get(stateNum).get(0), 0, 0, null);
+			animationTop.get(stateNum).add(img);
 		}
-		animation.get(stateNum).add(img);
+		else
+		{
+			BufferedImage img = new BufferedImage(imgW, imgH, BufferedImage.TYPE_INT_ARGB);
+			Graphics2D g2d = img.createGraphics();
+			for (int i = 0; i < 2; i++)
+				g2d.drawImage(Resources.bodyPart.get(i).get(n.get(i)).get(stateNum).get(frameNum), 0, 0, null);
+			animationBottom.get(stateNum).add(img);
+			g2d.dispose();
+			img = new BufferedImage(imgW, imgH, BufferedImage.TYPE_INT_ARGB);
+			g2d = img.createGraphics();
+			for (int i = 2; i < 4; i++)
+				g2d.drawImage(Resources.bodyPart.get(i).get(n.get(i)).get(stateNum).get(frameNum), 0, 0, null);
+			animationTop.get(stateNum).add(img);
+		}
+
+		BufferedImage img = new BufferedImage(imgW, imgH, BufferedImage.TYPE_INT_ARGB);
+		Graphics2D g2d = img.createGraphics();
+		g2d.drawImage(Resources.bodyPart.get(4).get(0).get(stateNum).get(frameNum), 0, 0, null);
+		animationVine.get(stateNum).add(img);
 	}
 
 	public void nextFrame(int frameNum)
@@ -474,7 +521,7 @@ public class Person extends RndPhysObj implements Mover
 			break;
 		}
 		// remember - if the animation has repeating frames of the same image, they are just added several times to the list.
-		if (animFrame > animation.get(animState).size() - 1)
+		if (animFrame > animationBottom.get(animState).size() - 1 && animFrame > animationTop.get(animState).size() - 1)
 			animFrame = 0;
 	}
 
@@ -651,7 +698,28 @@ public class Person extends RndPhysObj implements Mover
 			break;
 		}
 
-		changeImage(animation.get(animState).get(animFrame));
+		changeImage();
+	}
+
+	public void changeImage()
+	{
+		BufferedImage bf = new BufferedImage(imgW, imgH, BufferedImage.TYPE_INT_ARGB);
+		Graphics2D buffy = bf.createGraphics();
+		// Bottom
+		buffy.drawImage(animationBottom.get(animState).get(animFrame), 0, 0, null);
+
+		// Middle?
+		boolean vines = false;
+		for (Effect e : effects)
+			if (e instanceof Tangled)
+				vines = true;
+		if (vines)
+			buffy.drawImage(animationVine.get(animState).get(animFrame), 0, 0, null);
+
+		// Top
+		buffy.drawImage(animationTop.get(animState).get(animFrame), 0, 0, null);
+
+		changeImage(bf);
 	}
 
 	public void randomizeDNA()
@@ -909,13 +977,15 @@ public class Person extends RndPhysObj implements Mover
 			// Player Image
 			buffer.drawImage(img, (int) (x - 0.5 * imgW), (int) (y - 0.5 * imgH), null);
 
-			// Special effects (burning)
+			// Special effects
 			for (Effect e : effects)
+			{
 				if (e instanceof Burning)
 				{
-					img = Resources.effects.get(0).get(e.animFrame);
-					buffer.drawImage(img, (int) (x - 0.5 * imgW), (int) (y - 0.5 * imgH), null);
+					BufferedImage flames = Resources.effects.get(0).get(e.animFrame);
+					buffer.drawImage(flames, (int) (x - 0.5 * imgW), (int) (y - 0.5 * imgH), null);
 				}
+			}
 			buffer.rotate(-rotation + 0.5 * Math.PI, (int) (x), (int) (y));
 			buffer.translate(x, y);
 			buffer.scale(1 / (z * MAIN.heightZoomRatio + 1), 1 / (z * MAIN.heightZoomRatio + 1));
@@ -936,7 +1006,7 @@ public class Person extends RndPhysObj implements Mover
 			s += " (RIP)";
 			buffer.setColor(new Color(50, 50, 50)); // dark gray
 		}
-		buffer.drawString(s, (int) (x - s.length() / 2 * 10), (int) (y - radius - 18));
+		buffer.drawString(s, (int) (x - s.length() / 2 * 10), (int) (y - radius - 28));
 
 		// Does not draw data if the person is dead
 		if (!dead)

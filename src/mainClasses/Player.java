@@ -1,21 +1,25 @@
 package mainClasses;
 
+import java.awt.geom.Area;
+
 public class Player extends Person
 {
-	public int[]		hotkeys;											// Mid-Click, Shift, Q, E, R, F, V, C, X, Z
-	public String		targetType				= "";
+	public int[] hotkeys; // Mid-Click, Shift, Q, E, R, F, V, C, X, Z
+	public String targetType = "";
 
-	public boolean		leftMousePressed;
-	public boolean		rightMousePressed		= false;
-	public boolean		leftPressed, rightPressed, upPressed, downPressed;
-	public boolean		ctrlPressed				= false;
-	public boolean		resizeUIButtonPressed	= false;
-	public boolean		spacePressed			= false;
-	public boolean		rotateButtonPressed		= false;
-	public boolean		successfulTarget;
-	public double		portalMovementRotation	= 0;
-	public double		portalCameraRotation	= 0;
-	public boolean[]	wasdPortalArray;									// used to disable/enable movement axis rotation
+	public boolean leftMousePressed;
+	public boolean rightMousePressed = false;
+	public boolean leftPressed, rightPressed, upPressed, downPressed;
+	public boolean ctrlPressed = false;
+	public boolean resizeUIButtonPressed = false;
+	public boolean spacePressed = false;
+	public boolean rotateButtonPressed = false;
+	public boolean successfulTarget;
+	public double portalMovementRotation = 0;
+	public double portalCameraRotation = 0;
+	public boolean[] wasdPortalArray; // used to disable/enable movement axis rotation
+	Area visibleRememberArea = null;
+	boolean limitedVisibility = true;
 
 	// maybe hotkeys shouldn't belong to the player?
 

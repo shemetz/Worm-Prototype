@@ -3,6 +3,7 @@ package mainClasses;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Polygon;
+import java.awt.Shape;
 import java.awt.image.BufferedImage;
 
 import abilities.Beam_E;
@@ -100,18 +101,19 @@ public class Beam extends Drawable
 		double k = (p.end.x - p.start.x) * (point.y - p.start.y) - (p.end.y - p.start.y) * (point.x - p.start.x);
 		// k is >0 if this is below p, <0 if this is above p, or 0 if this is in the middle of p
 
+		Shape originalClip = buffer.getClip();
 		Polygon clip = getClipOfPortal(p, k > 0);
-		buffer.setClip(clip);
+		buffer.clip(clip);
 		trueDraw(buffer, cameraZed);
-		buffer.setClip(null);
+		buffer.setClip(originalClip);
 		clip = getClipOfPortal(p.partner, k <= 0);
-		buffer.setClip(clip);
+		buffer.clip(clip);
 		buffer.translate(p.partner.x - p.x, p.partner.y - p.y);
 		buffer.rotate(p.partner.angle - p.angle, p.x, p.y);
 		trueDraw(buffer, cameraZed);
 		buffer.rotate(-p.partner.angle + p.angle, p.x, p.y);
 		buffer.translate(-p.partner.x + p.x, -p.partner.y + p.y);
-		buffer.setClip(null);
+		buffer.setClip(originalClip);
 	}
 
 	public Polygon getClipOfPortal(Portal p, boolean direction)

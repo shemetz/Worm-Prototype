@@ -10,6 +10,7 @@ import java.awt.Point;
 import java.awt.Transparency;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.ConvolveOp;
 import java.awt.image.Kernel;
@@ -18,8 +19,9 @@ public class Methods
 {
 	// Handy rotation method
 	static GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-    static GraphicsDevice gs = ge.getDefaultScreenDevice();
-    static GraphicsConfiguration tgc = gs.getDefaultConfiguration();
+	static GraphicsDevice gs = ge.getDefaultScreenDevice();
+	static GraphicsConfiguration tgc = gs.getDefaultConfiguration();
+
 	public static BufferedImage rotate(BufferedImage image, double angle)
 	{
 		if (image == null)
@@ -27,7 +29,7 @@ public class Methods
 		double sin = Math.abs(Math.sin(angle)), cos = Math.abs(Math.cos(angle));
 		int w = image.getWidth(), h = image.getHeight();
 		int neww = (int) Math.floor(w * cos + h * sin), newh = (int) Math.floor(h * cos + w * sin);
-		
+
 		BufferedImage result = tgc.createCompatibleImage(neww, newh, Transparency.TRANSLUCENT);
 		Graphics2D g = result.createGraphics();
 		g.translate((neww - w) / 2, (newh - h) / 2);
@@ -73,6 +75,14 @@ public class Methods
 		return LineToPointDistancePow2(new Point(start.x, start.y), new Point(end.x, end.y), point);
 	}
 
+	/**
+	 * CASTS TO INTS
+	 */
+	public static double LineToPointDistancePow2(double x1, double y1, double x2, double y2, double px, double py)
+	{
+		return LineToPointDistancePow2(new Point((int) (x1), (int) (y1)), new Point((int) (x2), (int) (y2)), new Point((int) (px), (int) (py)));
+	}
+
 	public static double LineToPointDistancePow2(Point start, Point end, Point point)
 	{
 
@@ -112,10 +122,12 @@ public class Methods
 		if (u < 0)
 		{
 			closestPoint = new Point2D.Double(sx1, sy1);
-		} else if (u > 1)
+		}
+		else if (u > 1)
 		{
 			closestPoint = new Point2D.Double(sx2, sy2);
-		} else
+		}
+		else
 		{
 			closestPoint = new Point2D.Double(sx1 + u * xDelta, sy1 + u * yDelta);
 		}
@@ -139,10 +151,12 @@ public class Methods
 		if (u < 0)
 		{
 			return Methods.DistancePow2(sx1, sy1, px, py);
-		} else if (u > 1)
+		}
+		else if (u > 1)
 		{
 			return Methods.DistancePow2(sx2, sy2, px, py);
-		} else
+		}
+		else
 		{
 			return Methods.DistancePow2(sx1 + u * xDelta, sy1 + u * yDelta, px, py);
 		}
@@ -171,8 +185,8 @@ public class Methods
 		return (b.x - a.x) * (c.x - a.x) + (b.y - a.y) * (c.y - a.y);
 	}
 
-	static GraphicsDevice			gd	= GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
-	static GraphicsConfiguration	gc	= gd.getDefaultConfiguration();
+	static GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+	static GraphicsConfiguration gc = gd.getDefaultConfiguration();
 
 	public static BufferedImage optimizeImage(BufferedImage img)
 	{
@@ -216,7 +230,8 @@ public class Methods
 		if (horizontal)
 		{
 			kernel = new Kernel(size, 1, data);
-		} else
+		}
+		else
 		{
 			kernel = new Kernel(1, size, data);
 		}
@@ -317,6 +332,40 @@ public class Methods
 		buffy.setColor(color);
 		buffy.fillRect(0, 0, original.getWidth(), original.getHeight());
 		buffy.dispose();
+		return result;
+	}
+
+	public static Point2D getClosestIntersectionPoint(Line2D line, Rectangle2D rectangle)
+	{
+		// if (Methods.LineToPointDistancePow2(line.getX1(), line.getY1(), line.getX2(), line.getY2(), rectangle.getCenterX(), rectangle.getCenterY()) > rectangle.getWidth() * rectangle.getHeight() / 4)
+		// return null;
+		Point2D[] p = new Point2D[4];
+
+		// Top line
+		p[0] = getSegmentIntersection(line, new Line2D.Double(rectangle.getX(), rectangle.getY(), rectangle.getX() + rectangle.getWidth(), rectangle.getY()));
+		// Bottom line
+		p[1] = getSegmentIntersection(line,
+				new Line2D.Double(rectangle.getX(), rectangle.getY() + rectangle.getHeight(), rectangle.getX() + rectangle.getWidth(), rectangle.getY() + rectangle.getHeight()));
+		// Left side...
+		p[2] = getSegmentIntersection(line, new Line2D.Double(rectangle.getX(), rectangle.getY(), rectangle.getX(), rectangle.getY() + rectangle.getHeight()));
+		// Right side
+		p[3] = getSegmentIntersection(line,
+				new Line2D.Double(rectangle.getX() + rectangle.getWidth(), rectangle.getY(), rectangle.getX() + rectangle.getWidth(), rectangle.getY() + rectangle.getHeight()));
+
+		// find closest to line's start
+		double maxDistPow2 = Double.MAX_VALUE;
+		Point2D result = null;
+		for (Point2D point : p)
+			if (point != null)
+			{
+				double distPow2 = Methods.DistancePow2(line.getX1(), line.getY1(), point.getX(), point.getY());
+				if (distPow2 < maxDistPow2)
+				{
+					maxDistPow2 = distPow2;
+					result = point;
+				}
+			}
+
 		return result;
 	}
 }

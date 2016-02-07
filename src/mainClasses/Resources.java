@@ -12,31 +12,29 @@ import mainResourcesPackage.ResourceLoader;
 
 public class Resources
 {
-	static BufferedImage[]							wall;																// type
-	static BufferedImage[]							pool;																// type
-	static BufferedImage[][]						croppedPool;														// type, 0123 = abcd, 45 = two bridge types
-	static BufferedImage[]							floor;																// type
-	static BufferedImage[][]						cracks;																// health type, connection style
-	static BufferedImage[][][]						wCorner;															// type, connection (up, bridge, bite, full), angle (in quarter-circles)
-	static BufferedImage[][][]						pCorner;															// type, connection (up, bridge, bite, full), angle (in quarter-circles)
-	static List<List<List<List<BufferedImage>>>>	bodyPart;															// body part, permutation, state, frame
-	static Map<String, BufferedImage>				icons;																// ability, frame
-	final static int								elementalNum	= 12;
-	static BufferedImage[][]						arcForceFields;														// element (12 = Prot. Bubble), frame (healthy / 75% / 50% / 25%)
-	final static int								arcFFImageWidth	= 288;
-	static BufferedImage[]							balls;																// element
-	static BufferedImage[][]						beams;																// element, type (0,1,2,3 = start, 4,5,6,7 = middle, 8,9,10,11 = flat end, 12,13,14,15 regular end)
-	static BufferedImage[][]						sprayDrops;															// element, type
-	static BufferedImage[][]						debris;																// element, type. 12 = smoke, 13 = Force Field.
-	static BufferedImage[][]						debrisShadows;														// element, type. ^
-	final static int								debrisWidth		= 40;
-	static List<BufferedImage>						clouds;
-	static List<BufferedImage>						cloudShadows;
-	static List<List<BufferedImage>>				effects;
-	static BufferedImage[]							healingBeam;														// frame
-	static List<List<BufferedImage>>				explosions;															// type, frame
-
-	static BufferedImage							range_net		= ResourceLoader.getBufferedImage("range_net.png");
+	public static BufferedImage[] wall; // type
+	public static BufferedImage[] pool; // type
+	public static BufferedImage[][] croppedPool; // type, 0123 = abcd, 45 = two bridge types
+	public static BufferedImage[] floor; // type
+	public static BufferedImage[][] cracks; // health type, connection style
+	public static BufferedImage[][][] wCorner; // type, connection (up, bridge, bite, full), angle (in quarter-circles)
+	public static BufferedImage[][][] pCorner; // type, connection (up, bridge, bite, full), angle (in quarter-circles)
+	public static List<List<List<List<BufferedImage>>>> bodyPart; // body part, permutation, state, frame
+	public static Map<String, BufferedImage> icons; // ability, frame
+	public final static int elementalNum = 12;
+	public static BufferedImage[][] arcForceFields; // element (12 = Prot. Bubble), frame (healthy / 75% / 50% / 25%)
+	public final static int arcFFImageWidth = 288;
+	public static BufferedImage[] balls; // element
+	public static BufferedImage[][] beams; // element, type (0,1,2,3 = start, 4,5,6,7 = middle, 8,9,10,11 = flat end, 12,13,14,15 regular end)
+	public static BufferedImage[][] sprayDrops; // element, type
+	public static BufferedImage[][] debris; // element, type. 12 = smoke, 13 = Force Field.
+	public static BufferedImage[][] debrisShadows; // element, type. ^
+	public final static int debrisWidth = 40;
+	public static List<BufferedImage> clouds;
+	public static List<BufferedImage> cloudShadows;
+	public static List<List<BufferedImage>> effects;
+	public static BufferedImage[] healingBeam; // frame
+	public static List<List<BufferedImage>> explosions; // type, frame
 
 	public static void initialize()
 	{
@@ -47,7 +45,7 @@ public class Resources
 		wCorner = new BufferedImage[elementalNum][4][4];
 		pCorner = new BufferedImage[elementalNum][4][4];
 
-		bodyPart = new ArrayList<List<List<List<BufferedImage>>>>(); // LEGS, CHEST (+arms), HEAD, HAIR
+		bodyPart = new ArrayList<List<List<List<BufferedImage>>>>(); // LEGS, CHEST (+arms), HEAD, HAIR, VINES
 
 		icons = new HashMap<String, BufferedImage>();
 		arcForceFields = new BufferedImage[elementalNum + 1][4]; // 0-11 = elemental, 12 = Prot. Bubble
@@ -211,7 +209,7 @@ public class Resources
 			cracks[i][11] = ResourceLoader.getBufferedImage("environment/cracks/cracks_" + i + "_wall.png");
 		}
 
-		// no need to transform it into BufferedImage.TYPE_INT_RGB
+		// no need to transform it into BufferedImage.TYPE_INT_RGB or anything similar, won't work :(
 		floor[0] = ResourceLoader.getBufferedImage("environment/floor_Earth.png");
 		// TODO additional forcefield types
 
@@ -219,8 +217,9 @@ public class Resources
 		bodyPart.add(new ArrayList<List<List<BufferedImage>>>()); // chest
 		bodyPart.add(new ArrayList<List<List<BufferedImage>>>()); // head
 		bodyPart.add(new ArrayList<List<List<BufferedImage>>>()); // hair
+		bodyPart.add(new ArrayList<List<List<BufferedImage>>>()); // vines
 
-		for (int i = 0; i < 4; i++)
+		for (int i = 0; i < 5; i++)
 		{
 			String bodyPartName = "null";
 			int numOfPermutations = -1;
@@ -242,6 +241,10 @@ public class Resources
 				bodyPartName = "hair";
 				numOfPermutations = 2;
 				break;
+			case 4:
+				bodyPartName = "vines";
+				numOfPermutations = 1;
+				break;
 			default:
 				MAIN.errorMessage("Unknown body part number: " + i);
 				break;
@@ -250,7 +253,7 @@ public class Resources
 			{
 				// Comment: Yes. this part is messy. And remember that it needs to be in combination with the Person.initAnimation part.
 				bodyPart.get(i).add(new ArrayList<List<BufferedImage>>());
-				if (i == 0 || i == 1) // if body part is legs or chest
+				if (i == 0 || i == 1 || i == 4) // if body part is legs or chest or vines
 				{
 					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // stand = 0
 					bodyPart.get(i).get(j).get(0).add(ResourceLoader.getBufferedImage("people/stand-" + bodyPartName + "_" + j + ".png"));
@@ -261,7 +264,8 @@ public class Resources
 					bodyPart.get(i).get(j).get(2).add(ResourceLoader.getBufferedImage("people/hold_shield-" + bodyPartName + "_" + j + ".png"));
 					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // slip = 3
 					bodyPart.get(i).get(j).get(3).add(ResourceLoader.getBufferedImage("people/slip_0-" + bodyPartName + "_" + j + ".png"));
-				} else if (i == 2 || i == 3) // heads and hairs have the same image for all frames in most animations, unlike legs and chest
+				}
+				else if (i == 2 || i == 3) // heads and hairs have the same image for all frames in most animations, unlike legs and chest
 				{
 					// reusing images to save on copy-pasting on paint.net
 					BufferedImage runImg = ResourceLoader.getBufferedImage("people/run-" + bodyPartName + "_" + j + ".png");
@@ -293,7 +297,7 @@ public class Resources
 				bodyPart.get(i).get(j).get(4).add(ResourceLoader.getBufferedImage("people/slip_3-" + bodyPartName + "_" + j + ".png"));
 
 				// punches:
-				if (i == 1) // only chest+arms move differently during punches
+				if (i == 1 || i == 4) // only chest+arms (and vines) move differently during punches
 				{
 					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // 5 right punch
 					bodyPart.get(i).get(j).get(5).add(ResourceLoader.getBufferedImage("people/punch_1-" + bodyPartName + "_" + j + ".png"));
@@ -301,7 +305,8 @@ public class Resources
 					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // 6 left punch
 					bodyPart.get(i).get(j).get(6).add(ResourceLoader.getBufferedImage("people/punch_2-" + bodyPartName + "_" + j + ".png"));
 					bodyPart.get(i).get(j).get(6).add(ResourceLoader.getBufferedImage("people/punch_3-" + bodyPartName + "_" + j + ".png"));
-				} else if (i == 0 || i == 2 || i == 3)
+				}
+				else if (i == 0 || i == 2 || i == 3)
 				{
 					BufferedImage runImg = ResourceLoader.getBufferedImage("people/stand-" + bodyPartName + "_" + j + ".png");
 					BufferedImage punchImg = new BufferedImage(96, 96, BufferedImage.TYPE_INT_ARGB); // = empty image
@@ -316,14 +321,15 @@ public class Resources
 					bodyPart.get(i).get(j).get(6).add(punchImg);
 				}
 				// flight
-				if (i < 3) // legs, chest, head
+				if (i == 0 || i == 1 || i == 2 || i == 4) // legs, chest, head, vines
 				{
 					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // 7 fly
 					bodyPart.get(i).get(j).get(7).add(ResourceLoader.getBufferedImage("people/fly-" + bodyPartName + "_" + j + ".png"));
 					bodyPart.get(i).get(j).get(7).add(ResourceLoader.getBufferedImage("people/fly-" + bodyPartName + "_" + j + ".png"));
 					bodyPart.get(i).get(j).get(7).add(ResourceLoader.getBufferedImage("people/fly-" + bodyPartName + "_" + j + ".png"));
 					bodyPart.get(i).get(j).get(7).add(ResourceLoader.getBufferedImage("people/fly-" + bodyPartName + "_" + j + ".png"));
-				} else
+				}
+				else // hair (has fancy windy hair animation)
 				{
 					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // 7 fly
 					bodyPart.get(i).get(j).get(7).add(ResourceLoader.getBufferedImage("people/fly_1-" + bodyPartName + "_" + j + ".png"));
@@ -336,19 +342,21 @@ public class Resources
 				bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // 9 hover
 				bodyPart.get(i).get(j).get(9).add(ResourceLoader.getBufferedImage("people/hover_1-" + bodyPartName + "_" + j + ".png"));
 				// flight punch w/ arm held back
-				if (i == 1) // chest and arms prepare for a strike
+				if (i == 1 || i == 4) // chest and arms prepare for a strike
 				{
 					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>());
 					bodyPart.get(i).get(j).get(10).add(ResourceLoader.getBufferedImage("people/fly_punch_3-" + bodyPartName + "_" + j + ".png"));
 					bodyPart.get(i).get(j).get(10).add(ResourceLoader.getBufferedImage("people/fly_punch_3-" + bodyPartName + "_" + j + ".png"));
 					bodyPart.get(i).get(j).get(10).add(ResourceLoader.getBufferedImage("people/fly_punch_3-" + bodyPartName + "_" + j + ".png"));
-				} else if (i == 3) // hair still has animation
+				}
+				else if (i == 3) // hair still has animation
 				{
 					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // fly
 					bodyPart.get(i).get(j).get(10).add(ResourceLoader.getBufferedImage("people/fly_1-" + bodyPartName + "_" + j + ".png"));
 					bodyPart.get(i).get(j).get(10).add(ResourceLoader.getBufferedImage("people/fly_2-" + bodyPartName + "_" + j + ".png"));
 					bodyPart.get(i).get(j).get(10).add(ResourceLoader.getBufferedImage("people/fly_3-" + bodyPartName + "_" + j + ".png"));
-				} else
+				}
+				else
 				{
 					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>());
 					bodyPart.get(i).get(j).get(10).add(ResourceLoader.getBufferedImage("people/fly-" + bodyPartName + "_" + j + ".png"));
@@ -356,13 +364,14 @@ public class Resources
 					bodyPart.get(i).get(j).get(10).add(ResourceLoader.getBufferedImage("people/fly-" + bodyPartName + "_" + j + ".png"));
 				}
 				// 10 11 12 flight punch w/ arms
-				if (i == 1) // chest and arms prepare for a strike
+				if (i == 1 || i == 4) // chest and arms prepare for a strike
 				{
 					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>());
 					bodyPart.get(i).get(j).get(11).add(ResourceLoader.getBufferedImage("people/fly_punch_1-" + bodyPartName + "_" + j + ".png"));
 					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>());
 					bodyPart.get(i).get(j).get(12).add(ResourceLoader.getBufferedImage("people/fly_punch_2-" + bodyPartName + "_" + j + ".png"));
-				} else if (i == 3) // hair still has animation
+				}
+				else if (i == 3) // hair still has animation
 				{
 					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // fly
 					bodyPart.get(i).get(j).get(11).add(ResourceLoader.getBufferedImage("people/fly_1-" + bodyPartName + "_" + j + ".png"));
@@ -370,7 +379,8 @@ public class Resources
 					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // fly
 					bodyPart.get(i).get(j).get(12).add(ResourceLoader.getBufferedImage("people/fly_1-" + bodyPartName + "_" + j + ".png"));
 					bodyPart.get(i).get(j).get(12).add(ResourceLoader.getBufferedImage("people/fly_2-" + bodyPartName + "_" + j + ".png"));
-				} else
+				}
+				else
 				{
 					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>());
 					bodyPart.get(i).get(j).get(11).add(ResourceLoader.getBufferedImage("people/fly-" + bodyPartName + "_" + j + ".png"));
@@ -384,7 +394,7 @@ public class Resources
 				bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // dead = 13
 				bodyPart.get(i).get(j).get(13).add(ResourceLoader.getBufferedImage("people/dead_0-" + bodyPartName + "_" + j + ".png"));
 
-				// TODO burning
+				// TODO burning maybe or is it already fine?
 			}
 		}
 
@@ -410,7 +420,7 @@ public class Resources
 			}
 
 		// Effect icons:
-		List<String> effectNames = Arrays.asList("Healed", "Burning"); // all effect names should be written here! TODO make sure it happens
+		List<String> effectNames = Arrays.asList("Healed", "Burning", "Tangled"); // all effect names should be written here! TODO make sure it happens
 		for (String s : effectNames)
 			icons.put(s, ResourceLoader.getBufferedImage("icons/effects/" + s + ".png"));
 
@@ -421,7 +431,7 @@ public class Resources
 			cloudShadows.add(Cloud.cloudShadow(clouds.get(i)));
 		}
 
-		// Effects
+		// Effects (NOT EFFECT ICONS)
 		effects.add(new ArrayList<BufferedImage>()); // Burning
 		effects.get(0).add(ResourceLoader.getBufferedImage("people/burning_1.png"));
 		effects.get(0).add(ResourceLoader.getBufferedImage("people/burning_2.png"));
