@@ -77,7 +77,7 @@ public class Environment
 	{
 		this.width = width1;
 		this.height = height1;
-		elementalNum = Resources.elementalNum;
+		elementalNum = Resources.numOfElements;
 		wallHealths = new int[width][height];
 		wallTypes = new int[width][height];
 		poolHealths = new int[width][height];

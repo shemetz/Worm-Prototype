@@ -754,7 +754,7 @@ public class Person extends RndPhysObj implements Mover
 		for (int i = 0; i < 10;)
 		{
 			String str = possibleAbilities.get(rand.nextInt(possibleAbilities.size()));
-			if (Resources.icons.get(str) != null)
+			if (!Ability.elementalPowers.contains(str))
 			{
 				abilities.add(Ability.ability(str, 5));
 				i++;

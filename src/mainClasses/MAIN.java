@@ -148,11 +148,14 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 	// Pause menus
 	enum Menu
 	{
-		NO, ABILITIES, ESC
+		NO, ABILITIES, ESC, CHEATS
 	};
 
 	Menu menu = Menu.NO;
-	List<MenuText> menuStuff;
+	List<MenuElement> menuStuff;
+	String cheatedAbilityName = null;
+	String cheatedAbilityElement = null;
+	int cheatedAbilityLevel = 1;
 
 	// METHODS
 	void frame()
@@ -456,6 +459,15 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 					b.evasions.remove(j);
 					j--;
 				}
+			if (b.elementNum == EP.toInt("Fire"))
+			{
+				b.timer += deltaTime;
+				if (b.timer >= Ball.smokeEffectRate)
+				{
+					env.debris.add(new Debris(b.x, b.y, b.z, b.angle() + Math.PI * 2 / 3 + Math.PI * 2 / 3 * Math.random(), Math.random() < 0.5 ? 0 : 12, 400));
+					b.timer = 0;
+				}
+			}
 			// gravity
 			b.zVel -= 0.001 * gravity * deltaTime;
 			b.rotation += b.angularVelocity * deltaTime;
@@ -1027,7 +1039,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		niceHotKeys = new Point[10];
 		updateNiceHotkeys();
 
-		menuStuff = new ArrayList<MenuText>();
+		menuStuff = new ArrayList<MenuElement>();
 
 		// ~~~TEMPORARY TESTING~~~
 
@@ -1860,23 +1872,8 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		scaleBuffer(buffer, frameWidth / 2, frameHeight / 4, 1 / UIzoomLevel);
 
 		// buttons and stuff:
-		for (MenuText m : menuStuff)
-		{
-			buffer.setColor(new Color(0, 0, 0, 100));
-			buffer.fillRect(m.x, m.y, m.width, m.height);
-			buffer.setColor(Color.black);
-			buffer.setStroke(new BasicStroke(5));
-			buffer.drawRect(m.x, m.y, m.width, m.height);
-			if (m.selected)
-			{
-				buffer.setColor(Color.orange);
-				buffer.setStroke(new BasicStroke(3));
-				buffer.drawRect(m.x, m.y, m.width, m.height);
-			}
-			// color depends
-			buffer.setFont(new Font("Sans-Serif", Font.PLAIN, 40));
-			buffer.drawString(m.text, m.x + 5, m.y + m.height / 2 + 13); // TODO
-		}
+		for (MenuElement m : menuStuff)
+			m.draw(buffer);
 
 		if (menu == Menu.ABILITIES)
 		{
@@ -1931,6 +1928,11 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 						buffer.drawString(hotkeyStrings[j], (int) (rectStartX + i * 80 * UIzoomLevel + 12 * UIzoomLevel), (int) (rectStartY + 60 * UIzoomLevel + timesAssigned * 16 * UIzoomLevel));
 					}
 			}
+		}
+		// TODO make everything scale with uizoom or buffer scale
+		if (menu == Menu.CHEATS)
+		{
+
 		}
 	}
 
@@ -2313,6 +2315,16 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		}
 		if (bool) // pause key pressed
 		{
+			if (target == Menu.ESC && target != menu && menu != Menu.NO)
+			{
+				extraPauseBoolean = false;
+				paused = false;
+				menu = Menu.NO;
+				tooltip = "";
+				pauseHoverAbility = -1;
+				pauseAllSounds(false);
+				return;
+			}
 			menu = target;
 			if (!paused)
 				pauseAllSounds(true);
@@ -2344,8 +2356,31 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			menuStuff.add(new MenuText(frameWidth / 2 - 78, frameHeight / 2 - 30, 156, 60, "Resume"));
 			break;
 		case ESC:
-			menuStuff.add(new MenuText(frameWidth / 2 - 78, frameHeight / 2 - 30, 156, 60, "Resume"));
-			menuStuff.add(new MenuText(frameWidth / 2 - 137, frameHeight / 2 - 100, 274, 60, "exit_game"));
+			menuStuff.add(new MenuText(frameWidth / 2 - 78, frameHeight / 2 - 30, 156, 60, "RESUME"));
+			menuStuff.add(new MenuText(frameWidth / 2 - 137, frameHeight / 2 - 100, 274, 60, "EXIT_GAME"));
+			// TODO OPTIONS
+			menuStuff.add(new MenuText(frameWidth / 2 - 73, frameHeight / 2 + 40, 146, 60, "CHEATS"));
+			break;
+		case CHEATS:
+			menuStuff.add(new MenuText(frameWidth / 2 - 78, 50, 156, 60, "Resume"));
+			List<String> abilities = new ArrayList<String>();
+			abilities.addAll(Ability.implementedAbilities);
+			int x = (int) 300;
+			int y = (int) 200;
+			int columnNumber = 18;
+			// abilities
+			for (int row = 0; row <= (abilities.size() + columnNumber - 1) / columnNumber; row++)
+				for (int column = 0; row * columnNumber + column < abilities.size() && column < columnNumber; column++)
+				{
+					String abilityName = abilities.get(row * columnNumber + column);
+					menuStuff.add(new MenuThingie(x + column * 80, y + row * 80, "CHEATS_ABILITY", abilityName));
+				}
+			// elements
+			for (int i = 0; i < 6; i++)
+			{
+				menuStuff.add(new MenuThingie(x + 40 + i * 80, y - 160, "CHEATS_ELEMENT", EP.elementList[i]));
+				menuStuff.add(new MenuThingie(x + 40 + i * 80, y - 80, "CHEATS_ELEMENT", EP.elementList[i + 6]));
+			}
 			break;
 		case NO:
 			break;
@@ -2355,7 +2390,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		}
 	}
 
-	void pressMenuButton(MenuText m)
+	void pressMenuButton(MenuElement m)
 	{
 		switch (m.type)
 		{
@@ -2364,6 +2399,85 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			break;
 		case EXIT_GAME:
 			System.exit(0);
+			break;
+		case CHEATS:
+			menu = Menu.CHEATS;
+			updatePauseMenu();
+			break;
+		case CHEATS_ABILITY:
+		case CHEATS_ELEMENT:
+			for (MenuElement m2 : menuStuff)
+				if (m2.type == m.type)
+					((MenuThingie) m2).on = false;
+			((MenuThingie) m).on = !((MenuThingie) m).on;
+			if (m.type == MenuElement.Type.CHEATS_ABILITY)
+			{
+				cheatedAbilityName = m.text;
+				if (!Ability.elementalPowers.contains(m.text))
+				{
+					for (MenuElement m3 : menuStuff)
+						if (m3.type == MenuElement.Type.CHEATS_ELEMENT)
+						{
+							((MenuThingie) m3).available = false;
+							// if element was selected, avoid bug
+							if (((MenuThingie) m3).on)
+								cheatedAbilityElement = null;
+						}
+				}
+				else // is elemental
+					for (MenuElement m3 : menuStuff)
+						if (m3.type == MenuElement.Type.CHEATS_ELEMENT)
+						{
+							// checks if such elemental ability exists
+							((MenuThingie) m3).available = Resources.icons.get(m.text + " <" + m3.text + ">") != null;
+							// if not and element was selected, avoid bug
+							if (((MenuThingie) m3).on)
+								if (!((MenuThingie) m3).available)
+									cheatedAbilityElement = null;
+								else
+									cheatedAbilityElement = m3.text;
+						}
+			}
+			else if (m.type == MenuElement.Type.CHEATS_ELEMENT)
+			{
+				cheatedAbilityElement = m.text;
+				for (MenuElement m3 : menuStuff)
+					if (m3.type == MenuElement.Type.CHEATS_ABILITY)
+						if (((MenuThingie) m3).on)
+							if (Resources.icons.get(m3.text + " <" + m.text + ">") == null)
+							{
+								cheatedAbilityElement = null;
+								((MenuThingie) m).available = false;
+								((MenuThingie) m).on = false;
+							}
+			}
+
+			// update relevant text
+			String abilityName = "";
+			if (cheatedAbilityName != null)
+			{
+				if (cheatedAbilityElement != null)
+					abilityName = cheatedAbilityName + " <" + cheatedAbilityElement + ">";
+				else if (Ability.elementalPowers.contains(cheatedAbilityName))
+					abilityName = null;
+				else // normal non-elemental ability
+					abilityName = cheatedAbilityName;
+				// remove previous ability result
+				for (int i = 0; i < menuStuff.size(); i++)
+					if (menuStuff.get(i).type == MenuElement.Type.CHEATS_RESULT_ABILITY)
+					{
+						menuStuff.remove(i);
+						i--;
+					}
+				if (abilityName != null)
+				{
+					// add new ability name and description texts
+					MenuText abilityMenuText = new MenuText(300 + 800, 200 - 160, 650, 150, Ability.niceName(abilityName) + ", level " + cheatedAbilityLevel);
+					abilityMenuText.type = MenuElement.Type.CHEATS_RESULT_ABILITY;
+					abilityMenuText.text += "\n" + Ability.getFluff(abilityName);
+					menuStuff.add(abilityMenuText);
+				}
+			}
 			break;
 		default:
 			errorMessage("Been there done that messed around, I'm having fun, don't put me down");
@@ -2381,6 +2495,9 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			break;
 		case KeyEvent.VK_ESCAPE:// Pause menu
 			pause(Menu.ESC, true);
+			break;
+		case KeyEvent.VK_TAB:
+			pause(Menu.ABILITIES, true);
 			break;
 		case KeyEvent.VK_A:
 			player.leftPressed = true;
@@ -2446,9 +2563,6 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			break;
 		case KeyEvent.VK_O:
 			player.rotateButtonPressed = true;
-			break;
-		case KeyEvent.VK_TAB:
-			pause(Menu.ABILITIES, true);
 			break;
 
 		// hotkeys 1, 2, 3....10
@@ -2762,6 +2876,12 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				UIzoomLevel *= 1.1;
 			updateNiceHotkeys();
 		}
+		else if (menu == Menu.CHEATS)
+		{
+			cheatedAbilityLevel += mwe.getWheelRotation();
+			cheatedAbilityLevel = Math.min(cheatedAbilityLevel, 10);
+			cheatedAbilityLevel = Math.max(0, cheatedAbilityLevel);
+		}
 		else
 		{
 			// switch currently range-selected ability
@@ -2854,8 +2974,8 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			else if (hotkeySelected != -1 && player.abilities.get(player.hotkeys[hotkeySelected]).toggleable)
 				player.abilities.get(player.hotkeys[hotkeySelected]).toggle();
 
-			MenuText pressedThing = null;
-			for (MenuText m : menuStuff)
+			MenuElement pressedThing = null;
+			for (MenuElement m : menuStuff)
 				if (m.selected) // cursor on it will make it selected
 					if (m.clickable)
 						pressedThing = m;
@@ -2931,7 +3051,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 					foundOne = true;
 					hotkeyHovered = i;
 					tooltipPoint = new Point(niceHotKeys[i].x + 8, niceHotKeys[i].y - 10);
-					tooltip = player.abilities.get(player.hotkeys[i]).niceName();
+					tooltip = Ability.niceName(player.abilities.get(player.hotkeys[i]).name);
 					if (player.rightMousePressed)
 					{
 						tooltip += " " + player.abilities.get(player.hotkeys[i]).level + "\n" + player.abilities.get(player.hotkeys[i]).getFluff();
@@ -2975,7 +3095,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 						pauseHoverAbility = i;
 						tooltipPoint = new Point((int) (frameWidth / 2 - player.abilities.size() * 80 / 2 * UIzoomLevel + i * 80 * UIzoomLevel + 8 * UIzoomLevel),
 								(int) (frameHeight * 3 / 4 - 10 * UIzoomLevel));
-						tooltip = player.abilities.get(i).niceName();
+						tooltip = Ability.niceName(player.abilities.get(i).name);
 						if (player.rightMousePressed)
 						{
 							tooltip += " " + player.abilities.get(i).level + "\n" + player.abilities.get(i).getFluff();
@@ -2984,7 +3104,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 					}
 			}
 
-		for (MenuText m : menuStuff)
+		for (MenuElement m : menuStuff)
 			m.selected = m.contains(screenmx, screenmy);
 	}
 

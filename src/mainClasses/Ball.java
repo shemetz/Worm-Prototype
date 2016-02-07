@@ -12,6 +12,9 @@ public class Ball extends RndPhysObj
 	public Person creator;
 	public List<Evasion> evasions;
 	public boolean critical = false;
+	public double timer;
+	
+	final static public double smokeEffectRate = 0.03;
 
 	public Ball(int en, int p1, double angle, Person creator1)
 	{
@@ -20,6 +23,7 @@ public class Ball extends RndPhysObj
 		elementNum = en;
 		points = p1;
 		creator = creator1;
+		timer = 0;
 		changeImage(Resources.balls[elementNum]); // Not all the same size!!!
 
 		switch (elementNum)

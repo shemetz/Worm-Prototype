@@ -6,7 +6,7 @@ public class Debris extends Drawable
 {
 	double	velocity;
 	double	angle;
-	int		elementNum;	// 13 = smoke
+	int		elementNum;	// 12 = smoke, 13 = force field
 	int		type;
 	double	timeLeft;
 

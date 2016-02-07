@@ -50,14 +50,14 @@ import mainResourcesPackage.SoundEffect;
 public class Ability
 {
 	final static List<String> implementedAbilities = Arrays.asList("Portals", "Elemental Void", "Precision I", "Protective Bubble I", "Sprint", "Strength I", "Strength II", "Strength III", "Punch",
-			"Heal I", "Heal II", "Force Shield", "Ranged Explosion", "Flight I", "Flight II", "Telekinetic Flight", "Blink", "Ghost Mode I", "Strong Force Field", "Beam", "Ball", "Shield", "Pool",
-			"Wall", "Spray", "Toughness III", "Sense Life", "Sense Mana and Stamina", "Sense Powers", "Elemental Combat I");
-
+			"Heal I", "Heal II", "Force Shield", "Ranged Explosion", "Flight I", "Flight II", "Telekinetic Flight", "Blink", "Ghost Mode I", "Strong Force Field", "Elemental Combat I", "Beam", "Ball",
+			"Shield", "Pool", "Wall", "Spray", "Toughness III", "Sense Life", "Sense Mana and Stamina", "Sense Powers");
 	protected static List<String> descriptions = new ArrayList<String>();
 	protected static boolean[][] elementalAttacksPossible = new boolean[12][7]; // [element][ability]
 	protected static int[][] elementalAttackNumbers = new int[12][3];
 	protected static String[] elementalAttacks = new String[]
 	{ "Ball", "Beam", "Shield", "Wall", "Spray", "Strike", "Pool" };
+	final static List<String> elementalPowers = Arrays.asList("Ball", "Beam", "Shield", "Wall", "Spray", "Strike", "Pool");
 
 	// permanent variables of the ability
 	protected String name; // name of the ability
@@ -261,7 +261,7 @@ public class Ability
 
 	}
 
-	public String niceName()
+	public static String niceName(String name)
 	{ // turns "Ball <Fire>" into "Fire Ball"
 		if (name.contains("<"))
 			return name.substring(name.indexOf("<") + 1, name.indexOf(">")) + " " + name.substring(0, name.indexOf("<") - 1);

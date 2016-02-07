@@ -21,7 +21,7 @@ public class Resources
 	public static BufferedImage[][][] pCorner; // type, connection (up, bridge, bite, full), angle (in quarter-circles)
 	public static List<List<List<List<BufferedImage>>>> bodyPart; // body part, permutation, state, frame
 	public static Map<String, BufferedImage> icons; // ability, frame
-	public final static int elementalNum = 12;
+	public final static int numOfElements = 12;
 	public static BufferedImage[][] arcForceFields; // element (12 = Prot. Bubble), frame (healthy / 75% / 50% / 25%)
 	public final static int arcFFImageWidth = 288;
 	public static BufferedImage[] balls; // element
@@ -38,30 +38,30 @@ public class Resources
 
 	public static void initialize()
 	{
-		wall = new BufferedImage[elementalNum];
-		pool = new BufferedImage[elementalNum];
-		croppedPool = new BufferedImage[elementalNum][14];
+		wall = new BufferedImage[numOfElements];
+		pool = new BufferedImage[numOfElements];
+		croppedPool = new BufferedImage[numOfElements][14];
 		floor = new BufferedImage[1];
-		wCorner = new BufferedImage[elementalNum][4][4];
-		pCorner = new BufferedImage[elementalNum][4][4];
+		wCorner = new BufferedImage[numOfElements][4][4];
+		pCorner = new BufferedImage[numOfElements][4][4];
 
 		bodyPart = new ArrayList<List<List<List<BufferedImage>>>>(); // LEGS, CHEST (+arms), HEAD, HAIR, VINES
 
 		icons = new HashMap<String, BufferedImage>();
-		arcForceFields = new BufferedImage[elementalNum + 1][4]; // 0-11 = elemental, 12 = Prot. Bubble
-		balls = new BufferedImage[elementalNum];
-		sprayDrops = new BufferedImage[elementalNum][3];
-		debris = new BufferedImage[elementalNum + 2][6];
+		arcForceFields = new BufferedImage[numOfElements + 1][4]; // 0-11 = elemental, 12 = Prot. Bubble
+		balls = new BufferedImage[numOfElements];
+		sprayDrops = new BufferedImage[numOfElements][3];
+		debris = new BufferedImage[numOfElements + 2][6];
 		debrisShadows = new BufferedImage[debris.length][6];
 		cracks = new BufferedImage[3][12]; // 11 is saved for the original wall, not corners
 		clouds = new ArrayList<BufferedImage>();
 		cloudShadows = new ArrayList<BufferedImage>();
 		effects = new ArrayList<List<BufferedImage>>();
-		beams = new BufferedImage[elementalNum][16];
+		beams = new BufferedImage[numOfElements][16];
 		healingBeam = new BufferedImage[4];
 		explosions = new ArrayList<List<BufferedImage>>();
 
-		for (int i = 0; i < elementalNum; i++) // all things that occur per element are in this loop
+		for (int i = 0; i < numOfElements; i++) // all things that occur per element are in this loop
 		{
 			pool[i] = ResourceLoader.getBufferedImage("environment/pool_" + EP.elementList[i] + ".png");
 			wall[i] = ResourceLoader.getBufferedImage("environment/wall_" + EP.elementList[i] + ".png");
@@ -404,7 +404,7 @@ public class Resources
 			{
 			case "Sense Element":
 				BufferedImage senseElement = ResourceLoader.getBufferedImage("icons/abilities/Sense Element.png");
-				for (int j = 0; j < elementalNum; j++)
+				for (int j = 0; j < numOfElements; j++)
 				{
 					BufferedImage senseImage = new BufferedImage(60, 60, BufferedImage.TYPE_INT_ARGB);
 					Graphics2D buffy = senseImage.createGraphics();
@@ -423,6 +423,9 @@ public class Resources
 		List<String> effectNames = Arrays.asList("Healed", "Burning", "Tangled"); // all effect names should be written here! TODO make sure it happens
 		for (String s : effectNames)
 			icons.put(s, ResourceLoader.getBufferedImage("icons/effects/" + s + ".png"));
+		// Element icons:
+		for (int i = 0; i < numOfElements; i++)
+			icons.put(EP.elementList[i], ResourceLoader.getBufferedImage("icons/elements/" + EP.elementList[i] + ".png"));
 
 		// Clouds
 		for (int i = 0; i < 5; i++) // the number is the number of cloud images available
