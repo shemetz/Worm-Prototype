@@ -138,6 +138,13 @@ public class Punch extends Ability
 		// Notice:
 		damage += 0.2 * pushback;
 		pushback -= 0.2 * pushback;
+		if (user.timeEffect > 1)
+		{
+			// I would have made it work even if timeEfect < 1, but that's OP with the fact that fists are instantaneous (unlike in the real world).
+			// TODO maybe later, add a delay to the punch, and the delay will depend on timeEffect, so this will be better.
+			damage /= user.timeEffect;
+			pushback /= user.timeEffect;
+		}
 
 		int punchElement = -1; // TODO other punch types that aren't blunt?
 		int punchDamageType = 0;

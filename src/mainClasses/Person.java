@@ -981,16 +981,16 @@ public class Person extends RndPhysObj implements Mover
 
 			if (timeEffect != 1 && timeEffect != 0)
 			{
-				double chance = 1;
+				double intensity = 1;
 				if (timeEffect > 1)
-					chance = 1 - 0.5 / timeEffect; // bigger the faster you are
+					intensity = 1 - 1 / timeEffect; // bigger the faster you are
 				if (timeEffect < 1)
-					chance = 1 - timeEffect / 2; // bigger the slower you are
+					intensity = 1 - timeEffect; // bigger the slower you are
 				// Noise and transparency
 				for (int i = 0; i < img.getWidth(); i++)
 					for (int j = 0; j < img.getHeight(); j++)
 						if (img.getRGB(i, j) != 0x00000000) // if not transparent
-							if (Math.random() < chance)
+							if (Math.random() < intensity)
 							{
 								int RGB = img.getRGB(i, j);
 								int R = (RGB >> 16) & 0xff;
@@ -999,7 +999,7 @@ public class Person extends RndPhysObj implements Mover
 								if (timeEffect < 1) // slow = purple
 									img.setRGB(i, j, (new Color((R + 255) / 2, (G / 2), (B + 255) / 2)).getRGB());
 								else if (timeEffect > 1) // fast = green, and transparent
-									img.setRGB(i, j, (new Color(R, (G + 255) / 2, B / 2, (int) (255 - 200 * chance))).getRGB());
+									img.setRGB(i, j, (new Color(R, (G + 255) / 2, B / 2, (int) (255 - 200 * intensity))).getRGB());
 							}
 
 				// Multiple images

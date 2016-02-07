@@ -2161,6 +2161,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 
 						// Time shenanigans
 						staminaMultiplier *= p.timeEffect;
+						runMultiplier *= p.timeEffect;
 
 						// making sure dude/dudette has enough stamina
 						double timesStaminaFitsIntoStaminaCost = p.stamina / (p.runningStaminaCost * deltaTime * staminaMultiplier);

@@ -12,6 +12,7 @@ import java.util.List;
 import abilities.Ball_E;
 import abilities.Beam_E;
 import abilities.Blink;
+import abilities.Chronobiology;
 import abilities.Elemental_Combat_II_E;
 import abilities.Elemental_Combat_I_E;
 import abilities.Elemental_Void;
@@ -52,7 +53,7 @@ public class Ability
 {
 	final static List<String> implementedAbilities = Arrays.asList("Portals", "Elemental Void", "Precision I", "Protective Bubble I", "Sprint", "Strength I", "Strength II", "Strength III", "Punch",
 			"Heal I", "Heal II", "Force Shield", "Ranged Explosion", "Flight I", "Flight II", "Telekinetic Flight", "Blink", "Ghost Mode I", "Strong Force Field", "Beam", "Ball", "Shield", "Pool",
-			"Wall", "Spray", "Toughness III", "Sense Life", "Sense Mana and Stamina", "Sense Powers", "Elemental Combat I", "Slow Target");
+			"Wall", "Spray", "Toughness III", "Sense Life", "Sense Mana and Stamina", "Sense Powers", "Elemental Combat I", "Slow Target", "Chronobiology");
 	protected static List<String> descriptions = new ArrayList<String>();
 	protected static boolean[][] elementalAttacksPossible = new boolean[12][7]; // [element][ability]
 	protected static int[][] elementalAttackNumbers = new int[12][3];
@@ -243,6 +244,7 @@ public class Ability
 			return name.substring(0, name.indexOf("<") - 1);
 		return name;
 	}
+
 	public static String justName(String name)
 	{
 		if (name.contains("<"))
@@ -340,7 +342,7 @@ public class Ability
 				element = "BUG (Flesh) BUG";
 		}
 		if (element.equals("plant"))
-			if (realName.contains("Beam")) //TODO fix this. it does not work.
+			if (realName.contains("Beam")) // TODO fix this. it does not work.
 				text.replace("continuous beam of plant", "vine that can grab onto stuff");
 
 		text = text.substring(text.indexOf("\n") + 1); // skip name and type
@@ -471,6 +473,8 @@ public class Ability
 		}
 		switch (trimmedAbilityName)
 		{
+		case "Chronobiology":
+			return new Chronobiology(pnts);
 		case "Portals":
 			return new Portals(pnts);
 		case "Elemental Void":
