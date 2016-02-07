@@ -67,6 +67,7 @@ public class Ball_E extends Ability
 				b.z = user.z + 0.9;
 				b.xVel += user.xVel;
 				b.yVel += user.yVel;
+				b.timeEffect = user.timeEffect;
 
 				// critical chance
 				if (Math.random() < user.criticalChance)

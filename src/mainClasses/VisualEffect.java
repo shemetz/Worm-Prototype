@@ -21,7 +21,7 @@ public class VisualEffect
 
 	public enum Type
 	{
-		BLINK_SUCCESS, BLINK_FAIL, HEAL, EXPLOSION
+		BLINK_SUCCESS, BLINK_FAIL, HEAL, EXPLOSION, NO
 	};
 
 	public Type			type;
@@ -87,6 +87,8 @@ public class VisualEffect
 			if (frame >= Resources.explosions.get(subtype).size())
 				frame = -1;
 			break;
+		case NO:
+			break;
 		default:
 			MAIN.errorMessage("[1] Unused effect type has no update case:  " + type);
 			break;
@@ -143,6 +145,8 @@ public class VisualEffect
 			{
 				buffer.drawImage(Resources.explosions.get(subtype).get(frame), p1.x - p2.x, p1.y - p2.y, null);
 			}
+			break;
+		case NO:
 			break;
 		default:
 			MAIN.errorMessage("[2] Unused effect type has no draw case:  " + type);

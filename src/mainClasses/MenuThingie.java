@@ -23,6 +23,7 @@ public class MenuThingie extends MenuElement
 		{
 		case CHEATS_ELEMENT:
 		case CHEATS_ABILITY:
+		case ICON:
 			image = Resources.icons.get(text);
 			break;
 		default:
@@ -36,21 +37,22 @@ public class MenuThingie extends MenuElement
 		buffer.setColor(Color.black);
 		buffer.drawRect(x, y, width, height);
 		if (selected || on)
-		{
-			buffer.setColor(Color.orange);
-			buffer.setStroke(new BasicStroke(1));
-			buffer.drawRect(x, y, width, height);
-		}
+			if (type != MenuElement.Type.ICON)
+			{
+				buffer.setColor(Color.orange);
+				buffer.setStroke(new BasicStroke(1));
+				buffer.drawRect(x, y, width, height);
+			}
 		buffer.setColor(new Color(255, 255, 255, 100));
 		buffer.fillRect(x, y, width, height);
 		buffer.drawImage(image, x, y, null);
-		
+
 		if (!available)
 		{
 			buffer.setStroke(new BasicStroke(5));
 			buffer.setColor(Color.red);
-			buffer.drawLine(x, y, x+width, y+height);
-			buffer.drawLine(x+width, y, x, y+height);
+			buffer.drawLine(x, y, x + width, y + height);
+			buffer.drawLine(x + width, y, x, y + height);
 		}
 	}
 }

@@ -18,5 +18,6 @@ public class Toughness_III extends Ability
 		int val = on ? -1 : 1;
 		user.life *= val * 100 * level / user.maxLife + 1;
 		user.maxLife += val * 100 * level;
+		on = !on;
 	}
 }

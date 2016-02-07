@@ -31,6 +31,7 @@ public class Ranged_Explosion extends Ability
 			cooldownLeft = cooldown;
 		}
 	}
+	
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
 	{
 		player.targetType = "explosion";

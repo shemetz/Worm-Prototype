@@ -41,7 +41,8 @@ public class Spray_E extends Ability
 			if (user.mana <= 0.3)
 				cooldownLeft = cooldown;
 			stopAllSounds();
-		} else if (!user.prone && !user.maintaining && cooldownLeft <= 0) // activate
+		}
+		else if (!user.prone && !user.maintaining && cooldownLeft <= 0) // activate
 		{
 			user.notAnimating = true;
 			user.maintaining = true;
@@ -69,9 +70,11 @@ public class Spray_E extends Ability
 				double randomAngle = (Math.random() - 0.5) * arc + angle; // random angle within spray arc
 				Point2D start = new Point2D.Double(user.x + sprayExitDistance * Math.cos(randomAngle), user.y + sprayExitDistance * Math.sin(randomAngle));
 				SprayDrop sd = new SprayDrop(start.getX(), start.getY(), z, getElementNum(), level, randomAngle, velocity, user);
+				sd.timeEffect = user.timeEffect;
 				env.sprayDrops.add(sd);
 				user.mana -= costPerSecond * deltaTime;
-			} else
+			}
+			else
 			{
 				sounds.get(0).pause();
 				cooldownLeft = cooldown;

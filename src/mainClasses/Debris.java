@@ -4,11 +4,18 @@ import java.awt.Graphics2D;
 
 public class Debris extends Drawable
 {
-	double	velocity;
-	double	angle;
-	int		elementNum;	// 12 = smoke, 13 = force field
-	int		type;
-	double	timeLeft;
+	double velocity;
+	double angle;
+	int elementNum; // 12 = smoke, 13 = force field
+	int type;
+	double timeLeft;
+	double timeEffect = 1;
+
+	public Debris(double x1, double y1, double z1, double a1, int e1, double v1, double timeeffect)
+	{
+		this(x1, y1, z1, a1, e1, v1);
+		timeEffect = timeeffect;
+	}
 
 	public Debris(double x1, double y1, double z1, double a1, int e1, double v1)
 	{
@@ -45,12 +52,14 @@ public class Debris extends Drawable
 			radius = image.getWidth() / 2;
 
 			timeLeft = timeLeft1;
-		} else
+		}
+		else
 			MAIN.errorMessage("wtf? @ Debris");
 	}
 
 	public void update(double deltaTime)
 	{
+		deltaTime *= timeEffect;
 		if (timeLeft > 0)
 		{
 			timeLeft -= deltaTime;
@@ -60,7 +69,8 @@ public class Debris extends Drawable
 				image = Resources.debris[elementNum][type];
 				shadow = Resources.debrisShadows[elementNum][type];
 			}
-		} else
+		}
+		else
 		{
 			velocity -= 2.4 * deltaTime * velocity;
 			if (type == 1 || type == 4)

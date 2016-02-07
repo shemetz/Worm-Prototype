@@ -12,8 +12,8 @@ import mainClasses.Player;
 public class Elemental_Void extends Ability
 {
 
-	final int	squareSize	= 96;
-	double		timer;
+	final int squareSize = 96;
+	double timer;
 
 	public Elemental_Void(int p)
 	{
@@ -39,8 +39,9 @@ public class Elemental_Void extends Ability
 
 	public void maintain(Environment env, Person user, Point target, double deltaTime)
 	{
+		deltaTime *= user.timeEffect;
 		timer += deltaTime;
-		int damage = 1000000;
+		int damage = (int) (50000000 * deltaTime);
 		if (timer > 0.25) // every quarter second
 		{
 			timer -= 0.25;

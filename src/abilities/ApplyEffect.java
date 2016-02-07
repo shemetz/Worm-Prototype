@@ -26,9 +26,9 @@ public class ApplyEffect extends Ability
 	// OTHER - works on the closest person in range that isn't yourself. IF there is none, works on self instead.
 	// AREA - works on every person in range, including yourself.
 	// TARGETED - works on the person closest to target point, if they're within range.
-	List<Person>		targets;
-	targetTypes			targetingType;
-	VisualEffect.Type	type;
+	List<Person> targets;
+	targetTypes targetingType;
+	VisualEffect.Type type;
 
 	public ApplyEffect(String name, int p, targetTypes targetType1, VisualEffect.Type type1)
 	{
@@ -81,6 +81,23 @@ public class ApplyEffect extends Ability
 						targets.add(p);
 				}
 			break;
+		case TARGETED:
+			targets.clear();
+			double closest = 100 * 100; // max distance of 100 pixels to target, from cursor
+			for (Person p : env.people)
+			{
+				if (viableTarget(p, user))
+				{
+					double distancePow2 = Methods.DistancePow2(user.target.x, user.target.y, p.x, p.y);
+					if (distancePow2 < closest)
+					{
+						closest = distancePow2;
+						targets.clear();
+						targets.add(p);
+					}
+				}
+			}
+			break;
 		default:
 			MAIN.errorMessage(targetingType);
 			break;
@@ -121,21 +138,41 @@ public class ApplyEffect extends Ability
 
 	public void use(Environment env, Person user, Point targetPoint)
 	{
-		if (on)
+		if (maintainable)
 		{
-			on = false;
-			user.maintaining = false;
-			user.abilityMaintaining = -1;
-			for (Person target : targets)
+			if (on)
 			{
-				target.affect(effect(), false);
-				// uh add visual effect ? TODO
+				on = false;
+				user.maintaining = false;
+				user.abilityMaintaining = -1;
+				for (Person target : targets)
+				{
+					target.affect(effect(), false);
+					// uh add visual effect ? TODO
+				}
+				targets.clear();
 			}
-			targets.clear();
-		} else if (!user.prone && !user.maintaining && cooldownLeft <= 0)
+			else if (!user.prone && !user.maintaining && cooldownLeft <= 0)
+			{
+				user.maintaining = true;
+				on = true;
+			}
+		}
+		else
 		{
-			user.maintaining = true;
-			on = true;
+			addNewTargets(env, user);
+			if (user.mana >= cost && !user.maintaining && cooldownLeft <= 0 && !user.prone)
+			{
+				if (!targets.isEmpty())
+				{
+					user.mana -= cost;
+					cooldownLeft = cooldown;
+					for (Person p : targets)
+					{
+						p.affect(effect(), true);
+					}
+				}
+			}
 		}
 	}
 
@@ -178,8 +215,14 @@ public class ApplyEffect extends Ability
 
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
 	{
-		// Override this if the ability is using TARGETED
-		player.targetType = "";
-		player.target = new Point(-1, -1);
+		if (targetingType == targetTypes.TARGETED)
+		{
+			player.targetType = "rangedTarget";
+		}
+		else
+		{
+			player.targetType = "";
+			player.target = new Point(-1, -1);
+		}
 	}
 }

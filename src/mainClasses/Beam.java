@@ -17,7 +17,7 @@ public class Beam extends Drawable
 	public int				endType;						// 0 = regular end, 1 = flat, -1 = not tested yet.
 	public double			endAngle;
 	public int				frameNum;						// 0, 1, 2 or 3
-	public int				points;
+	public double				strength;
 	public double			timeLeft;
 	public double			damaging;
 	public final static int	lengthOfBeamImg	= 200,
@@ -27,7 +27,7 @@ public class Beam extends Drawable
 	public Beam_E			theAbility;
 	public boolean			critical		= false;
 
-	public Beam(Person creator, Beam_E theAbility, Point3D start, Point3D end, int elementNum, int points, double range)
+	public Beam(Person creator, Beam_E theAbility, Point3D start, Point3D end, int elementNum, double strength1, double range)
 	{
 		this.theAbility = theAbility;
 		this.creator = creator;
@@ -36,7 +36,7 @@ public class Beam extends Drawable
 		this.elementNum = elementNum;
 		this.endType = -1;
 		this.endAngle = -1;
-		this.points = points;
+		this.strength = strength1;
 		this.range = range;
 
 		isChild = false;
@@ -57,13 +57,13 @@ public class Beam extends Drawable
 	public double getDamage()
 	{
 		// 0.6 * points * 0.25 * attackRate * damage
-		return 0.6 * points * 0.25 * Ability.elementalAttackNumbers[elementNum][2] * Ability.elementalAttackNumbers[elementNum][0];
+		return 0.6 * strength * 0.25 * Ability.elementalAttackNumbers[elementNum][2] * Ability.elementalAttackNumbers[elementNum][0];
 	}
 
 	public double getPushback()
 	{
 		// 0.6 * points * 0.25 * attackRate * pushback.
-		return 0.6 * points * 0.25 * Ability.elementalAttackNumbers[elementNum][2] * Ability.elementalAttackNumbers[elementNum][1];
+		return 0.6 * strength * 0.25 * Ability.elementalAttackNumbers[elementNum][2] * Ability.elementalAttackNumbers[elementNum][1];
 	}
 
 	// unused

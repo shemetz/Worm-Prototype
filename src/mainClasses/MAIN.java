@@ -33,6 +33,7 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
@@ -438,7 +439,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 					j--;
 				}
 			// gravity
-			sd.zVel -= 0.003 * gravity * deltaTime;
+			sd.zVel -= 0.003 * gravity * deltaTime * sd.timeEffect;
 			if (random.nextInt(100) <= 1)
 				env.sprayDropDebris(sd);
 			if (sd.xVel == 0 || sd.yVel == 0 || sd.mass <= 0 || !env.moveSprayDrop(sd, deltaTime)) // sd was destroyed, or sd stopped. Also, moves the sd
@@ -469,7 +470,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				}
 			}
 			// gravity
-			b.zVel -= 0.001 * gravity * deltaTime;
+			b.zVel -= 0.001 * gravity * deltaTime * b.timeEffect;
 			b.rotation += b.angularVelocity * deltaTime;
 			if (b.xVel == 0 || b.yVel == 0 || b.mass <= 0 || !env.moveBall(b, deltaTime)) // ball was destroyed, or ball stopped. Also, moves the ball
 			{
@@ -943,6 +944,33 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				circleRadius /= 2;
 			}
 			break;
+		case "rangedTarget":
+			Point targetPerson = null;
+			double closest = 100 * 100; // max distance of 100 pixels to target, from cursor
+			for (Person possibleTarget : env.people)
+			{
+				double distancePow2 = Methods.DistancePow2(player.target.x, player.target.y, possibleTarget.x, possibleTarget.y);
+				if (distancePow2 < closest)
+				{
+					closest = distancePow2;
+					targetPerson = possibleTarget.Point();
+				}
+			}
+			if (targetPerson != null)
+			{
+				buffer.setStroke(new BasicStroke(3));
+				buffer.setColor(Color.green);
+				int haloRadius = 60;
+				buffer.drawOval(targetPerson.x - haloRadius, targetPerson.y - haloRadius, haloRadius * 2, haloRadius * 2);
+			}
+			else
+			{
+				buffer.setStroke(dashedStroke3);
+				buffer.setColor(Color.orange);
+				int haloRadius = 100;
+				buffer.drawOval(player.target.x - haloRadius, player.target.y - haloRadius, haloRadius * 2, haloRadius * 2);
+			}
+			break;
 		case "teleport":
 			buffer.setStroke(new BasicStroke(3));
 			final int radius = 35;
@@ -1088,6 +1116,8 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 
 		player = new Player(96 * 20, 96 * 20);
 		player.tempTrigger();
+		// player.abilities.add(Ability.ability("Force Shield", 5));
+		// player.abilities.add(Ability.ability("Beam <Energy>", 5));
 		player.updateAbilities(); // Because we added some abilities and the hotkeys haven't been updated
 		env.people.add(player);
 		camera = new Point3D((int) player.x, (int) player.y, (int) player.z + 25);
@@ -1240,6 +1270,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 
 	double applyGravityAndFrictionAndReturnFriction(Person p, double deltaTime)
 	{
+		deltaTime *= p.timeEffect;
 		double velocity = Math.sqrt(p.xVel * p.xVel + p.yVel * p.yVel);
 		double moveDirectionAngle = Math.atan2(p.yVel, p.xVel);
 
@@ -1309,7 +1340,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			if (!safeLanding)
 			{
 				// fall damage
-				double damage = p.zVel * p.zVel * 0.0002;
+				double damage = p.zVel * p.zVel * 0.0002 * p.timeEffect;
 				env.hitPerson(p, damage, 0, 0, -1); // blunt
 				if (p.zVel * p.zVel * p.mass * 0.0001 > 15)
 					p.sounds.get(2).play(); // fall hit
@@ -1877,62 +1908,66 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 
 		if (menu == Menu.ABILITIES)
 		{
-
-			int rectStartX = (int) (frameWidth / 2 - player.abilities.size() * 80 / 2 * UIzoomLevel);
-			int rectStartY = (int) (frameHeight * 3 / 4);
-			int rectWidth = (int) (player.abilities.size() * 80 * UIzoomLevel);
-			int extraUp = screenmx > rectStartX - 50 * UIzoomLevel && screenmx < rectStartX + rectWidth + 130 * UIzoomLevel && screenmy > rectStartY - 70 * UIzoomLevel
-					&& screenmy < rectStartY + 100 * UIzoomLevel ? 0 : (int) (-40 * UIzoomLevel);
-
-			// Ability breakdown rectangle
-			buffer.setColor(new Color(255, 255, 255, 130));
-			buffer.setStroke(new BasicStroke(1));
-			buffer.fillRect(0, (int) (rectStartY - 70 * UIzoomLevel - extraUp), frameWidth, (int) (UIzoomLevel * 170 + extraUp));
-			buffer.setColor(new Color(0, 0, 0));
-			buffer.drawRect(0, (int) (rectStartY - 70 * UIzoomLevel - extraUp), frameWidth, (int) (UIzoomLevel * 170 + extraUp));
-
-			buffer.setFont(new Font("Sans-Serif", Font.BOLD, (int) (12 * UIzoomLevel)));
-			for (int i = 0; i < player.abilities.size(); i++)
-			{
-				Ability ability = player.abilities.get(i);
-				if (ability.cost == -1)
-				{
-					buffer.setStroke(new BasicStroke((float) (3 * UIzoomLevel), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, (float) (10.0f), new float[]
-					{ (float) (10.0f * UIzoomLevel) }, 0.0f));
-					buffer.setColor(new Color(0, 0, 0, 90));
-				}
-				else
-				{
-					buffer.setStroke(new BasicStroke((float) (3 * UIzoomLevel)));
-					buffer.setColor(Color.black);
-				}
-				// icons
-				scaleBuffer(buffer, (int) (rectStartX + i * 80 * UIzoomLevel + 0 * UIzoomLevel), (int) (rectStartY + 0 * UIzoomLevel), UIzoomLevel);
-				buffer.drawImage(Resources.icons.get(ability.name), (int) (rectStartX + i * 80 * UIzoomLevel), (int) (rectStartY), this);
-				scaleBuffer(buffer, (int) (rectStartX + i * 80 * UIzoomLevel + 0 * UIzoomLevel), (int) (rectStartY + 0 * UIzoomLevel), 1 / UIzoomLevel);
-				buffer.drawRect((int) (rectStartX + i * 80 * UIzoomLevel), rectStartY, (int) (60 * UIzoomLevel), (int) (60 * UIzoomLevel));
-				if (i == pauseHoverAbility || (hotkeyHovered != -1 && i == player.hotkeys[hotkeyHovered]))
-				{
-					buffer.setStroke(new BasicStroke(1));
-					buffer.setColor(Color.yellow);
-					buffer.drawRect((int) (frameWidth / 2 - player.abilities.size() * 80 / 2 * UIzoomLevel + i * 80 * UIzoomLevel), frameHeight * 3 / 4, (int) (60 * UIzoomLevel),
-							(int) (60 * UIzoomLevel));
-				}
-				// Key bound to that ability
-				int timesAssigned = 0;
-				buffer.setColor(Color.black);
-				for (int j = 0; j < player.hotkeys.length; j++)
-					if (player.hotkeys[j] == i)
-					{
-						timesAssigned++;
-						buffer.drawString(hotkeyStrings[j], (int) (rectStartX + i * 80 * UIzoomLevel + 12 * UIzoomLevel), (int) (rectStartY + 60 * UIzoomLevel + timesAssigned * 16 * UIzoomLevel));
-					}
-			}
+			drawPauseAbilities(buffer);
 		}
 		// TODO make everything scale with uizoom or buffer scale
 		if (menu == Menu.CHEATS)
 		{
+			drawPauseAbilities(buffer);
+		}
+	}
 
+	void drawPauseAbilities(Graphics2D buffer)
+	{
+		int rectStartX = (int) (frameWidth / 2 - player.abilities.size() * 80 / 2 * UIzoomLevel);
+		int rectStartY = (int) (frameHeight * 3 / 4);
+		int rectWidth = (int) (player.abilities.size() * 80 * UIzoomLevel);
+		int extraUp = screenmx > rectStartX - 50 * UIzoomLevel && screenmx < rectStartX + rectWidth + 130 * UIzoomLevel && screenmy > rectStartY - 70 * UIzoomLevel
+				&& screenmy < rectStartY + 100 * UIzoomLevel ? 0 : (int) (-40 * UIzoomLevel);
+
+		// Ability breakdown rectangle
+		buffer.setColor(new Color(255, 255, 255, 130));
+		buffer.setStroke(new BasicStroke(1));
+		buffer.fillRect(0, (int) (rectStartY - 70 * UIzoomLevel - extraUp), frameWidth, (int) (UIzoomLevel * 170 + extraUp));
+		buffer.setColor(new Color(0, 0, 0));
+		buffer.drawRect(0, (int) (rectStartY - 70 * UIzoomLevel - extraUp), frameWidth, (int) (UIzoomLevel * 170 + extraUp));
+
+		buffer.setFont(new Font("Sans-Serif", Font.BOLD, (int) (12 * UIzoomLevel)));
+		for (int i = 0; i < player.abilities.size(); i++)
+		{
+			Ability ability = player.abilities.get(i);
+			if (ability.cost == -1)
+			{
+				buffer.setStroke(new BasicStroke((float) (3 * UIzoomLevel), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, (float) (10.0f), new float[]
+				{ (float) (10.0f * UIzoomLevel) }, 0.0f));
+				buffer.setColor(new Color(0, 0, 0, 90));
+			}
+			else
+			{
+				buffer.setStroke(new BasicStroke((float) (3 * UIzoomLevel)));
+				buffer.setColor(Color.black);
+			}
+			// icons
+			scaleBuffer(buffer, (int) (rectStartX + i * 80 * UIzoomLevel + 0 * UIzoomLevel), (int) (rectStartY + 0 * UIzoomLevel), UIzoomLevel);
+			buffer.drawImage(Resources.icons.get(ability.name), (int) (rectStartX + i * 80 * UIzoomLevel), (int) (rectStartY), this);
+			scaleBuffer(buffer, (int) (rectStartX + i * 80 * UIzoomLevel + 0 * UIzoomLevel), (int) (rectStartY + 0 * UIzoomLevel), 1 / UIzoomLevel);
+			buffer.drawRect((int) (rectStartX + i * 80 * UIzoomLevel), rectStartY, (int) (60 * UIzoomLevel), (int) (60 * UIzoomLevel));
+			if (i == pauseHoverAbility || (hotkeyHovered != -1 && i == player.hotkeys[hotkeyHovered]))
+			{
+				buffer.setStroke(new BasicStroke(1));
+				buffer.setColor(Color.yellow);
+				buffer.drawRect((int) (frameWidth / 2 - player.abilities.size() * 80 / 2 * UIzoomLevel + i * 80 * UIzoomLevel), frameHeight * 3 / 4, (int) (60 * UIzoomLevel),
+						(int) (60 * UIzoomLevel));
+			}
+			// Key bound to that ability
+			int timesAssigned = 0;
+			buffer.setColor(Color.black);
+			for (int j = 0; j < player.hotkeys.length; j++)
+				if (player.hotkeys[j] == i)
+				{
+					timesAssigned++;
+					buffer.drawString(hotkeyStrings[j], (int) (rectStartX + i * 80 * UIzoomLevel + 12 * UIzoomLevel), (int) (rectStartY + 60 * UIzoomLevel + timesAssigned * 16 * UIzoomLevel));
+				}
 		}
 	}
 
@@ -1996,11 +2031,10 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				if (!player.notAnimating)
 					player.rotate(player.directionOfAttemptedMovement, globalDeltaTime);
 			}
-			else
-			// fly-punch users can't really stop...or aim themselves...
-			if (player.flySpeed != -1 && player.strengthOfAttemptedMovement != 0)
+			else if (player.flySpeed != -1 && player.strengthOfAttemptedMovement != 0)
 			{
-				player.rotate(player.directionOfAttemptedMovement, globalDeltaTime * 0.3);
+				// rotation of fly-punchers
+				player.rotate(player.directionOfAttemptedMovement, globalDeltaTime * 1); // this 1 used to be 0.3
 			}
 		}
 	}
@@ -2124,6 +2158,9 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 						for (Effect e : p.effects)
 							if (e instanceof Tangled)
 								runMultiplier *= 0.66; // Speed decreased by 33% per vine (stacking multiplicatively)
+
+						// Time shenanigans
+						staminaMultiplier *= p.timeEffect;
 
 						// making sure dude/dudette has enough stamina
 						double timesStaminaFitsIntoStaminaCost = p.stamina / (p.runningStaminaCost * deltaTime * staminaMultiplier);
@@ -2407,13 +2444,13 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		case CHEATS_ABILITY:
 		case CHEATS_ELEMENT:
 			for (MenuElement m2 : menuStuff)
-				if (m2.type == m.type)
+				if (m2.type == m.type && !m.equals(m2))
 					((MenuThingie) m2).on = false;
-			((MenuThingie) m).on = !((MenuThingie) m).on;
+			((MenuThingie) m).on = true;
 			if (m.type == MenuElement.Type.CHEATS_ABILITY)
 			{
-				cheatedAbilityName = m.text;
-				if (!Ability.elementalPowers.contains(m.text))
+				cheatedAbilityName = Ability.justName(m.text);
+				if (!Ability.elementalPowers.contains(cheatedAbilityName))
 				{
 					for (MenuElement m3 : menuStuff)
 						if (m3.type == MenuElement.Type.CHEATS_ELEMENT)
@@ -2429,7 +2466,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 						if (m3.type == MenuElement.Type.CHEATS_ELEMENT)
 						{
 							// checks if such elemental ability exists
-							((MenuThingie) m3).available = Resources.icons.get(m.text + " <" + m3.text + ">") != null;
+							((MenuThingie) m3).available = Resources.icons.get(cheatedAbilityName + " <" + m3.text + ">") != null;
 							// if not and element was selected, avoid bug
 							if (((MenuThingie) m3).on)
 								if (!((MenuThingie) m3).available)
@@ -2444,44 +2481,105 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				for (MenuElement m3 : menuStuff)
 					if (m3.type == MenuElement.Type.CHEATS_ABILITY)
 						if (((MenuThingie) m3).on)
-							if (Resources.icons.get(m3.text + " <" + m.text + ">") == null)
+							if (Resources.icons.get(Ability.justName(m3.text) + " <" + m.text + ">") == null)
 							{
 								cheatedAbilityElement = null;
 								((MenuThingie) m).available = false;
 								((MenuThingie) m).on = false;
 							}
+				if (cheatedAbilityElement != null)
+					for (MenuElement m3 : menuStuff)
+						if (m3.type == MenuElement.Type.CHEATS_ABILITY)
+							if (Ability.elementalPowers.contains(Ability.justName(m3.text)))
+							{
+								BufferedImage img = Resources.icons.get(Ability.justName(m3.text) + " <" + cheatedAbilityElement + ">");
+								if (img != null)
+									((MenuThingie) m3).image = img;
+								else
+									((MenuThingie) m3).image = Resources.icons.get(Ability.justName(m3.text));
+							}
+
 			}
+			if (cheatedAbilityElement == null)
+				for (MenuElement m3 : menuStuff)
+					if (m3.type == MenuElement.Type.CHEATS_ABILITY)
+						if (Ability.elementalPowers.contains(Ability.justName(m3.text)))
+							((MenuThingie) m3).image = Resources.icons.get(Ability.justName(m3.text));
 
 			// update relevant text
+			updateCheatAddAbilityButton();
+			break;
+		case CHEATS_RESULT_ABILITY:
 			String abilityName = "";
-			if (cheatedAbilityName != null)
-			{
-				if (cheatedAbilityElement != null)
-					abilityName = cheatedAbilityName + " <" + cheatedAbilityElement + ">";
-				else if (Ability.elementalPowers.contains(cheatedAbilityName))
-					abilityName = null;
-				else // normal non-elemental ability
-					abilityName = cheatedAbilityName;
-				// remove previous ability result
-				for (int i = 0; i < menuStuff.size(); i++)
-					if (menuStuff.get(i).type == MenuElement.Type.CHEATS_RESULT_ABILITY)
-					{
-						menuStuff.remove(i);
-						i--;
-					}
-				if (abilityName != null)
+			if (cheatedAbilityElement != null)
+				abilityName = cheatedAbilityName + " <" + cheatedAbilityElement + ">";
+			else if (Ability.elementalPowers.contains(cheatedAbilityName))
+				abilityName = null;
+			else // normal non-elemental ability
+				abilityName = cheatedAbilityName;
+			if ("Punch".equals(abilityName) || "Sprint".equals(abilityName))
+				return;
+			boolean removed = false;
+			// remove existing ability if exists
+			for (int i = 0; i < player.abilities.size(); i++)
+				if (player.abilities.get(i).name.equals(abilityName) && player.abilities.get(i).level == cheatedAbilityLevel)
 				{
-					// add new ability name and description texts
-					MenuText abilityMenuText = new MenuText(300 + 800, 200 - 160, 650, 150, Ability.niceName(abilityName) + ", level " + cheatedAbilityLevel);
-					abilityMenuText.type = MenuElement.Type.CHEATS_RESULT_ABILITY;
-					abilityMenuText.text += "\n" + Ability.getFluff(abilityName);
-					menuStuff.add(abilityMenuText);
+					if (player.abilities.get(i).on)
+						player.abilities.get(i).use(env, player, player.target);
+					player.abilities.remove(i);
+					i--;
+					removed = true;
 				}
+			if (removed)
+			{
+				player.updateAbilities();
+				updateNiceHotkeys();
+				break;
 			}
+			// otherwise, add new ability
+			Ability ability = Ability.ability(abilityName, cheatedAbilityLevel);
+			player.abilities.add(ability);
+			player.updateAbilities();
+			break;
+		case ICON:
 			break;
 		default:
-			errorMessage("Been there done that messed around, I'm having fun, don't put me down");
+			errorMessage("Been there done that messed around, I'm having fun, don't put me down    (" + m.type + ")");
 			break;
+		}
+	}
+
+	void updateCheatAddAbilityButton()
+	{
+		String abilityName = "";
+		if (cheatedAbilityName != null)
+		{
+			if (cheatedAbilityElement != null)
+				abilityName = cheatedAbilityName + " <" + cheatedAbilityElement + ">";
+			else if (Ability.elementalPowers.contains(cheatedAbilityName))
+				abilityName = null;
+			else // normal non-elemental ability
+				abilityName = cheatedAbilityName;
+			// remove previous ability result
+			for (int i = 0; i < menuStuff.size(); i++)
+				if (menuStuff.get(i).type == MenuElement.Type.CHEATS_RESULT_ABILITY || menuStuff.get(i).type == MenuElement.Type.ICON)
+				{
+					menuStuff.remove(i);
+					i--;
+				}
+			if (abilityName != null)
+			{
+				// add new ability name and description texts
+				MenuText abilityMenuText = new MenuText(300 + 800, 200 - 160, 650, 150, Ability.niceName(abilityName) + ", level " + cheatedAbilityLevel);
+				abilityMenuText.clickable = true;
+				abilityMenuText.type = MenuElement.Type.CHEATS_RESULT_ABILITY;
+				abilityMenuText.text += "\n" + Ability.getFluff(abilityName);
+				menuStuff.add(abilityMenuText);
+				// icon
+				MenuThingie abilityIcon = new MenuThingie(300 + 800 + 500, 200 - 160 + 10, "ICON", abilityName);
+				abilityIcon.clickable = false;
+				menuStuff.add(abilityIcon);
+			}
 		}
 	}
 
@@ -2847,7 +2945,6 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 	{
 	}
 
-	// IGNORE
 	public void mouseWheelMoved(MouseWheelEvent mwe)
 	{
 		boolean direction = mwe.getWheelRotation() == 1 ? true : false;
@@ -2878,9 +2975,11 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		}
 		else if (menu == Menu.CHEATS)
 		{
-			cheatedAbilityLevel += mwe.getWheelRotation();
+			cheatedAbilityLevel += -mwe.getWheelRotation();
 			cheatedAbilityLevel = Math.min(cheatedAbilityLevel, 10);
-			cheatedAbilityLevel = Math.max(0, cheatedAbilityLevel);
+			cheatedAbilityLevel = Math.max(1, cheatedAbilityLevel);
+			updateCheatAddAbilityButton();
+			updateMousePosition();
 		}
 		else
 		{
@@ -2981,6 +3080,32 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 						pressedThing = m;
 			if (pressedThing != null)
 				pressMenuButton(pressedThing);
+
+			if (menu == Menu.CHEATS && pauseHoverAbility != -1)
+			{
+				// set current cheat-selected ability to the clicked ability
+				cheatedAbilityName = player.abilities.get(pauseHoverAbility).justName();
+				String element = null;
+				if (cheatedAbilityName.length() < player.abilities.get(pauseHoverAbility).name.length())
+					element = player.abilities.get(pauseHoverAbility).getElement();
+				else
+					element = null;
+				cheatedAbilityLevel = player.abilities.get(pauseHoverAbility).level;
+				for (int i = 0; i < menuStuff.size(); i++)
+					if (menuStuff.get(i) instanceof MenuThingie)
+					{
+						MenuThingie mm = (MenuThingie) menuStuff.get(i);
+						if (Ability.justName(mm.text).equals(cheatedAbilityName))
+							pressMenuButton(mm);
+					}
+				for (int i = 0; i < menuStuff.size(); i++)
+					if (menuStuff.get(i) instanceof MenuThingie)
+					{
+						MenuThingie mm = (MenuThingie) menuStuff.get(i);
+						if (mm.text.equals(element))
+							pressMenuButton(mm);
+					}
+			}
 		}
 		if (me.getButton() == MouseEvent.BUTTON2) // Mid Click
 		{
@@ -3080,7 +3205,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		}
 
 		if (paused)
-			if (menu == Menu.ABILITIES)
+			if (menu == Menu.ABILITIES || menu == Menu.CHEATS)
 			{
 				pauseHoverAbility = -1;
 				for (int i = 0; i < player.abilities.size(); i++)

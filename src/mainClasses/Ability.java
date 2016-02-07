@@ -35,6 +35,7 @@ import abilities.Sense_Parahumans;
 import abilities.Sense_Powers;
 import abilities.Sense_Structure;
 import abilities.Shield_E;
+import abilities.Slow_Target;
 import abilities.Spray_E;
 import abilities.Sprint;
 import abilities.Strength_I;
@@ -50,14 +51,14 @@ import mainResourcesPackage.SoundEffect;
 public class Ability
 {
 	final static List<String> implementedAbilities = Arrays.asList("Portals", "Elemental Void", "Precision I", "Protective Bubble I", "Sprint", "Strength I", "Strength II", "Strength III", "Punch",
-			"Heal I", "Heal II", "Force Shield", "Ranged Explosion", "Flight I", "Flight II", "Telekinetic Flight", "Blink", "Ghost Mode I", "Strong Force Field", "Elemental Combat I", "Beam", "Ball",
-			"Shield", "Pool", "Wall", "Spray", "Toughness III", "Sense Life", "Sense Mana and Stamina", "Sense Powers");
+			"Heal I", "Heal II", "Force Shield", "Ranged Explosion", "Flight I", "Flight II", "Telekinetic Flight", "Blink", "Ghost Mode I", "Strong Force Field", "Beam", "Ball", "Shield", "Pool",
+			"Wall", "Spray", "Toughness III", "Sense Life", "Sense Mana and Stamina", "Sense Powers", "Elemental Combat I", "Slow Target");
 	protected static List<String> descriptions = new ArrayList<String>();
 	protected static boolean[][] elementalAttacksPossible = new boolean[12][7]; // [element][ability]
 	protected static int[][] elementalAttackNumbers = new int[12][3];
 	protected static String[] elementalAttacks = new String[]
 	{ "Ball", "Beam", "Shield", "Wall", "Spray", "Strike", "Pool" };
-	final static List<String> elementalPowers = Arrays.asList("Ball", "Beam", "Shield", "Wall", "Spray", "Strike", "Pool");
+	final static List<String> elementalPowers = Arrays.asList("Elemental Combat I", "Elemental Combat II", "Ball", "Beam", "Shield", "Wall", "Spray", "Strike", "Pool");
 
 	// permanent variables of the ability
 	protected String name; // name of the ability
@@ -242,6 +243,12 @@ public class Ability
 			return name.substring(0, name.indexOf("<") - 1);
 		return name;
 	}
+	public static String justName(String name)
+	{
+		if (name.contains("<"))
+			return name.substring(0, name.indexOf("<") - 1);
+		return name;
+	}
 
 	public static String getDescription(String name)
 	{
@@ -302,7 +309,7 @@ public class Ability
 			else if (realName.contains("Strike"))
 				element = "skeletally-enhanced";
 			else if (realName.contains("Sense"))
-				text = "Sense Element (Passive) <Flesh>\nSense blood pools, bone walls, meat shields, and people with Flesh powers.\nSee silhouettes of capes with your elemental power, walls/pools of your element or creatures under your element’s effect, and know how hurt they are. The range is 3^Level. Sense Element <Earth> allows you to also have Sense Structure! Yup!";
+				text = "Sense Element (Passive) <Flesh>\nSense blood pools, bone walls, meat shields, and people with Flesh powers.\ntags\nSee silhouettes of capes with your elemental power, walls/pools of your element or creatures under your element’s effect, and know how hurt they are. The range is 3^Level. Sense Element <Earth> allows you to also have Sense Structure! Yup!";
 			else if (realName.contains("Strike"))
 				element = "skeletally-enhanced";
 			else if (realName.contains("Fists"))
@@ -325,19 +332,17 @@ public class Ability
 				element = "flesh and gore! :D";
 			else if (realName.contains("Specialty"))
 				element = "flesh (as a power)";
-			else if (realName.contains("Reshape"))
-				element = "bones, blood and meat";
 			else if (realName.contains("Pool"))
 				element = "blood";
-			else if (realName.contains("Melt"))
-				text = "Melt (Activated) <Flesh>\nMelt a bone wall into a blood pool. Because powers don't always make sense.\nTarget an <Element> wall. Destroy it and create an <Element> pool instead.\nCost: 0 Mana.";
-			else if (realName.contains("Launch"))
-				text = "Launch Wall (Activated) <Flesh>\nTransform a bone wall into a meat ball through sheer force of will, and then throw it at a target.\nTarget a wall and then a creature. The wall immediately becomes an <Element> Ball and is thrown towards the target.\nCost: 2 Mana.";
-			else if (realName.contains("Wall")) // important that this is after "Launch"!
+			else if (realName.contains("Wall"))
 				element = "bone";
 			else
 				element = "BUG (Flesh) BUG";
 		}
+		if (element.equals("plant"))
+			if (realName.contains("Beam")) //TODO fix this. it does not work.
+				text.replace("continuous beam of plant", "vine that can grab onto stuff");
+
 		text = text.substring(text.indexOf("\n") + 1); // skip name and type
 		text = text.substring(text.indexOf("\n") + 1, text.indexOf("\n", text.indexOf("\n") + 1)); // skip tags, delete description
 		text = text.replace("<e>", element);
@@ -538,6 +543,8 @@ public class Ability
 			return new Elemental_Combat_I_E(element, pnts);
 		case "Elemental Combat II": // NOT DONE
 			return new Elemental_Combat_II_E(element, pnts);
+		case "Slow Target":
+			return new Slow_Target(pnts);
 		default:
 			MAIN.errorMessage("Donald trump peninsula error - " + abilityName);
 

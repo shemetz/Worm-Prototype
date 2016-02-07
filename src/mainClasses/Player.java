@@ -48,13 +48,15 @@ public class Player extends Person
 
 	public void defaultHotkeys()
 	{
+		hotkeys = new int[10];
 		int k = 0;
 		for (int i = 0; i < abilities.size() && k < hotkeys.length; i++, k++)
-			if (abilities.get(i).cooldown != -1)
-				hotkeys[k] = i;
-			else
-			{
+			if (abilities.get(i).hasTag("passive"))
 				k--;
-			}
+			else
+				hotkeys[k] = i;
+		if (k < hotkeys.length)
+			for (; k < hotkeys.length; k++)
+				hotkeys[k] = -1;
 	}
 }

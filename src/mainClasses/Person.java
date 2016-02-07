@@ -183,6 +183,9 @@ public class Person extends RndPhysObj implements Mover
 
 	public void affect(Effect e, boolean add)
 	{
+		// Can't get additional effects while dead. TODO look at this again one day and reconsider
+		if (dead && add)
+			return;
 		if (!e.stackable)
 			for (int i = 0; i < effects.size(); i++)
 			{
@@ -793,10 +796,13 @@ public class Person extends RndPhysObj implements Mover
 
 	public void selfFrame(double deltaTime)
 	{
-		for (SoundEffect s : sounds)
-			s.setPosition(x, y);
 		// this method is activated 1/deltaTime times per second
 		// If it's called with deltaTime == 0, it should only clamp the boundaries of health, mana, etc. and use unactivated passive abilities.
+
+		deltaTime *= timeEffect;
+
+		for (SoundEffect s : sounds)
+			s.setPosition(x, y);
 		if (timeSinceLastHit < 60)
 			timeSinceLastHit += deltaTime;
 		if (timeBetweenDamageTexts < 60)
@@ -931,7 +937,7 @@ public class Person extends RndPhysObj implements Mover
 		g.drawImage(image, 0, 0, null);
 		g.dispose();
 		if (ghostMode)
-		{
+		{ // TODO merge with real other draw effects
 			if (z <= cameraZed) // when in Ghost Mode, people are drawn as if they are higher on the Z axis, in order to make them be drawn above walls. cameraZed will be 1 lower than actual.
 			{
 				buffer.translate(x, y);
@@ -973,6 +979,38 @@ public class Person extends RndPhysObj implements Mover
 					if (a instanceof Elemental_Void)
 						drawColoredShadow(buffer, a.level * 10, Color.gray);
 
+			if (timeEffect != 1 && timeEffect != 0)
+			{
+				double chance = 1;
+				if (timeEffect > 1)
+					chance = 1 - 0.5 / timeEffect; // bigger the faster you are
+				if (timeEffect < 1)
+					chance = 1 - timeEffect / 2; // bigger the slower you are
+				// Noise and transparency
+				for (int i = 0; i < img.getWidth(); i++)
+					for (int j = 0; j < img.getHeight(); j++)
+						if (img.getRGB(i, j) != 0x00000000) // if not transparent
+							if (Math.random() < chance)
+							{
+								int RGB = img.getRGB(i, j);
+								int R = (RGB >> 16) & 0xff;
+								int G = (RGB >> 8) & 0xff;
+								int B = (RGB >> 0) & 0xff;
+								if (timeEffect < 1) // slow = purple
+									img.setRGB(i, j, (new Color((R + 255) / 2, (G / 2), (B + 255) / 2)).getRGB());
+								else if (timeEffect > 1) // fast = green, and transparent
+									img.setRGB(i, j, (new Color(R, (G + 255) / 2, B / 2, (int) (255 - 200 * chance))).getRGB());
+							}
+
+				// Multiple images
+				// buffer.rotate(0.1812, (int) (x), (int) (y));
+				// buffer.drawImage(img, (int) (x - 0.5 * imgW), (int) (y - 0.5 * imgH), null);
+				// buffer.rotate(-0.1812, (int) (x), (int) (y));
+				// buffer.rotate(-0.1812, (int) (x), (int) (y));
+				// buffer.drawImage(img, (int) (x - 0.5 * imgW), (int) (y - 0.5 * imgH), null);
+				// buffer.rotate(0.1812, (int) (x), (int) (y));
+			}
+
 			// Player Image
 			buffer.drawImage(img, (int) (x - 0.5 * imgW), (int) (y - 0.5 * imgH), null);
 
@@ -990,6 +1028,7 @@ public class Person extends RndPhysObj implements Mover
 			buffer.scale(1 / (z * MAIN.heightZoomRatio + 1), 1 / (z * MAIN.heightZoomRatio + 1));
 			buffer.translate(-x, -y);
 		}
+
 	}
 
 	public void drawData(Graphics2D buffer, boolean drawLife, boolean drawMana, boolean drawStamina, double cameraRotation)
@@ -1116,6 +1155,7 @@ public class Person extends RndPhysObj implements Mover
 			MAIN.errorMessage("NaN, NaN NaN NaN NaN NaN NaN NaN, NaN, Katamari Damaci");
 			return;
 		}
+		deltaTime *= timeEffect;
 		final double lerp_constant = 7;
 		this.rotation += (((((rotationAngle - this.rotation) % (Math.PI * 2)) + (Math.PI * 3)) % (Math.PI * 2)) - Math.PI) * lerp_constant * deltaTime;
 	}

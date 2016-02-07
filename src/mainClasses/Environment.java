@@ -141,6 +141,7 @@ public class Environment
 	boolean moveBall(Ball b, double deltaTime)
 	{
 		// return false if ball was destroyed
+		deltaTime *= b.timeEffect;
 		Portal intersectedPortal = b.intersectedPortal;
 		boolean startedAbovePortal = false;
 		if (intersectedPortal != null)
@@ -254,6 +255,7 @@ public class Environment
 							}
 							else
 							{
+								// TODO add checks for ball masses and timeEffects, maybe they don't shatter
 								// damage person
 								if (checkForEvasion(p))
 									b.evadedBy(p);
@@ -558,6 +560,7 @@ public class Environment
 
 	boolean moveSprayDrop(SprayDrop sd, double deltaTime)
 	{
+		deltaTime *= sd.timeEffect;
 		Portal intersectedPortal = sd.intersectedPortal;
 		boolean startedAbovePortal = false;
 		if (intersectedPortal != null)
@@ -787,6 +790,7 @@ public class Environment
 
 	void movePerson(Person p, double deltaTime)
 	{
+		deltaTime *= p.timeEffect;
 		Portal intersectedPortal = p.intersectedPortal;
 		boolean startedAbovePortal = false;
 		if (intersectedPortal != null)
@@ -2236,7 +2240,7 @@ public class Environment
 			b.end.y = roundedIntersectionPoint.y;
 			b.endType = 0;
 
-			collidedBall.mass -= 2 * b.getDamage() * deltaTime; // TODO what the shit? Damaging the ball's mass? Whaaa?
+			collidedBall.mass -= 2 * b.getDamage() * deltaTime * collidedBall.timeEffect; // TODO what the shit? Damaging the ball's mass? Whaaa?
 			// I'm not sure what I did here with the angles but it looks OK
 			if (Math.random() < 0.5)
 				ballDebris(collidedBall, "beam hit", collidedBall.angle());
@@ -2295,7 +2299,7 @@ public class Environment
 		if (newRange < 0) // because bugs
 			return null;
 		Beam b2 = new Beam(b.creator, b.theAbility, new Point3D((int) (b.end.x + startDistance * Math.cos(newBeamAngle)), (int) (b.end.y + startDistance * Math.sin(newBeamAngle)), b.end.z - 0.01),
-				new Point3D((int) (b.end.x + newRange * Math.cos(newBeamAngle)), (int) (b.end.y + newRange * Math.sin(newBeamAngle)), b.end.z - 0.01), b.elementNum, b.points, newRange);
+				new Point3D((int) (b.end.x + newRange * Math.cos(newBeamAngle)), (int) (b.end.y + newRange * Math.sin(newBeamAngle)), b.end.z - 0.01), b.elementNum, b.strength, newRange);
 		b2.frameNum = b.frameNum;
 		b2.isChild = true;
 		return b2;
@@ -2316,7 +2320,7 @@ public class Environment
 						(int) (p.partner.y + distanceToPortalCenter * Math.sin(angleRelativeToPartner) + startDistance * Math.sin(newBeamAngle)), b.end.z + p.partner.z - p.z - 0.01),
 				new Point3D((int) (p.partner.x + distanceToPortalCenter * Math.cos(angleRelativeToPartner) + (startDistance + newRange) * Math.cos(newBeamAngle)),
 						(int) (p.partner.y + distanceToPortalCenter * Math.sin(angleRelativeToPartner) + (startDistance + newRange) * Math.sin(newBeamAngle)), b.end.z + p.partner.z - p.z - 0.01),
-				b.elementNum, b.points, newRange);
+				b.elementNum, b.strength, newRange);
 		b2.frameNum = b.frameNum;
 		b2.isChild = true;
 		return b2;
@@ -2331,8 +2335,8 @@ public class Environment
 			for (int k = 0; k < 3; k++)
 			{
 				// 3 pieces of debris on every side, spread angle is 20*3 degrees (180/9) on every side
-				debris.add(new Debris(b.x, b.y, b.z, angle - 0.5 * Math.PI + k * Math.PI / 9, b.elementNum, b.velocity() * 0.9));
-				debris.add(new Debris(b.x, b.y, b.z, angle + 0.5 * Math.PI - k * Math.PI / 9, b.elementNum, b.velocity() * 0.9));
+				debris.add(new Debris(b.x, b.y, b.z, angle - 0.5 * Math.PI + k * Math.PI / 9, b.elementNum, b.velocity() * 0.9, b.timeEffect));
+				debris.add(new Debris(b.x, b.y, b.z, angle + 0.5 * Math.PI - k * Math.PI / 9, b.elementNum, b.velocity() * 0.9, b.timeEffect));
 			}
 			playSound(EP.elementList[b.elementNum] + " Smash.wav", b.Point());
 			break;
@@ -2340,7 +2344,7 @@ public class Environment
 			for (int i = 0; i < 7; i++)
 			{
 				// I'm not sure what I did here with the angles but it looks OK
-				debris.add(new Debris(b.x, b.y, b.z, angle + 4 + i * (4) / 6, b.elementNum, 500));
+				debris.add(new Debris(b.x, b.y, b.z, angle + 4 + i * (4) / 6, b.elementNum, 500, b.timeEffect));
 			}
 			playSound(EP.elementList[b.elementNum] + " Smash.wav", b.Point());
 			break;
@@ -2348,19 +2352,19 @@ public class Environment
 			for (int i = 0; i < 3; i++)
 			{
 				// 3 pieces of debris on every side, spread angle is 20*3 degrees (180/9) on every side
-				debris.add(new Debris(b.x, b.y, b.z, angle + 0.5 * Math.PI + i * Math.PI / 9, b.elementNum, b.velocity() * 0.9));
-				debris.add(new Debris(b.x, b.y, b.z, angle - 0.5 * Math.PI - i * Math.PI / 9, b.elementNum, b.velocity() * 0.9));
+				debris.add(new Debris(b.x, b.y, b.z, angle + 0.5 * Math.PI + i * Math.PI / 9, b.elementNum, b.velocity() * 0.9, b.timeEffect));
+				debris.add(new Debris(b.x, b.y, b.z, angle - 0.5 * Math.PI - i * Math.PI / 9, b.elementNum, b.velocity() * 0.9, b.timeEffect));
 			}
 			playSound(EP.elementList[b.elementNum] + " Smash.wav", b.Point());
 			break;
 		case "punch":
 			// effects
 			for (int k = 0; k < 7; k++) // epicness
-				debris.add(new Debris(b.x, b.y, b.z, angle - 3 * 0.3 + k * 0.3, b.elementNum, 600));
+				debris.add(new Debris(b.x, b.y, b.z, angle - 3 * 0.3 + k * 0.3, b.elementNum, 600, b.timeEffect));
 			playSound(EP.elementList[b.elementNum] + " Smash.wav", b.Point());
 			break;
 		case "beam hit":
-			debris.add(new Debris(b.x, b.y, b.z, Math.random() * 2 * Math.PI, b.elementNum, 500));
+			debris.add(new Debris(b.x, b.y, b.z, Math.random() * 2 * Math.PI, b.elementNum, 500, b.timeEffect));
 			break;
 		default:
 			MAIN.errorMessage("I'm sorry, I couldn't find any results for \"debris\". Perhaps you meant \"Deborah Peters\"?");
@@ -2632,6 +2636,9 @@ public class Environment
 	public void hitPerson(Person p, double damage, double pushback, double angle, int elementNum, double percentageOfTheDamage)
 	{
 		p.inCombat = true; // TODO
+
+		// percentages are multiplied by time stretch effects
+		percentageOfTheDamage *= p.timeEffect;
 		damage *= percentageOfTheDamage;
 		pushback *= percentageOfTheDamage;
 		if (damage > 0)

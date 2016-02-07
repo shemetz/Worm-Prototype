@@ -17,9 +17,9 @@ import mainResourcesPackage.SoundEffect;
 public class Beam_E extends Ability
 {
 
-	int						beamFrameNum;
-	public List<Evasion>	evasions;
-	public double			criticalTimeLeft	= 0;
+	int beamFrameNum;
+	public List<Evasion> evasions;
+	public double criticalTimeLeft = 0;
 
 	public Beam_E(String elementName, int p)
 	{
@@ -46,7 +46,8 @@ public class Beam_E extends Ability
 		{
 			sounds.add(new SoundEffect("Vine_send.wav"));
 			sounds.add(new SoundEffect("Vine_retrieve.wav"));
-		} else
+		}
+		else
 		{
 			sounds.add(new SoundEffect(elementName + " Beam.wav"));
 			sounds.get(0).endUnlessMaintained = true;
@@ -85,7 +86,8 @@ public class Beam_E extends Ability
 						i--;
 					}
 				criticalTimeLeft = 0;
-			} else if (!user.prone && !user.maintaining && cooldownLeft <= 0)
+			}
+			else if (!user.prone && !user.maintaining && cooldownLeft <= 0)
 			{
 				user.notAnimating = true;
 				user.maintaining = true;
@@ -94,7 +96,8 @@ public class Beam_E extends Ability
 				evasions = new ArrayList<Evasion>();
 				sounds.get(0).loop();
 			}
-		} else
+		}
+		else
 		{
 			// plant vines
 			if (on)
@@ -110,7 +113,8 @@ public class Beam_E extends Ability
 						env.vines.remove(i);
 						i--;
 					}
-			} else if (!user.prone && !user.maintaining && cooldownLeft <= 0)
+			}
+			else if (!user.prone && !user.maintaining && cooldownLeft <= 0)
 			{
 				user.notAnimating = true;
 				user.maintaining = true;
@@ -131,6 +135,7 @@ public class Beam_E extends Ability
 	public void maintain(Environment env, Person user, Point target, double deltaTime)
 	{
 		setSounds(user.Point());
+		deltaTime *= user.timeEffect;
 		for (int j = 0; j < this.evasions.size(); j++)
 			if (this.evasions.get(j).timeLeft > 0)
 				this.evasions.get(j).timeLeft -= deltaTime;
@@ -158,7 +163,7 @@ public class Beam_E extends Ability
 					Point3D start = new Point3D((int) (user.x + beamExitDistance * Math.cos(angle)), (int) (user.y + beamExitDistance * Math.sin(angle)), user.z + user.height / 2); // starts beamExitDistance pixels in front of the user
 					// TODO piercing beams, or electric lightning bolts
 					Point3D end = new Point3D((int) (user.x + range * Math.cos(angle)), (int) (user.y + range * Math.sin(angle)), user.z + user.height / 2);
-					Beam b = new Beam(user, this, start, end, getElementNum(), level, range);
+					Beam b = new Beam(user, this, start, end, getElementNum(), level * user.timeEffect, range);
 					frameNum++;
 					b.frameNum = beamFrameNum;
 					// critical chance
@@ -175,11 +180,13 @@ public class Beam_E extends Ability
 							beamFrameNum = 0;
 						frameNum = 0;
 					}
-				} else
+				}
+				else
 				{
 					cooldownLeft = cooldown;
 				}
-		} else // plant vines
+		}
+		else // plant vines
 		{
 			if (cooldownLeft == 0)
 				if (user.mana >= costPerSecond * deltaTime)
@@ -197,7 +204,8 @@ public class Beam_E extends Ability
 						env.moveVine(v, deltaTime);
 					}
 					user.mana -= costPerSecond * deltaTime;
-				} else
+				}
+				else
 				{
 					cooldownLeft = cooldown;
 					for (int i = 0; i < env.vines.size(); i++) // TODO change this from removing vines to leaving the leftovers which just keep flying for about a second
