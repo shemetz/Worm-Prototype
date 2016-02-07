@@ -95,6 +95,7 @@ public class Person extends RndPhysObj implements Mover
 	public boolean holdingVine = false; // true if the person is using a Plant Beam (vine) and grabbling an enemy.
 	public double flySpeed = -1;
 	public double timeSincePortal = 0;
+	public double timeEffect = 1;
 
 	// for continuous inaccuracy stuff like beams
 	public double inaccuracyAngle = 0;

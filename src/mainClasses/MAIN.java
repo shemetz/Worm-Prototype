@@ -1076,6 +1076,15 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 
 		player = new Player(96 * 20, 96 * 20);
 		player.tempTrigger();
+		// player.abilities.add(Ability.ability("Force Shield", 5));
+		// player.abilities.add(Ability.ability("Protective Bubble I", 5));
+		// player.abilities.add(Ability.ability("Spray <Acid>", 5));
+		// player.abilities.add(Ability.ability("Ball <Fire>", 5));
+		// player.abilities.add(Ability.ability("Heal I", 5));
+		// player.abilities.add(Ability.ability("Flight I", 5));
+		// player.abilities.add(Ability.ability("Blink", 5));
+		// player.abilities.add(Ability.ability("Beam <Energy>", 5));
+		player.abilities.add(Ability.ability("Slow Target", 7));
 		player.updateAbilities(); // Because we added some abilities and the hotkeys haven't been updated
 		env.people.add(player);
 		camera = new Point3D((int) player.x, (int) player.y, (int) player.z + 25);

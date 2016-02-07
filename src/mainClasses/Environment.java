@@ -787,6 +787,7 @@ public class Environment
 
 	void movePerson(Person p, double deltaTime)
 	{
+		deltaTime *= p.timeEffect;
 		Portal intersectedPortal = p.intersectedPortal;
 		boolean startedAbovePortal = false;
 		if (intersectedPortal != null)
