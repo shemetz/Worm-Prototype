@@ -48,6 +48,7 @@ import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.Timer;
 
+import abilities.Chronobiology;
 import abilities.ForceFieldAbility;
 import abilities.GridTargetingAbility;
 import abilities.Portals;
@@ -1824,6 +1825,25 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 					}
 
 					// ON/OFF
+					if (ability instanceof Chronobiology)
+					{
+						if (ability.on)
+						{
+							buffer.setColor(Color.green);
+							buffer.setStroke(new BasicStroke(2));
+							buffer.drawLine(x + (int) (1 * UIzoomLevel), y + (int) (1 * UIzoomLevel), x + (int) (1 * UIzoomLevel + 59 * UIzoomLevel), y + (int) (1 * UIzoomLevel));
+							buffer.drawLine(x + (int) (1 * UIzoomLevel), y + (int) (1 * UIzoomLevel), x + (int) (1 * UIzoomLevel), y + (int) (1 * UIzoomLevel + 59 * UIzoomLevel));
+						}
+						else
+						{
+							buffer.setColor(Color.magenta);
+							buffer.setStroke(new BasicStroke(2));
+							buffer.drawLine(x + (int) (1 * UIzoomLevel + 59 * UIzoomLevel), y + (int) (1 * UIzoomLevel + 59 * UIzoomLevel), x + (int) (1 * UIzoomLevel + 59 * UIzoomLevel), y + (int) (1 * UIzoomLevel));
+							buffer.drawLine(x + (int) (1 * UIzoomLevel + 59 * UIzoomLevel), y + (int) (1 * UIzoomLevel + 59 * UIzoomLevel), x + (int) (1 * UIzoomLevel), y + (int) (1 * UIzoomLevel + 59 * UIzoomLevel));
+						
+						}
+					}
+					else
 					if (ability.on)
 					{
 						buffer.setColor(Color.cyan);
