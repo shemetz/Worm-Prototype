@@ -10,6 +10,10 @@ public class Burning extends Effect
 	public Burning(int strength1, Ability CA)
 	{
 		super("Burning", -1, strength1, CA);
+	}
+
+	public void init()
+	{
 		stackable = false;
 		removeOnDeath = true;
 	}

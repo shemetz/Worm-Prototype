@@ -13,7 +13,7 @@ import mainClasses.Person;
 import mainClasses.Player;
 import mainClasses.VisualEffect;
 
-public class ApplyEffect extends Ability
+public class _ApplyEffect extends Ability
 {
 	double beamAnimationTimer;
 
@@ -30,7 +30,7 @@ public class ApplyEffect extends Ability
 	targetTypes targetingType;
 	VisualEffect.Type type;
 
-	public ApplyEffect(String name, int p, targetTypes targetType1, VisualEffect.Type type1)
+	public _ApplyEffect(String name, int p, targetTypes targetType1, VisualEffect.Type type1)
 	{
 		super(name, p);
 		targetingType = targetType1;

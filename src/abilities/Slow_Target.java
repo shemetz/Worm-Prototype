@@ -5,11 +5,11 @@ import mainClasses.Effect;
 import mainClasses.Person;
 import mainClasses.VisualEffect;
 
-public class Slow_Target extends ApplyEffect
+public class Slow_Target extends _ApplyEffect
 {
 	public Slow_Target(int p)
 	{
-		super("Slow Target", p, ApplyEffect.targetTypes.TARGETED, VisualEffect.Type.NO);
+		super("Slow Target", p, _ApplyEffect.targetTypes.TARGETED, VisualEffect.Type.NO);
 		cost = 6 - level / 2;
 		costPerSecond = 1;
 		costType = "mana";

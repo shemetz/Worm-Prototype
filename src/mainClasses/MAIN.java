@@ -57,6 +57,7 @@ import abilities.Sense_Powers;
 import abilities.Shield_E;
 import abilities.Sprint;
 import abilities.TeleportAbility;
+import abilities._LoopAbility;
 import effects.Burning;
 import effects.Tangled;
 import mainClasses.NPC.Strategy;
@@ -318,7 +319,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				// maintaining person abilities
 				for (Ability a : p.abilities)
 				{
-					if (a.on && a.cost != -1)
+					if (a.on && !a.hasTag("passive"))
 					{
 						a.maintain(env, p, p.target, deltaTime);
 					}
@@ -841,6 +842,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 					(int) (ability.arc / Math.PI * 180));
 			buffer.drawArc((int) (player.x - 50), (int) (player.y - 50), 50 * 2, 50 * 2, (int) ((-player.rotation - ability.arc / 2) / Math.PI * 180), (int) (ability.arc / Math.PI * 180));
 			break;
+		case "Self":
 		case "Look":
 		case "":
 			break;
@@ -1046,8 +1048,43 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			buffer.drawRect((int) (player.target.x - ffAbility.width / 2), (int) (player.target.y - ffAbility.height / 2), (int) (ffAbility.width), (int) (ffAbility.height));
 			buffer.rotate(-angleToFF - Math.PI / 2, player.target.x, player.target.y);
 			break;
+		case "loop":
+			_LoopAbility loopAbility = (_LoopAbility) ability;
+
+			List<Person> targets = loopAbility.getTargets(env, player, player.target);
+			if (!targets.isEmpty())
+			{
+				int haloRadius = 60;
+				for (Person targetedPerson : targets)
+				{
+					buffer.setColor(Color.orange);
+					buffer.drawOval((int) targetedPerson.x - haloRadius, (int) targetedPerson.y - haloRadius, haloRadius * 2, haloRadius * 2);
+					if (loopAbility.position)
+					{
+						buffer.setStroke(new BasicStroke(3));
+						buffer.setColor(new Color(182, 255, 0, 128));
+						int last = targetedPerson.pastCopies.size() - 1;
+						for (int i = 0; i < last && i < loopAbility.amount; i++)
+							buffer.drawLine((int) targetedPerson.pastCopies.get(last - i).x, (int) targetedPerson.pastCopies.get(last - i).y, (int) targetedPerson.pastCopies.get(last - i - 1).x,
+									(int) targetedPerson.pastCopies.get(last - i - 1).y);
+						buffer.drawLine((int) targetedPerson.x, (int) targetedPerson.y, (int) targetedPerson.pastCopies.get(last).x, (int) targetedPerson.pastCopies.get(last).y);
+						targetedPerson.pastCopies.get(last - loopAbility.amount).draw(buffer);
+					}
+
+				}
+			}
+			else
+			{
+				buffer.setStroke(dashedStroke3);
+				buffer.setColor(Color.orange);
+				int haloRadius = (int) loopAbility.maxDistFromTargetedPoint;
+				buffer.drawOval(player.target.x - haloRadius, player.target.y - haloRadius, haloRadius * 2, haloRadius * 2);
+			}
+			break;
 		case "":
+			break;
 		default:
+			errorMessage("No such target type");
 			break;
 		}
 	}
@@ -1838,13 +1875,14 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 						{
 							buffer.setColor(Color.magenta);
 							buffer.setStroke(new BasicStroke(2));
-							buffer.drawLine(x + (int) (1 * UIzoomLevel + 59 * UIzoomLevel), y + (int) (1 * UIzoomLevel + 59 * UIzoomLevel), x + (int) (1 * UIzoomLevel + 59 * UIzoomLevel), y + (int) (1 * UIzoomLevel));
-							buffer.drawLine(x + (int) (1 * UIzoomLevel + 59 * UIzoomLevel), y + (int) (1 * UIzoomLevel + 59 * UIzoomLevel), x + (int) (1 * UIzoomLevel), y + (int) (1 * UIzoomLevel + 59 * UIzoomLevel));
-						
+							buffer.drawLine(x + (int) (1 * UIzoomLevel + 59 * UIzoomLevel), y + (int) (1 * UIzoomLevel + 59 * UIzoomLevel), x + (int) (1 * UIzoomLevel + 59 * UIzoomLevel),
+									y + (int) (1 * UIzoomLevel));
+							buffer.drawLine(x + (int) (1 * UIzoomLevel + 59 * UIzoomLevel), y + (int) (1 * UIzoomLevel + 59 * UIzoomLevel), x + (int) (1 * UIzoomLevel),
+									y + (int) (1 * UIzoomLevel + 59 * UIzoomLevel));
+
 						}
 					}
-					else
-					if (ability.on)
+					else if (ability.on)
 					{
 						buffer.setColor(Color.cyan);
 						buffer.setStroke(new BasicStroke(2));

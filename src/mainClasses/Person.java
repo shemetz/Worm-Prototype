@@ -120,6 +120,10 @@ public class Person extends RndPhysObj implements Mover
 	// Sounds
 	public List<SoundEffect> sounds = new ArrayList<SoundEffect>();
 
+	// Time loop states
+	List<PersonCopy> pastCopies;
+	double pastCopyTimer;
+
 	public Person(double x1, double y1)
 	{
 		super(x1, y1, 0, 0);
@@ -179,6 +183,45 @@ public class Person extends RndPhysObj implements Mover
 		inventory = new ArrayList<Item>();
 
 		selfFrame(0);
+		pastCopies = new ArrayList<PersonCopy>();
+		pastCopyTimer = 0;
+	}
+
+	public void copyState(PersonCopy other)
+	{
+		// This method is for the Loop abilities that undo/rewind a person's state and/or position
+
+		// Purposefully not copied:
+		// this.mana = other.mana;
+		// this.charge = other.charge;
+		this.animState = other.animState;
+		this.animFrame = other.animFrame;
+		this.abilities = other.abilities;
+		this.effects = other.effects;
+		this.life = other.life;
+		this.stamina = other.stamina;
+		this.ghostMode = other.ghostMode;
+		this.panic = other.panic;
+		this.prone = other.prone;
+		this.dead = other.dead;
+		this.slippedTimeLeft = other.slippedTimeLeft;
+		this.directionOfAttemptedMovement = other.directionOfAttemptedMovement = 0;
+		this.strengthOfAttemptedMovement = other.strengthOfAttemptedMovement = 0;
+		this.timeEffect = other.timeEffect;
+	}
+
+	public void copyPosition(PersonCopy other)
+	{
+		// This method is for the Loop abilities that undo/rewind a person's state and/or position
+
+		// position, rotation and velocity
+		this.x = other.x;
+		this.y = other.y;
+		this.z = other.z;
+		this.rotation = other.rotation;
+		this.xVel = other.xVel;
+		this.yVel = other.yVel;
+		this.zVel = other.zVel;
 	}
 
 	public void affect(Effect e, boolean add)
@@ -902,6 +945,29 @@ public class Person extends RndPhysObj implements Mover
 					eNum--;
 				}
 		}
+
+		// time past copies
+		pastCopyTimer += deltaTime / timeEffect; // unaffected by time stretching
+		if (pastCopyTimer >= 1) // every 1 second
+		{
+			pastCopyTimer -= 1;
+			pastCopies.add(new PersonCopy(this));
+
+			// max size is 10 seconds back
+			if (pastCopies.size() > 10)
+				pastCopies.remove(0); // remove earliest one (from 10 secs ago)
+		}
+	}
+
+	public void loop(int secondsBackwards, boolean state, boolean position)
+	{
+		int index = pastCopies.size() - 1 - Math.min(secondsBackwards, pastCopies.size() - 1);
+		if (index < 0)
+			MAIN.errorMessage("nope this is not supposed to happen buddy");
+		if (state)
+			copyState(pastCopies.get(index));
+		if (position)
+			copyPosition(pastCopies.get(index));
 	}
 
 	public void slip(boolean yes)

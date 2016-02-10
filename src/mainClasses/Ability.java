@@ -28,6 +28,7 @@ import abilities.Precision_I;
 import abilities.Protective_Bubble_I;
 import abilities.Punch;
 import abilities.Ranged_Explosion;
+import abilities.Retrace_I;
 import abilities.Sense_Element_E;
 import abilities.Sense_Life;
 import abilities.Sense_Mana_and_Stamina;
@@ -53,7 +54,7 @@ public class Ability
 {
 	final static List<String> implementedAbilities = Arrays.asList("Portals", "Elemental Void", "Precision I", "Protective Bubble I", "Sprint", "Strength I", "Strength II", "Strength III", "Punch",
 			"Heal I", "Heal II", "Force Shield", "Ranged Explosion", "Flight I", "Flight II", "Telekinetic Flight", "Blink", "Ghost Mode I", "Strong Force Field", "Beam", "Ball", "Shield", "Pool",
-			"Wall", "Spray", "Toughness III", "Sense Life", "Sense Mana and Stamina", "Sense Powers", "Elemental Combat I", "Slow Target", "Chronobiology");
+			"Wall", "Spray", "Toughness III", "Sense Life", "Sense Mana and Stamina", "Sense Powers", "Elemental Combat I", "Slow Target", "Chronobiology", "Retrace I");
 	protected static List<String> descriptions = new ArrayList<String>();
 	protected static boolean[][] elementalAttacksPossible = new boolean[12][7]; // [element][ability]
 	protected static int[][] elementalAttackNumbers = new int[12][3];
@@ -124,7 +125,7 @@ public class Ability
 
 		// default values.
 		costPerSecond = -1;
-		cooldown = -1;
+		cooldown = 0;
 		cooldownLeft = 0;
 		cost = -1;
 		costPerSecond = -1;
@@ -457,8 +458,25 @@ public class Ability
 		}
 	};
 
+	public void init()
+	{
+		if (cooldown == -1) // todo remove this
+			System.out.println(this.name);
+		// make sure all values are OK
+		level = Math.min(level, 10);
+		level = Math.max(1, level);
+		cooldown = Math.max(0, cooldown);
+		cost = Math.max(0, cost);
+		costPerSecond = Math.max(0, costPerSecond);
+		range = Math.max(0, range);
+		areaRadius = Math.max(0, areaRadius);
+		arc = Math.max(0, arc);
+	}
+
 	public static Ability ability(String abilityName, int pnts)
 	{
+		Ability ab = null;
+
 		String element = null;
 		String trimmedAbilityName = abilityName;
 		if (abilityName.indexOf("<") != -1)
@@ -473,87 +491,132 @@ public class Ability
 		}
 		switch (trimmedAbilityName)
 		{
+		case "Retrace I":
+			ab = new Retrace_I(pnts);
+			break;
 		case "Chronobiology":
-			return new Chronobiology(pnts);
+			ab = new Chronobiology(pnts);
+			break;
 		case "Portals":
-			return new Portals(pnts);
+			ab = new Portals(pnts);
+			break;
 		case "Elemental Void":
-			return new Elemental_Void(pnts);
+			ab = new Elemental_Void(pnts);
+			break;
 		case "Precision I":
-			return new Precision_I(pnts);
+			ab = new Precision_I(pnts);
+			break;
 		case "Protective Bubble I":
-			return new Protective_Bubble_I(pnts);
+			ab = new Protective_Bubble_I(pnts);
+			break;
 		case "Sprint":
-			return new Sprint(pnts);
+			ab = new Sprint(pnts);
+			break;
 		case "Strength I":
-			return new Strength_I(pnts);
+			ab = new Strength_I(pnts);
+			break;
 		case "Strength II":
-			return new Strength_II(pnts);
+			ab = new Strength_II(pnts);
+			break;
 		case "Strength III":
-			return new Strength_III(pnts);
+			ab = new Strength_III(pnts);
+			break;
 		case "Punch":
-			return new Punch(pnts);
+			ab = new Punch(pnts);
+			break;
 		case "Heal I":
-			return new Heal_I(pnts);
+			ab = new Heal_I(pnts);
+			break;
 		case "Heal II":
-			return new Heal_II(pnts);
+			ab = new Heal_II(pnts);
+			break;
 		case "Force Shield":
-			return new Force_Shield(pnts);
+			ab = new Force_Shield(pnts);
+			break;
 		case "Ranged Explosion":
-			return new Ranged_Explosion(pnts);
+			ab = new Ranged_Explosion(pnts);
+			break;
 		case "Flight I":
-			return new Flight_I(pnts);
+			ab = new Flight_I(pnts);
+			break;
 		case "Flight II":
-			return new Flight_II(pnts);
+			ab = new Flight_II(pnts);
+			break;
 		case "Telekinetic Flight":
-			return new Telekinetic_Flight(pnts);
+			ab = new Telekinetic_Flight(pnts);
+			break;
 		case "Blink":
-			return new Blink(pnts);
+			ab = new Blink(pnts);
+			break;
 		case "Ghost Mode I":
-			return new Ghost_Mode_I(pnts);
+			ab = new Ghost_Mode_I(pnts);
+			break;
 		case "Strong Force Field":
-			return new Strong_Force_Field(pnts);
+			ab = new Strong_Force_Field(pnts);
+			break;
 		case "Beam":
-			return new Beam_E(element, pnts);
+			ab = new Beam_E(element, pnts);
+			break;
 		case "Ball":
-			return new Ball_E(element, pnts);
+			ab = new Ball_E(element, pnts);
+			break;
 		case "Shield":
-			return new Shield_E(element, pnts);
+			ab = new Shield_E(element, pnts);
+			break;
 		case "Pool":
-			return new Pool_E(element, pnts);
+			ab = new Pool_E(element, pnts);
+			break;
 		case "Wall":
-			return new Wall_E(element, pnts);
+			ab = new Wall_E(element, pnts);
+			break;
 		case "Spray":
-			return new Spray_E(element, pnts);
+			ab = new Spray_E(element, pnts);
+			break;
 		case "Strike": // NOT DONE
-			return new Strike_E(element, pnts);
+			ab = new Strike_E(element, pnts);
+			break;
 		case "Toughness III":
-			return new Toughness_III(pnts);
+			ab = new Toughness_III(pnts);
+			break;
 		case "Sense Life":
-			return new Sense_Life(pnts);
+			ab = new Sense_Life(pnts);
+			break;
 		case "Sense Mana and Stamina":
-			return new Sense_Mana_and_Stamina(pnts);
+			ab = new Sense_Mana_and_Stamina(pnts);
+			break;
 		case "Sense Movement": // NOT DONE
-			return new Sense_Movement(pnts);
+			ab = new Sense_Movement(pnts);
+			break;
 		case "Sense Structure": // NOT DONE
-			return new Sense_Structure(pnts);
+			ab = new Sense_Structure(pnts);
+			break;
 		case "Sense Parahumans": // NOT DONE
-			return new Sense_Parahumans(pnts);
+			ab = new Sense_Parahumans(pnts);
+			break;
 		case "Sense Powers":
-			return new Sense_Powers(pnts);
+			ab = new Sense_Powers(pnts);
+			break;
 		case "Sense Element": // NOT DONE
-			return new Sense_Element_E(element, pnts);
+			ab = new Sense_Element_E(element, pnts);
+			break;
 		case "Elemental Combat I":
-			return new Elemental_Combat_I_E(element, pnts);
+			ab = new Elemental_Combat_I_E(element, pnts);
+			break;
 		case "Elemental Combat II": // NOT DONE
-			return new Elemental_Combat_II_E(element, pnts);
+			ab = new Elemental_Combat_II_E(element, pnts);
+			break;
 		case "Slow Target":
-			return new Slow_Target(pnts);
+			ab = new Slow_Target(pnts);
+			break;
 		default:
 			MAIN.errorMessage("Donald trump peninsula error - " + abilityName);
 
 			return null;
 		// Just because the game isn't finished yet and I still haven't made all 151 ability methods:
 		}
+
+		ab.init();
+
+		return ab;
 	}
 }

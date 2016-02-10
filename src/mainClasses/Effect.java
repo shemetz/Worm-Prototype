@@ -7,19 +7,47 @@ public class Effect
 	public String name; // can be an int or a short, honestly, but then the programming would be difficulter
 	public double strength;
 	public int animFrame;
-	public boolean stackable;
 	public Ability creatorAbility; // to avoid same ability giving same effect multiple times to same person
+	
 	public boolean removeOnDeath;
+	public boolean stackable;
 
-	public Effect(String type, double duration1, double lifeRegenBuff, Ability creatorAbility1)
+	public Effect(String name1, double duration1, double strength1, Ability creatorAbility1)
 	{
 		creatorAbility = creatorAbility1;
-		name = type;
+		name = name1;
 		duration = duration1;
 		timeLeft = duration;
-		strength = lifeRegenBuff;
+		strength = strength1;
 		animFrame = 0;
-		// stackable - depends
+		init();
+	}
+
+	public void init()
+	{
+		// you must extend this!! important!
+		MAIN.errorMessage("YOU FORGOT TO ADD AN INIT METHOD TO THE EFFECT CALLED " + name + "!!!!!!111111");
+	}
+
+	public Effect()
+	{
+
+	}
+
+	public Effect clone()
+	{
+		// does NOT clone any variable that belongs to abilities that extend this one! Please know this!
+		Effect e = new Effect();
+		e.duration = this.duration;
+		e.timeLeft = this.timeLeft;
+		e.name = this.name;
+		e.strength = this.strength;
+		e.animFrame = this.animFrame;
+		e.stackable = this.stackable;
+		e.creatorAbility = this.creatorAbility; // SAME ABILITY INSTANCE
+		e.removeOnDeath = this.removeOnDeath;
+		e.init();
+		return e;
 	}
 
 	@SuppressWarnings("unused")

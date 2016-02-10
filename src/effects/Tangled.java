@@ -11,6 +11,10 @@ public class Tangled extends Effect
 	public Tangled(int strength1, Ability CA)
 	{
 		super("Tangled", 4, strength1, CA);
+	}
+
+	public void init()
+	{
 		stackable = true;
 		removeOnDeath = false;
 		damage = 1;
@@ -34,8 +38,9 @@ public class Tangled extends Effect
 	{
 
 	}
+
 	public void nextFrame(int frameNum)
 	{
-		
+
 	}
 }

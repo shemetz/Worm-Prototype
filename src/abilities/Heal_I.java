@@ -9,7 +9,7 @@ import mainClasses.Person;
 import mainClasses.UIText;
 import mainClasses.VisualEffect;
 
-public class Heal_I extends ApplyEffect
+public class Heal_I extends _ApplyEffect
 {
 
 	double healTextTimer;
@@ -17,7 +17,7 @@ public class Heal_I extends ApplyEffect
 
 	public Heal_I(int p)
 	{
-		super("Heal I", p, ApplyEffect.targetTypes.OTHER, VisualEffect.Type.HEAL);
+		super("Heal I", p, _ApplyEffect.targetTypes.OTHER, VisualEffect.Type.HEAL);
 		cost = 0;
 		costPerSecond = 1;
 		costType = "mana";
