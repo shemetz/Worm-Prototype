@@ -16,14 +16,14 @@ public class _LoopAbility extends Ability
 	public int amount; // amount of time in seconds the target of the ability goes backwards in time.
 	public boolean state;
 	public boolean position;
-	public double maxDistFromTargetedPoint = 500;
+	public double maxDistFromTargetedPoint = 250;
 
-	enum Targeting
+	public enum Targeting
 	{
 		SELF, TARGETED, AREA
 	};
 
-	Targeting targeting;
+	public Targeting targeting;
 
 	public _LoopAbility(String name, int p, String targeting1)
 	{
@@ -86,7 +86,10 @@ public class _LoopAbility extends Ability
 
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
 	{
-		target = player.Point();
+		if (targeting == Targeting.SELF)
+			player.target = player.Point();
+		else
+			player.target = target;
 		player.targetType = "loop";
 	}
 }

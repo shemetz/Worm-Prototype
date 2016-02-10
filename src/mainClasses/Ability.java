@@ -29,6 +29,8 @@ import abilities.Protective_Bubble_I;
 import abilities.Punch;
 import abilities.Ranged_Explosion;
 import abilities.Retrace_I;
+import abilities.Retrace_II;
+import abilities.Retrace_III;
 import abilities.Sense_Element_E;
 import abilities.Sense_Life;
 import abilities.Sense_Mana_and_Stamina;
@@ -54,7 +56,7 @@ public class Ability
 {
 	final static List<String> implementedAbilities = Arrays.asList("Portals", "Elemental Void", "Precision I", "Protective Bubble I", "Sprint", "Strength I", "Strength II", "Strength III", "Punch",
 			"Heal I", "Heal II", "Force Shield", "Ranged Explosion", "Flight I", "Flight II", "Telekinetic Flight", "Blink", "Ghost Mode I", "Strong Force Field", "Beam", "Ball", "Shield", "Pool",
-			"Wall", "Spray", "Toughness III", "Sense Life", "Sense Mana and Stamina", "Sense Powers", "Elemental Combat I", "Slow Target", "Chronobiology", "Retrace I");
+			"Wall", "Spray", "Toughness III", "Sense Life", "Sense Mana and Stamina", "Sense Powers", "Elemental Combat I", "Slow Target", "Chronobiology", "Retrace I", "Retrace II", "Retrace III");
 	protected static List<String> descriptions = new ArrayList<String>();
 	protected static boolean[][] elementalAttacksPossible = new boolean[12][7]; // [element][ability]
 	protected static int[][] elementalAttackNumbers = new int[12][3];
@@ -493,6 +495,12 @@ public class Ability
 		{
 		case "Retrace I":
 			ab = new Retrace_I(pnts);
+			break;
+		case "Retrace II":
+			ab = new Retrace_II(pnts);
+			break;
+		case "Retrace III":
+			ab = new Retrace_III(pnts);
 			break;
 		case "Chronobiology":
 			ab = new Chronobiology(pnts);

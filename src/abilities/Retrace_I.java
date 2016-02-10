@@ -8,7 +8,7 @@ public class Retrace_I extends _LoopAbility
 
 		cost = 4 - 0.5 * level;
 		costType = "Mana";
-		cooldown = level;
+		cooldown = 2;
 		range = 0;
 		rangeType = "Self";
 		instant = false;

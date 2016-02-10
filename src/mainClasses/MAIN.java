@@ -321,7 +321,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				{
 					if (a.on && !a.hasTag("passive"))
 					{
-						a.maintain(env, p, p.target, deltaTime);
+						a.maintain(env, p, p.target, deltaTime / p.timeEffect); // divided by timeEffect. TODO double check this! (try using abilities like Beam with it)
 					}
 				}
 				// using abilities the person is trying to repetitively use (e.g. holding down the Punch ability's key)
@@ -1052,23 +1052,31 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			_LoopAbility loopAbility = (_LoopAbility) ability;
 
 			List<Person> targets = loopAbility.getTargets(env, player, player.target);
+			if (loopAbility.targeting != _LoopAbility.Targeting.SELF)
+			{
+				// draw range around mouse point
+				buffer.setStroke(dashedStroke3);
+				buffer.setColor(Color.orange);
+				int haloRadius = (int) loopAbility.maxDistFromTargetedPoint;
+				buffer.drawOval(player.target.x - haloRadius, player.target.y - haloRadius, haloRadius * 2, haloRadius * 2);
+			}
 			if (!targets.isEmpty())
 			{
 				int haloRadius = 60;
 				for (Person targetedPerson : targets)
 				{
+					buffer.setStroke(new BasicStroke(3));
 					buffer.setColor(Color.orange);
 					buffer.drawOval((int) targetedPerson.x - haloRadius, (int) targetedPerson.y - haloRadius, haloRadius * 2, haloRadius * 2);
 					if (loopAbility.position)
 					{
-						buffer.setStroke(new BasicStroke(3));
 						buffer.setColor(new Color(182, 255, 0, 128));
 						int last = targetedPerson.pastCopies.size() - 1;
 						for (int i = 0; i < last && i < loopAbility.amount; i++)
 							buffer.drawLine((int) targetedPerson.pastCopies.get(last - i).x, (int) targetedPerson.pastCopies.get(last - i).y, (int) targetedPerson.pastCopies.get(last - i - 1).x,
 									(int) targetedPerson.pastCopies.get(last - i - 1).y);
 						buffer.drawLine((int) targetedPerson.x, (int) targetedPerson.y, (int) targetedPerson.pastCopies.get(last).x, (int) targetedPerson.pastCopies.get(last).y);
-						targetedPerson.pastCopies.get(last - loopAbility.amount).draw(buffer);
+						targetedPerson.pastCopies.get(Math.max(last - loopAbility.amount, 0)).draw(buffer);
 					}
 
 				}
@@ -1076,8 +1084,8 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			else
 			{
 				buffer.setStroke(dashedStroke3);
-				buffer.setColor(Color.orange);
-				int haloRadius = (int) loopAbility.maxDistFromTargetedPoint;
+				buffer.setColor(Color.red);
+				int haloRadius = (int) loopAbility.maxDistFromTargetedPoint - 2;
 				buffer.drawOval(player.target.x - haloRadius, player.target.y - haloRadius, haloRadius * 2, haloRadius * 2);
 			}
 			break;
