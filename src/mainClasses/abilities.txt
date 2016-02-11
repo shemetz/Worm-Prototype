@@ -3,7 +3,7 @@ offensive damaging pushing cost
 Thrust your curled palm forward towards a hostile object, with the intent of colliding with it and applying a strong force to the targeted area.
 Punch. The range of the punch is 1.4 * your width (0.5 meters for almost all people). Enemies hit by the punch are dealt STR*1 Blunt damage, and STR*1.5 pushback.
 Cooldown (time between punches): 0.55 seconds, minus 0.02*FIT (maximum -0.15).
-Cost: 1 Stamina.
+Cost: 0.7 Stamina.
 
 
 Sprint (On/Off)
@@ -42,7 +42,7 @@ Beam (Maintained) <Element>
 offensive damaging pushing beam aim continuous-cost
 Shoot a continuous beam of <e>.
 Deals the same amount of damage but continuously (every 0.2 seconds, damage is damage*attackRate*0.04), instead of every X seconds. Hits immediately.
-Costs 1 M/s while attacking.
+Costs ….some amount per second. 5 / attackRate * 1.5.
 NOTE:  Plant-Beams are completely different. Vines are shot, like an infinitely increasing line, until the person can't shoot anymore (lack of \mana) and they are destroyed, or when they latch onto a person. If the vine reaches its full range, it will retract.
 When vines hit an enemy with their end they're "grabbling" it. While grabbling an enemy, there is a fixed-length vine stretching between the vine creator and the grabbled person.
 Grabbled enemies are damaged by the vine at 0.5*points damage every 0.5 seconds. The vine now acts as a one-sided spring: When one of the people tries to move away from the vine, it stretches and draws them back, more strongly the more it stretches. The creator of the vine has increased control over the vine - they functionally have double the mass, in regards to pulling it. They are also able to move the vine sideways, virtually rotating the grabbled enemy around them (more easily the closer they are).
@@ -57,11 +57,11 @@ Cooldown of 2 seconds.
 Costs 3 mana to deploy, and then 0.2 M/s to maintain.
 
 
-Spray (Attack mode) <Element>
+Spray (Maintained) <Element>
 offensive damaging pushing continuous-cost range
 Spray <e> in a wide arc in front of you, hitting many targets at once.
-Deals half damage and half pushback on average, to every target in short range and a 120 degree arc. It acts like many short beams, randomly fluctuating and rotating in the field. Since the beams randomly rotate, it isn’t accurate and is not very useful against less than 3 targets.
-Costs 1 M/s while attacking.
+Deals half damage and half pushback on average, to every target in short range and a 120 degree arc. It isn’t accurate and is not very useful against less than 3 targets.
+Costs 2 M/s while attacking.
 
 
 Strike (Activated) <Element>
@@ -293,7 +293,7 @@ Flying costs 0.4 S/s.
 Telekinetic Flight (On/Off + Passive)
 on-off flight
 You are a master of flight!
-Be able to fly at your regular speed*9*Level. In addition, you gain 50% immunity to pushback, +20% evasion chance and +2 to Strength.
+Be able to fly at your regular speed*9*Level. In addition, you gain 50% resistance to pushback, +20% evasion chance and +2 to Strength.
 
 
 Chemtrail (On/Off)
@@ -430,7 +430,7 @@ Trail (On/Off)
 cost
 Leave <an e> trail behind you.
 While running, leave an elemental trail behind you every time you leave a grid square (maximum 1 per frame). The trail is made of 1x1 pools if the element is Water, Acid, Lava, Blood; made of 1x1 walls if the element is Metal, Ice, Earth; or made of level 1 elemental balls thrown backwards if the element is Fire, Wind, Electricity, Energy.
-While this is active, it costs 0.7-0.1*Level mana per wall/pool/ball (minimum 0).
+While this is active, it costs 0.7-0.1*Level mana per wall/pool/ball.
 
 
 Blink (Activated)
@@ -476,8 +476,8 @@ Costs 11-Level Mana (minimum 1M).
 
 Portals (Activated)
 escape cost cooldown range
-Create two portals between two walls you can see and target.
-Create two portals on two walls. Every Portal’s size is 2x0 m (it’s on the side of two walls). Anything that passes through one portal exits the other, and momentum is conserved (from the POV of the portal-passer). IF anything destroys any of the walls, both portals disappear.
+Now you’re thinking with portals.
+Create two portals. Anything that passes through one portal exits the other, and momentum is conserved (from the POV of the portal-passer).
 Cooldown of 10-Level seconds.
 Costs 11-Level Mana.
 
@@ -492,8 +492,8 @@ Elemental Teleport (Activated) <Element>
 escape cost cooldown
 Teleport through <e>.
 Teleport up to 100 meters to an elemental ball, pool or wall you can see and target, replacing it. 
-Cooldown of 5-level/2 seconds (minimum 0).
-Costs 4-Level Mana. (Minimum 0)
+Cooldown of 5-level/2 seconds.
+Costs 4-Level Mana.
 
 
 Trickst (Activated)
@@ -565,8 +565,8 @@ Costs 3 Mana.
 Protective Bubble I (Activated)
 defensive force-field cost cooldown
 Create a spherical force field that surrounds you and follows you.
-Create a spherical force field around you, that moves to always stay the same distance from you. The FF’s radius/”length” is 1 meter, and its width is 0.05 + 0.05*Level meters. The FF’s life is 10*Level.
-Cooldown: 6-Level seconds (minimum 0.3).
+Create a spherical force field around you, that moves to always stay the same distance from you. The FF’s radius is 1 meter, and its width is 0.05 + 0.05*Level meters. The FF’s life is 10*Level.
+Cooldown: 1 second.
 Costs 3 Mana.
 
 
@@ -574,7 +574,7 @@ Protective Bubble II (Activated)
 defensive force-field cost cooldown
 Create a strong spherical force field that surrounds you and follows you.
 Create a spherical force field around you. The FF’s radius is 1 meter, and its width is 0.05 + 0.2*Level meters. The FF’s life is 20*Level. The FF has Level armor.
-Cooldown: 7-Level seconds (minimum 0.3).
+Cooldown: 1 second.
 Costs 4 Mana.
 
 
@@ -652,32 +652,33 @@ Costs 1 Mana.
 
 Slow Target (Activated)
 debuff offensive defensive cost cooldown duration point
-Slow somebody down by 90%, while making them tougher.
-For a period of 2*Level seconds, a target slows down to 1/10 of what it was before. While it is slow, the target receives 10% damage and pushback with the exception of the Sting shard, AKA Ghost Weapons II, which can damage it.It  is affected by gravity and movement, times 0.1. When the effect ends the target’s speed is multiplied by 10 again.
-Cooldown: 3*Level seconds.
-Costs 5 Mana.
+Slow somebody’s time by 50%.
+For a period of 2*Level seconds, a target person slows down to 1/2 of what it was before. While it is slow, the target receives 50% of the damage and pushback with the exception of the Sting shard, AKA Ghost Weapons II, which can damage it.It  is affected by gravity and movement, times 0.5. When the effect ends the target’s speed is multiplied by 2 again.
+Cooldown: 3 seconds.
+Costs 6-level/2 Mana.
 
 
 Time-Freeze Target I (Activated)
 debuff offensive defensive cost cooldown duration point
-Chronically freeze a target, while making them immovable and invulnerable.
-For a period of 2*Level seconds, a target is frozen in time. It cannot be damaged, it can’t move, it isn’t affected by gravity and it is resistant to any effect (including control, sound…) with the exception of the Sting shard, AKA Ghost Weapons II, which can damage it.
+Chronologically freeze a target, while making them immovable and invulnerable.
+For a period of 2*Level seconds, a target person is frozen in time. It cannot be damaged, it can’t move, it isn’t affected by gravity and it is resistant to any effect (including control, sound…) with the exception of the Sting shard, AKA Ghost Weapons II, which can damage it.
 Cooldown: 3*Level seconds.
 Costs 5 Mana.
 
 
 Time-Freeze Target II (Activated)
 debuff offensive defensive cost cooldown duration point
-Chronically freeze targets more easily.
-For a period of 2*Level seconds, a target is frozen in time. It cannot be damaged, it can’t move, it isn’t affected by gravity and it is resistant to any effect (including control, sound…) with the exception of the Sting shard, AKA Ghost Weapons II, which can damage it. Possibly make the effect a random number between 1*Level and 3*Level?
+Chronologically freeze targets more easily.
+For a period of 2*Level seconds, a target person is frozen in time. It cannot be damaged, it can’t move, it isn’t affected by gravity and it is resistant to any effect (including control, sound…) with the exception of the Sting shard, AKA Ghost Weapons II, which can damage it. Possibly make the cooldown a random number between 1*Level and 3*Level? (like Clockblocker :)
+Cooldown: 0.2 seconds.
 Costs 3 Mana.
 
 
 Chronobiology (Passive, On/Off)
 on-off buff level-up cost
 Your body’s organs move faster or slower through time.
-Everything your body does related to time is slower faster, either multiplied by 1.0+0.3*Level or divided by that same amount. This includes regeneration, effects that apply to you such as buffs or debuffs, and aging (if anyone cares about that).
-You switch between fast and slow (can’t choose anything inbetween) by off/on-ing this power. Each switch costs 5 Mana.
+Everything your body does related to time is slower faster, either multiplied by 1.0+0.2*Level or divided by that same amount. This includes health/stamina regeneration, effects that apply to you such as buffs or debuffs, and aging (if anyone cares about that).
+You switch between fast and slow (can’t choose anything inbetween) by off/on-ing this power. Each switch costs 3 Mana.
 
 
 Slow-Motion (Activated)
@@ -688,76 +689,77 @@ Cooldown: 4*Level seconds.
 Costs 6 Mana.
 
 
-Repeat I (Passive + Activated)
+Repeat I (Activated)
 cooldown cost todo
 Loop yourself back to the position and state you were in a few seconds ago.
 Set your position and state to what they were Level seconds ago.
-Cooldown: Level seconds.
-Cost: 4-0.5*Level (minimum 0).
+Cooldown: 2 seconds.
+Cost: 4-0.5*Level.
 
 
-Repeat II (Passive + Activated)
+Repeat II (Activated)
 point cooldown cost todo
 Loop someone back to the position and state they were in a few seconds ago.
 Set a target’s position and state to what they were Level seconds ago.
-Cooldown: Level seconds.
-Cost: 6-0.5*Level (minimum 0).
+Cooldown: 2 seconds.
+Cost: 6-0.5*Level.
 
 
-Repeat III (Passive + Activated)
+Repeat III (Activated)
 point range cooldown cost todo
 Loop people back to the position and state they were in a few seconds ago.
 Within a circle with a range of Level meters, set every person’s position and state to what they were Level seconds ago.
-Cooldown: Level seconds.
-Cost: 8-0.5*Level (minimum 0).
+Cooldown: 2 seconds.
+Cost: 8-0.5*Level.
 
 
-Retrace I (Passive + Activated)
-cooldown cost todo
+Retrace I (Activated)
+cooldown cost
 Loop yourself back to the position you were in a few seconds ago.
 Set your position to what it was Level seconds ago.
-Cooldown: Level seconds.
-Cost: 4-0.5*Level (minimum 0).
+Cooldown: 2 seconds.
+Cost: 4-0.5*Level.
 
 
-Retrace II (Passive + Activated)
-point cooldown cost todo
+Retrace II (Activated)
+point cooldown cost
 Loop someone back to the position it was in a few seconds ago.
 Set a target’s position to what it was Level seconds ago.
-Cooldown: Level seconds.
-Cost: 6-0.5*Level (minimum 0).
+Cooldown: 2 seconds.
+Cost: 6-0.5*Level.
 
 
-Retrace III (Passive + Activated)
-point range cooldown cost todo
+Retrace III (Activated)
+point range cooldown cost
 Loop people back to the position it was in a few seconds ago.
 Within a circle with a range of Level meters, set every person’s position to what it was Level seconds ago.
-Cooldown: Level seconds.
-Cost: 8-0.5*Level (minimum 0).
+Range: 15 m.
+Cooldown: 2 seconds.
+Cost: 8-0.5*Level.
 
 
-Undo I (Passive + Activated)
+Undo I (Activated)
 cooldown cost todo
 Loop yourself back to the state you were in a few seconds ago.
 Set your state to what it was Level seconds ago.
-Cooldown: Level seconds.
-Cost: 4-0.5*Level (minimum 0).
+Cooldown: 2 seconds.
+Cost: 4-0.5*Level.
 
 
-Undo II (Passive + Activated)
+Undo II (Activated)
 point cooldown cost todo
 Loop someone back to the state it was in a few seconds ago.
 Set a target’s state to what it was Level seconds ago.
-Cooldown: Level seconds.
-Cost: 6-0.5*Level (minimum 0).
+Cooldown: 2 seconds.
+Cost: 6-0.5*Level.
 
 
-Undo III (Passive + Activated)
+Undo III (Activated)
 point range cooldown cost todo
 Loop people back to the state it was in a few seconds ago.
 Within a circle with a range of Level meters, set every person’s state to what it was Level seconds ago.
-Cooldown: Level seconds.
-Cost: 8-0.5*Level (minimum 0).
+Cooldown: 2 seconds.
+Cost: 8-0.5*Level.
 
 
 Nullify (Activated)
@@ -800,10 +802,10 @@ While this is on, whenever you are the target of a power or are inside an aura p
 Cost to switch: 0.
 
 
-Instability (Passive + Activated)
+Instability (Activated)
 todo
 You power is randomized every few seconds.
-Every 12 seconds, you gain a random ability of the highest rank possible from the ability list, with a number of Levels equal to this power’s Level and the element (if any) equal to a random element. You also lose the previous power you had. Note that this is a random ability, not a random power decided from a power element combination, and therefore there is an equal chance of getting every power. If the random power you get is Instability, uh, oh wow. You get….hmmm…..you get a new temporary power called “Uberpower” that gives you ten (!) temporary powers for the next 12 seconds. yeah, that would be impressive! 
+Every 12 seconds, you gain a random ability of the highest rank possible from the ability list, with a number of Levels equal to this power’s Level and the element (if any) equal to a random element. You also lose the previous power you had. Note that this is a random ability, not a random power decided from a power element combination, and therefore there is an equal chance of getting every power. If the random power you get is Instability, uh, oh wow. You get….hmmm….you get a new temporary power called “Uberpower” that gives you ten (!) temporary powers for the next 12 seconds. yeah, that would be impressive! 
 You can also force the power change, for 6 Mana.
 
 
@@ -814,7 +816,7 @@ A targeted creature’s passive abilities and effects caused by powers are copie
 Cost: 3 Mana.
 
 
-Steal Power (On/Off + Passive)
+Steal Power (On/Off)
 continuous-cost offensive debuff extra-abilities
 Temporarily steal the power of a target, and gain a stronger version.
 A targeted cape loses their highest-points power, and you gain the same power with Steal Power’s Level plus 1 (maximum 10!!!). You keep the power as long as the effect is on, and the target keeps missing it.
@@ -990,7 +992,7 @@ Cost: 5 Mana.
 Cooldown: 3 seconds.
 
 
-Self-Bomb (Passive + Activated)
+Self-Bomb (Activated)
 offensive extra-abilities damaging explosion cost cooldown
 Create an explosion centered around you that deals a lot of damage and pushback to others around you.
 You have Explosion Resistance. Create an explosion where you stand, with a radius of 4 meters, a damage of 5*Level and a pushback of 5*Level. The explosion doesn’t affect you in any way.
@@ -1112,13 +1114,13 @@ Pool (Activated) <Element>
 defensive build cost
 Create <an e> pool or pit.
 Create a 1x1 m pool of the element. When creating pools adjacent to existing pools of the same material, the mana cost is greatly decreased.
-Cost: 7-0.5*Level(minimum 1) Mana, or 3-0.5*Level (minimum 0) Mana next to another pool.
+Cost: 7-0.5*Level(minimum 1) Mana, or 3-0.5*Level Mana next to another pool.
 
 
 Elemental Void (On/Off)
 on-off range
 You have an aura that destroys elemental pools and walls.
-Pools and walls that are not earth pools and walls are damaged at 20 HP/sec if they are within Level meters from you and are not Earth walls or pits.
+Pools and walls that are not earth pools and walls are damaged at 20 HP/sec if they are within Level meters from you.
 
 
 Heal I (Maintained)
@@ -1139,7 +1141,7 @@ Friendly Fire (Passive)
 passive todo
 You can’t hurt allies with your powers.
 Allies gain immunity to damage and negative effects dealt to them by your powers.
-In addition, gain +5*Level HP. ...To make this ability better in levels greater than 1.
+In addition, gain +5*Level HP. ..To make this ability better in levels greater than 1.
 
 
 Buff Strength (Activated)
