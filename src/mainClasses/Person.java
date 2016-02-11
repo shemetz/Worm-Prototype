@@ -847,7 +847,7 @@ public class Person extends RndPhysObj implements Mover
 	{
 		// this method is activated 1/deltaTime times per second
 		// If it's called with deltaTime == 0, it should only clamp the boundaries of health, mana, etc. and use unactivated passive abilities.
-
+		double realDeltaTime = deltaTime;
 		deltaTime *= timeEffect;
 
 		for (SoundEffect s : sounds)
@@ -888,13 +888,13 @@ public class Person extends RndPhysObj implements Mover
 		if (inCombat)
 		{
 			life += lifeRegen * deltaTime;
-			mana += manaRegen * deltaTime / timeEffect; // mana regen is unaffected by time shenanigans
+			mana += manaRegen * realDeltaTime; // mana regen is unaffected by time shenanigans
 			stamina += staminaRegen * deltaTime;
 		}
 		else
 		{
 			life += lifeRegen * 3 * deltaTime;
-			mana += manaRegen * 1.5 * deltaTime / timeEffect; // mana regen is unaffected by time shenanigans
+			mana += manaRegen * 1.5 * realDeltaTime; // mana regen is unaffected by time shenanigans
 			stamina += staminaRegen * 1.5 * deltaTime;
 		}
 
@@ -929,7 +929,7 @@ public class Person extends RndPhysObj implements Mover
 			if (!a.hasTag("passive")) // check if ability isn't passive
 			{
 				if (a.cooldownLeft > 0)
-					a.cooldownLeft -= 1 * deltaTime;
+					a.cooldownLeft -= realDeltaTime;// unaffected by time stretching
 				if (a.cooldownLeft < 0)
 					a.cooldownLeft = 0;
 			}
@@ -943,17 +943,21 @@ public class Person extends RndPhysObj implements Mover
 		{
 			Effect e = effects.get(eNum);
 			if (e.duration != -1)
-				if (e.timeLeft > 0)
+			{
+				if (e.timeAffecting)
+					e.timeLeft -= realDeltaTime;
+				else if (e.timeLeft > 0)
 					e.timeLeft -= deltaTime;
-				else
+				if (e.timeLeft <= 0)
 				{
 					affect(e, false); // will remove the effect
 					eNum--;
 				}
+			}
 		}
 
 		// time past copies
-		pastCopyTimer += deltaTime / timeEffect; // unaffected by time stretching
+		pastCopyTimer += realDeltaTime; // unaffected by time stretching
 		if (pastCopyTimer >= 1) // every 1 second
 		{
 			pastCopyTimer -= 1;
@@ -1081,6 +1085,26 @@ public class Person extends RndPhysObj implements Mover
 				// buffer.rotate(-0.1812, (int) (x), (int) (y));
 				// buffer.drawImage(img, (int) (x - 0.5 * imgW), (int) (y - 0.5 * imgH), null);
 				// buffer.rotate(0.1812, (int) (x), (int) (y));
+			}
+			else if (timeEffect == 0)
+			{
+				// make grayscale
+				for (int i = 0; i < img.getWidth(); i++)
+					for (int j = 0; j < img.getHeight(); j++)
+					{
+						int RGB = img.getRGB(i, j);
+						if (RGB != 0x00000000) // if not transparent
+						{
+							int R = (RGB >> 16) & 0xff;
+							int G = (RGB >> 8) & 0xff;
+							int B = (RGB >> 0) & 0xff;
+							float[] HSB = Color.RGBtoHSB(R, G, B, null);
+							HSB[2] += (float) (Math.random() * 0.4 - 0.4 / 2);
+							HSB[2] = Math.max(HSB[2], 0f);
+							HSB[2] = Math.min(HSB[2], 1f);
+							img.setRGB(i, j, Color.HSBtoRGB(HSB[0], 0f, HSB[2]));
+						}
+					}
 			}
 
 			// Player Image

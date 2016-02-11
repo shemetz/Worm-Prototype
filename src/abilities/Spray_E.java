@@ -42,7 +42,7 @@ public class Spray_E extends Ability
 				cooldownLeft = cooldown;
 			stopAllSounds();
 		}
-		else if (!user.prone && !user.maintaining && cooldownLeft <= 0) // activate
+		else if (!user.prone && !user.maintaining && cooldownLeft <= 0 && user.timeEffect != 0) // activate
 		{
 			user.notAnimating = true;
 			user.maintaining = true;
@@ -55,7 +55,7 @@ public class Spray_E extends Ability
 	public void maintain(Environment env, Person user, Point target, double deltaTime)
 	{
 		double targetAngle = Math.atan2(target.y - user.y, target.x - user.x);
-		user.rotate(targetAngle, deltaTime);
+		user.rotate(targetAngle, deltaTime*user.timeEffect);
 
 		setSounds(user.Point());
 		double angle = user.rotation;

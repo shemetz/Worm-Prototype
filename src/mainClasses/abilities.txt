@@ -658,7 +658,7 @@ Cooldown: 3 seconds.
 Costs 6-level/2 Mana.
 
 
-Time-Freeze Target I (Activated)
+Time Freeze Target I (Activated)
 debuff offensive defensive cost cooldown duration point
 Chronologically freeze a target, while making them immovable and invulnerable.
 For a period of 2*Level seconds, a target person is frozen in time. It cannot be damaged, it can’t move, it isn’t affected by gravity and it is resistant to any effect (including control, sound…) with the exception of the Sting shard, AKA Ghost Weapons II, which can damage it.
@@ -666,7 +666,7 @@ Cooldown: 3*Level seconds.
 Costs 5 Mana.
 
 
-Time-Freeze Target II (Activated)
+Time Freeze Target II (Activated)
 debuff offensive defensive cost cooldown duration point
 Chronologically freeze targets more easily.
 For a period of 2*Level seconds, a target person is frozen in time. It cannot be damaged, it can’t move, it isn’t affected by gravity and it is resistant to any effect (including control, sound…) with the exception of the Sting shard, AKA Ghost Weapons II, which can damage it. Possibly make the cooldown a random number between 1*Level and 3*Level? (like Clockblocker :)

@@ -317,13 +317,10 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				}
 
 				// maintaining person abilities
-				for (Ability a : p.abilities)
-				{
-					if (a.on && !a.hasTag("passive"))
-					{
-						a.maintain(env, p, p.target, deltaTime / p.timeEffect); // divided by timeEffect. TODO double check this! (try using abilities like Beam with it)
-					}
-				}
+				if (p.timeEffect != 0)
+					for (Ability a : p.abilities)
+						if (a.on && !a.hasTag("passive"))
+							a.maintain(env, p, p.target, deltaTime); // not affected by timeEffect. TODO double check this! (try using abilities like Beam with it)
 				// using abilities the person is trying to repetitively use (e.g. holding down the Punch ability's key)
 				if (p.abilityTryingToRepetitivelyUse != -1)
 				{
@@ -2114,6 +2111,8 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			errorMessage("Person " + p.id + "'s direction of movement is NaN. This is not OK.");
 			return;
 		}
+		if (p.timeEffect == 0) // time stopped
+			return;
 		// if the person is attempting to stand still
 		if (!p.prone && p.strengthOfAttemptedMovement == 0)
 		{

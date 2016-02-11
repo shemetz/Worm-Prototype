@@ -54,7 +54,7 @@ public class Ball_E extends Ability
 	{
 		setSounds(user.Point());
 		double targetAngle = Math.atan2(target.y - user.y, target.x - user.x);
-		user.rotate(targetAngle, deltaTime);
+		user.rotate(targetAngle, deltaTime * user.timeEffect);
 
 		if (cooldownLeft == 0)
 			if (user.mana >= cost)
@@ -96,7 +96,8 @@ public class Ball_E extends Ability
 				{
 					env.balls.add(b);
 					sounds.get((int) (Math.random() * 5)).play();
-				} else
+				}
+				else
 					env.ballDebris(b, "shatter", b.angle());
 				user.mana -= cost;
 				user.rotate(angle, deltaTime);

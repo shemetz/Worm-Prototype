@@ -13,8 +13,7 @@ public class Time_Slowed extends Effect
 		super("Time Slowed", duration1, 0.5, CA);
 		stackable = true;
 		removeOnDeath = true;
-		duration *= strength; // so that the actual time is the actual time.
-		timeLeft *= strength; // ditto
+		timeAffecting = true;
 	}
 
 	public Effect clone()

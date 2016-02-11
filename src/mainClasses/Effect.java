@@ -8,6 +8,7 @@ public class Effect
 	public double strength;
 	public int animFrame;
 	public Ability creatorAbility; // to avoid same ability giving same effect multiple times to same person
+	public boolean timeAffecting;
 
 	public boolean removeOnDeath;
 	public boolean stackable;
@@ -19,6 +20,7 @@ public class Effect
 		duration = duration1;
 		timeLeft = duration;
 		strength = strength1;
+		timeAffecting = false;
 		animFrame = 0;
 	}
 

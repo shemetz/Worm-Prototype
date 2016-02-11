@@ -4,20 +4,21 @@ import mainClasses.Ability;
 import mainClasses.Effect;
 import mainClasses.Person;
 
-public class ChronobiologyEffect extends Effect
+public class Time_Stopped extends Effect
 {
+	double originalValue;
 
-	public ChronobiologyEffect(double duration1, double strength1, Ability CA)
+	public Time_Stopped(double duration1, Ability CA)
 	{
-		super("Time Stretched", duration1, strength1, CA);
+		super("Time Stopped", duration1, 1, CA);
 		stackable = true;
-		removeOnDeath = true;
+		removeOnDeath = false;
 		timeAffecting = true;
 	}
 
 	public Effect clone()
 	{
-		ChronobiologyEffect e = new ChronobiologyEffect(this.duration, this.strength, this.creatorAbility);
+		Time_Stopped e = new Time_Stopped(this.duration, this.creatorAbility);
 		e.timeLeft = this.timeLeft;
 		e.strength = this.strength;
 		e.animFrame = this.animFrame;
@@ -28,12 +29,14 @@ public class ChronobiologyEffect extends Effect
 
 	public void apply(Person target)
 	{
-		target.timeEffect *= strength;
+		originalValue = target.timeEffect;
+		target.timeEffect = 0;
 	}
 
 	public void unapply(Person target)
 	{
-		target.timeEffect /= strength;
+		target.timeEffect = originalValue;
+		originalValue = 0; //unnecessary but who cares
 	}
 
 	public void nextFrame(int frameNum)

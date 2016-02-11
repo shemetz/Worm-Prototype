@@ -51,6 +51,7 @@ import abilities.Strength_III;
 import abilities.Strike_E;
 import abilities.Strong_Force_Field;
 import abilities.Telekinetic_Flight;
+import abilities.Time_Freeze_Target_I;
 import abilities.Toughness_III;
 import abilities.Undo_I;
 import abilities.Undo_II;
@@ -63,7 +64,7 @@ public class Ability
 	final static List<String> implementedAbilities = Arrays.asList("Portals", "Elemental Void", "Precision I", "Protective Bubble I", "Sprint", "Strength I", "Strength II", "Strength III", "Punch",
 			"Heal I", "Heal II", "Force Shield", "Ranged Explosion", "Flight I", "Flight II", "Telekinetic Flight", "Blink", "Ghost Mode I", "Strong Force Field", "Beam", "Ball", "Shield", "Pool",
 			"Wall", "Spray", "Toughness III", "Sense Life", "Sense Mana and Stamina", "Sense Powers", "Elemental Combat I", "Slow Target", "Chronobiology", "Retrace I", "Retrace II", "Retrace III",
-			"Undo I", "Undo II", "Undo III", "Repeat I", "Repeat II", "Repeat III");
+			"Undo I", "Undo II", "Undo III", "Repeat I", "Repeat II", "Repeat III", "Time Freeze Target I");
 	protected static List<String> descriptions = new ArrayList<String>();
 	protected static boolean[][] elementalAttacksPossible = new boolean[12][7]; // [element][ability]
 	protected static int[][] elementalAttackNumbers = new int[12][3];
@@ -500,6 +501,9 @@ public class Ability
 		}
 		switch (trimmedAbilityName)
 		{
+		case "Time Freeze Target I":
+			ab = new Time_Freeze_Target_I(pnts);
+			break;
 		case "Repeat I":
 			ab = new Repeat_I(pnts);
 			break;
