@@ -28,6 +28,9 @@ import abilities.Precision_I;
 import abilities.Protective_Bubble_I;
 import abilities.Punch;
 import abilities.Ranged_Explosion;
+import abilities.Repeat_I;
+import abilities.Repeat_II;
+import abilities.Repeat_III;
 import abilities.Retrace_I;
 import abilities.Retrace_II;
 import abilities.Retrace_III;
@@ -49,6 +52,9 @@ import abilities.Strike_E;
 import abilities.Strong_Force_Field;
 import abilities.Telekinetic_Flight;
 import abilities.Toughness_III;
+import abilities.Undo_I;
+import abilities.Undo_II;
+import abilities.Undo_III;
 import abilities.Wall_E;
 import mainResourcesPackage.SoundEffect;
 
@@ -56,7 +62,8 @@ public class Ability
 {
 	final static List<String> implementedAbilities = Arrays.asList("Portals", "Elemental Void", "Precision I", "Protective Bubble I", "Sprint", "Strength I", "Strength II", "Strength III", "Punch",
 			"Heal I", "Heal II", "Force Shield", "Ranged Explosion", "Flight I", "Flight II", "Telekinetic Flight", "Blink", "Ghost Mode I", "Strong Force Field", "Beam", "Ball", "Shield", "Pool",
-			"Wall", "Spray", "Toughness III", "Sense Life", "Sense Mana and Stamina", "Sense Powers", "Elemental Combat I", "Slow Target", "Chronobiology", "Retrace I", "Retrace II", "Retrace III");
+			"Wall", "Spray", "Toughness III", "Sense Life", "Sense Mana and Stamina", "Sense Powers", "Elemental Combat I", "Slow Target", "Chronobiology", "Retrace I", "Retrace II", "Retrace III",
+			"Undo I", "Undo II", "Undo III", "Repeat I", "Repeat II", "Repeat III");
 	protected static List<String> descriptions = new ArrayList<String>();
 	protected static boolean[][] elementalAttacksPossible = new boolean[12][7]; // [element][ability]
 	protected static int[][] elementalAttackNumbers = new int[12][3];
@@ -493,6 +500,24 @@ public class Ability
 		}
 		switch (trimmedAbilityName)
 		{
+		case "Repeat I":
+			ab = new Repeat_I(pnts);
+			break;
+		case "Repeat II":
+			ab = new Repeat_II(pnts);
+			break;
+		case "Repeat III":
+			ab = new Repeat_III(pnts);
+			break;
+		case "Undo I":
+			ab = new Undo_I(pnts);
+			break;
+		case "Undo II":
+			ab = new Undo_II(pnts);
+			break;
+		case "Undo III":
+			ab = new Undo_III(pnts);
+			break;
 		case "Retrace I":
 			ab = new Retrace_I(pnts);
 			break;

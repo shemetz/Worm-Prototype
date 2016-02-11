@@ -1,30 +1,34 @@
 package mainClasses;
 
+import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
 public class VisualEffect
 {
-	public double		timeLeft;
-	public double		duration;
-	public boolean		onTop;
-	public Point		p1, p2;
-	public double		z;
-	public Point		p1p2variations;
-	public List<Point>	points;
-	public Color		color;
-	public int			frame;
+	public double timeLeft;
+	public double duration;
+	public boolean onTop;
+	public Point p1, p2;
+	public double z;
+	public Point p1p2variations;
+	public List<Point> points;
+	public Color color;
+	public int frame;
+	public BufferedImage image;
 
 	public enum Type
 	{
-		BLINK_SUCCESS, BLINK_FAIL, HEAL, EXPLOSION, NO
+		BLINK_SUCCESS, BLINK_FAIL, HEAL, EXPLOSION, NO, TELEPORT, STATE_LOOP
 	};
 
-	public Type			type;
+	public Type type;
 
 	/*
 	 * BLINK_SUCCESS = successful blink. Random blue lines between entry and exit points.
@@ -33,11 +37,15 @@ public class VisualEffect
 	 * 
 	 * HEAL = healing beam. Green.
 	 * 
+	 * TELEPORT = rotating inwards, fading, image of person at entry point of teleport
+	 * 
+	 * STATE_LOOP = three arcs that rotate inwards into person
+	 * 
 	 * EXPLOSION = explosion (subtypes for different drawings)
 	 */
-	public int		subtype;
-	public double	angle;
-	public double	size;
+	public int subtype;
+	public double angle;
+	public double size;
 
 	public VisualEffect()
 	{
@@ -87,19 +95,49 @@ public class VisualEffect
 			if (frame >= Resources.explosions.get(subtype).size())
 				frame = -1;
 			break;
+		case TELEPORT:
+		case STATE_LOOP:
 		case NO:
 			break;
 		default:
 			MAIN.errorMessage("[1] Unused effect type has no update case:  " + type);
 			break;
 		}
-
 	}
 
 	public void draw(Graphics2D buffer)
 	{
 		switch (type)
 		{
+		case STATE_LOOP:
+			buffer.setColor(new Color(180, 255, 0));
+			int radius = (int) (timeLeft * 120);
+			for (double i = 0; i < Math.PI * 2; i += Math.PI * 2 / 3)
+				buffer.drawArc(p1.x - radius, p1.y - radius, radius * 2, radius * 2, (int) ((i + timeLeft * 7) * 180 / Math.PI), 60);
+			Composite original1 = buffer.getComposite();
+			buffer.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) timeLeft * 0.7f));
+			buffer.rotate(angle - Math.PI / 2, p1.x, p1.y);
+			buffer.drawImage(image, p1.x - image.getWidth() / 2, p1.y - image.getHeight() / 2, null);
+			buffer.rotate(-angle + Math.PI / 2, p1.x, p1.y);
+			buffer.setComposite(original1);
+			break;
+		case TELEPORT:
+			// draws image, spinning and shrinking
+			buffer.rotate(20 * timeLeft + angle, p1.x, p1.y);
+			buffer.translate(p1.x, p1.y);
+			buffer.scale(timeLeft, timeLeft);
+			buffer.translate(-p1.x, -p1.y);
+
+			Composite original = buffer.getComposite();
+			buffer.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) timeLeft));
+			buffer.drawImage(image, p1.x - image.getWidth() / 2, p1.y - image.getHeight() / 2, null);
+			buffer.setComposite(original);
+
+			buffer.translate(p1.x, p1.y);
+			buffer.scale(1 / timeLeft, 1 / timeLeft);
+			buffer.translate(-p1.x, -p1.y);
+			buffer.rotate(-20 * timeLeft - angle, p1.x, p1.y);
+			break;
 		case BLINK_SUCCESS:
 			buffer.setStroke(new BasicStroke(2));
 			buffer.setColor(color);

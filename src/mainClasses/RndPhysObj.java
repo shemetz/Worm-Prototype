@@ -8,7 +8,7 @@ public class RndPhysObj extends Drawable
 	public double angularVelocity; // radians per second
 	public double mass; // in kilograms
 	public double zVel; // positive = upwards
-	public double timeEffect = 1; // if 0.4, this will move 40% as fast and apply 40% the force when colliding and will only be dealt 40% of the damage
+	public double timeEffect; // if 0.4, this will move 40% as fast and apply 40% the force when colliding and will only be dealt 40% of the damage
 
 	public RndPhysObj(double x1, double y1, int r1, double m1)
 	{
@@ -21,6 +21,7 @@ public class RndPhysObj extends Drawable
 		mass = m1;
 		angularVelocity = 0;
 		zVel = 0;
+		timeEffect = 1;
 	}
 
 	public Point Point()

@@ -2887,6 +2887,8 @@ public class Environment
 
 	private void recursivePoolCheck(int x, int y, int elementNum)
 	{
+		if (x < 0 || y < 0 || x >= width || y >= height)
+			return;
 		if (poolTypes[x][y] != elementNum || checkedSquares[x][y])
 			return;
 		healthSum += poolHealths[x][y];

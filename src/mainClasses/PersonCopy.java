@@ -4,7 +4,9 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class PersonCopy
 {
@@ -26,7 +28,7 @@ public class PersonCopy
 	double xVel, yVel, zVel;
 	double timeEffect;
 
-	List<Ability> abilities;
+	Map<Ability, Boolean> abilities;
 	List<Effect> effects;
 
 	public PersonCopy(Person other)
@@ -45,8 +47,8 @@ public class PersonCopy
 		this.prone = other.prone;
 		this.dead = other.dead;
 		this.slippedTimeLeft = other.slippedTimeLeft;
-		this.directionOfAttemptedMovement = other.directionOfAttemptedMovement = 0;
-		this.strengthOfAttemptedMovement = other.strengthOfAttemptedMovement = 0;
+		this.directionOfAttemptedMovement = other.directionOfAttemptedMovement;
+		this.strengthOfAttemptedMovement = other.strengthOfAttemptedMovement;
 		this.x = other.x;
 		this.y = other.y;
 		this.z = other.z;
@@ -56,7 +58,11 @@ public class PersonCopy
 		this.zVel = other.zVel;
 		this.timeEffect = other.timeEffect;
 
-		// DOES NOT COPY ABILITIES OR THEIR VARIABLES. THIS IS MAYBE IMPORTANT
+		abilities = new HashMap<Ability, Boolean>();
+
+		for (Ability a : other.abilities)
+			if (a.hasTag("on-off"))
+				abilities.put(a, a.on);
 
 		this.effects = new ArrayList<Effect>();
 		for (Effect e : other.effects)
@@ -66,7 +72,7 @@ public class PersonCopy
 	public void draw(Graphics2D buffer)
 	{
 		int radius = 50;
-		buffer.setColor(new Color(0,0,0,128));
+		buffer.setColor(new Color(0, 0, 0, 128));
 		buffer.setStroke(new BasicStroke(5));
 		buffer.drawOval((int) x - radius, (int) y - radius, radius * 2, radius * 2);
 	}

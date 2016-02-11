@@ -11,13 +11,21 @@ public class Time_Slowed extends Effect
 	public Time_Slowed(double duration1, Ability CA)
 	{
 		super("Time Slowed", duration1, 0.5, CA);
-	}
-	public void init()
-	{
 		stackable = true;
 		removeOnDeath = true;
 		duration *= strength; // so that the actual time is the actual time.
 		timeLeft *= strength; // ditto
+	}
+
+	public Effect clone()
+	{
+		Time_Slowed e = new Time_Slowed(this.duration, this.creatorAbility);
+		e.timeLeft = this.timeLeft;
+		e.strength = this.strength;
+		e.animFrame = this.animFrame;
+		e.stackable = this.stackable;
+		e.removeOnDeath = this.removeOnDeath;
+		return e;
 	}
 
 	public void apply(Person target)

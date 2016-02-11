@@ -2,6 +2,7 @@ package abilities;
 
 import java.awt.Point;
 
+import effects.ChronobiologyEffect;
 import mainClasses.Ability;
 import mainClasses.Environment;
 import mainClasses.Person;
@@ -12,6 +13,7 @@ public class Chronobiology extends Ability
 
 	double amount;
 	boolean initialChange = false;
+	ChronobiologyEffect effect;
 
 	public Chronobiology(int p)
 	{
@@ -30,10 +32,9 @@ public class Chronobiology extends Ability
 		{
 			user.mana -= cost;
 			on = !on;
-			if (on)
-				user.timeEffect *= amount * amount;
-			else
-				user.timeEffect /= amount * amount;
+			effect.unapply(user);
+			effect.strength = 1 / effect.strength;
+			effect.apply(user);
 		}
 	}
 
@@ -41,7 +42,8 @@ public class Chronobiology extends Ability
 	{
 		if (!initialChange)
 		{
-			user.timeEffect *= amount;
+			effect = new ChronobiologyEffect(-1, amount, this);
+			user.affect(effect, true);
 			initialChange = true;
 		}
 	}

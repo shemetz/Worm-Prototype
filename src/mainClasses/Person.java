@@ -196,8 +196,6 @@ public class Person extends RndPhysObj implements Mover
 		// this.charge = other.charge;
 		this.animState = other.animState;
 		this.animFrame = other.animFrame;
-		this.abilities = other.abilities;
-		this.effects = other.effects;
 		this.life = other.life;
 		this.stamina = other.stamina;
 		this.ghostMode = other.ghostMode;
@@ -205,9 +203,17 @@ public class Person extends RndPhysObj implements Mover
 		this.prone = other.prone;
 		this.dead = other.dead;
 		this.slippedTimeLeft = other.slippedTimeLeft;
-		this.directionOfAttemptedMovement = other.directionOfAttemptedMovement = 0;
-		this.strengthOfAttemptedMovement = other.strengthOfAttemptedMovement = 0;
+		this.directionOfAttemptedMovement = other.directionOfAttemptedMovement;
+		this.strengthOfAttemptedMovement = other.strengthOfAttemptedMovement;
 		this.timeEffect = other.timeEffect;
+
+		for (Ability a : this.abilities)
+			if (a.hasTag("on-off"))
+				a.on = other.abilities.get(a);
+
+		this.effects = new ArrayList<Effect>();
+		for (Effect e : other.effects)
+			this.effects.add(e.clone());
 	}
 
 	public void copyPosition(PersonCopy other)

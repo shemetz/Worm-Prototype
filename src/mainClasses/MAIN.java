@@ -763,7 +763,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				return;
 		// if the area isn't nice
 		if (!ability.rangeType.equals("Create in grid"))
-			if (ability.range != -1)
+			if (ability.hasTag("range"))
 				// clamp target to range:
 				if (Methods.DistancePow2(p.x, p.y, p.target.x, p.target.y) > ability.range * ability.range)
 				{
@@ -1089,6 +1089,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				buffer.drawOval(player.target.x - haloRadius, player.target.y - haloRadius, haloRadius * 2, haloRadius * 2);
 			}
 			break;
+		case "look":
 		case "":
 			break;
 		default:
