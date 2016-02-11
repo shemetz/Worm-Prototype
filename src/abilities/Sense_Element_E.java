@@ -11,14 +11,14 @@ public class Sense_Element_E extends Ability
 
 	public Sense_Element_E(String elementName, int p)
 	{
-		super("Sense Element <"+elementName+">", p);
+		super("Sense Element <" + elementName + ">", p);
 		cost = -1;
-		costType = "none";
+		costType = CostType.NONE;
 		cooldown = -1;
 		range = (int) (50 * Math.pow(3, level));
-		rangeType = "Circle area";
+		rangeType = RangeType.CIRCLE_AREA;
 	}
-	
+
 	public void use(Environment env, Person user, Point target)
 	{
 		on = !on;

@@ -5,7 +5,13 @@ import java.awt.geom.Area;
 public class Player extends Person
 {
 	public int[] hotkeys; // Mid-Click, Shift, Q, E, R, F, V, C, X, Z
-	public String targetType = "";
+
+	public enum AimType
+	{
+		CREATE_FF, PORTALS, CREATE_IN_GRID, TARGET_IN_RANGE, EXPLOSION, TELEPORT, LOOP, NONE
+	};
+
+	public AimType aimType;
 
 	public boolean leftMousePressed;
 	public boolean rightMousePressed = false;

@@ -13,10 +13,10 @@ public class Sense_Parahumans extends Ability
 	{
 		super("Sense Parahumans", p);
 		cost = -1;
-		costType = "none";
+		costType = CostType.NONE;
 		cooldown = -1;
 		range = (int) (50 * Math.pow(3, level));
-		rangeType = "Circle area";
+		rangeType = RangeType.CIRCLE_AREA;
 	}
 	
 	public void use(Environment env, Person user, Point target)

@@ -10,13 +10,13 @@ public class Retrace_I extends _LoopAbility
 {
 	public Retrace_I(int p)
 	{
-		super("Retrace I", p, "SELF");
+		super("Retrace I", p, Targeting.SELF);
 
 		cost = 4 - 0.5 * level;
-		costType = "Mana";
+		costType = CostType.MANA;
 		cooldown = 2;
 		range = 0;
-		rangeType = "Self";
+		rangeType = RangeType.NONE;
 		instant = false;
 
 		amount = level;

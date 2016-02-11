@@ -12,13 +12,13 @@ public class Retrace_III extends _LoopAbility
 {
 	public Retrace_III(int p)
 	{
-		super("Retrace III", p, "AREA");
+		super("Retrace III", p, Targeting.AREA);
 
 		cost = 8 - 0.5 * level;
-		costType = "Mana";
+		costType = CostType.MANA;
 		cooldown = 2;
 		range = 1500;
-		rangeType = "Circle area";
+		rangeType = RangeType.CIRCLE_AREA;
 		instant = false;
 
 		amount = level;

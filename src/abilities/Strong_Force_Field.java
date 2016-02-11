@@ -15,9 +15,9 @@ public class Strong_Force_Field extends ForceFieldAbility
 		super("Strong Force Field", p);
 		cooldown = Math.max(7 - level, 0.3);
 		range = 68;
-		rangeType = "Exact range";
+		rangeType = RangeType.EXACT_RANGE;
 		cost = 4;
-		costType = "mana";
+		costType = CostType.MANA;
 	}
 
 	public void use(Environment env, Person user, Point target)
@@ -41,7 +41,7 @@ public class Strong_Force_Field extends ForceFieldAbility
 	{
 		double angle = Math.atan2(target.y - player.y, target.x - player.x);
 
-		player.targetType = "createFF";
+		player.aimType = Player.AimType.CREATE_FF;
 		player.target = new Point((int) (player.x + range * Math.cos(angle)), (int) (player.y + range * Math.sin(angle)));
 		
 		width = 100 + 50 * (int) level;

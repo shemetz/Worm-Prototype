@@ -22,11 +22,11 @@ public class GridTargetingAbility extends Ability
 	{
 		super(n, p);
 		cost = Math.max(3 - 0.3 * level, 0.8);
-		costType = "mana";
+		costType = CostType.MANA;
 		cooldown = Math.max(3 - 0.3 * level, 0.3); // is used for creating the wall
 		costPerSecond = 1;
 		range = 600;
-		rangeType = "Create in grid";
+		rangeType = RangeType.CREATE_IN_GRID;
 		maintainable = true;
 		instant = true;
 

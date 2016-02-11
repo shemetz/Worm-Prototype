@@ -20,10 +20,10 @@ public class Heal_I extends _ApplyEffect
 		super("Heal I", p, _ApplyEffect.targetTypes.OTHER, VisualEffect.Type.HEAL);
 		cost = 0;
 		costPerSecond = 1;
-		costType = "mana";
+		costType = CostType.MANA;
 		cooldown = 0;
 		range = 50 * level;
-		rangeType = "Circle area";
+		rangeType = RangeType.CIRCLE_AREA;
 		stopsMovement = false;
 		maintainable = true;
 		instant = true;

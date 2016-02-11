@@ -25,10 +25,10 @@ public class Portals extends Ability
 	{
 		super("Portals", p);
 		cost = (10 - level) / 2; // divided by 2 because 2 portals
-		costType = "mana";
+		costType = CostType.MANA;
 		cooldown = 0;
 		range = 1000;
-		rangeType = "Ranged circular area";
+		rangeType = RangeType.EXACT_RANGE;
 		toggleable = true;
 
 		alignPortals = false;
@@ -142,7 +142,7 @@ public class Portals extends Ability
 
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
 	{
-		player.targetType = "portals";
+		player.aimType = Player.AimType.PORTALS;
 		if (holdTarget == null) // when starting to hold mouse
 			holdTarget = new Point(target.x, target.y);
 		if (player.rightMousePressed) // cancel

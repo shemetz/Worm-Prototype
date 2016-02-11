@@ -25,10 +25,10 @@ public class _LoopAbility extends Ability
 
 	public Targeting targeting;
 
-	public _LoopAbility(String name, int p, String targeting1)
+	public _LoopAbility(String name, int p, Targeting targeting1)
 	{
 		super(name, p);
-		targeting = Targeting.valueOf(targeting1);
+		targeting = targeting1;
 	}
 
 	public List<Person> getTargets(Environment env, Person user, Point target)
@@ -90,6 +90,6 @@ public class _LoopAbility extends Ability
 			player.target = player.Point();
 		else
 			player.target = target;
-		player.targetType = "loop";
+		player.aimType = Player.AimType.LOOP;
 	}
 }

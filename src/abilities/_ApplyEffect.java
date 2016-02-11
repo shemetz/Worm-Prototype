@@ -217,11 +217,11 @@ public class _ApplyEffect extends Ability
 	{
 		if (targetingType == targetTypes.TARGETED)
 		{
-			player.targetType = "rangedTarget";
+			player.aimType = Player.AimType.TARGET_IN_RANGE;
 		}
 		else
 		{
-			player.targetType = "";
+			player.aimType = Player.AimType.NONE;
 			player.target = new Point(-1, -1);
 		}
 	}

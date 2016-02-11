@@ -18,10 +18,10 @@ public class Shield_E extends Ability
 		super("Shield <" + elementName + ">", p);
 		cost = 2;
 		costPerSecond = 0.3;
-		costType = "mana";
+		costType = CostType.MANA;
 		cooldown = 5;
 		range = -1;
-		rangeType = "Look";
+		rangeType = RangeType.NONE;
 		maintainable = true;
 
 		shield = null;
@@ -105,7 +105,7 @@ public class Shield_E extends Ability
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
 	{
 		double angle = Math.atan2(target.y - player.y, target.x - player.x);
-		player.targetType = "look";
+		player.aimType = Player.AimType.NONE;
 		if (!player.leftMousePressed) // stops aiming shield while pressing mouse, to blink for example
 			player.rotate(angle, deltaTime);
 	}

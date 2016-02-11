@@ -24,9 +24,9 @@ public class Punch extends Ability
 	{
 		super("Punch", p);
 		cost = 0.7;
-		costType = "stamina";
+		costType = CostType.STAMINA;
 		cooldown = 0.55; // is actually 0.55 - Math.min(0.02*FITNESS, 0.15);
-		rangeType = "Exact range";
+		rangeType = RangeType.EXACT_RANGE;
 		stopsMovement = true;
 		instant = true;
 		// range = (int) (1.15 * radius); //in person's
@@ -69,7 +69,7 @@ public class Punch extends Ability
 
 							user.switchAnimation(5);
 							user.stamina -= cost;
-							cooldownLeft = cooldown;
+							cooldownLeft = cooldown * user.timeEffect;
 						}
 						// Rotate towards target anyways
 						else
@@ -107,7 +107,7 @@ public class Punch extends Ability
 					{
 						user.stamina -= cost;
 						user.switchAnimation(11 + (user.lastHandUsedIsRight ? 0 : 1));
-						cooldownLeft = cooldown;
+						cooldownLeft = cooldown * user.timeEffect;
 					}
 					else
 						user.switchAnimation(10);
@@ -123,7 +123,7 @@ public class Punch extends Ability
 
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
 	{
-		player.targetType = "look";
+		player.aimType = Player.AimType.NONE;
 	}
 
 	boolean testUserPunch(Person user, Environment env, boolean onlyOrganics, boolean missSound)

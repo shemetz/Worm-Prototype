@@ -18,7 +18,7 @@ public class Protective_Bubble_I extends Ability
 	{
 		super("Protective Bubble I", p);
 		cooldown = 1;
-		costType = "mana";
+		costType = CostType.MANA;
 		cost = 3;
 		instant = true;
 

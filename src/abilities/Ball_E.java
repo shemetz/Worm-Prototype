@@ -18,10 +18,10 @@ public class Ball_E extends Ability
 	{
 		super("Ball <" + elementName + ">", p);
 		cost = 5 / elementalAttackNumbers[getElementNum()][2];
-		costType = "mana";
+		costType = CostType.MANA;
 		cooldown = 5 / elementalAttackNumbers[getElementNum()][2];
 		range = 80;
-		rangeType = "Look";
+		rangeType = RangeType.NONE;
 		stopsMovement = false;
 		maintainable = true;
 		instant = true;
@@ -107,7 +107,7 @@ public class Ball_E extends Ability
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
 	{
 		double angle = Math.atan2(target.y - player.y, target.x - player.x);
-		player.targetType = "look";
+		player.aimType = Player.AimType.NONE;
 		player.target = new Point((int) (player.x + range * Math.cos(angle)), (int) (player.y + range * Math.sin(angle)));
 		if (!player.leftMousePressed)
 			player.rotate(angle, 3.0 * deltaTime);

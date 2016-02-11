@@ -743,7 +743,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			ability = player.abilities.get(player.abilityMaintaining);
 		else
 		{
-			player.targetType = "";
+			player.aimType = Player.AimType.NONE;
 			player.successfulTarget = false;
 			return;
 		}
@@ -759,7 +759,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			if (((Portals) ability).holdTarget != null)
 				return;
 		// if the area isn't nice
-		if (!ability.rangeType.equals("Create in grid"))
+		if (!ability.rangeType.equals(Ability.RangeType.CREATE_IN_GRID))
 			if (ability.hasTag("range"))
 				// clamp target to range:
 				if (Methods.DistancePow2(p.x, p.y, p.target.x, p.target.y) > ability.range * ability.range)
@@ -773,13 +773,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 	{
 		switch (ability.rangeType)
 		{
-		case "Ranged circular area":
-			buffer.setStroke(dashedStroke3);
-			buffer.setColor(new Color(255, 255, 255, 80));
-			// range
-			buffer.drawOval((int) (player.x - ability.range), (int) (player.y - ability.range), 2 * ability.range, 2 * ability.range);
-			break;
-		case "Create in grid":
+		case CREATE_IN_GRID:
 			buffer.setStroke(dashedStroke3);
 			GridTargetingAbility gAbility = (GridTargetingAbility) ability;
 			gAbility.UPT(env, player);
@@ -794,12 +788,12 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			buffer.setColor(new Color(255, 255, 255, 80)); // stroke is still dashed
 			buffer.draw(gAbility.rangeArea);
 			break;
-		case "Exact range":
+		case EXACT_RANGE:
 			buffer.setColor(new Color(255, 255, 255, 80)); // transparent white
 			buffer.setStroke(dashedStroke3);
 			buffer.drawOval((int) (player.x - ability.range), (int) (player.y - ability.range), 2 * ability.range, 2 * ability.range);
 			break;
-		case "Circle area":
+		case CIRCLE_AREA:
 			// "filled" area, not just outlines.
 			buffer.setStroke(new BasicStroke(1));
 			buffer.setColor(new Color(182, 255, 0));
@@ -828,7 +822,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			// // You must be wondering why I did this wacky hijink instead ofsimply drawing the ovals with buffer. Well, apparently the TexturePaint causes the process to be very slow when the camera is zoomed in (and buffer's scale is very big).
 
 			break;
-		case "cone":
+		case CONE:
 			buffer.setStroke(dashedStroke3);
 			buffer.setColor(new Color(255, 255, 255, 80)); // transparent white
 			buffer.drawLine((int) (player.x + 50 * Math.cos(player.rotation + ability.arc / 2)), (int) (player.y + 50 * Math.sin(player.rotation + ability.arc / 2)),
@@ -839,12 +833,10 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 					(int) (ability.arc / Math.PI * 180));
 			buffer.drawArc((int) (player.x - 50), (int) (player.y - 50), 50 * 2, 50 * 2, (int) ((-player.rotation - ability.arc / 2) / Math.PI * 180), (int) (ability.arc / Math.PI * 180));
 			break;
-		case "Self":
-		case "Look":
-		case "":
+		case NONE:
 			break;
 		default:
-			errorMessage("No such range type, sir!");
+			errorMessage("No such range type, sir!   " + ability.rangeType);
 			break;
 		}
 	}
@@ -853,9 +845,9 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 	{
 		Ability ability = player.abilities.get(player.abilityAiming);
 
-		switch (player.targetType)
+		switch (player.aimType)
 		{
-		case "portals":
+		case PORTALS:
 			Portals p = (Portals) ability;
 			if (p.holdTarget == null)
 				break;
@@ -928,7 +920,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				buffer.drawLine(p.p2.start.x, p.p2.start.y, p.p2.end.x, p.p2.end.y);
 			}
 			break;
-		case "explosion":
+		case EXPLOSION:
 			buffer.setStroke(dashedStroke3);
 			buffer.setColor(Color.orange);
 			// explosion "plus"
@@ -944,7 +936,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				circleRadius /= 2;
 			}
 			break;
-		case "rangedTarget":
+		case TARGET_IN_RANGE:
 			Point targetPerson = null;
 			double closest = 100 * 100; // max distance of 100 pixels to target, from cursor
 			for (Person possibleTarget : env.people)
@@ -971,7 +963,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				buffer.drawOval(player.target.x - haloRadius, player.target.y - haloRadius, haloRadius * 2, haloRadius * 2);
 			}
 			break;
-		case "teleport":
+		case TELEPORT:
 			buffer.setStroke(new BasicStroke(3));
 			final int radius = 35;
 			TeleportAbility teleportAbility = (TeleportAbility) ability;
@@ -1036,7 +1028,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 					(int) (player.y + 0.9 * distance * Math.sin(angle)));
 
 			break;
-		case "createFF":
+		case CREATE_FF:
 			ForceFieldAbility ffAbility = (ForceFieldAbility) ability;
 			double angleToFF = Math.atan2(player.y - player.target.y, player.x - player.target.x);
 			buffer.setColor(new Color(53, 218, 255));
@@ -1045,7 +1037,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			buffer.drawRect((int) (player.target.x - ffAbility.width / 2), (int) (player.target.y - ffAbility.height / 2), (int) (ffAbility.width), (int) (ffAbility.height));
 			buffer.rotate(-angleToFF - Math.PI / 2, player.target.x, player.target.y);
 			break;
-		case "loop":
+		case LOOP:
 			_LoopAbility loopAbility = (_LoopAbility) ability;
 
 			List<Person> targets = loopAbility.getTargets(env, player, player.target);
@@ -1086,8 +1078,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				buffer.drawOval(player.target.x - haloRadius, player.target.y - haloRadius, haloRadius * 2, haloRadius * 2);
 			}
 			break;
-		case "look":
-		case "":
+		case NONE:
 			break;
 		default:
 			errorMessage("No such target type");
@@ -1725,7 +1716,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			if (cost > 0)
 				switch (ability.costType)
 				{
-				case "mana":
+				case MANA:
 					for (int i = 1; i < player.mana / cost; i++)
 					{
 						// darker rectangle
@@ -1740,7 +1731,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 						buffer.fillRect((int) (20 * UIzoomLevel + player.mana * 20 * UIzoomLevel) - i * (int) (cost * 20 * UIzoomLevel), (int) (60 * UIzoomLevel + 1), 2, (int) (13 * UIzoomLevel));
 					}
 					break;
-				case "stamina":
+				case STAMINA:
 					for (int i = 1; i < player.stamina / cost; i++)
 					{
 						// darker rectangle
@@ -1943,11 +1934,20 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 
 		buffer.setStroke(new BasicStroke((float) (3 * UIzoomLevel)));
 		buffer.setColor(Color.black);
-		// effect icons
+		// effects
 		for (int i = 0; i < player.effects.size(); i++)
 		{
-			buffer.drawImage(Resources.icons.get(player.effects.get(i).name), (int) (frameWidth - 90 * UIzoomLevel - i * 80 * UIzoomLevel), (int) (frameHeight - 90 * UIzoomLevel), this);
+			Effect e = player.effects.get(i);
+			// Icon
+			buffer.drawImage(Resources.icons.get(e.name), (int) (frameWidth - 90 * UIzoomLevel - i * 80 * UIzoomLevel), (int) (frameHeight - 90 * UIzoomLevel), this);
 			buffer.drawRect((int) (frameWidth - 90 * UIzoomLevel - i * 80 * UIzoomLevel), (int) (frameHeight - 90 * UIzoomLevel), (int) (60 * UIzoomLevel), (int) (60 * UIzoomLevel));
+			// Cooldown
+			if (e.duration != -1)
+			{
+				buffer.setColor(new Color(0, 0, 0, 89));
+				buffer.fillArc((int) (frameWidth - 90 * UIzoomLevel - i * 80 * UIzoomLevel), (int) (frameHeight - 90 * UIzoomLevel), (int) (60 * UIzoomLevel), (int) (60 * UIzoomLevel), +90,
+						(int) (360 * e.timeLeft / e.duration));
+			}
 		}
 	}
 

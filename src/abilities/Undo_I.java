@@ -10,13 +10,13 @@ public class Undo_I extends _LoopAbility
 {
 	public Undo_I(int p)
 	{
-		super("Undo I", p, "SELF");
+		super("Undo I", p, Targeting.SELF);
 
 		cost = 4 - 0.5 * level;
-		costType = "Mana";
+		costType = CostType.MANA;
 		cooldown = 2;
 		range = 0;
-		rangeType = "Self";
+		rangeType = RangeType.NONE;
 		instant = false;
 
 		amount = level;

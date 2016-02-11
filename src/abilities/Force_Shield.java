@@ -14,10 +14,10 @@ public class Force_Shield extends ForceFieldAbility
 	{
 		super("Force Shield", p);
 		cost = 3;
-		costType = "mana";
+		costType = CostType.MANA;
 		cooldown = 1;
 		range = 68;
-		rangeType = "Exact range";
+		rangeType = RangeType.EXACT_RANGE;
 	}
 
 	public void use(Environment env, Person user, Point target)
@@ -39,7 +39,7 @@ public class Force_Shield extends ForceFieldAbility
 	{
 		double angle = Math.atan2(target.y - player.y, target.x - player.x);
 
-		player.targetType = "createFF";
+		player.aimType = Player.AimType.CREATE_FF;
 		player.target = new Point((int) (player.x + range * Math.cos(angle)), (int) (player.y + range * Math.sin(angle)));
 		
 		width = 100 + 100 * (int) level / 3;

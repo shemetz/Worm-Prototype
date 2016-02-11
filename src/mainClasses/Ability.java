@@ -71,7 +71,9 @@ public class Ability
 	protected static String[] elementalAttacks = new String[]
 	{ "Ball", "Beam", "Shield", "Wall", "Spray", "Strike", "Pool" };
 	final static List<String> elementalPowers = Arrays.asList("Elemental Combat I", "Elemental Combat II", "Ball", "Beam", "Shield", "Wall", "Spray", "Strike", "Pool");
-
+	public enum CostType {NONE, MANA, STAMINA, CHARGE, LIFE}; //Abilities that use multiple don't exist, I think.
+	public enum RangeType {CREATE_IN_GRID, EXACT_RANGE, CIRCLE_AREA, CONE, NONE}; 
+	
 	// permanent variables of the ability
 	protected String name; // name of the ability
 	protected int level; // 1-10. AKA "level". Measures how powerful the ability is.
@@ -84,7 +86,7 @@ public class Ability
 	public boolean toggleable;
 	protected boolean maintainable; // Maintained abilities are instant, and require you to continue holding the button to use them (they're continuous abilities).
 	protected boolean stopsMovement; // Does the power stop the person from moving?
-	protected String costType; // "none", "mana", "stamina", "charge" or "life". Abilities that use multiple don't exist, I think.
+	protected CostType costType; 
 	public double arc; // used for abilities with an arc - the Spray ability
 
 	// changing variables of the ability
@@ -99,10 +101,10 @@ public class Ability
 
 	// EXAMPLES
 	//
-	// Fire Beam 7: name = "Beam <Fire>"; points = 7; cooldown = 0.5; cost = 0; costPerSecond = 5 / <fire damage>; range = 500*points; areaRadius = -1; instant = true; maintainable = true; stopsMovement = false; onOff = false; costType = "mana";
+	// Fire Beam 7: name = "Beam <Fire>"; points = 7; cooldown = 0.5; cost = 0; costPerSecond = 5 / <fire damage>; range = 500*points; areaRadius = -1; instant = true; maintainable = true; stopsMovement = false; onOff = false; costType = CostType.MANA;
 
 	// for special effects:
-	protected String rangeType = "";
+	protected RangeType rangeType;
 	protected int frameNum = 0; // used in child classes
 
 	protected List<SoundEffect> sounds = new ArrayList<SoundEffect>();
@@ -146,7 +148,8 @@ public class Ability
 		stopsMovement = false;
 		toggleable = false;
 		on = false;
-		costType = "none";
+		costType = CostType.NONE;
+		rangeType = RangeType.NONE;
 		timeLeft = 0;
 
 		addTags();

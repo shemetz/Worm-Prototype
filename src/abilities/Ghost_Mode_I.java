@@ -14,11 +14,11 @@ public class Ghost_Mode_I extends Ability
 	{
 		super("Ghost Mode I", p);
 		cost = 2 * level;
-		costType = "mana";
+		costType = CostType.MANA;
 		costPerSecond = 0.3;
 		cooldown = 5;
 		range = -1;
-		rangeType = "";
+		rangeType = RangeType.NONE;
 		instant = true;
 	}
 
@@ -73,7 +73,7 @@ public class Ghost_Mode_I extends Ability
 
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
 	{
-		player.targetType = "";
+		player.aimType = Player.AimType.NONE;
 		player.target = new Point(-1, -1);
 	}
 }

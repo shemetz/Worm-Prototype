@@ -19,7 +19,7 @@ public class Chronobiology extends Ability
 	{
 		super("Chronobiology", p);
 		cost = 3; // to switch
-		costType = "mana";
+		costType = CostType.MANA;
 		instant = true;
 
 		amount = 1 + 0.2 * level;

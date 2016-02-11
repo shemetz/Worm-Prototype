@@ -100,7 +100,7 @@ public class Pool_E extends GridTargetingAbility
 
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
 	{
-		player.targetType = "createInGrid";
+		player.aimType = Player.AimType.CREATE_IN_GRID;
 		UPT(env, player);
 		if (!player.maintaining)
 		{

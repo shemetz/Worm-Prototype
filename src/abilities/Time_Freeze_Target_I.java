@@ -18,10 +18,10 @@ public class Time_Freeze_Target_I extends Ability
 	{
 		super("Time Freeze Target I", p);
 		cost = 5;
-		costType = "mana";
+		costType = CostType.MANA;
 		cooldown = 3 * level;
 		range = 500;
-		rangeType = "Circle area";
+		rangeType = RangeType.CIRCLE_AREA;
 		duration = 2 * level;
 	}
 
@@ -58,6 +58,6 @@ public class Time_Freeze_Target_I extends Ability
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
 	{
 		player.target = target;
-		player.targetType = "rangedTarget";
+		player.aimType = Player.AimType.TARGET_IN_RANGE;
 	}
 }

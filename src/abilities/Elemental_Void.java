@@ -19,10 +19,10 @@ public class Elemental_Void extends Ability
 	{
 		super("Elemental Void", p);
 		cost = 0;
-		costType = "mana";
+		costType = CostType.MANA;
 		cooldown = 0.2;
 		range = level * 100;
-		rangeType = "Circle area";
+		rangeType = RangeType.CIRCLE_AREA;
 		instant = true;
 
 		timer = 0;
@@ -81,7 +81,7 @@ public class Elemental_Void extends Ability
 
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
 	{
-		player.targetType = "";
+		player.aimType = Player.AimType.NONE;
 		player.target = new Point(-1, -1);
 	}
 }

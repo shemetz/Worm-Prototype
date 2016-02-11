@@ -18,8 +18,8 @@ public class Spray_E extends Ability
 		super("Spray <" + elementName + ">", p);
 		cost = 0;
 		costPerSecond = 2;
-		costType = "mana";
-		rangeType = "cone";
+		costType = CostType.MANA;
+		rangeType = RangeType.CONE;
 		cooldown = 1; // after running out of mana
 		range = 500; // TODO make range depend on points
 		stopsMovement = false;
@@ -84,7 +84,7 @@ public class Spray_E extends Ability
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
 	{
 		double angle = Math.atan2(target.y - player.y, target.x - player.x);
-		player.targetType = "look";
+		player.aimType = Player.AimType.NONE;
 		if (!player.leftMousePressed)
 			player.rotate(angle, 3.0 * deltaTime);
 	}

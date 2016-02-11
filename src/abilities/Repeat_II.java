@@ -11,13 +11,13 @@ public class Repeat_II extends _LoopAbility
 {
 	public Repeat_II(int p)
 	{
-		super("Repeat II", p, "TARGETED");
+		super("Repeat II", p, Targeting.TARGETED);
 
 		cost = 6 - 0.5 * level;
-		costType = "Mana";
+		costType = CostType.MANA;
 		cooldown = 2;
 		range = 500;
-		rangeType = "Circle area";
+		rangeType = RangeType.CIRCLE_AREA;
 		instant = false;
 
 		amount = level;

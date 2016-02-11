@@ -14,7 +14,7 @@ public class Flight_I extends Ability
 	{
 		super("Flight I", p);
 		costPerSecond = Math.max(5 - level, 0);
-		costType = "stamina";
+		costType = CostType.STAMINA;
 		cooldown = 1;
 		cost = 0;
 		instant = true;
@@ -44,7 +44,7 @@ public class Flight_I extends Ability
 
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
 	{
-		player.targetType = "";
+		player.aimType = Player.AimType.NONE;
 		player.target = new Point(-1, -1);
 	}
 }

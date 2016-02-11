@@ -22,10 +22,10 @@ public class Sense_Powers extends Ability
 	{
 		super("Sense Powers", p);
 		cost = 0;
-		costType = "none";
+		costType = CostType.NONE;
 		cooldown = 1;
 		range = (int) (50 * Math.pow(2, level));
-		rangeType = "Circle area";
+		rangeType = RangeType.CIRCLE_AREA;
 		instant = true;
 		
 		details = new int[MAIN.numOfElements];
@@ -67,7 +67,7 @@ public class Sense_Powers extends Ability
 	}
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
 	{
-		player.targetType = "";
+		player.aimType = Player.AimType.NONE;
 		player.target = new Point(-1, -1);
 	}
 }

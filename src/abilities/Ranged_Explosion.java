@@ -14,13 +14,13 @@ public class Ranged_Explosion extends Ability
 	{
 		super("Ranged Explosion", p);
 		cost = 3;
-		costType = "mana";
+		costType = CostType.MANA;
 		cooldown = 1;
 		range = 600;
-		rangeType = "Ranged circular area";
+		rangeType = RangeType.EXACT_RANGE;
 		areaRadius = level * 50;
 	}
-	
+
 	public void use(Environment env, Person user, Point target)
 	{
 		if (user.mana >= cost && !user.maintaining && cooldownLeft == 0 && !user.prone)
@@ -31,9 +31,9 @@ public class Ranged_Explosion extends Ability
 			cooldownLeft = cooldown;
 		}
 	}
-	
+
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
 	{
-		player.targetType = "explosion";
+		player.aimType = Player.AimType.EXPLOSION;
 	}
 }

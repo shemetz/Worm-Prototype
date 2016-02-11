@@ -12,10 +12,10 @@ public class Slow_Target extends _ApplyEffect
 		super("Slow Target", p, _ApplyEffect.targetTypes.TARGETED, VisualEffect.Type.NO);
 		cost = 6 - level / 2;
 		costPerSecond = 1;
-		costType = "mana";
+		costType = CostType.MANA;
 		cooldown = 3;
 		range = 500;
-		rangeType = "Circle area";
+		rangeType = RangeType.CIRCLE_AREA;
 		stopsMovement = false;
 		maintainable = false;
 		instant = false;

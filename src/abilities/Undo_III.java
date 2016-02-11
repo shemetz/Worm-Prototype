@@ -12,13 +12,13 @@ public class Undo_III extends _LoopAbility
 {
 	public Undo_III(int p)
 	{
-		super("Undo III", p, "AREA");
+		super("Undo III", p, Targeting.AREA);
 
 		cost = 8 - 0.5 * level;
-		costType = "Mana";
+		costType = CostType.MANA;
 		cooldown = 2;
 		range = 1500;
-		rangeType = "Circle area";
+		rangeType = RangeType.CIRCLE_AREA;
 		instant = false;
 
 		amount = level;

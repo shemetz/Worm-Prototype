@@ -48,7 +48,7 @@ public class TeleportAbility extends Ability
 		double angle = Math.atan2(target.y - player.y, target.x - player.x);
 		player.target = new Point((int) (player.x + range * Math.cos(angle)), (int) (player.y + range * Math.sin(angle)));
 		target = player.target;
-		player.targetType = "teleport";
+		player.aimType = Player.AimType.TELEPORT;
 		player.successfulTarget = checkIfAvailable(target.x, target.y, player.z, env, player);
 
 		// sweet awesome triangles

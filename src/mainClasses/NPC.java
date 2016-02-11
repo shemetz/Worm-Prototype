@@ -435,6 +435,10 @@ public class NPC extends Person
 	{
 		AStarPathFinder pathFinder = new AStarPathFinder(envMap, 50, false);
 
+		targetPoint.x = Math.max(0, targetPoint.x);
+		targetPoint.x = Math.min(envMap.width * 96, targetPoint.x);
+		targetPoint.y = Math.max(0, targetPoint.y);
+		targetPoint.y = Math.min(envMap.height * 96, targetPoint.y);
 		Path foundPath = pathFinder.findPath(this, (int) (x / 96), (int) (y / 96), targetPoint.x / 96, targetPoint.y / 96);
 		if (foundPath != null)
 		{

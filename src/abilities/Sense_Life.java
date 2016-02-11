@@ -13,7 +13,7 @@ public class Sense_Life extends Ability
 	{
 		super("Sense Life", p);
 		range = (int) (50 * Math.pow(2, level));
-		rangeType = "Circle area";
+		rangeType = RangeType.CIRCLE_AREA;
 	}
 	
 	public void use(Environment env, Person user, Point target)

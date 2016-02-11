@@ -14,9 +14,9 @@ public class Sprint extends Ability
 	{
 		super("Sprint", p);
 		cost = 0;
-		costType = "stamina";
+		costType = CostType.STAMINA;
 		cooldown = 0;
-		rangeType = "";
+		rangeType = RangeType.NONE;
 		maintainable = true;
 		instant = true;
 		costPerSecond = 3 - 0.3 * level;

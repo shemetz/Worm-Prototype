@@ -14,10 +14,10 @@ public class Blink extends TeleportAbility
 	{
 		super("Blink", p);
 		cost = 1 + (double) (level) / 3;
-		costType = "mana";
+		costType = CostType.MANA;
 		cooldown = 0.1 + (double) (level) / 4;
 		range = level * 100;
-		rangeType = "Exact range"; // maybe change it to up-to range?
+		rangeType = RangeType.EXACT_RANGE; // maybe change it to up-to range?
 
 		sounds.add(new SoundEffect("Blink_success.wav"));
 		sounds.add(new SoundEffect("Blink_fail.wav"));

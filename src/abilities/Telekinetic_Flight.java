@@ -13,7 +13,7 @@ public class Telekinetic_Flight extends Ability
 	public Telekinetic_Flight(int p)
 	{
 		super("Telekinetic Flight", p);
-		costType = "none";
+		costType = CostType.NONE;
 		cooldown = 1;
 		cost = 0;
 		instant = true;
@@ -52,7 +52,7 @@ public class Telekinetic_Flight extends Ability
 
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
 	{
-		player.targetType = "";
+		player.aimType = Player.AimType.NONE;
 		player.target = new Point(-1, -1);
 	}
 }

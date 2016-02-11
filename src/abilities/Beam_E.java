@@ -26,8 +26,8 @@ public class Beam_E extends Ability
 		super("Beam <" + elementName + ">", p);
 		cost = 0;
 		costPerSecond = 5 / elementalAttackNumbers[getElementNum()][2] * 1.5;
-		costType = "mana";
-		rangeType = "Exact range";
+		costType = CostType.MANA;
+		rangeType = RangeType.EXACT_RANGE;
 		cooldown = 0.5; // after stopping a beam attack, this is the cooldown to start a new one
 
 		if (getElement().equals("Plant"))
@@ -225,7 +225,7 @@ public class Beam_E extends Ability
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
 	{
 		double angle = Math.atan2(target.y - player.y, target.x - player.x);
-		player.targetType = "look";
+		player.aimType = Player.AimType.NONE;
 		if (!player.leftMousePressed && !player.holdingVine)
 			player.rotate(angle, 3.0 * deltaTime);
 		// if it's a vine and it's holding onto something, the person's rotation is hard-changed to the vine's angle in frame()
