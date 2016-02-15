@@ -222,6 +222,13 @@ public class Beam_E extends Ability
 		evasions.add(new Evasion(p.id));
 	}
 
+	public void disable(Environment env, Person user)
+	{
+		disabled = true;
+		if (on)
+			use(env, user, user.target);
+	}
+
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
 	{
 		double angle = Math.atan2(target.y - player.y, target.x - player.x);

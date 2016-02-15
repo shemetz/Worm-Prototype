@@ -10,6 +10,7 @@ import mainClasses.Player;
 public class Telekinetic_Flight extends Ability
 {
 	boolean gaveBonuses;
+
 	public Telekinetic_Flight(int p)
 	{
 		super("Telekinetic Flight", p);
@@ -27,17 +28,18 @@ public class Telekinetic_Flight extends Ability
 			on = true;
 			if (user.z == 0)
 				user.z += 0.2;
-			user.flySpeed = 900 * level; // 
+			user.flySpeed = 900 * level; //
 			cooldownLeft = 0.5; // constant activation cooldown - to fix keys being stuck, etc.
-			
+
 			if (!gaveBonuses)
 			{
 				gaveBonuses = true;
 				user.STRENGTH += 2;
-				user.pushbackResistance += 0.5*(1 - user.pushbackResistance); //+50% pushback immunity
-				user.evasion += 0.2*(1-user.evasion); //+20% evasion
+				user.pushbackResistance += 0.5 * (1 - user.pushbackResistance); // +50% pushback immunity
+				user.evasion += 0.2 * (1 - user.evasion); // +20% evasion
 			}
-		} else if (on && cooldownLeft == 0)
+		}
+		else if (on && cooldownLeft == 0)
 		{
 			on = false;
 			cooldownLeft = cooldown;
@@ -45,9 +47,19 @@ public class Telekinetic_Flight extends Ability
 		}
 	}
 
+	public void disable(Environment env, Person user)
+	{
+		disabled = true;
+		if (on)
+		{
+			user.flySpeed = -1;
+			on = false;
+		}
+	}
+
 	public void maintain(Environment env, Person user, Point target, double deltaTime)
 	{
-		
+
 	}
 
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)

@@ -35,6 +35,11 @@ public class _TEMPLATE_ extends Ability
 		@SuppressWarnings("unused")
 		double angle = Math.atan2(target.y - user.y, target.x - user.x);
 	}
+	
+	public void disable(Environment env, Person user)
+	{
+		disabled = true;
+	}
 
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
 	{

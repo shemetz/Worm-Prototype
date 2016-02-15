@@ -86,6 +86,13 @@ public class Shield_E extends Ability
 		}
 	}
 
+	public void disable(Environment env, Person user)
+	{
+		disabled = true;
+		if (on)
+			use(env, user, user.target);
+	}
+
 	public void maintain(Environment env, Person user, Point target, double deltaTime)
 	{
 		if (user.mana < costPerSecond)

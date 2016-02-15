@@ -23,8 +23,15 @@ public class Precision_I extends Ability
 			user.accuracy = 1 - (1 - user.accuracy) * Math.pow(0.9, level);
 		else // deactivate
 			user.accuracy = 1 - (1 - user.accuracy) / Math.pow(0.9, level);
-		//a = 1-(1-b)*(0.9^level)
-		//b = 1-(1-a)/(0.9^level)
+		// a = 1-(1-b)*(0.9^level)
+		// b = 1-(1-a)/(0.9^level)
 		user.updateAccuracy();
+	}
+
+	public void disable(Environment env, Person user)
+	{
+		disabled = true;
+		if (on)
+			use(env, user, null);
 	}
 }

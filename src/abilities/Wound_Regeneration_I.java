@@ -18,5 +18,13 @@ public class Wound_Regeneration_I extends Ability
 	{
 		int val = on ? -1 : 1;
 		user.lifeRegen += val * 2 * level;
+		on = !on;
+	}
+	
+	public void disable(Environment env, Person user)
+	{
+		disabled = true;
+		if (on)
+			use(env, user, null);
 	}
 }

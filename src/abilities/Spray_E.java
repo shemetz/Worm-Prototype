@@ -30,6 +30,13 @@ public class Spray_E extends Ability
 		sounds.add(new SoundEffect(elementName + " Beam.wav"));
 	}
 
+	public void disable(Environment env, Person user)
+	{
+		disabled = true;
+		if (on)
+			use(env, user, user.target);
+	}
+
 	public void use(Environment env, Person user, Point target)
 	{
 		setSounds(user.Point());
@@ -55,7 +62,7 @@ public class Spray_E extends Ability
 	public void maintain(Environment env, Person user, Point target, double deltaTime)
 	{
 		double targetAngle = Math.atan2(target.y - user.y, target.x - user.x);
-		user.rotate(targetAngle, deltaTime*user.timeEffect);
+		user.rotate(targetAngle, deltaTime * user.timeEffect);
 
 		setSounds(user.Point());
 		double angle = user.rotation;

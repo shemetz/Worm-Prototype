@@ -44,7 +44,8 @@ public class Protective_Bubble_I extends Ability
 					i--;
 					sounds.get(1).play();
 				}
-		} else if (!user.maintaining && !user.prone) // activating bubble
+		}
+		else if (!user.maintaining && !user.prone) // activating bubble
 		{
 			if (cost > user.mana || cooldownLeft > 0)
 				return;
@@ -72,6 +73,13 @@ public class Protective_Bubble_I extends Ability
 	{
 		bubble.life -= bubble.life * 0.1 * deltaTime;
 		bubble.rotation = Methods.lerpAngle(bubble.rotation, user.rotation, deltaTime);
+	}
+
+	public void disable(Environment env, Person user)
+	{
+		disabled = true;
+		if (on)
+			use(env, user, null);
 	}
 
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)

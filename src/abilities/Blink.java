@@ -64,7 +64,8 @@ public class Blink extends TeleportAbility
 			}
 			// SFX
 			sounds.get(0).play();
-		} else
+		}
+		else
 		// tried to blink into something
 		{
 			user.x -= range * Math.cos(angle);
@@ -88,4 +89,8 @@ public class Blink extends TeleportAbility
 		}
 	}
 
+	public void disable(Environment env, Person user)
+	{
+		disabled = true;
+	}
 }

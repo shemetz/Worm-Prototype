@@ -20,4 +20,11 @@ public class Toughness_III extends Ability
 		user.maxLife += val * 100 * level;
 		on = !on;
 	}
+
+	public void disable(Environment env, Person user)
+	{
+		disabled = true;
+		if (on)
+			use(env, user, null);
+	}
 }

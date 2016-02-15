@@ -13,13 +13,13 @@ import mainResourcesPackage.SoundEffect;
 public class Portals extends Ability
 {
 
-	public Portal	p1, p2;
-	public double	minPortalLength;
-	public double	maxPortalLength;
-	public double	minimumDistanceBetweenPortalsPow2;
-	public boolean	alignPortals;
+	public Portal p1, p2;
+	public double minPortalLength;
+	public double maxPortalLength;
+	public double minimumDistanceBetweenPortalsPow2;
+	public boolean alignPortals;
 
-	public Point	holdTarget	= null;
+	public Point holdTarget = null;
 
 	public Portals(int p)
 	{
@@ -64,7 +64,8 @@ public class Portals extends Ability
 				holdTarget.x = (int) (target.x - p1.length / 2 * Math.cos(p1.angle));
 				holdTarget.y = (int) (target.y - p1.length / 2 * Math.sin(p1.angle));
 				angle = p1.angle;
-			} else // lock to cardinal directions
+			}
+			else // lock to cardinal directions
 			{
 				double length = Math.min(maxPortalLength, Math.sqrt(Methods.DistancePow2(holdTarget.x, holdTarget.y, target.x, target.y)));
 				length = Math.max(minPortalLength, length);
@@ -84,7 +85,8 @@ public class Portals extends Ability
 				env.portals.add(p1);
 				user.mana -= cost;
 				sounds.get(0).play();
-			} else if (p2 == null)
+			}
+			else if (p2 == null)
 			{
 				double length = p1.length;
 				p2 = new Portal(holdTarget.x + length / 2 * Math.cos(angle), holdTarget.y + length / 2 * Math.sin(angle), user.z, angle, length);
@@ -92,7 +94,8 @@ public class Portals extends Ability
 				{
 					p2 = null;
 					// TODO portal creation failure sound effect
-				} else
+				}
+				else
 				{
 					env.portals.add(p2);
 					p1.join(p2);
@@ -132,7 +135,14 @@ public class Portals extends Ability
 
 	public void maintain(Environment env, Person user, Point target, double deltaTime)
 	{
+		// empty but existing on purpose
+	}
 
+	public void disable(Environment env, Person user)
+	{
+		disabled = true;
+		if (on)
+			removePortals(env);
 	}
 
 	public void toggle()

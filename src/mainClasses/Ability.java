@@ -71,9 +71,17 @@ public class Ability
 	protected static String[] elementalAttacks = new String[]
 	{ "Ball", "Beam", "Shield", "Wall", "Spray", "Strike", "Pool" };
 	final static List<String> elementalPowers = Arrays.asList("Elemental Combat I", "Elemental Combat II", "Ball", "Beam", "Shield", "Wall", "Spray", "Strike", "Pool");
-	public enum CostType {NONE, MANA, STAMINA, CHARGE, LIFE}; //Abilities that use multiple don't exist, I think.
-	public enum RangeType {CREATE_IN_GRID, EXACT_RANGE, CIRCLE_AREA, CONE, NONE}; 
-	
+
+	public enum CostType
+	{
+		NONE, MANA, STAMINA, CHARGE, LIFE
+	}; // Abilities that use multiple don't exist, I think.
+
+	public enum RangeType
+	{
+		CREATE_IN_GRID, EXACT_RANGE, CIRCLE_AREA, CONE, NONE
+	};
+
 	// permanent variables of the ability
 	protected String name; // name of the ability
 	protected int level; // 1-10. AKA "level". Measures how powerful the ability is.
@@ -86,7 +94,7 @@ public class Ability
 	public boolean toggleable;
 	protected boolean maintainable; // Maintained abilities are instant, and require you to continue holding the button to use them (they're continuous abilities).
 	protected boolean stopsMovement; // Does the power stop the person from moving?
-	protected CostType costType; 
+	protected CostType costType;
 	public double arc; // used for abilities with an arc - the Spray ability
 
 	// changing variables of the ability
@@ -94,6 +102,7 @@ public class Ability
 	protected double cooldownLeft; // if cooldown is -1 (passive), then a cooldownLeft of 0 means the ability hasn't been initialized yet
 	protected boolean on; // For maintained and on/off abilities - whether or not the power is active.
 	protected int elementNum;
+	public boolean disabled;
 
 	protected String[] tags; // list of tags.
 	// possible tags are:
@@ -101,7 +110,8 @@ public class Ability
 
 	// EXAMPLES
 	//
-	// Fire Beam 7: name = "Beam <Fire>"; points = 7; cooldown = 0.5; cost = 0; costPerSecond = 5 / <fire damage>; range = 500*points; areaRadius = -1; instant = true; maintainable = true; stopsMovement = false; onOff = false; costType = CostType.MANA;
+	// Fire Beam 7: name = "Beam <Fire>"; points = 7; cooldown = 0.5; cost = 0; costPerSecond = 5 / <fire damage>; range = 500*points; areaRadius = -1; instant = true; maintainable = true; stopsMovement = false; onOff = false; costType =
+	// CostType.MANA;
 
 	// for special effects:
 	protected RangeType rangeType;
@@ -130,6 +140,13 @@ public class Ability
 		MAIN.errorMessage("Time Wroth Lime Broth Crime Froth Grime Sloth.. no updatePlayerTargeting for this ability. " + name);
 	}
 
+	@SuppressWarnings("unused")
+	public void disable(Environment env, Person user)
+	{
+		// to be written in child classes
+		MAIN.errorMessage("vjhvsfasetjblckvzyuf no disable() for this method. " + name);
+	}
+
 	public Ability(String n, int p)
 	{
 		name = n;
@@ -151,6 +168,7 @@ public class Ability
 		costType = CostType.NONE;
 		rangeType = RangeType.NONE;
 		timeLeft = 0;
+		disabled = false;
 
 		addTags();
 		elementNum = getElementNum();

@@ -37,13 +37,18 @@ public class Strong_Force_Field extends ForceFieldAbility
 		}
 	}
 
+	public void disable(Environment env, Person user)
+	{
+		disabled = true;
+	}
+
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
 	{
 		double angle = Math.atan2(target.y - player.y, target.x - player.x);
 
 		player.aimType = Player.AimType.CREATE_FF;
 		player.target = new Point((int) (player.x + range * Math.cos(angle)), (int) (player.y + range * Math.sin(angle)));
-		
+
 		width = 100 + 50 * (int) level;
 		height = 5 + 7 * level;
 

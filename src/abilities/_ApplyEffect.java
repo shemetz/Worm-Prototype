@@ -136,6 +136,15 @@ public class _ApplyEffect extends Ability
 		return defaultViableTarget(p, user);
 	}
 
+	public void disable(Environment env, Person user)
+	{
+		disabled = true;
+		if (maintainable && on)
+		{
+			use(env, user, user.target);
+		}
+	}
+
 	public void use(Environment env, Person user, Point targetPoint)
 	{
 		if (maintainable)

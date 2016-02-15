@@ -21,6 +21,13 @@ public class Sprint extends Ability
 		instant = true;
 		costPerSecond = 3 - 0.3 * level;
 	}
+	
+	public void disable(Environment env, Person user)
+	{
+		disabled = true;
+		if (on)
+			use(env, user, user.target);
+	}
 
 	public void use(Environment env, Person user, Point target)
 	{

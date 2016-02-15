@@ -48,6 +48,20 @@ public class Chronobiology extends Ability
 		}
 	}
 
+	public void disable(Environment env, Person user)
+	{
+		disabled = true;
+		if (on)
+		{
+			on = false;
+			effect.unapply(user);
+			effect.strength = 1 / effect.strength;
+			effect.apply(user);
+		}
+		effect.unapply(user);
+		initialChange = false;
+	}
+
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
 	{
 	}

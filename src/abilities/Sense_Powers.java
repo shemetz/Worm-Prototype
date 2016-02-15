@@ -13,9 +13,9 @@ import mainClasses.Player;
 
 public class Sense_Powers extends Ability
 {
-	public int[]	details;
-	Random			random	= new Random();
-	double			timer;
+	public int[] details;
+	Random random = new Random();
+	double timer;
 	double updatePeriod;
 
 	public Sense_Powers(int p)
@@ -27,12 +27,18 @@ public class Sense_Powers extends Ability
 		range = (int) (50 * Math.pow(2, level));
 		rangeType = RangeType.CIRCLE_AREA;
 		instant = true;
-		
+
 		details = new int[MAIN.numOfElements];
 		for (int i = 0; i < details.length; i++)
 			details[i] = 0;
 		timer = 0;
-		updatePeriod = 10-level;
+		updatePeriod = 10 - level;
+	}
+
+	public void disable(Environment env, Person user)
+	{
+		disabled = true;
+		on = false;
 	}
 
 	public void use(Environment env, Person user, Point target)
@@ -65,6 +71,7 @@ public class Sense_Powers extends Ability
 		}
 		timer += deltaTime;
 	}
+
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
 	{
 		player.aimType = Player.AimType.NONE;

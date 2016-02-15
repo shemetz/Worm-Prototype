@@ -37,7 +37,8 @@ public class Ghost_Mode_I extends Ability
 			user.mana -= cost;
 			timeLeft = level;
 			cooldownLeft = 0.5;
-		} else if (cooldownLeft == 0)
+		}
+		else if (cooldownLeft == 0)
 		{
 			if (!user.insideWall)
 			{
@@ -45,7 +46,8 @@ public class Ghost_Mode_I extends Ability
 				user.ghostMode = false;
 				cooldownLeft = cooldown;
 				timeLeft = 0;
-			} else
+			}
+			else
 				timeLeft = 0;
 		}
 	}
@@ -58,7 +60,8 @@ public class Ghost_Mode_I extends Ability
 			{
 				user.panic = false;
 				use(env, user, target);
-			} else
+			}
+			else
 			{
 				user.mana -= 1.5 * deltaTime; // punish
 				env.hitPerson(user, 15, 0, 0, 9, deltaTime); // punish
@@ -67,8 +70,19 @@ public class Ghost_Mode_I extends Ability
 				user.panic = true;
 			}
 
-		} else
+		}
+		else
 			timeLeft -= deltaTime;
+	}
+
+	public void disable(Environment env, Person user)
+	{
+		disabled = true;
+		if (on)
+		{
+			on = false;
+			user.ghostMode = false;
+		}
 	}
 
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)

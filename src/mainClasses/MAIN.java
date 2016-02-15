@@ -320,12 +320,15 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				if (p.timeEffect != 0)
 					for (Ability a : p.abilities)
 						if (a.on && !a.hasTag("passive"))
-							a.maintain(env, p, p.target, deltaTime); // not affected by timeEffect. TODO double check this! (try using abilities like Beam with it)
+							if (!a.disabled)
+								a.maintain(env, p, p.target, deltaTime); // not affected by timeEffect. TODO double check this! (try using abilities like Beam with it)
 				// using abilities the person is trying to repetitively use (e.g. holding down the Punch ability's key)
 				if (p.abilityTryingToRepetitivelyUse != -1)
 				{
 					p.inCombat = true; // TODO
-					p.abilities.get(p.abilityTryingToRepetitivelyUse).use(env, p, p.target);
+					Ability a = p.abilities.get(p.abilityTryingToRepetitivelyUse);
+					if (!a.disabled)
+						a.use(env, p, p.target);
 				}
 
 				p.selfFrame(deltaTime);
@@ -1216,7 +1219,8 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 							p.abilityMaintaining = abilityIndex;
 							if (!a.on)
 							{
-								a.use(env, p, p.target);
+								if (!a.disabled)
+									a.use(env, p, p.target);
 							}
 						} // Can't start a maintainable ability while maintaining another
 					}
@@ -1224,7 +1228,8 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 					{
 						if (a.instant && !a.hasTag("on-off")) // Instant ability, without aim
 						{
-							a.use(env, p, p.target);
+							if (!a.disabled)
+								a.use(env, p, p.target);
 							p.abilityTryingToRepetitivelyUse = abilityIndex;
 						}
 						else
@@ -1239,12 +1244,14 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			}
 			else if (p.abilityAiming != -1 && p.abilityAiming == abilityIndex) // = activate currently aimed ability
 			{
-				a.use(env, p, p.target);
+				if (!a.disabled)
+					a.use(env, p, p.target);
 				p.abilityAiming = -1;
 			}
 			else if (p.maintaining && p.abilityMaintaining == abilityIndex)
 			{
-				a.use(env, p, p.target); // stop maintaining
+				if (!a.disabled)
+					a.use(env, p, p.target); // stop maintaining
 				p.abilityMaintaining = -1;
 			}
 			else if (!p.maintaining && p.abilityMaintaining == abilityIndex) // player's maintaining was stopped before player released key
@@ -1939,14 +1946,17 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		{
 			Effect e = player.effects.get(i);
 			// Icon
-			buffer.drawImage(Resources.icons.get(e.name), (int) (frameWidth - 90 * UIzoomLevel - i * 80 * UIzoomLevel), (int) (frameHeight - 90 * UIzoomLevel), this);
-			buffer.drawRect((int) (frameWidth - 90 * UIzoomLevel - i * 80 * UIzoomLevel), (int) (frameHeight - 90 * UIzoomLevel), (int) (60 * UIzoomLevel), (int) (60 * UIzoomLevel));
+			Rectangle place = new Rectangle((int) (frameWidth - 90 * UIzoomLevel - i * 80 * UIzoomLevel), (int) (frameHeight - 90 * UIzoomLevel), (int) (60 * UIzoomLevel), (int) (60 * UIzoomLevel));
+			buffer.drawImage(Resources.icons.get(e.name), place.x, place.y, this);
+			buffer.drawRect(place.x, place.y, place.width, place.height);
 			// Cooldown
 			if (e.duration != -1)
 			{
 				buffer.setColor(new Color(0, 0, 0, 89));
-				buffer.fillArc((int) (frameWidth - 90 * UIzoomLevel - i * 80 * UIzoomLevel), (int) (frameHeight - 90 * UIzoomLevel), (int) (60 * UIzoomLevel), (int) (60 * UIzoomLevel), +90,
-						(int) (360 * e.timeLeft / e.duration));
+				Shape prevClip = buffer.getClip();
+				buffer.setClip(new Rectangle2D.Double(place.x, place.y, place.width, place.height));
+				buffer.fillArc(place.x - place.width / 2, place.y - place.height / 2, place.width * 2, place.height * 2, +90, (int) (360 * e.timeLeft / e.duration));
+				buffer.setClip(prevClip);
 			}
 		}
 	}

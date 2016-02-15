@@ -23,6 +23,13 @@ public class Strength_I extends Ability
 		on = !on;
 	}
 
+	public void disable(Environment env, Person user)
+	{
+		disabled = true;
+		if (on)
+			use(env, user, user.target);
+	}
+
 	public void maintain(Environment env, Person user, Point target, double deltaTime)
 	{
 		@SuppressWarnings("unused")

@@ -24,6 +24,11 @@ public class Time_Freeze_Target_I extends Ability
 		rangeType = RangeType.CIRCLE_AREA;
 		duration = 2 * level;
 	}
+	
+	public void disable(Environment env, Person user)
+	{
+		disabled = true;
+	}
 
 	public Person getTarget(Environment env, Point targetPoint)
 	{

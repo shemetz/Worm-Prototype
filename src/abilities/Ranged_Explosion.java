@@ -32,6 +32,11 @@ public class Ranged_Explosion extends Ability
 		}
 	}
 
+	public void disable(Environment env, Person user)
+	{
+		disabled = true;
+	}
+
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
 	{
 		player.aimType = Player.AimType.EXPLOSION;

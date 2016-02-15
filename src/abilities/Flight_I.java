@@ -29,7 +29,8 @@ public class Flight_I extends Ability
 				user.z += 0.1;
 			user.flySpeed = 100 * level; // 100 pixels per second
 			cooldownLeft = 0.5; // constant activation cooldown - to fix keys being stuck, etc.
-		} else if (on && cooldownLeft == 0)
+		}
+		else if (on && cooldownLeft == 0)
 		{
 			on = false;
 			cooldownLeft = cooldown;
@@ -40,6 +41,14 @@ public class Flight_I extends Ability
 	public void maintain(Environment env, Person user, Point target, double deltaTime)
 	{
 		user.stamina -= deltaTime * costPerSecond;
+	}
+
+	public void disable(Environment env, Person user)
+	{
+		disabled = true;
+		if (on)
+			user.flySpeed = -1;
+		on = false;
 	}
 
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)

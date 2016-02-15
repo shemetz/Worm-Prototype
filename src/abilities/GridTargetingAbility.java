@@ -61,6 +61,11 @@ public class GridTargetingAbility extends Ability
 		player.target = new Point((int) targetGridX * squareSize + squareSize / 2, (int) targetGridY * squareSize + squareSize / 2);
 	}
 
+	public void disable(Environment env, Person user)
+	{
+		disabled = true;
+	}
+
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
 	{
 		MAIN.errorMessage("No no no, you need to EXTEND this class and OVERRIDE this method, goddammit");

@@ -42,6 +42,14 @@ public class Flight_II extends Ability
 		user.stamina -= deltaTime * costPerSecond;
 	}
 
+	public void disable(Environment env, Person user)
+	{
+		disabled = true;
+		if (on)
+			user.flySpeed = -1;
+		on = false;
+	}
+
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
 	{
 		player.aimType = Player.AimType.NONE;

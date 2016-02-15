@@ -78,6 +78,12 @@ public class Elemental_Void extends Ability
 				}
 		}
 	}
+	
+	public void disable(Environment env, Person user)
+	{
+		disabled = true;
+		on = false;
+	}
 
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
 	{

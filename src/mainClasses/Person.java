@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Random;
 
 import abilities.Elemental_Void;
+import abilities.Punch;
 import abilities.Sprint;
 import effects.Burning;
 import effects.Healed;
@@ -928,16 +929,24 @@ public class Person extends RndPhysObj implements Mover
 			Ability a = abilities.get(i);
 			if (!a.hasTag("passive")) // check if ability isn't passive
 			{
-				if (a.cooldownLeft > 0)
-					a.cooldownLeft -= realDeltaTime;// unaffected by time stretching
-				if (a.cooldownLeft < 0)
-					a.cooldownLeft = 0;
+				if (a instanceof Punch)
+				{
+					if (a.cooldownLeft > 0)
+						a.cooldownLeft -= deltaTime;// affected by time stretching
+					if (a.cooldownLeft < 0)
+						a.cooldownLeft = 0;
+				}
+				else
+				{
+					if (a.cooldownLeft > 0)
+						a.cooldownLeft -= realDeltaTime;// unaffected by time stretching
+					if (a.cooldownLeft < 0)
+						a.cooldownLeft = 0;
+				}
 			}
-			else if (a.cooldownLeft == 0) // check if this passive ability is unactivated
-			{
-				a.use(null, this, null); // such elegant
-				a.cooldownLeft = -1;
-			}
+			else if (!a.on) // check if this passive ability is unactivated
+				if (!a.disabled)
+					a.use(null, this, null); // such elegant
 		}
 		for (int eNum = 0; eNum < effects.size(); eNum++)
 		{

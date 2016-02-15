@@ -104,6 +104,11 @@ public class Ball_E extends Ability
 			}
 	}
 
+	public void disable(Environment env, Person user)
+	{
+		disabled = true;
+	}
+	
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
 	{
 		double angle = Math.atan2(target.y - player.y, target.x - player.x);

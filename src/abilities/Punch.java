@@ -69,7 +69,7 @@ public class Punch extends Ability
 
 							user.switchAnimation(5);
 							user.stamina -= cost;
-							cooldownLeft = cooldown * user.timeEffect;
+							cooldownLeft = cooldown;
 						}
 						// Rotate towards target anyways
 						else
@@ -107,7 +107,7 @@ public class Punch extends Ability
 					{
 						user.stamina -= cost;
 						user.switchAnimation(11 + (user.lastHandUsedIsRight ? 0 : 1));
-						cooldownLeft = cooldown * user.timeEffect;
+						cooldownLeft = cooldown;
 					}
 					else
 						user.switchAnimation(10);
@@ -119,6 +119,11 @@ public class Punch extends Ability
 	public void maintain(Environment env, Person user, Point target, double deltaTime)
 	{
 
+	}
+
+	public void disable(Environment env, Person user)
+	{
+		disabled = true;
 	}
 
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
