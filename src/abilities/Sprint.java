@@ -20,6 +20,7 @@ public class Sprint extends Ability
 		maintainable = true;
 		instant = true;
 		costPerSecond = 3 - 0.3 * level;
+		natural = true;
 	}
 	
 	public void disable(Environment env, Person user)

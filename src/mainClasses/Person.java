@@ -18,6 +18,7 @@ import abilities.Punch;
 import abilities.Sprint;
 import effects.Burning;
 import effects.Healed;
+import effects.Nullified;
 import effects.Tangled;
 import mainResourcesPackage.SoundEffect;
 import pathfinding.Mover;
@@ -264,11 +265,11 @@ public class Person extends RndPhysObj implements Mover
 			e.apply(this);
 			effects.add(e);
 		}
-		else // DELETES OLDEST EFFECT WITH SAME NAME AND STRENGTH
+		else // DELETES OLDEST EFFECT WITH SAME NAME AND CREATOR ABILITY
 		{
 			int oldestEffectIndex = -1;
 			for (int i = 0; i < effects.size(); i++)
-				if (effects.get(i).name.equals(e.name) && effects.get(i).strength == e.strength)
+				if (effects.get(i).name.equals(e.name) && effects.get(i).creatorAbility.equals(e.creatorAbility))
 					if (oldestEffectIndex == -1 || effects.get(i).timeLeft < effects.get(oldestEffectIndex).timeLeft)
 						oldestEffectIndex = i;
 			if (oldestEffectIndex != -1) // sometimes the program attempts to remove an effect without checking if it already exists. It's ok.
@@ -1057,8 +1058,12 @@ public class Person extends RndPhysObj implements Mover
 			buffer.rotate(rotation - 0.5 * Math.PI, (int) (x), (int) (y));
 			// Special shadows
 			for (Effect e : effects)
+			{
 				if (e instanceof Healed)
 					drawColoredShadow(buffer, e.strength, Color.green);
+				if (e instanceof Nullified)
+					drawColoredShadow(buffer, 10, Color.black);
+			}
 			for (Ability a : abilities)
 				if (a.on)
 					if (a instanceof Elemental_Void)

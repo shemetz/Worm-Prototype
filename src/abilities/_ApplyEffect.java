@@ -104,7 +104,7 @@ public class _ApplyEffect extends Ability
 		}
 	}
 
-	public void draw(Environment env, double deltaTime, Person user, Person effectTarget)
+	public void addVisualEffect(Environment env, double deltaTime, Person user, Person effectTarget)
 	{
 		if (effectTarget != user)
 		{
@@ -210,7 +210,7 @@ public class _ApplyEffect extends Ability
 						alreadyAffected = true;
 				if (!alreadyAffected)
 					target.affect(effect(), true);
-				draw(env, deltaTime, user, target);
+				addVisualEffect(env, deltaTime, user, target);
 			}
 			user.mana -= deltaTime * costPerSecond;
 		}

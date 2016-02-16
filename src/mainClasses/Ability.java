@@ -22,6 +22,8 @@ import abilities.Force_Shield;
 import abilities.Ghost_Mode_I;
 import abilities.Heal_I;
 import abilities.Heal_II;
+import abilities.Nullification_Aura_I;
+import abilities.Nullification_Aura_II;
 import abilities.Pool_E;
 import abilities.Portals;
 import abilities.Precision_I;
@@ -64,7 +66,7 @@ public class Ability
 	final static List<String> implementedAbilities = Arrays.asList("Portals", "Elemental Void", "Precision I", "Protective Bubble I", "Sprint", "Strength I", "Strength II", "Strength III", "Punch",
 			"Heal I", "Heal II", "Force Shield", "Ranged Explosion", "Flight I", "Flight II", "Telekinetic Flight", "Blink", "Ghost Mode I", "Strong Force Field", "Beam", "Ball", "Shield", "Pool",
 			"Wall", "Spray", "Toughness III", "Sense Life", "Sense Mana and Stamina", "Sense Powers", "Elemental Combat I", "Slow Target", "Chronobiology", "Retrace I", "Retrace II", "Retrace III",
-			"Undo I", "Undo II", "Undo III", "Repeat I", "Repeat II", "Repeat III", "Time Freeze Target I");
+			"Undo I", "Undo II", "Undo III", "Repeat I", "Repeat II", "Repeat III", "Time Freeze Target I", "Nullification Aura I", "Nullification Aura II");
 	protected static List<String> descriptions = new ArrayList<String>();
 	protected static boolean[][] elementalAttacksPossible = new boolean[12][7]; // [element][ability]
 	protected static int[][] elementalAttackNumbers = new int[12][3];
@@ -96,6 +98,7 @@ public class Ability
 	protected boolean stopsMovement; // Does the power stop the person from moving?
 	protected CostType costType;
 	public double arc; // used for abilities with an arc - the Spray ability
+	public boolean natural;
 
 	// changing variables of the ability
 	protected double timeLeft; // how much time the ability has been on.
@@ -103,6 +106,8 @@ public class Ability
 	protected boolean on; // For maintained and on/off abilities - whether or not the power is active.
 	protected int elementNum;
 	public boolean disabled;
+	public boolean prepareToDisable;
+	public boolean prepareToEnable;
 
 	protected String[] tags; // list of tags.
 	// possible tags are:
@@ -169,6 +174,9 @@ public class Ability
 		rangeType = RangeType.NONE;
 		timeLeft = 0;
 		disabled = false;
+		prepareToDisable = false;
+		prepareToEnable = false;
+		natural = false;
 
 		addTags();
 		elementNum = getElementNum();
@@ -522,6 +530,12 @@ public class Ability
 		}
 		switch (trimmedAbilityName)
 		{
+		case "Nullification Aura I":
+			ab = new Nullification_Aura_I(pnts);
+			break;
+		case "Nullification Aura II":
+			ab = new Nullification_Aura_II(pnts);
+			break;
 		case "Time Freeze Target I":
 			ab = new Time_Freeze_Target_I(pnts);
 			break;

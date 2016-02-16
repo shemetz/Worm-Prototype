@@ -30,6 +30,7 @@ public class Punch extends Ability
 		stopsMovement = true;
 		instant = true;
 		// range = (int) (1.15 * radius); //in person's
+		natural = true;
 
 		sounds.add(new SoundEffect("Punch_hit_1.wav"));
 		sounds.add(new SoundEffect("Punch_hit_2.wav"));

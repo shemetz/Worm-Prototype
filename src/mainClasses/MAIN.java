@@ -291,6 +291,19 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		for (Person p : env.people)
 		{
 			double floorFriction = applyGravityAndFrictionAndReturnFriction(p, deltaTime);
+			for (Ability a : p.abilities) // TODO make sure this is resistant to ConcurrentModificationException and doesn't bug out when dying with extra ability giving abilities
+			{
+				if (a.prepareToDisable)
+				{
+					a.prepareToDisable = false;
+					a.disable(env, p);
+				}
+				if (a.prepareToEnable)
+				{
+					a.prepareToEnable = false;
+					a.disabled = false;
+				}
+			}
 			if (p.dead)
 			{
 				// Deactivate all abilities
