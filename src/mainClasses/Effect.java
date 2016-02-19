@@ -21,7 +21,7 @@ public class Effect
 		timeLeft = duration;
 		strength = strength1;
 		timeAffecting = false;
-		removable = false;
+		removable = true;
 		animFrame = 0;
 	}
 

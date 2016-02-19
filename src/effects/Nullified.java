@@ -13,6 +13,7 @@ public class Nullified extends Effect
 		super("Nullified", duration1, 0, CA);
 		stackable = false;
 		removeOnDeath = true;
+		removable = false;
 		removeEffects = removeEffects1;
 	}
 
@@ -32,7 +33,7 @@ public class Nullified extends Effect
 				a.prepareToDisable = true; // "disables" the ability
 		if (removeEffects)
 			for (Effect e : target.effects)
-				if (!e.removable && !(e instanceof Nullified))
+				if (e.removable)
 					e.timeLeft = 0; // "removes" the effect
 	}
 

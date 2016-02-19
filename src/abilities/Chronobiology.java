@@ -14,6 +14,7 @@ public class Chronobiology extends Ability
 	double amount;
 	boolean initialChange = false;
 	ChronobiologyEffect effect;
+	public boolean state; // true = fast, false = slow
 
 	public Chronobiology(int p)
 	{
@@ -23,7 +24,8 @@ public class Chronobiology extends Ability
 		instant = true;
 
 		amount = 1 + 0.2 * level;
-		on = true; // on = fast, off = slow
+		state = true;
+		on = true; // stays like that
 	}
 
 	public void use(Environment env, Person user, Point target)
@@ -31,10 +33,12 @@ public class Chronobiology extends Ability
 		if (user.mana >= cost)
 		{
 			user.mana -= cost;
-			on = !on;
-			effect.unapply(user);
+			state = !state;
+			if (!disabled)
+				effect.unapply(user);
 			effect.strength = 1 / effect.strength;
-			effect.apply(user);
+			if (!disabled)
+				effect.apply(user);
 		}
 	}
 
@@ -42,7 +46,10 @@ public class Chronobiology extends Ability
 	{
 		if (!initialChange)
 		{
+			on = true;
 			effect = new ChronobiologyEffect(-1, amount, this);
+			if (!state)
+				effect.strength = 1 / effect.strength;
 			user.affect(effect, true);
 			initialChange = true;
 		}
@@ -51,14 +58,7 @@ public class Chronobiology extends Ability
 	public void disable(Environment env, Person user)
 	{
 		disabled = true;
-		if (on)
-		{
-			on = false;
-			effect.unapply(user);
-			effect.strength = 1 / effect.strength;
-			effect.apply(user);
-		}
-		effect.unapply(user);
+		user.affect(effect, false);
 		initialChange = false;
 	}
 

@@ -347,8 +347,8 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 
 				p.selfFrame(deltaTime);
 				if (p instanceof NPC)
-				for (Effect e : p.effects)
-					e.nextFrame(frameNum);
+					for (Effect e : p.effects)
+						e.nextFrame(frameNum);
 				// movement
 				checkMovementAttempt(p, floorFriction, deltaTime);
 			}
@@ -1273,7 +1273,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 					else
 					{
 						if (a.instant && !a.hasTag("on-off")) // Instant ability, without aim
-						{
+						{ // TODO does this make sense? where's the on-off stuff?
 							if (!a.disabled)
 								a.use(env, p, p.target);
 							p.abilityTryingToRepetitivelyUse = abilityIndex;
@@ -1290,7 +1290,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			}
 			else if (p.abilityAiming != -1 && p.abilityAiming == abilityIndex) // = activate currently aimed ability
 			{
-				if (!a.disabled)
+				if (!a.disabled || a instanceof Chronobiology) // can toggle chronobiology while it's disabled
 					a.use(env, p, p.target);
 				p.abilityAiming = -1;
 			}
@@ -1912,31 +1912,34 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 					}
 
 					// ON/OFF
-					if (ability instanceof Chronobiology)
+					if (ability.on)
 					{
-						if (ability.on)
+						if (ability instanceof Chronobiology)
 						{
-							buffer.setColor(Color.green);
-							buffer.setStroke(new BasicStroke(2));
-							buffer.drawLine(x + (int) (1 * UIzoomLevel), y + (int) (1 * UIzoomLevel), x + (int) (1 * UIzoomLevel + 59 * UIzoomLevel), y + (int) (1 * UIzoomLevel));
-							buffer.drawLine(x + (int) (1 * UIzoomLevel), y + (int) (1 * UIzoomLevel), x + (int) (1 * UIzoomLevel), y + (int) (1 * UIzoomLevel + 59 * UIzoomLevel));
+							if (((Chronobiology) ability).state)
+							{
+								buffer.setColor(Color.green);
+								buffer.setStroke(new BasicStroke(2));
+								buffer.drawLine(x + (int) (1 * UIzoomLevel), y + (int) (1 * UIzoomLevel), x + (int) (1 * UIzoomLevel + 59 * UIzoomLevel), y + (int) (1 * UIzoomLevel));
+								buffer.drawLine(x + (int) (1 * UIzoomLevel), y + (int) (1 * UIzoomLevel), x + (int) (1 * UIzoomLevel), y + (int) (1 * UIzoomLevel + 59 * UIzoomLevel));
+							}
+							else
+							{
+								buffer.setColor(Color.magenta);
+								buffer.setStroke(new BasicStroke(2));
+								buffer.drawLine(x + (int) (1 * UIzoomLevel + 59 * UIzoomLevel), y + (int) (1 * UIzoomLevel + 59 * UIzoomLevel), x + (int) (1 * UIzoomLevel + 59 * UIzoomLevel),
+										y + (int) (1 * UIzoomLevel));
+								buffer.drawLine(x + (int) (1 * UIzoomLevel + 59 * UIzoomLevel), y + (int) (1 * UIzoomLevel + 59 * UIzoomLevel), x + (int) (1 * UIzoomLevel),
+										y + (int) (1 * UIzoomLevel + 59 * UIzoomLevel));
+
+							}
 						}
 						else
 						{
-							buffer.setColor(Color.magenta);
+							buffer.setColor(Color.cyan);
 							buffer.setStroke(new BasicStroke(2));
-							buffer.drawLine(x + (int) (1 * UIzoomLevel + 59 * UIzoomLevel), y + (int) (1 * UIzoomLevel + 59 * UIzoomLevel), x + (int) (1 * UIzoomLevel + 59 * UIzoomLevel),
-									y + (int) (1 * UIzoomLevel));
-							buffer.drawLine(x + (int) (1 * UIzoomLevel + 59 * UIzoomLevel), y + (int) (1 * UIzoomLevel + 59 * UIzoomLevel), x + (int) (1 * UIzoomLevel),
-									y + (int) (1 * UIzoomLevel + 59 * UIzoomLevel));
-
+							buffer.drawRect(x + (int) (1 * UIzoomLevel), y + (int) (1 * UIzoomLevel), (int) (59 * UIzoomLevel), (int) (59 * UIzoomLevel));
 						}
-					}
-					else if (ability.on)
-					{
-						buffer.setColor(Color.cyan);
-						buffer.setStroke(new BasicStroke(2));
-						buffer.drawRect(x + (int) (1 * UIzoomLevel), y + (int) (1 * UIzoomLevel), (int) (59 * UIzoomLevel), (int) (59 * UIzoomLevel));
 					}
 					else if (ability instanceof Portals) // if portals ability
 						if (((Portals) ability).p1 != null)
