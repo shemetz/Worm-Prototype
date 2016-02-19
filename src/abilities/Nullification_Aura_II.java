@@ -15,6 +15,8 @@ public class Nullification_Aura_II extends Ability
 {
 	List<Person> affectedTargets;
 
+	final double verticalRange = 5;
+
 	public Nullification_Aura_II(int p)
 	{
 		super("Nullification Aura II", p);
@@ -48,21 +50,22 @@ public class Nullification_Aura_II extends Ability
 	{
 		for (Person other : env.people)
 			if (!other.equals(user))
-			{
-				if (Methods.DistancePow2(other.Point(), user.Point()) < range * range)
+				if (other.z <= user.z + verticalRange && other.z >= user.z - verticalRange)
 				{
-					if (!affectedTargets.contains(other))
+					if (Methods.DistancePow2(other.Point(), user.Point()) < range * range)
 					{
-						affectedTargets.add(other);
-						other.affect(new Nullified(-1, true, this), true);
+						if (!affectedTargets.contains(other))
+						{
+							affectedTargets.add(other);
+							other.affect(new Nullified(-1, true, this), true);
+						}
+					}
+					else if (affectedTargets.contains(other))
+					{
+						affectedTargets.remove(other);
+						other.affect(new Nullified(-1, true, this), false);
 					}
 				}
-				else if (affectedTargets.contains(other))
-				{
-					affectedTargets.remove(other);
-					other.affect(new Nullified(-1, true, this), false);
-				}
-			}
 	}
 
 	public void disable(Environment env, Person user)

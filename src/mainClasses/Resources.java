@@ -221,7 +221,7 @@ public class Resources
 		floor[0] = ResourceLoader.getBufferedImage("environment/floor_Earth.png");
 		// TODO additional forcefield types
 
-		disabled = ResourceLoader.getBufferedImage("icons/disabled.png");
+		disabled = ResourceLoader.getBufferedImage("icons/effects/disabled.png");
 
 		bodyPart.add(new ArrayList<List<List<BufferedImage>>>()); // legs
 		bodyPart.add(new ArrayList<List<List<BufferedImage>>>()); // chest
