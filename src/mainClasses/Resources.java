@@ -27,7 +27,7 @@ public class Resources
 	public static BufferedImage[] balls; // element
 	public static BufferedImage[][] beams; // element, type (0,1,2,3 = start, 4,5,6,7 = middle, 8,9,10,11 = flat end, 12,13,14,15 regular end)
 	public static BufferedImage[][] sprayDrops; // element, type
-	public static BufferedImage[][] debris; // element, type. 12 = smoke, 13 = Force Field.
+	public static BufferedImage[][] debris; // element, type. 12 = smoke, 13 = Force Field, 14 = blood.
 	public static BufferedImage[][] debrisShadows; // element, type. ^
 	public final static int debrisWidth = 40;
 	public static List<BufferedImage> clouds;
@@ -51,7 +51,7 @@ public class Resources
 		arcForceFields = new BufferedImage[numOfElements + 1][4]; // 0-11 = elemental, 12 = Prot. Bubble
 		balls = new BufferedImage[numOfElements];
 		sprayDrops = new BufferedImage[numOfElements][3];
-		debris = new BufferedImage[numOfElements + 2][6];
+		debris = new BufferedImage[numOfElements + 3][6];
 		debrisShadows = new BufferedImage[debris.length][6];
 		cracks = new BufferedImage[3][12]; // 11 is saved for the original wall, not corners
 		clouds = new ArrayList<BufferedImage>();
@@ -196,7 +196,14 @@ public class Resources
 		for (int j = 0; j < 3; j++)
 			debris[13][j + 3] = ResourceLoader.getBufferedImage("debris/FF_smalldebris_" + j + ".png");
 		for (int j = 0; j < debris[0].length; j++)
-			debrisShadows[13][j] = Drawable.createShadow(debris[12][j]);
+			debrisShadows[13][j] = Drawable.createShadow(debris[13][j]);
+		// Blood debris
+		for (int j = 0; j < 3; j++)
+			debris[14][j] = ResourceLoader.getBufferedImage("debris/Blood_debris_" + j + ".png");
+		for (int j = 0; j < 3; j++)
+			debris[14][j + 3] = ResourceLoader.getBufferedImage("debris/Blood_smalldebris_" + j + ".png");
+		for (int j = 0; j < debris[0].length; j++)
+			debrisShadows[14][j] = Drawable.createShadow(debris[14][j]);
 
 		// Protective bubble
 		for (int j = 0; j < 4; j++)

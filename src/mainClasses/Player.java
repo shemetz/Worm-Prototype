@@ -8,7 +8,7 @@ public class Player extends Person
 
 	public enum AimType
 	{
-		CREATE_FF, PORTALS, CREATE_IN_GRID, TARGET_IN_RANGE, EXPLOSION, TELEPORT, LOOP, NONE
+		CREATE_FF, PORTALS, CREATE_IN_GRID, TARGET_IN_RANGE, EXPLOSION, TELEPORT, LOOP, WILD_POWER, NONE
 	};
 
 	public AimType aimType;

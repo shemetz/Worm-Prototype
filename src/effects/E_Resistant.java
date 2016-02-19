@@ -13,6 +13,7 @@ public class E_Resistant extends Effect
 		stackable = true;
 		removeOnDeath = false;
 		element = element1;
+		removable = false;
 	}
 
 	public Effect clone()

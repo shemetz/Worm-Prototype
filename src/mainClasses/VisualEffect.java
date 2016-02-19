@@ -25,7 +25,7 @@ public class VisualEffect
 
 	public enum Type
 	{
-		BLINK_SUCCESS, BLINK_FAIL, HEAL, EXPLOSION, NO, TELEPORT, STATE_LOOP
+		BLINK_SUCCESS, BLINK_FAIL, HEAL, EXPLOSION, NO, TELEPORT, STATE_LOOP, WILD_POWER
 	};
 
 	public Type type;
@@ -42,6 +42,8 @@ public class VisualEffect
 	 * STATE_LOOP = three arcs that rotate inwards into person
 	 * 
 	 * EXPLOSION = explosion (subtypes for different drawings)
+	 * 
+	 * WILD_POWER = four points that move depending on subtype.
 	 */
 	public int subtype;
 	public double angle;
@@ -97,6 +99,7 @@ public class VisualEffect
 			break;
 		case TELEPORT:
 		case STATE_LOOP:
+		case WILD_POWER:
 		case NO:
 			break;
 		default:
@@ -109,6 +112,69 @@ public class VisualEffect
 	{
 		switch (type)
 		{
+		case WILD_POWER:
+			double distance = 0;
+			switch (subtype)
+			{
+			case 0: // ally
+				distance = 60;
+				buffer.setStroke(new BasicStroke(2));
+				for (int i = 0; i < 4; i++)
+				{
+					buffer.setColor(Color.green);
+					buffer.fillOval(-5 + (int) (p1.x + distance * Math.cos(i * Math.PI / 2 + timeLeft)), -5 + (int) (p1.y + distance * Math.sin(i * Math.PI / 2 + timeLeft)), 10, 10);
+					buffer.setColor(Color.cyan);
+					buffer.drawOval(-5 + (int) (p1.x + distance * Math.cos(i * Math.PI / 2 + timeLeft)), -5 + (int) (p1.y + distance * Math.sin(i * Math.PI / 2 + timeLeft)), 10, 10);
+				}
+				break;
+			case 1: // enemy
+				distance = 60;
+				buffer.setStroke(new BasicStroke(2));
+				for (int i = 0; i < 4; i++)
+				{
+					buffer.setColor(Color.red);
+					buffer.fillOval(-5 + (int) (p1.x + distance * Math.cos(i * Math.PI / 2 - timeLeft)), -5 + (int) (p1.y + distance * Math.sin(i * Math.PI / 2 - timeLeft)), 10, 10);
+					buffer.setColor(Color.orange);
+					buffer.drawOval(-5 + (int) (p1.x + distance * Math.cos(i * Math.PI / 2 - timeLeft)), -5 + (int) (p1.y + distance * Math.sin(i * Math.PI / 2 - timeLeft)), 10, 10);
+				}
+				break;
+			case 2: // ball
+				buffer.setStroke(new BasicStroke(2));
+				distance = 110 - timeLeft * timeLeft * 50;
+				for (int i = 0; i < 3; i++)
+				{
+					buffer.setColor(Color.blue);
+					buffer.fillOval(-5 + (int) (p1.x + distance * Math.cos(i * Math.PI * 2 / 3)), -5 + (int) (p1.y + distance * Math.sin(i * Math.PI * 2 / 3)), 10, 10);
+					buffer.setColor(Color.magenta);
+					buffer.drawOval(-5 + (int) (p1.x + distance * Math.cos(i * Math.PI * 2 / 3)), -5 + (int) (p1.y + distance * Math.sin(i * Math.PI * 2 / 3)), 10, 10);
+				}
+				distance = 10 + timeLeft * timeLeft * 50;
+				for (double i = 0.5; i < 3.5; i++)
+				{
+					buffer.setColor(Color.blue);
+					buffer.fillOval(-5 + (int) (p1.x + distance * Math.cos(i * Math.PI * 2 / 3)), -5 + (int) (p1.y + distance * Math.sin(i * Math.PI * 2 / 3)), 10, 10);
+					buffer.setColor(Color.magenta);
+					buffer.drawOval(-5 + (int) (p1.x + distance * Math.cos(i * Math.PI * 2 / 3)), -5 + (int) (p1.y + distance * Math.sin(i * Math.PI * 2 / 3)), 10, 10);
+				}
+				break;
+			case 3: // wall / pool / floor
+				buffer.setStroke(new BasicStroke(2));
+				distance = 400 - timeLeft * timeLeft * 400;
+				for (int i = 0; i < 4; i++)
+				{
+					buffer.setColor(Color.yellow);
+					buffer.fillOval(-5 + (int) (p1.x + 300 * Math.cos(i * Math.PI / 2 + Math.PI / 4) + distance * Math.cos(i * Math.PI / 2 + Math.PI)),
+							-5 + (int) (p1.y + 300 * Math.sin(i * Math.PI / 2 + Math.PI / 4) + distance * Math.sin(i * Math.PI / 2 + Math.PI)), 10, 10);
+					buffer.setColor(Color.green);
+					buffer.drawOval(-5 + (int) (p1.x + 300 * Math.cos(i * Math.PI / 2 + Math.PI / 4) + distance * Math.cos(i * Math.PI / 2 + Math.PI)),
+							-5 + (int) (p1.y + 300 * Math.sin(i * Math.PI / 2 + Math.PI / 4) + distance * Math.sin(i * Math.PI / 2 + Math.PI)), 10, 10);
+				}
+				break;
+			default:
+				MAIN.errorMessage("ALERT: CXAXAKLUTHCXAXAKLUTHCXAXAKLUTH");
+				break;
+			}
+			break;
 		case STATE_LOOP:
 			buffer.setColor(new Color(180, 255, 0));
 			int radius = (int) (timeLeft * 120);

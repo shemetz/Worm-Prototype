@@ -2606,11 +2606,22 @@ public class Environment
 	{
 		switch (type)
 		{
+		case "pool heal blood":
+			if (frameNum % 3 == 0)
+			{
+				double angle = Math.random() * Math.PI * 2;
+				double distance = Math.random() * 100 + 50;
+				debris.add(new Debris(x + distance * Math.cos(angle), y + distance * Math.sin(angle), 0, angle, n, true, 1));
+			}
+			break;
 		case "pool heal":
 		case "wall heal":
 			if (frameNum % 10 == 0)
-				for (double i = Math.random(); i < 7; i++)
-					debris.add(new Debris(x, y, 0, i, n, 300));
+				for (double i = Math.random(); i < 3; i++)
+					debris.add(new Debris(x, y, 0, i + Math.random(), n, 300));
+			break;
+		case "destroy":
+			debris.add(new Debris(x, y, 0, Math.random() * 2 * Math.PI, n, 300));
 			break;
 		default:
 			MAIN.errorMessage("Error message 7: BEBHMAXBRI0903 T");
@@ -3414,6 +3425,10 @@ public class Environment
 	{
 		if ((wallTypes[x][y] != -1 || poolTypes[x][y] != -1) && !fullHealth)
 			return; // can't create where there's already something
+		for (Person p : people)
+			if ((int) (p.x - p.radius) / squareSize == x || (int) (p.x + p.radius) / squareSize == x)
+				if ((int) (p.y - p.radius) / squareSize == y || (int) (p.y + p.radius) / squareSize == y)
+					return;
 		poolTypes[x][y] = elementalType;
 		if (fullHealth)
 			poolHealths[x][y] = 100;
@@ -3432,10 +3447,7 @@ public class Environment
 			element = wallTypes[x][y];
 			wallTypes[x][y] = -1;
 			wallHealths[x][y] = -1;
-			checkWCorner(element, x, y);
-			checkWCorner(element, x + 1, y);
-			checkWCorner(element, x, y + 1);
-			checkWCorner(element, x + 1, y + 1);
+			updateWallCorners(x, y, element);
 			return true;
 		}
 		if (poolTypes[x][y] != -1)
@@ -3443,14 +3455,27 @@ public class Environment
 			element = poolTypes[x][y];
 			poolTypes[x][y] = -1;
 			poolHealths[x][y] = -1;
-			checkPCorner(element, x, y);
-			checkPCorner(element, x + 1, y);
-			checkPCorner(element, x, y + 1);
-			checkPCorner(element, x + 1, y + 1);
+			updatePoolCorners(x, y, element);
 			updatePools();
 			return true;
 		}
 		return false;
+	}
+
+	public void updateWallCorners(int x, int y, int element)
+	{
+		checkWCorner(element, x, y);
+		checkWCorner(element, x + 1, y);
+		checkWCorner(element, x, y + 1);
+		checkWCorner(element, x + 1, y + 1);
+	}
+
+	public void updatePoolCorners(int x, int y, int element)
+	{
+		checkPCorner(element, x, y);
+		checkPCorner(element, x + 1, y);
+		checkPCorner(element, x, y + 1);
+		checkPCorner(element, x + 1, y + 1);
 	}
 
 	public void destroyWall(int x, int y)

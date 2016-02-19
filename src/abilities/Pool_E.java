@@ -2,6 +2,7 @@ package abilities;
 
 import java.awt.Point;
 
+import mainClasses.EP;
 import mainClasses.Environment;
 import mainClasses.Person;
 import mainClasses.Player;
@@ -65,9 +66,11 @@ public class Pool_E extends GridTargetingAbility
 				cooldownLeft = cooldown;
 				on = true;
 				user.switchAnimation(2);
-			} else
+			}
+			else
 				canBuildInTarget = false; // unable
-		} else if (on && user.maintaining)
+		}
+		else if (on && user.maintaining)
 		{
 			if (env.poolHealths[target.x / squareSize][target.y / squareSize] > 90)
 				env.poolHealths[target.x / squareSize][target.y / squareSize] = 100; // to fix some problems
@@ -87,7 +90,13 @@ public class Pool_E extends GridTargetingAbility
 		else
 		{
 			// effects
-			env.otherDebris((targetGridX + 0.5) * squareSize, (targetGridY + 0.5) * squareSize, getElementNum(), "pool heal", frameNum);
+			int element = getElementNum();
+			if (element == EP.toInt("Flesh"))
+			{
+				env.otherDebris((targetGridX + 0.5) * squareSize, (targetGridY + 0.5) * squareSize, 14, "pool heal blood", frameNum);
+			}
+			else
+			env.otherDebris((targetGridX + 0.5) * squareSize, (targetGridY + 0.5) * squareSize, element, "pool heal", frameNum);
 			env.poolHealths[(int) targetGridX][(int) targetGridY] += level;
 			if (env.poolHealths[(int) targetGridX][(int) targetGridY] >= 100)
 				env.poolHealths[(int) targetGridX][(int) targetGridY] = 100;

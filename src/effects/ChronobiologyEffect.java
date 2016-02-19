@@ -13,6 +13,7 @@ public class ChronobiologyEffect extends Effect
 		stackable = true;
 		removeOnDeath = true;
 		timeAffecting = true;
+		removable = false;
 	}
 
 	public Effect clone()

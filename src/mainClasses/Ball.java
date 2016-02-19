@@ -8,13 +8,21 @@ public class Ball extends RndPhysObj
 {
 	public int elementNum;
 	public int points;
-	final int ballMass = 10; //TODO different per element, maybe depends on radius
+	final int ballMass = 10; // TODO different per element, maybe depends on radius
 	public Person creator;
 	public List<Evasion> evasions;
 	public boolean critical = false;
 	public double timer;
-	
+
 	final static public double smokeEffectRate = 0.03;
+
+	public Ball(double x1, double y1, double z1, int en, int p1, double angle, Person creator1)
+	{
+		this(en, p1, angle, creator1);
+		x = x1;
+		y = y1;
+		z = z1;
+	}
 
 	public Ball(int en, int p1, double angle, Person creator1)
 	{

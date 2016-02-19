@@ -57,6 +57,7 @@ import abilities.Sense_Powers;
 import abilities.Shield_E;
 import abilities.Sprint;
 import abilities.TeleportAbility;
+import abilities.Wild_Power;
 import abilities._LoopAbility;
 import effects.Burning;
 import effects.Tangled;
@@ -408,7 +409,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 						env.hitPerson(p, 25, 0, 0, 10, deltaTime);
 						break;
 					case 11: // plant vines/spikes
-						env.hitPerson(p, 5, 0, 0, 11, deltaTime);
+						env.hitPerson(p, 5, 0, 0, -1, deltaTime);
 						if (frameNum % 50 == 0 && random.nextDouble() < 0.7) // tangle chance is 70% in lava
 							p.affect(new Tangled(0, null), true);
 						break;
@@ -863,6 +864,36 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 
 		switch (player.aimType)
 		{
+		case WILD_POWER:
+			Object target1 = ((Wild_Power) ability).getTarget(env, player.target);
+			if (target1 instanceof Person)
+			{
+				Point targetPerson = ((Person) target1).Point();
+				buffer.setStroke(new BasicStroke(3));
+				if (((Person) target1).commanderID == player.commanderID)
+					buffer.setColor(Color.green);
+				else
+					buffer.setColor(Color.red);
+				int haloRadius = 60;
+				buffer.drawOval(targetPerson.x - haloRadius, targetPerson.y - haloRadius, haloRadius * 2, haloRadius * 2);
+			}
+			else if (target1 instanceof Ball)
+			{
+				Point targetBall = ((Person) target1).Point();
+				buffer.setStroke(new BasicStroke(3));
+				buffer.setColor(Color.blue);
+				int haloRadius = 40;
+				buffer.drawOval(targetBall.x - haloRadius, targetBall.y - haloRadius, haloRadius * 2, haloRadius * 2);
+			}
+			else if (target1 instanceof Point)
+			{
+				Point point = (Point) target1;
+				buffer.setStroke(new BasicStroke(3));
+				buffer.setColor(Color.yellow);
+				buffer.drawRect(point.x * squareSize - ((int) (ability.level / 4)) * squareSize, point.y * squareSize - ((int) (ability.level / 4)) * squareSize,
+						((int) (ability.level / 4)) * 2 * squareSize + squareSize, ((int) (ability.level / 4)) * 2 * squareSize + squareSize);
+			}
+			break;
 		case PORTALS:
 			Portals p = (Portals) ability;
 			if (p.holdTarget == null)

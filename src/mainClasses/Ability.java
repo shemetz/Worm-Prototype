@@ -59,6 +59,7 @@ import abilities.Undo_I;
 import abilities.Undo_II;
 import abilities.Undo_III;
 import abilities.Wall_E;
+import abilities.Wild_Power;
 import mainResourcesPackage.SoundEffect;
 
 public class Ability
@@ -66,7 +67,7 @@ public class Ability
 	final static List<String> implementedAbilities = Arrays.asList("Portals", "Elemental Void", "Precision I", "Protective Bubble I", "Sprint", "Strength I", "Strength II", "Strength III", "Punch",
 			"Heal I", "Heal II", "Force Shield", "Ranged Explosion", "Flight I", "Flight II", "Telekinetic Flight", "Blink", "Ghost Mode I", "Strong Force Field", "Beam", "Ball", "Shield", "Pool",
 			"Wall", "Spray", "Toughness III", "Sense Life", "Sense Mana and Stamina", "Sense Powers", "Elemental Combat I", "Slow Target", "Chronobiology", "Retrace I", "Retrace II", "Retrace III",
-			"Undo I", "Undo II", "Undo III", "Repeat I", "Repeat II", "Repeat III", "Time Freeze Target I", "Nullification Aura I", "Nullification Aura II");
+			"Undo I", "Undo II", "Undo III", "Repeat I", "Repeat II", "Repeat III", "Time Freeze Target I", "Nullification Aura I", "Nullification Aura II", "Wild Power");
 	protected static List<String> descriptions = new ArrayList<String>();
 	protected static boolean[][] elementalAttacksPossible = new boolean[12][7]; // [element][ability]
 	protected static int[][] elementalAttackNumbers = new int[12][3];
@@ -530,6 +531,9 @@ public class Ability
 		}
 		switch (trimmedAbilityName)
 		{
+		case "Wild Power":
+			ab = new Wild_Power(pnts);
+			break;
 		case "Nullification Aura I":
 			ab = new Nullification_Aura_I(pnts);
 			break;

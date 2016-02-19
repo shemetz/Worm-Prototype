@@ -269,15 +269,33 @@ public class Person extends RndPhysObj implements Mover
 		{
 			int oldestEffectIndex = -1;
 			for (int i = 0; i < effects.size(); i++)
-				if (effects.get(i).name.equals(e.name) && effects.get(i).creatorAbility.equals(e.creatorAbility))
-					if (oldestEffectIndex == -1 || effects.get(i).timeLeft < effects.get(oldestEffectIndex).timeLeft)
+			{
+				Effect ee = effects.get(i);
+				if (ee.name.equals(e.name) && (ee.creatorAbility == null || e.creatorAbility == null || ee.creatorAbility.equals(e.creatorAbility)))
+					if (oldestEffectIndex == -1 || e.timeLeft < effects.get(oldestEffectIndex).timeLeft)
 						oldestEffectIndex = i;
+			}
 			if (oldestEffectIndex != -1) // sometimes the program attempts to remove an effect without checking if it already exists. It's ok.
 			{
 				effects.get(oldestEffectIndex).unapply(this);
 				effects.remove(oldestEffectIndex);
 			}
 		}
+	}
+
+	public void removeEffects(int amount)
+	{
+		amount = Math.min(amount, effects.size());
+		if (amount > 0)
+			for (int i = 0, k = 0; i < effects.size() && k < amount; i++, k++)
+				if (effects.get(i).removable)
+				{
+					affect(effects.get(i), false);
+					i--;
+				}
+				else
+					k--;
+
 	}
 
 	public void damage(double damage)
