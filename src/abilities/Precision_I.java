@@ -2,11 +2,10 @@ package abilities;
 
 import java.awt.Point;
 
-import mainClasses.Ability;
 import mainClasses.Environment;
 import mainClasses.Person;
 
-public class Precision_I extends Ability
+public class Precision_I extends _PassiveAbility
 {
 
 	public Precision_I(int p)
@@ -26,12 +25,5 @@ public class Precision_I extends Ability
 		// a = 1-(1-b)*(0.9^level)
 		// b = 1-(1-a)/(0.9^level)
 		user.updateAccuracy();
-	}
-
-	public void disable(Environment env, Person user)
-	{
-		disabled = true;
-		if (on)
-			use(env, user, null);
 	}
 }

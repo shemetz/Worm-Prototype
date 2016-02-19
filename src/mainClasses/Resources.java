@@ -35,6 +35,7 @@ public class Resources
 	public static List<List<BufferedImage>> effects;
 	public static BufferedImage[] healingBeam; // frame
 	public static List<List<BufferedImage>> explosions; // type, frame
+	public static BufferedImage disabled;
 
 	public static void initialize()
 	{
@@ -219,6 +220,8 @@ public class Resources
 		// no need to transform it into BufferedImage.TYPE_INT_RGB or anything similar, won't work :(
 		floor[0] = ResourceLoader.getBufferedImage("environment/floor_Earth.png");
 		// TODO additional forcefield types
+
+		disabled = ResourceLoader.getBufferedImage("icons/disabled.png");
 
 		bodyPart.add(new ArrayList<List<List<BufferedImage>>>()); // legs
 		bodyPart.add(new ArrayList<List<List<BufferedImage>>>()); // chest

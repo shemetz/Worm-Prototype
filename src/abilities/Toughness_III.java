@@ -2,11 +2,10 @@ package abilities;
 
 import java.awt.Point;
 
-import mainClasses.Ability;
 import mainClasses.Environment;
 import mainClasses.Person;
 
-public class Toughness_III extends Ability
+public class Toughness_III extends _PassiveAbility
 {
 	public Toughness_III(int p)
 	{
@@ -19,12 +18,5 @@ public class Toughness_III extends Ability
 		user.life *= val * 100 * level / user.maxLife + 1;
 		user.maxLife += val * 100 * level;
 		on = !on;
-	}
-
-	public void disable(Environment env, Person user)
-	{
-		disabled = true;
-		if (on)
-			use(env, user, null);
 	}
 }

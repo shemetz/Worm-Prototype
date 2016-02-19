@@ -66,7 +66,10 @@ public class PersonCopy
 
 		this.effects = new ArrayList<Effect>();
 		for (Effect e : other.effects)
-			this.effects.add(e.clone());
+		{
+			if (e.timeLeft != -1) //DOES NOT COPY PERMANENT EFFECTS
+				this.effects.add(e.clone());
+		}
 	}
 
 	public void draw(Graphics2D buffer)

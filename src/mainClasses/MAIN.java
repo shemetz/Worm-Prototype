@@ -333,7 +333,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				// maintaining person abilities
 				if (p.timeEffect != 0)
 					for (Ability a : p.abilities)
-						if (a.on && !a.hasTag("passive"))
+						if (a.on)
 							if (!a.disabled)
 								a.maintain(env, p, p.target, deltaTime); // not affected by timeEffect. TODO double check this! (try using abilities like Beam with it)
 				// using abilities the person is trying to repetitively use (e.g. holding down the Punch ability's key)
@@ -346,6 +346,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				}
 
 				p.selfFrame(deltaTime);
+				if (p instanceof NPC)
 				for (Effect e : p.effects)
 					e.nextFrame(frameNum);
 				// movement
@@ -1218,6 +1219,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		{
 			Person person = new NPC((int) (100 + Math.random() * (env.widthPixels - 200)), (int) (100 + Math.random() * (env.heightPixels - 200)), Strategy.AGGRESSIVE);
 			person.commanderID = 1;
+			person.abilities.add(Ability.ability("Nullification Aura I", 9));
 			env.people.add(person);
 		}
 
@@ -1952,6 +1954,13 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 						buffer.setColor(Color.green);
 						buffer.setStroke(new BasicStroke(2));
 						buffer.drawRect(x + (int) (1 * UIzoomLevel), y + (int) (1 * UIzoomLevel), (int) (59 * UIzoomLevel), (int) (59 * UIzoomLevel));
+					}
+
+					// disabled?
+
+					if (ability.disabled)
+					{
+						buffer.drawImage(Resources.disabled, x, y, null);
 					}
 
 					// selected power for targeting

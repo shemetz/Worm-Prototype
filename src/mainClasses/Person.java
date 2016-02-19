@@ -215,7 +215,7 @@ public class Person extends RndPhysObj implements Mover
 
 		this.effects = new ArrayList<Effect>();
 		for (Effect e : other.effects)
-			this.effects.add(e.clone());
+			this.affect(e, true);
 	}
 
 	public void copyPosition(PersonCopy other)
