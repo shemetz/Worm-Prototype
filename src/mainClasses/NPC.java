@@ -45,7 +45,6 @@ public class NPC extends Person
 	int targetID = -1;
 	boolean rightOrLeft = false; // true = right or CW. false = left or CCW.
 	boolean justCollided = false;
-	boolean justGotHit = false;
 	double instinctDelayTime;
 	double timeSinceLastInstinct;
 	double angleOfLastInstinct;
@@ -245,7 +244,7 @@ public class NPC extends Person
 				this.directionOfAttemptedMovement = angleToTarget + deviationAngle * (this.rightOrLeft ? 1 : -1); // BUG - distance grows between p and target for some reason!!!! TODO
 				this.strengthOfAttemptedMovement = 1;
 
-				if (this.justGotHit || this.justCollided || Math.random() < 0.005) // chance of switching direction mid-circle
+				if (this.timeSinceLastHit == 0 || this.justCollided || Math.random() < 0.005) // chance of switching direction mid-circle
 					this.rightOrLeft = !this.rightOrLeft;
 
 				// moving away or into range
@@ -348,7 +347,7 @@ public class NPC extends Person
 				}
 				if (this.strategy.equals(Strategy.PASSIVE)) // TEMP TODO
 				{
-					if (this.justGotHit)
+					if (this.timeSinceLastHit == 0)
 						for (int aIndex = 0; aIndex < this.abilities.size(); aIndex++)
 						{
 							Ability a = this.abilities.get(aIndex);
@@ -367,16 +366,23 @@ public class NPC extends Person
 			}
 		// tactic-switching decisions. TODO make it make sense
 		Tactic prevTactic = this.tactic;
-		if (this.panic)
-			this.tactic = Tactic.PANIC;
-		else if (this.life < 0.15 * this.maxLife)
-			this.tactic = Tactic.RETREAT;
-		else if (this.tactic.equals(Tactic.RETREAT)) // stop retreating when uninjured
-			this.tactic = Tactic.NO_TARGET;
-		else if (this.strategy.equals(Strategy.AGGRESSIVE))
+
+		if (this.strategy == Strategy.AGGRESSIVE)
+		{
+			if (this.panic)
+				this.tactic = Tactic.PANIC;
+			else if (this.life < 0.15 * this.maxLife)
+				this.tactic = Tactic.RETREAT;
+			else if (this.tactic == Tactic.RETREAT) // stop retreating when uninjured
+				this.tactic = Tactic.NO_TARGET;
+			else
+				this.tactic = Tactic.PUNCH_CHASING;
+		}
+		if (this.strategy == Strategy.CLONE_I)
 		{
 			this.tactic = Tactic.PUNCH_CHASING;
 		}
+
 		if (prevTactic != this.tactic)
 		{
 			if (this.abilityMaintaining != -1)
@@ -387,7 +393,6 @@ public class NPC extends Person
 		}
 		// resetting check-booleans
 		this.justCollided = false;
-		this.justGotHit = false;
 
 		if (Double.isNaN(this.directionOfAttemptedMovement)) // to fix a certain irritating bug
 		{
@@ -397,7 +402,6 @@ public class NPC extends Person
 		boolean nothingToDo = false;
 		if (this.strengthOfAttemptedMovement == 0)
 			nothingToDo = true;
-
 		// Instincts - move away from dangerous objects
 		if (this.timeSinceLastInstinct < 0)
 			this.timeSinceLastInstinct += deltaTime;
@@ -588,7 +592,7 @@ public class NPC extends Person
 				}
 				else if (Methods.DistancePow2(waypoint, Point()) > 96 * 96 * 4) // sort of right
 				{
-					System.out.println("this is supposed to happen");
+					MAIN.print("this is supposed to happen");
 					path.remove(0);
 				}
 		}

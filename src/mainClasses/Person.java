@@ -120,7 +120,7 @@ public class Person extends RndPhysObj implements Mover
 	public List<List<BufferedImage>> animationVine;
 
 	// Look
-	int legs, chest, head, hair;
+	public int legs, chest, head, hair, nakedLegs, nakedChest;
 
 	// Sounds
 	public List<SoundEffect> sounds = new ArrayList<SoundEffect>();
@@ -193,10 +193,12 @@ public class Person extends RndPhysObj implements Mover
 		initStats();
 
 		// randomize look
-		legs = MAIN.random.nextInt(2);
-		chest = MAIN.random.nextInt(2);
+		legs = 1 + MAIN.random.nextInt(2);
+		chest = 1 + MAIN.random.nextInt(2);
 		head = MAIN.random.nextInt(2);
-		hair = MAIN.random.nextInt(2);
+		hair = 1 + MAIN.random.nextInt(2);
+		nakedLegs = MAIN.random.nextInt(1);
+		nakedChest = MAIN.random.nextInt(1);
 		initAnimation();
 	}
 
@@ -312,8 +314,12 @@ public class Person extends RndPhysObj implements Mover
 	public void damage(double damage)
 	{
 		life -= damage;
-		timeSinceLastHit = 0;
-		inCombat = true;
+		if (damage >= 2.5 || Math.random() < 0.01) // so that beams and wall collisions don't always trigger this
+		{
+			// TODO - this is kinda buggy with the fact that normal wall collisions can damage, and that makes clones stay "in combat" too much
+			timeSinceLastHit = 0;
+			inCombat = true;
+		}
 	}
 
 	public void initStats()
@@ -424,6 +430,9 @@ public class Person extends RndPhysObj implements Mover
 		n.add(chest);
 		n.add(head);
 		n.add(hair);
+		n.add(-1); // stand-in for vines
+		n.add(nakedLegs);
+		n.add(nakedChest);
 
 		animationBottom = new ArrayList<List<BufferedImage>>();
 		animationTop = new ArrayList<List<BufferedImage>>();
@@ -504,36 +513,44 @@ public class Person extends RndPhysObj implements Mover
 
 	public void insertFullBodyAnimation(int stateNum, int frameNum, List<Integer> n)
 	{
-		// legs and chest, which change look depending on the frame
 		if (stateNum < 4)
 		{
 			BufferedImage img = new BufferedImage(imgW, imgH, BufferedImage.TYPE_INT_ARGB);
 			Graphics2D g2d = img.createGraphics();
-			for (int i = 0; i < 2; i++)
-				g2d.drawImage(Resources.bodyPart.get(i).get(n.get(i)).get(stateNum).get(frameNum), 0, 0, null); // first get is 0-1 for legs/chest, second get is for the stand state, third get is for the first stand frame
-			// wat. you mean third, fourth, fifth
+			g2d.drawImage(Resources.bodyPart.get(5).get(n.get(5)).get(stateNum).get(frameNum), 0, 0, null); // naked legs
+			if (n.get(0) != 0)
+				g2d.drawImage(Resources.bodyPart.get(0).get(n.get(0)).get(stateNum).get(frameNum), 0, 0, null); // legs
+			g2d.drawImage(Resources.bodyPart.get(6).get(n.get(6)).get(stateNum).get(frameNum), 0, 0, null); // naked chest
+			if (n.get(1) != 0)
+				g2d.drawImage(Resources.bodyPart.get(1).get(n.get(1)).get(stateNum).get(frameNum), 0, 0, null); // chest
 
 			animationBottom.get(stateNum).add(img);
 			g2d.dispose();
 			img = new BufferedImage(imgW, imgH, BufferedImage.TYPE_INT_ARGB);
 			g2d = img.createGraphics();
-			// head and hair, which do not
-			for (int i = 2; i < 4; i++)
-				g2d.drawImage(Resources.bodyPart.get(i).get(n.get(i)).get(stateNum).get(0), 0, 0, null);
+			// head and hair don't change in these frames, hence the .get(0):
+			g2d.drawImage(Resources.bodyPart.get(2).get(n.get(2)).get(stateNum).get(0), 0, 0, null); // head
+			if (n.get(3) != 0)
+				g2d.drawImage(Resources.bodyPart.get(3).get(n.get(3)).get(stateNum).get(0), 0, 0, null); // hair
 			animationTop.get(stateNum).add(img);
 		}
 		else
 		{
 			BufferedImage img = new BufferedImage(imgW, imgH, BufferedImage.TYPE_INT_ARGB);
 			Graphics2D g2d = img.createGraphics();
-			for (int i = 0; i < 2; i++)
-				g2d.drawImage(Resources.bodyPart.get(i).get(n.get(i)).get(stateNum).get(frameNum), 0, 0, null);
+			g2d.drawImage(Resources.bodyPart.get(5).get(n.get(5)).get(stateNum).get(frameNum), 0, 0, null); // naked legs
+			if (n.get(0) != 0)
+				g2d.drawImage(Resources.bodyPart.get(0).get(n.get(0)).get(stateNum).get(frameNum), 0, 0, null); // legs
+			g2d.drawImage(Resources.bodyPart.get(6).get(n.get(6)).get(stateNum).get(frameNum), 0, 0, null); // naked chest
+			if (n.get(1) != 0)
+				g2d.drawImage(Resources.bodyPart.get(1).get(n.get(1)).get(stateNum).get(frameNum), 0, 0, null); // chest
 			animationBottom.get(stateNum).add(img);
 			g2d.dispose();
 			img = new BufferedImage(imgW, imgH, BufferedImage.TYPE_INT_ARGB);
 			g2d = img.createGraphics();
-			for (int i = 2; i < 4; i++)
-				g2d.drawImage(Resources.bodyPart.get(i).get(n.get(i)).get(stateNum).get(frameNum), 0, 0, null);
+			g2d.drawImage(Resources.bodyPart.get(2).get(n.get(2)).get(stateNum).get(frameNum), 0, 0, null); // head
+			if (n.get(3) != 0)
+				g2d.drawImage(Resources.bodyPart.get(3).get(n.get(3)).get(stateNum).get(frameNum), 0, 0, null); // hair
 			animationTop.get(stateNum).add(img);
 		}
 
@@ -890,7 +907,7 @@ public class Person extends RndPhysObj implements Mover
 
 		for (SoundEffect s : sounds)
 			s.setPosition(x, y);
-		if (timeSinceLastHit < 60)
+		if (timeSinceLastHit < 20) // 20 seconds of no damage = combat stopped
 			timeSinceLastHit += deltaTime;
 		else
 			inCombat = false;
@@ -1179,19 +1196,22 @@ public class Person extends RndPhysObj implements Mover
 
 	}
 
-	public void drawData(Graphics2D buffer, boolean drawLife, boolean drawMana, boolean drawStamina, double cameraRotation)
+	public void drawData(Graphics2D buffer, boolean drawLife, boolean drawMana, boolean drawStamina, Color nameColor, double cameraRotation)
 	{
 		buffer.rotate(cameraRotation, x, y);
 
 		// name
 		buffer.setFont(new Font(Font.MONOSPACED, Font.BOLD, 16));
-		buffer.setColor(Color.black);
 		String s = name;
 		if (dead)
 		{
 			s += " (RIP)";
 			buffer.setColor(new Color(50, 50, 50)); // dark gray
 		}
+		buffer.setColor(nameColor);
+		buffer.drawString(s, (int) (x - s.length() / 2 * 10) + 1, (int) (y - radius - 28) + 1);
+		buffer.drawString(s, (int) (x - s.length() / 2 * 10) - 1, (int) (y - radius - 28) - 1);
+		buffer.setColor(Color.black);
 		buffer.drawString(s, (int) (x - s.length() / 2 * 10), (int) (y - radius - 28));
 
 		// Does not draw data if the person is dead

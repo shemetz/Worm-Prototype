@@ -228,8 +228,10 @@ public class Resources
 		bodyPart.add(new ArrayList<List<List<BufferedImage>>>()); // head
 		bodyPart.add(new ArrayList<List<List<BufferedImage>>>()); // hair
 		bodyPart.add(new ArrayList<List<List<BufferedImage>>>()); // vines
+		bodyPart.add(new ArrayList<List<List<BufferedImage>>>()); // naked legs
+		bodyPart.add(new ArrayList<List<List<BufferedImage>>>()); // naked chest
 
-		for (int i = 0; i < 5; i++)
+		for (int i = 0; i < 7; i++)
 		{
 			String bodyPartName = "null";
 			int numOfPermutations = -1;
@@ -255,6 +257,14 @@ public class Resources
 				bodyPartName = "vines";
 				numOfPermutations = 1;
 				break;
+			case 5:
+				bodyPartName = "legs_naked";
+				numOfPermutations = 1;
+				break;
+			case 6:
+				bodyPartName = "chest_naked";
+				numOfPermutations = 1;
+				break;
 			default:
 				MAIN.errorMessage("Unknown body part number: " + i);
 				break;
@@ -263,7 +273,7 @@ public class Resources
 			{
 				// Comment: Yes. this part is messy. And remember that it needs to be in combination with the Person.initAnimation part.
 				bodyPart.get(i).add(new ArrayList<List<BufferedImage>>());
-				if (i == 0 || i == 1 || i == 4) // if body part is legs or chest or vines
+				if (i == 0 || i == 1 || i == 5 || i == 6 || i == 4) // if body part is legs or chest or vines
 				{
 					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // stand = 0
 					bodyPart.get(i).get(j).get(0).add(ResourceLoader.getBufferedImage("people/stand-" + bodyPartName + "_" + j + ".png"));
@@ -307,7 +317,7 @@ public class Resources
 				bodyPart.get(i).get(j).get(4).add(ResourceLoader.getBufferedImage("people/slip_3-" + bodyPartName + "_" + j + ".png"));
 
 				// punches:
-				if (i == 1 || i == 4) // only chest+arms (and vines) move differently during punches
+				if (i == 1 || i == 6 || i == 4) // only chest+arms (and vines) move differently during punches
 				{
 					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // 5 right punch
 					bodyPart.get(i).get(j).get(5).add(ResourceLoader.getBufferedImage("people/punch_1-" + bodyPartName + "_" + j + ".png"));
@@ -316,7 +326,7 @@ public class Resources
 					bodyPart.get(i).get(j).get(6).add(ResourceLoader.getBufferedImage("people/punch_2-" + bodyPartName + "_" + j + ".png"));
 					bodyPart.get(i).get(j).get(6).add(ResourceLoader.getBufferedImage("people/punch_3-" + bodyPartName + "_" + j + ".png"));
 				}
-				else if (i == 0 || i == 2 || i == 3)
+				else if (i == 0 || i == 5 || i == 2 || i == 3)
 				{
 					BufferedImage runImg = ResourceLoader.getBufferedImage("people/stand-" + bodyPartName + "_" + j + ".png");
 					BufferedImage punchImg = new BufferedImage(96, 96, BufferedImage.TYPE_INT_ARGB); // = empty image
@@ -331,7 +341,7 @@ public class Resources
 					bodyPart.get(i).get(j).get(6).add(punchImg);
 				}
 				// flight
-				if (i == 0 || i == 1 || i == 2 || i == 4) // legs, chest, head, vines
+				if (i == 0 || i == 1 || i == 5 || i == 6 || i == 2 || i == 4) // legs, chest, head, vines
 				{
 					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // 7 fly
 					bodyPart.get(i).get(j).get(7).add(ResourceLoader.getBufferedImage("people/fly-" + bodyPartName + "_" + j + ".png"));
@@ -352,7 +362,7 @@ public class Resources
 				bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // 9 hover
 				bodyPart.get(i).get(j).get(9).add(ResourceLoader.getBufferedImage("people/hover_1-" + bodyPartName + "_" + j + ".png"));
 				// flight punch w/ arm held back
-				if (i == 1 || i == 4) // chest and arms prepare for a strike
+				if (i == 1 || i == 6 || i == 4) // chest and arms prepare for a strike
 				{
 					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>());
 					bodyPart.get(i).get(j).get(10).add(ResourceLoader.getBufferedImage("people/fly_punch_3-" + bodyPartName + "_" + j + ".png"));
@@ -374,7 +384,7 @@ public class Resources
 					bodyPart.get(i).get(j).get(10).add(ResourceLoader.getBufferedImage("people/fly-" + bodyPartName + "_" + j + ".png"));
 				}
 				// 10 11 12 flight punch w/ arms
-				if (i == 1 || i == 4) // chest and arms prepare for a strike
+				if (i == 1 || i == 6 || i == 4) // chest and arms prepare for a strike
 				{
 					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>());
 					bodyPart.get(i).get(j).get(11).add(ResourceLoader.getBufferedImage("people/fly_punch_1-" + bodyPartName + "_" + j + ".png"));
@@ -403,8 +413,12 @@ public class Resources
 				// dead
 				bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // dead = 13
 				bodyPart.get(i).get(j).get(13).add(ResourceLoader.getBufferedImage("people/dead_0-" + bodyPartName + "_" + j + ".png"));
-
-				// TODO burning maybe or is it already fine?
+			}
+			// add emptiness
+			if (i == 0 || i == 1 || i == 3) // legs, chest, hair
+			{
+				bodyPart.get(i).add(0, new ArrayList<List<BufferedImage>>()); // added in the BEGINNING of the list!
+				// LIST STAYS EMPTY
 			}
 		}
 

@@ -2744,10 +2744,6 @@ public class Environment
 				break;
 			}
 
-			if (p instanceof NPC)
-				if (damage >= 1 || Math.random() < 0.01) // so that beams don't always trigger this
-					((NPC) p).justGotHit = true;
-
 			// Grunt sound, if damage is bad enough
 			if (!p.dead)
 				if (damage >= 0.15 * p.maxLife)

@@ -289,8 +289,9 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			// targeting
 		updatePlayerTargeting();
 		// PEOPLE
-		for (Person p : env.people)
+		peopleLoop: for (int k = 0; k < env.people.size(); k++)
 		{
+			Person p = env.people.get(k);
 			double floorFriction = applyGravityAndFrictionAndReturnFriction(p, deltaTime);
 			for (Ability a : p.abilities) // TODO make sure this is resistant to ConcurrentModificationException and doesn't bug out when dying with extra ability giving abilities
 			{
@@ -303,6 +304,19 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				{
 					a.prepareToEnable = false;
 					a.disabled = false;
+				}
+			}
+			if (p instanceof Clone)
+			{
+				Clone clone = ((Clone) p);
+				// disintegrate
+				if (clone.timeLeft > 0)
+					clone.timeLeft -= deltaTime;
+				else if (clone.timeLeft != -1)
+				{
+					env.people.remove(k);
+					k--;
+					continue peopleLoop;
 				}
 			}
 			if (p.dead)
@@ -324,7 +338,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			}
 			else
 			{
-				if (p.getClass().equals(NPC.class))
+				if (p instanceof NPC)
 				{
 					NPC npc = (NPC) p;
 					npc.frameAIupdate(deltaTime, frameNum, env, this);
@@ -865,6 +879,15 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 
 		switch (player.aimType)
 		{
+		case CLONE:
+			double angle1 = Math.atan2(player.target.y - player.y, player.target.x - player.x);
+			buffer.setStroke(new BasicStroke(2));
+			buffer.setColor(Color.pink);
+			for (int i = 0; i < 6; i++)
+				buffer.drawLine((int) (player.x + ability.range * Math.cos(angle1) + 60 * Math.cos(i * Math.PI / 3)),
+						(int) (player.y + ability.range * Math.sin(angle1) + 60 * Math.sin(i * Math.PI / 3)), (int) (player.x + ability.range * Math.cos(angle1)),
+						(int) (player.y + ability.range * Math.sin(angle1)));
+			break;
 		case WILD_POWER:
 			Object target1 = ((Wild_Power) ability).getTarget(env, player.target);
 			if (target1 instanceof Person)
@@ -1665,7 +1688,12 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 					buffer.scale(p.z * MAIN.heightZoomRatio + 1, p.z * MAIN.heightZoomRatio + 1);
 					buffer.translate(-p.x, -p.y);
 
-					p.drawData(buffer, distancePow2 < drawLifeDistancePow2, distancePow2 < drawManaDistancePow2, distancePow2 < drawStaminaDistancePow2, cameraRotation);
+					Color nameColor = Color.white; // neutral
+					if (p.commanderID == player.commanderID) // friendly
+						nameColor = Color.green;
+					if (p.commanderID != player.commanderID) // enemy. TODO make neutrals also possible
+						nameColor = Color.red;
+					p.drawData(buffer, distancePow2 < drawLifeDistancePow2, distancePow2 < drawManaDistancePow2, distancePow2 < drawStaminaDistancePow2, nameColor, cameraRotation);
 
 					buffer.translate(p.x, p.y);
 					buffer.scale(1 / (p.z * MAIN.heightZoomRatio + 1), 1 / (p.z * MAIN.heightZoomRatio + 1));
