@@ -119,6 +119,9 @@ public class Person extends RndPhysObj implements Mover
 	public List<List<BufferedImage>> animationTop;
 	public List<List<BufferedImage>> animationVine;
 
+	// Look
+	int legs, chest, head, hair;
+
 	// Sounds
 	public List<SoundEffect> sounds = new ArrayList<SoundEffect>();
 
@@ -153,25 +156,10 @@ public class Person extends RndPhysObj implements Mover
 		timeSinceLastHit = 0;
 		timeBetweenDamageTexts = 0;
 		waitingDamage = 0;
-		switch ((int) (Math.random() * 2))
-		{
-		case 0:
-			voiceType = "M";
-			break;
-		case 1:
-			voiceType = "F";
-			break;
-		default:
-			MAIN.errorMessage("Got my A machines on the table got my B machines in the drawer");
-		}
 		panic = false;
 		target = new Point(-1, -1);
 		imgW = 96;
 		imgH = 96;
-		initAnimation();
-		initSounds();
-		initStats();
-
 		body = new Armor[4];
 		body[0] = (new Armor(1, "Skin"));
 		body[1] = (new Armor(1, "Skin"));
@@ -187,6 +175,29 @@ public class Person extends RndPhysObj implements Mover
 		selfFrame(0);
 		pastCopies = new ArrayList<PersonCopy>();
 		pastCopyTimer = 0;
+
+		// randomize gender
+		switch ((int) (Math.random() * 2))
+		{
+		case 0:
+			voiceType = "M";
+			break;
+		case 1:
+			voiceType = "F";
+			break;
+		default:
+			MAIN.errorMessage("Got my A machines on the table got my B machines in the drawer");
+		}
+
+		initSounds();
+		initStats();
+
+		// randomize look
+		legs = MAIN.random.nextInt(2);
+		chest = MAIN.random.nextInt(2);
+		head = MAIN.random.nextInt(2);
+		hair = MAIN.random.nextInt(2);
+		initAnimation();
 	}
 
 	public void copyState(PersonCopy other)
@@ -331,6 +342,16 @@ public class Person extends RndPhysObj implements Mover
 		abilities.add(Ability.ability("Sprint", 0));
 	}
 
+	public void setStats(int str, int dex, int fit, int wit, int know, int soc)
+	{
+		STRENGTH = str;
+		DEXTERITY = dex;
+		FITNESS = fit;
+		WITS = wit;
+		KNOWLEDGE = know;
+		SOCIAL = soc;
+	}
+
 	public void updateSubStats()
 	{
 		// should always be overridden.
@@ -398,11 +419,6 @@ public class Person extends RndPhysObj implements Mover
 
 	public void initAnimation()
 	{
-		// randomize look. TODO
-		int legs = MAIN.random.nextInt(2);
-		int chest = MAIN.random.nextInt(2);
-		int head = MAIN.random.nextInt(2);
-		int hair = MAIN.random.nextInt(2);
 		List<Integer> n = new ArrayList<Integer>();
 		n.add(legs);
 		n.add(chest);
@@ -524,6 +540,8 @@ public class Person extends RndPhysObj implements Mover
 		BufferedImage img = new BufferedImage(imgW, imgH, BufferedImage.TYPE_INT_ARGB);
 		Graphics2D g2d = img.createGraphics();
 		g2d.drawImage(Resources.bodyPart.get(4).get(0).get(stateNum).get(frameNum), 0, 0, null);
+		g2d.dispose();
+
 		animationVine.get(stateNum).add(img);
 	}
 
@@ -874,6 +892,8 @@ public class Person extends RndPhysObj implements Mover
 			s.setPosition(x, y);
 		if (timeSinceLastHit < 60)
 			timeSinceLastHit += deltaTime;
+		else
+			inCombat = false;
 		if (timeBetweenDamageTexts < 60)
 			timeBetweenDamageTexts += deltaTime;
 		if (timeSincePortal > 0)

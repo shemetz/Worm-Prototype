@@ -16,15 +16,16 @@ import pathfinding.WayPoint;
 
 public class NPC extends Person
 {
-	Strategy strategy;
+	public Strategy strategy;
 
-	enum Strategy
+	public enum Strategy
 	{
-		AGGRESSIVE, DEFENSIVE, PASSIVE
+		AGGRESSIVE, DEFENSIVE, PASSIVE, CLONE_I
 	}
 	// AGGRESSIVE = attack enemies if possible, then heal/buff and follow if possible.
-	// "defensive" = push away enemies and block them if possible, run away if possible.
+	// DEFENSIVE = push away enemies and block them if possible, run away if possible.
 	// PASSIVE = does nothing.
+	// CLONE_I = attacks closest enemy in 8 meters range, follow master otherwise
 
 	Tactic tactic;
 
@@ -53,7 +54,7 @@ public class NPC extends Person
 	List<WayPoint> path;
 	EnvMap envMap = null;
 
-	public NPC(int x1, int y1, Strategy s1)
+	public NPC(double x1, double y1, Strategy s1)
 	{
 		super(x1, y1);
 		// TEMP

@@ -15,10 +15,10 @@ public class _TEMPLATE_ extends Ability
 		super("TEMPLATE", p);
 		// costPerSecond = ;
 		// cost = ;
-		// costType = "";
+		// costType = CostType.;
 		// cooldown = ;
 		// range = ;
-		// rangeType = "";
+		// rangeType = RangeType.;
 		// stopsMovement = ;
 		// maintainable = ;
 		// instant = ;
