@@ -882,7 +882,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		case CLONE:
 			double angle1 = Math.atan2(player.target.y - player.y, player.target.x - player.x);
 			buffer.setStroke(new BasicStroke(2));
-			buffer.setColor(Color.pink);
+			buffer.setColor(Color.magenta);
 			for (int i = 0; i < 6; i++)
 				buffer.drawLine((int) (player.x + ability.range * Math.cos(angle1) + 60 * Math.cos(i * Math.PI / 3)),
 						(int) (player.y + ability.range * Math.sin(angle1) + 60 * Math.sin(i * Math.PI / 3)), (int) (player.x + ability.range * Math.cos(angle1)),
