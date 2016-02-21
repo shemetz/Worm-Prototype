@@ -4,6 +4,9 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.Random;
 
+import abilities.Clone_II;
+import abilities.Clone_III;
+
 public class Clone extends NPC
 {
 	public Person master;
@@ -43,6 +46,10 @@ public class Clone extends NPC
 					{
 						a.on = false;
 						a.cooldownLeft = a.cooldown;
+						if (a instanceof Clone_II)
+							((Clone_II)a).clonesMade--;
+						if (a instanceof Clone_III)
+							((Clone_III)a).clonesMade--;
 					}
 			}
 	}

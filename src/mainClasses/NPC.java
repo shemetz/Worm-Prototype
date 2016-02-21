@@ -20,7 +20,7 @@ public class NPC extends Person
 
 	public enum Strategy
 	{
-		AGGRESSIVE, DEFENSIVE, PASSIVE, CLONE_I
+		AGGRESSIVE, DEFENSIVE, PASSIVE, CLONE
 	}
 	// AGGRESSIVE = attack enemies if possible, then heal/buff and follow if possible.
 	// DEFENSIVE = push away enemies and block them if possible, run away if possible.
@@ -378,7 +378,7 @@ public class NPC extends Person
 			else
 				this.tactic = Tactic.PUNCH_CHASING;
 		}
-		if (this.strategy == Strategy.CLONE_I)
+		if (this.strategy == Strategy.CLONE)
 		{
 			this.tactic = Tactic.PUNCH_CHASING;
 		}

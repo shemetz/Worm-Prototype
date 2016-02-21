@@ -9,36 +9,43 @@ import mainClasses.NPC;
 import mainClasses.Person;
 import mainClasses.Player;
 
-public class Clone_I extends Ability
+public class Clone_III extends Ability
 {
-	public Clone_I(int p)
+	public int clonesMade;
+
+	public Clone_III(int p)
 	{
-		super("Clone I", p);
+		super("Clone III", p);
 		cost = 5;
 		costType = CostType.MANA;
-		cooldown = 10 - level; // after last clone died
+		cooldown = 2; // after last clone died
 		range = 300;
 		rangeType = RangeType.NONE;
+
+		clonesMade = 0;
 	}
 
 	public void use(Environment env, Person user, Point target)
 	{
-		if (!on && user.mana >= cost && cooldownLeft == 0)
+		if (clonesMade < 3 && user.mana >= cost && cooldownLeft == 0)
 		{
 			user.mana -= cost;
 			double angle = Math.atan2(target.y - user.y, target.x - user.x);
 			Clone clone = new Clone(user.x + range * Math.cos(angle), user.y + range * Math.sin(angle), user, this);
-			clone.setStats(2, 2, 2, 2, 2, 2);
 			clone.updateSubStats();
-			clone.maxLife = 15 * level;
+			clone.maxLife = 30 * level;
 			clone.life = clone.maxLife;
-			clone.lifeRegen = 0;
 			clone.strategy = NPC.Strategy.CLONE;
 			clone.legs = 0;
 			clone.chest = 0;
 			clone.initAnimation();
+			for (Ability a : user.abilities)
+				if (!a.equals(this))
+					clone.abilities.add(Ability.ability(a.name, a.level));
 			env.people.add(clone);
-			on = true;
+			clonesMade++;
+			if (clonesMade == 3)
+				on = true;
 		}
 	}
 

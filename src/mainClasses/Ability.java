@@ -14,6 +14,8 @@ import abilities.Beam_E;
 import abilities.Blink;
 import abilities.Chronobiology;
 import abilities.Clone_I;
+import abilities.Clone_II;
+import abilities.Clone_III;
 import abilities.Elemental_Combat_II_E;
 import abilities.Elemental_Combat_I_E;
 import abilities.Elemental_Void;
@@ -71,7 +73,7 @@ public class Ability
 			"Strength II", "Strength III", "Punch", "Heal I", "Heal II", "Force Shield", "Ranged Explosion", "Flight I", "Flight II", "Telekinetic Flight", "Blink", "Ghost Mode I",
 			"Strong Force Field", "Beam", "Ball", "Shield", "Pool", "Wall", "Spray", "Toughness III", "Sense Life", "Sense Mana and Stamina", "Sense Powers", "Elemental Combat I", "Slow Target",
 			"Chronobiology", "Retrace I", "Retrace II", "Retrace III", "Undo I", "Undo II", "Undo III", "Repeat I", "Repeat II", "Repeat III", "Time Freeze Target I", "Nullification Aura I",
-			"Nullification Aura II", "Wild Power", "Clone I");
+			"Nullification Aura II", "Wild Power", "Clone I", "Clone II", "Clone III");
 	protected static List<String> descriptions = new ArrayList<String>();
 	protected static boolean[][] elementalAttacksPossible = new boolean[12][7]; // [element][ability]
 	protected static int[][] elementalAttackNumbers = new int[12][3];
@@ -90,8 +92,8 @@ public class Ability
 	};
 
 	// permanent variables of the ability
-	protected String name; // name of the ability
-	protected int level; // 1-10. AKA "level". Measures how powerful the ability is.
+	public String name; // name of the ability
+	public int level; // 1-10. AKA "level". Measures how powerful the ability is.
 	protected double cooldown; // Duration in which power doesn't work after using it. -1 = passive, 0 = no cooldown
 	protected double cost; // -1 = passive. Is a cost in mana, stamina or charge...depending on the power.
 	protected double costPerSecond; // applies to some abilities. Is a cost in mana, stamina or charge...depending on the power.
@@ -537,6 +539,12 @@ public class Ability
 		{
 		case "Clone I":
 			ab = new Clone_I(pnts);
+			break;
+		case "Clone II":
+			ab = new Clone_II(pnts);
+			break;
+		case "Clone III":
+			ab = new Clone_III(pnts);
 			break;
 		case "Wild Power":
 			ab = new Wild_Power(pnts);

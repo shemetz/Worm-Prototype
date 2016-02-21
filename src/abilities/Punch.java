@@ -52,8 +52,8 @@ public class Punch extends Ability
 		// difference between user's rotation and angle:
 		double tempAngleThing = Math.abs(user.rotation - angle) % (2 * Math.PI);
 		double angleDifference = tempAngleThing > Math.PI ? 2 * Math.PI - tempAngleThing : tempAngleThing;
-		
-		if (user.z == 0)
+
+		if (user.z == 0 || user.z == 1)
 		{
 			if (!user.prone && (!user.maintaining || user.abilities.get(user.abilityMaintaining) instanceof Sprint)) // special enable for sprint-punching
 				if (cost <= user.stamina)
@@ -170,7 +170,7 @@ public class Punch extends Ability
 					{
 						int i = user.target.x / squareSize;
 						int j = user.target.y / squareSize;
-						if (env.wallTypes[i][j] > 0)
+						if (user.z < 1 && env.wallTypes[i][j] > 0)
 						{
 							int wallHealth = env.wallHealths[i][j];
 							double leftoverPushback = wallHealth > damage + pushback ? pushback : Math.min(wallHealth, pushback);
