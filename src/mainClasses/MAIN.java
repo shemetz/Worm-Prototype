@@ -1767,6 +1767,11 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		buffer.translate(8, 30);
 		// Name
 		buffer.setFont(new Font("Monospaced", Font.BOLD, (int) (20 * UIzoomLevel)));
+		buffer.setColor(Color.white);
+		buffer.drawString(player.name, (int) (20 * UIzoomLevel) - 1, 25 - 1);
+		buffer.drawString(player.name, (int) (20 * UIzoomLevel) - 1, 25 + 1);
+		buffer.drawString(player.name, (int) (20 * UIzoomLevel) + 1, 25 - 1);
+		buffer.drawString(player.name, (int) (20 * UIzoomLevel) + 1, 25 + 1);
 		buffer.setColor(Color.black);
 		buffer.drawString(player.name, (int) (20 * UIzoomLevel), 25);
 		// Health, Mana, Stamina
@@ -2094,7 +2099,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		for (int i = 0; i < player.abilities.size(); i++)
 		{
 			Ability ability = player.abilities.get(i);
-			if (ability.cost == -1)
+			if (ability.hasTag("passive"))
 			{
 				buffer.setStroke(new BasicStroke((float) (3 * UIzoomLevel), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, (float) (10.0f), new float[]
 				{ (float) (10.0f * UIzoomLevel) }, 0.0f));
