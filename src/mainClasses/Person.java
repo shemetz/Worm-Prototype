@@ -77,6 +77,7 @@ public class Person extends RndPhysObj implements Mover
 	public double slippedTimeLeft;
 	public int imgW, imgH; // For drawing purposes only
 	public boolean inCombat;
+	public boolean twitching;
 	public boolean maintaining; // whether or not the person is using a maintained ability like Shield or Escalating Scream
 	public double timeSinceLastHit;
 	public double timeBetweenDamageTexts;

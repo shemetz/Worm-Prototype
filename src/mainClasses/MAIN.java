@@ -341,7 +341,8 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				if (p instanceof NPC)
 				{
 					NPC npc = (NPC) p;
-					npc.frameAIupdate(deltaTime, frameNum, env, this);
+					if (!p.twitching)
+						npc.frameAIupdate(deltaTime, frameNum, env, this);
 				}
 
 				// maintaining person abilities
@@ -353,18 +354,17 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				// using abilities the person is trying to repetitively use (e.g. holding down the Punch ability's key)
 				if (p.abilityTryingToRepetitivelyUse != -1)
 				{
-					p.inCombat = true; // TODO
 					Ability a = p.abilities.get(p.abilityTryingToRepetitivelyUse);
 					if (!a.disabled)
 						a.use(env, p, p.target);
 				}
-
 				p.selfFrame(deltaTime);
 				if (p instanceof NPC)
 					for (Effect e : p.effects)
 						e.nextFrame(frameNum);
 				// movement
-				checkMovementAttempt(p, floorFriction, deltaTime);
+				if (!p.twitching)
+					checkMovementAttempt(p, floorFriction, deltaTime);
 			}
 			env.movePerson(p, deltaTime);
 			// Animation
@@ -1236,14 +1236,14 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		shmulik.abilities.add(Ability.ability("Ball <Earth>", 6));
 		shmulik.abilities.add(Ability.ability("Heal I", 3));
 		shmulik.name = "Shmulik";
-		// env.people.add(shmulik);
+		env.people.add(shmulik);
 
 		for (int i = 0; i < 1; i++)
 		{
 			Person person = new NPC((int) (100 + Math.random() * (env.widthPixels - 200)), (int) (100 + Math.random() * (env.heightPixels - 200)), Strategy.AGGRESSIVE);
 			person.commanderID = 1;
 			person.abilities.add(Ability.ability("Nullification Aura I", 9));
-			env.people.add(person);
+			// env.people.add(person);
 		}
 
 		// Fix walls spawning on people

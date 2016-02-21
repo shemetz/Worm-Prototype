@@ -376,7 +376,12 @@ public class NPC extends Person
 			else if (this.tactic == Tactic.RETREAT) // stop retreating when uninjured
 				this.tactic = Tactic.NO_TARGET;
 			else
+			{
 				this.tactic = Tactic.PUNCH_CHASING;
+				for (Ability a : this.abilities)
+					if (a.hasTag("projectile") || a.hasTag("beam"))
+						this.tactic = Tactic.CIRCLE_STRAFING;
+			}
 		}
 		if (this.strategy == Strategy.CLONE)
 		{
