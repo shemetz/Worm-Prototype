@@ -160,6 +160,15 @@ public class Ability
 		MAIN.errorMessage("vjhvsfasetjblckvzyuf no disable() for this method. " + name);
 	}
 
+	public Ability clone()
+	{
+		Ability clone = Ability.ability(this.name, this.level);
+		if (this.hasTag("on-off"))
+			clone.on = this.on;
+
+		return clone;
+	}
+
 	public Ability(String n, int p)
 	{
 		name = n;

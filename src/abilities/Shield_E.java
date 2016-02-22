@@ -55,7 +55,6 @@ public class Shield_E extends Ability
 				user.rotation = angle;
 				on = true;
 				user.switchAnimation(2);
-				user.notMoving = stopsMovement;
 				user.notAnimating = true;
 			}
 			else
@@ -81,7 +80,6 @@ public class Shield_E extends Ability
 																									// cooldown.
 			user.maintaining = false;
 			on = false;
-			user.notMoving = false;
 			user.notAnimating = false;
 		}
 	}

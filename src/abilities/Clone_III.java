@@ -41,7 +41,7 @@ public class Clone_III extends Ability
 			clone.initAnimation();
 			for (Ability a : user.abilities)
 				if (!a.equals(this))
-					clone.abilities.add(Ability.ability(a.name, a.level));
+					clone.abilities.add(a.clone());
 			env.people.add(clone);
 			clonesMade++;
 			if (clonesMade == 3)
