@@ -26,6 +26,8 @@ import mainResourcesPackage.SoundEffect;
 
 public class Environment
 {
+	public final static int squareSize = 96;
+	public final int amountOfElements;
 	public final double TAU = Math.PI * 2;
 	public final int numOfClouds = 0;
 	public final int minCloudHeight = 60, maxCloudHeight = 400;
@@ -39,10 +41,8 @@ public class Environment
 	public boolean showDamageNumbers = true;
 	public Point windDirection;
 	public double shadowX, shadowY;
-
-	public final static int squareSize = 96;
-	public final int elementalNum;
-	// All of these shouldn't be ints, they range from -1 to 12. :/
+	
+	// All of these shouldn't be ints, they range from -1 to 12 or -1 to 100. :/
 	public int[][] wallHealths; // 2D array of wall healths. -1 = no wall. 100 = full health wall.
 	public int[][] wallTypes; // 2D array of wall types. Types are equal to the wall's element. -1 = no wall.
 	public int[][] poolHealths; // ditto, for pools
@@ -77,7 +77,7 @@ public class Environment
 	{
 		this.width = width1;
 		this.height = height1;
-		elementalNum = Resources.numOfElements;
+		amountOfElements = Resources.numOfElements;
 		wallHealths = new int[width][height];
 		wallTypes = new int[width][height];
 		poolHealths = new int[width][height];
@@ -85,9 +85,9 @@ public class Environment
 		poolImages = new BufferedImage[width][height];
 		floorTypes = new int[width][height];
 		cornerCracks = new int[width][height];
-		wCornerStyles = new int[width][height][elementalNum];
-		pCornerStyles = new int[width][height][elementalNum];
-		pCornerTransparencies = new int[width][height][elementalNum];
+		wCornerStyles = new int[width][height][amountOfElements];
+		pCornerStyles = new int[width][height][amountOfElements];
+		pCornerTransparencies = new int[width][height][amountOfElements];
 		this.widthPixels = width * squareSize;
 		this.heightPixels = height * squareSize;
 		// default shadow position is directly below.
@@ -116,7 +116,7 @@ public class Environment
 				poolImages[x][y] = null;
 				floorTypes[x][y] = -1;
 				cornerCracks[x][y] = -1;
-				for (int i = 0; i < elementalNum; i++)
+				for (int i = 0; i < amountOfElements; i++)
 				{
 					wCornerStyles[x][y][i] = -1;
 					pCornerStyles[x][y][i] = -1;
@@ -3061,7 +3061,7 @@ public class Environment
 							buffer.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
 						}
 						// pool corners
-						for (int i = elementalNum - 1; i >= 0; i--)
+						for (int i = amountOfElements - 1; i >= 0; i--)
 							// decreasing order because I want earth walls to be bottomest and earth is one of the last elements
 							if (pCornerStyles[x][y][i] != -1)
 							{
@@ -3097,7 +3097,7 @@ public class Environment
 								buffer.drawImage(Resources.cracks[0][11], x * squareSize, y * squareSize, null);
 						}
 						// wall corners
-						for (int i = elementalNum - 1; i >= 0; i--)
+						for (int i = amountOfElements - 1; i >= 0; i--)
 							if (wCornerStyles[x][y][i] != -1)
 							{
 								BufferedImage cornerImg = Resources.wCorner[i][getCornerStyle(wCornerStyles[x][y][i])][Environment.getCornerAngle(wCornerStyles[x][y][i])];
@@ -3426,10 +3426,10 @@ public class Environment
 			// update seenBefore
 			int x = (int) (closestPoint.getX() + 1 * Math.cos(angle)) / squareSize;
 			x = Math.max(0, x);
-			x = Math.max(x, width - 1);
+			x = Math.min(x, width - 1);
 			int y = (int) (closestPoint.getY() + 1 * Math.sin(angle)) / squareSize;
 			y = Math.max(0, y);
-			y = Math.max(y, height - 1);
+			y = Math.min(y, height - 1);
 			seenBefore[x][y] = 1;
 
 			visibleAreaPolygon.addPoint((int) (closestPoint.getX() + extra * Math.cos(angle)), (int) (closestPoint.getY() + extra * Math.sin(angle)));
@@ -3470,6 +3470,8 @@ public class Environment
 
 	public boolean remove(int x, int y)
 	{
+		if (x < 0 || y < 0 || x >= width || y >= height)
+			return false;
 		int element = -1;
 		if (wallTypes[x][y] != -1)
 		{

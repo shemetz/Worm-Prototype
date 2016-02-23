@@ -143,8 +143,8 @@ public class Methods
 
 		if ((xDelta == 0) && (yDelta == 0))
 		{
-			MAIN.errorMessage("That's not a line");
-			return -1;
+			// It's a bug. It's a bug?
+			return Methods.DistancePow2(sx1, sy1, px, py);
 		}
 
 		double u = ((px - sx1) * xDelta + (py - sy1) * yDelta) / (xDelta * xDelta + yDelta * yDelta);

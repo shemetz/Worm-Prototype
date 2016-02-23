@@ -1223,7 +1223,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				env.addWall(sx, y, 10, true);
 		}
 
-		player = new Player(96 * 20, 96 * 20);
+		player = new Player(96 * 15, 96 * 15);
 		player.tempTrigger();
 		// player.abilities.add(Ability.ability("Force Shield", 5));
 		// player.abilities.add(Ability.ability("Beam <Energy>", 5));
@@ -1232,7 +1232,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		camera = new Point3D((int) player.x, (int) player.y, (int) player.z + 25);
 		player.rename();
 
-		Person shmulik = new NPC(96 * 22, 96 * 19, Strategy.AGGRESSIVE);
+		Person shmulik = new NPC(96 * 12, 96 * 18, Strategy.AGGRESSIVE);
 		shmulik.abilities.add(Ability.ability("Beam <Energy>", 6));
 		shmulik.abilities.add(Ability.ability("Flight II", 5));
 		shmulik.abilities.add(Ability.ability("Force Shield", 3));
