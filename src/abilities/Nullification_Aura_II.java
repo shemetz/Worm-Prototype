@@ -26,6 +26,7 @@ public class Nullification_Aura_II extends Ability
 		cost = 5;
 		instant = true;
 		cooldown = 0.8;
+		affectedTargets = new ArrayList<Person>();
 	}
 
 	public void use(Environment env, Person user, Point target)

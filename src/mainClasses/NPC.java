@@ -264,6 +264,8 @@ public class NPC extends Person
 			ai.PUNCH(targetPerson);
 			break;
 		case NO_TARGET:
+			strengthOfAttemptedMovement = 0;
+			directionOfAttemptedMovement = 0;
 			break;
 		default:
 			MAIN.errorMessage("6j93k, no tactic - " + this.tactic);
