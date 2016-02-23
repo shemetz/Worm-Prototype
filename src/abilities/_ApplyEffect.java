@@ -206,7 +206,7 @@ public class _ApplyEffect extends Ability
 			{
 				boolean alreadyAffected = false;
 				for (Effect e : target.effects)
-					if (e.creatorAbility.equals(this))
+					if (e.creatorAbility != null && e.creatorAbility.equals(this))
 						alreadyAffected = true;
 				if (!alreadyAffected)
 					target.affect(effect(), true);

@@ -3345,7 +3345,7 @@ public class Environment
 		Polygon visibleAreaPolygon = new Polygon();
 		for (double angle = 0; angle <= TAU; angle += TAU / precision)
 		{
-			Point2D start = new Point2D.Double(bounds.getCenterX() + minDistance * Math.cos(angle), bounds.getCenterY() + minDistance * Math.sin(angle));
+			Point2D start = new Point2D.Double(person.x + minDistance * Math.cos(angle), person.y + minDistance * Math.sin(angle));
 			Line2D line = new Line2D.Double(start.getX(), start.getY(), start.getX() + maxDistance * Math.cos(angle), start.getY() + maxDistance * Math.sin(angle));
 			Point2D closestPoint = null;
 			double shortestDistPow2 = Double.MAX_VALUE;

@@ -1504,9 +1504,12 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		// NOTICE! THE ORDER OF DRAWING OPERATIONS IS ACTUALLY IMPORTANT!
 		Graphics2D buffer = (Graphics2D) g;
 
+		// Fill everything with black
 		buffer.setColor(Color.black);
 		buffer.fillRect(0, 0, frameWidth, frameHeight);
+
 		zoomLevel /= (player.z * heightZoomRatio + 1);
+
 		// Move "camera" to position
 		buffer.scale(zoomLevel, zoomLevel);
 		buffer.translate(0.5 * frameWidth / zoomLevel, 0.5 * frameHeight / zoomLevel);
@@ -1534,6 +1537,8 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 
 		if (player.limitedVisibility)
 		{
+			drawExtraEnvironmentInfo(buffer);
+
 			// visibility
 			if (player.seenBefore == null) // TODO move this to initialization in restart() probably
 			{
@@ -1627,6 +1632,41 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			buffer.drawString("" + FPS, frameWidth - 50 + 1, 50 + 1);
 			buffer.setColor(Color.black);
 			buffer.drawString("" + FPS, frameWidth - 50, 50);
+		}
+	}
+
+	void drawExtraEnvironmentInfo(Graphics2D buffer)
+	{
+		// like drawExtraPeopleInfo but for walls and stuff
+		double[] elementSenses = new double[13];
+		double drawStructureDistancePow2 = 0;
+		for (Ability a : player.abilities)
+			if (a.on)
+				switch (a.justName())
+				{
+				case "Sense Structure":
+					drawStructureDistancePow2 = Math.pow(a.range, 2);
+					break;
+				case "Sense Element":
+					elementSenses[a.getElementNum()] = a.range;
+					break;
+				default:
+					break;
+				}
+		if (drawStructureDistancePow2 > 0)
+		{
+			buffer.setStroke(new BasicStroke(3));
+			buffer.setColor(new Color(40, 40, 40));
+			int maxX = Math.min((int) (player.x + Math.sqrt(drawStructureDistancePow2)), env.widthPixels);
+			int maxY = Math.min((int) (player.y + Math.sqrt(drawStructureDistancePow2)), env.heightPixels);
+			for (int x = Math.max((int) (player.x - Math.sqrt(drawStructureDistancePow2)), 0); x < maxX; x += squareSize)
+				for (int y = Math.max((int) (player.y - Math.sqrt(drawStructureDistancePow2)), 0); y < maxY; y += squareSize)
+					if (env.wallTypes[(int) (x / squareSize)][(int) (y / squareSize)] != -1)
+						if (Methods.DistancePow2((int) (x / squareSize) * squareSize + squareSize / 2, (int) (y / squareSize) * squareSize + squareSize / 2, player.x,
+								player.y) <= drawStructureDistancePow2)
+						{
+							buffer.drawRect((int) (x / squareSize) * squareSize + 3, (int) (y / squareSize) * squareSize + 3, squareSize - 6, squareSize - 6);
+						}
 		}
 	}
 
