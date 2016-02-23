@@ -1638,7 +1638,9 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 	void drawExtraEnvironmentInfo(Graphics2D buffer)
 	{
 		// like drawExtraPeopleInfo but for walls and stuff
-		double[] elementSenses = new double[13];
+		double[] elementSenses = new double[12];
+		for (int i = 0; i < elementSenses.length; i++)
+			elementSenses[i] = 0;
 		double drawStructureDistancePow2 = 0;
 		for (Ability a : player.abilities)
 			if (a.on)
@@ -1648,37 +1650,58 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 					drawStructureDistancePow2 = Math.pow(a.range, 2);
 					break;
 				case "Sense Element":
-					elementSenses[a.getElementNum()] = a.range;
+					elementSenses[a.getElementNum()] = Math.pow(a.range, 2);
 					break;
 				default:
 					break;
 				}
-		if (drawStructureDistancePow2 > 0)
-		{
-			buffer.setStroke(new BasicStroke(3));
-			buffer.setColor(new Color(40, 40, 40));
-			int maxX = Math.min((int) (player.x + Math.sqrt(drawStructureDistancePow2)), env.widthPixels);
-			int maxY = Math.min((int) (player.y + Math.sqrt(drawStructureDistancePow2)), env.heightPixels);
-			for (int x = Math.max((int) (player.x - Math.sqrt(drawStructureDistancePow2)), 0); x < maxX; x += squareSize)
-				for (int y = Math.max((int) (player.y - Math.sqrt(drawStructureDistancePow2)), 0); y < maxY; y += squareSize)
-					if (env.wallTypes[(int) (x / squareSize)][(int) (y / squareSize)] != -1)
-						if (Methods.DistancePow2((int) (x / squareSize) * squareSize + squareSize / 2, (int) (y / squareSize) * squareSize + squareSize / 2, player.x,
-								player.y) <= drawStructureDistancePow2)
-						{
-							buffer.drawRect((int) (x / squareSize) * squareSize + 3, (int) (y / squareSize) * squareSize + 3, squareSize - 6, squareSize - 6);
-						}
-		}
+		for (int x = 0; x < env.widthPixels; x += squareSize)
+			for (int y = 0; y < env.heightPixels; y += squareSize)
+			{
+				int gx = (int) (x / squareSize), gy = (int) (y / squareSize);
+				double distPow2 = Methods.DistancePow2(gx * squareSize + squareSize / 2, gy * squareSize + squareSize / 2, player.x, player.y);
+				// Sense Structure
+				if (distPow2 <= drawStructureDistancePow2)
+					if (env.wallTypes[gx][gy] != -1)
+					{
+						buffer.setStroke(new BasicStroke(3));
+						buffer.setColor(new Color(40, 40, 40));
+						buffer.drawRect(gx * squareSize + 3, gy * squareSize + 3, squareSize - 6, squareSize - 6);
+					}
+				// Sense Element - Walls
+				if (env.wallTypes[gx][gy] >= 0 && env.wallTypes[gx][gy] < 12)
+					if (distPow2 <= elementSenses[env.wallTypes[gx][gy]])
+					{
+						buffer.setStroke(new BasicStroke(3));
+						buffer.setColor(EP.elementColors[env.wallTypes[gx][gy]]);
+						buffer.drawRect(gx * squareSize + 3, gy * squareSize + 3, squareSize - 6, squareSize - 6);
+					}
+				// Sense Element - Pools
+				if (env.poolTypes[gx][gy] >= 0 && env.poolTypes[gx][gy] < 12)
+				{
+					if (distPow2 <= elementSenses[env.poolTypes[gx][gy]])
+					{
+						buffer.setStroke(new BasicStroke(3));
+						buffer.setColor(EP.elementColors[env.poolTypes[gx][gy]]);
+						buffer.drawOval(gx * squareSize + 3, gy * squareSize + 3, squareSize - 6, squareSize - 6);
+					}
+				}
+
+			}
 	}
 
 	void drawExtraPeopleInfo(Graphics2D buffer)
 	{
 		// exists after coordinate shift
-		double drawLifeDistancePow2 = 0, drawManaDistancePow2 = 0, drawStaminaDistancePow2 = 0;
-		double[] elementSenses = new double[13];
+		double drawLifeDistancePow2 = 0, drawManaDistancePow2 = 0, drawStaminaDistancePow2 = 0, drawParahumansDistancePow2 = 0;
+		double[] elementSenses = new double[12];
 		for (Ability a : player.abilities)
 			if (a.on)
 				switch (a.justName())
 				{
+				case "Sense Parahumans":
+					drawParahumansDistancePow2 = Math.pow(a.range, 2);
+					break;
 				case "Sense Life":
 					drawLifeDistancePow2 = Math.pow(a.range, 2);
 					break;
@@ -1687,7 +1710,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 					drawStaminaDistancePow2 = Math.pow(a.range, 2);
 					break;
 				case "Sense Element":
-					elementSenses[a.getElementNum()] = a.range;
+					elementSenses[a.getElementNum()] = Math.pow(a.range, 2);
 					break;
 				case "Sense Powers":
 					Sense_Powers spAbility = (Sense_Powers) a;
@@ -1698,9 +1721,6 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 					double radius = frameHeight / 3;
 					int[] elementIndexes = new int[]
 					{ 21, 22, 7, 23, 15, 11, 16, 30, 5, 2, 15, 12, 19, 1, 17, 25, 4, 20, 26, 9, 6, 27, 13, 24, 10, 8, 28, 0, 31, 29, 3, 18 };
-					String[] colorHexCodes = new String[]
-					{ "C6FF7C", "A7C841", "A8A30D", "6D6B08", "156B08", "5DAE00", "00E493", "8FFFC2", "84FFFF", "CDE8FF", "D1CDFF", "91C6FF", "1ECAFF", "0094FF", "0800FF", "404E74", "999999",
-							"000000", "FFE2EC", "FF75AE", "E751FF", "8131C6", "4F2472", "693F59", "8C2F14", "D32B00", "E57600", "FF6A00", "FF9F00", "FFC97F", "FFD800", "FFF9A8" };
 					Point center = new Point((int) (player.x), (int) (player.y));
 					buffer.translate(center.x, center.y);
 					buffer.rotate(cameraRotation);
@@ -1710,9 +1730,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 						int elementLevel = 2 * spAbility.details[elementIndexes[i]];
 						if (elementLevel <= 0)
 							continue;
-						Color color = Color.decode("#" + colorHexCodes[i]);
-						if (elementIndexes[i] == EP.toInt("Ghost"))
-							color = new Color(224, 224, 224, 120);
+						Color color = EP.elementColors[elementIndexes[i]];
 						buffer.setColor(color);
 						buffer.rotate(angle);
 						buffer.fillRect(-35, (int) (-radius - elementLevel), 70, elementLevel);
@@ -1727,28 +1745,68 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 
 		for (Person p : env.people)
 		{
-			// does not draw info above player
+			// does not draw info for the player herself/himself
 			if (!p.equals(player) && p.z <= camera.z)
-				// only if inside visible area
-				if (!player.limitedVisibility || player.visibleArea.contains(p.x, p.y))
+			{
+				double distancePow2 = Methods.DistancePow2(player.x, player.y, p.x, p.y);
+
+				buffer.translate(p.x, p.y);
+				buffer.scale(p.z * MAIN.heightZoomRatio + 1, p.z * MAIN.heightZoomRatio + 1);
+				buffer.translate(-p.x, -p.y);
+
+				// Sense Parahumans
+				if (p.isParahuman())
+					if (distancePow2 < drawParahumansDistancePow2)
+					{
+						buffer.setStroke(new BasicStroke(3));
+						// if within sight, color is less noticeable
+						if (!player.limitedVisibility || player.visibleRememberArea.contains(p.x, p.y))
+							buffer.setColor(new Color(200, 210, 255, 91));
+						else
+							buffer.setColor(new Color(200, 210, 255));
+						int radius = 20;
+						// draws a circle with an X on it
+						buffer.drawOval((int) (p.x - radius), (int) (p.y - radius), radius * 2, radius * 2);
+						buffer.drawLine((int) (p.x + radius * sqrt2by2), (int) (p.y + radius * sqrt2by2), (int) (p.x - radius * sqrt2by2), (int) (p.y - radius * sqrt2by2));
+						buffer.drawLine((int) (p.x - radius * sqrt2by2), (int) (p.y + radius * sqrt2by2), (int) (p.x + radius * sqrt2by2), (int) (p.y - radius * sqrt2by2));
+					}
+
+				buffer.setStroke(new BasicStroke(3));
+				// Sense Element
+				for (int elementNum = 0; elementNum < elementSenses.length; elementNum++)
+					if (distancePow2 < elementSenses[elementNum])
+					{
+						Color color = EP.elementColors[elementNum];
+						if (!player.limitedVisibility || player.visibleRememberArea.contains(p.x, p.y))
+							buffer.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue(), 91)); // more transparent
+						else
+							buffer.setColor(color);
+						if (p.elementSensed(elementNum))
+						{
+							// draws a circle with an X on it
+							int radius = 10 + elementNum; // so that elements don't fully intersect each other
+							buffer.drawOval((int) (p.x - radius), (int) (p.y - radius), radius * 2, radius * 2);
+							buffer.drawLine((int) (p.x + radius * sqrt2by2), (int) (p.y + radius * sqrt2by2), (int) (p.x - radius * sqrt2by2), (int) (p.y - radius * sqrt2by2));
+							buffer.drawLine((int) (p.x - radius * sqrt2by2), (int) (p.y + radius * sqrt2by2), (int) (p.x + radius * sqrt2by2), (int) (p.y - radius * sqrt2by2));
+						}
+					}
+				// DOES NOT draw name out of visibility
+				if (!player.limitedVisibility || player.visibleRememberArea.contains(p.x, p.y))
 				{
-					double distancePow2 = Methods.DistancePow2(player.x, player.y, p.x, p.y);
-
-					buffer.translate(p.x, p.y);
-					buffer.scale(p.z * MAIN.heightZoomRatio + 1, p.z * MAIN.heightZoomRatio + 1);
-					buffer.translate(-p.x, -p.y);
-
 					Color nameColor = Color.white; // neutral
 					if (p.commanderID == player.commanderID) // friendly
 						nameColor = Color.green;
 					if (p.commanderID != player.commanderID) // enemy. TODO make neutrals also possible
 						nameColor = Color.red;
-					p.drawData(buffer, distancePow2 < drawLifeDistancePow2, distancePow2 < drawManaDistancePow2, distancePow2 < drawStaminaDistancePow2, nameColor, cameraRotation);
-
-					buffer.translate(p.x, p.y);
-					buffer.scale(1 / (p.z * MAIN.heightZoomRatio + 1), 1 / (p.z * MAIN.heightZoomRatio + 1));
-					buffer.translate(-p.x, -p.y);
+					p.drawName(buffer, nameColor, cameraRotation);
 				}
+				// DOES draw life/stamina/mana out of visibility
+				p.drawData(buffer, distancePow2 < drawLifeDistancePow2, distancePow2 < drawManaDistancePow2, distancePow2 < drawStaminaDistancePow2, cameraRotation);
+
+				buffer.translate(p.x, p.y);
+				buffer.scale(1 / (p.z * MAIN.heightZoomRatio + 1), 1 / (p.z * MAIN.heightZoomRatio + 1));
+				buffer.translate(-p.x, -p.y);
+			}
 		}
 	}
 

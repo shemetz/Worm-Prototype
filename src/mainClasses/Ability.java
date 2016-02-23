@@ -76,13 +76,14 @@ public class Ability
 			"Strength II", "Strength III", "Punch", "Heal I", "Heal II", "Force Shield", "Ranged Explosion", "Flight I", "Flight II", "Telekinetic Flight", "Blink", "Ghost Mode I",
 			"Strong Force Field", "Beam", "Ball", "Shield", "Pool", "Wall", "Spray", "Toughness I", "Toughness II", "Toughness III", "Sense Life", "Sense Mana and Stamina", "Sense Powers",
 			"Elemental Combat I", "Slow Target", "Chronobiology", "Retrace I", "Retrace II", "Retrace III", "Undo I", "Undo II", "Undo III", "Repeat I", "Repeat II", "Repeat III",
-			"Time Freeze Target I", "Nullification Aura I", "Nullification Aura II", "Wild Power", "Clone I", "Clone II", "Clone III", "Twitch", "Sense Structure");
+			"Time Freeze Target I", "Nullification Aura I", "Nullification Aura II", "Wild Power", "Clone I", "Clone II", "Clone III", "Twitch", "Sense Structure", "Sense Parahumans",
+			"Sense Element");
 	protected static List<String> descriptions = new ArrayList<String>();
 	protected static boolean[][] elementalAttacksPossible = new boolean[12][7]; // [element][ability]
 	protected static int[][] elementalAttackNumbers = new int[12][3];
 	protected static String[] elementalAttacks = new String[]
 	{ "Ball", "Beam", "Shield", "Wall", "Spray", "Strike", "Pool" };
-	final static List<String> elementalPowers = Arrays.asList("Elemental Combat I", "Elemental Combat II", "Ball", "Beam", "Shield", "Wall", "Spray", "Strike", "Pool");
+	final static List<String> elementalPowers = Arrays.asList("Elemental Combat I", "Elemental Combat II", "Ball", "Beam", "Shield", "Wall", "Spray", "Strike", "Pool", "Sense Element");
 
 	public enum CostType
 	{
@@ -705,16 +706,16 @@ public class Ability
 		case "Sense Movement": // NOT DONE
 			ab = new Sense_Movement(pnts);
 			break;
-		case "Sense Structure": // NOT DONE
+		case "Sense Structure":
 			ab = new Sense_Structure(pnts);
 			break;
-		case "Sense Parahumans": // NOT DONE
+		case "Sense Parahumans":
 			ab = new Sense_Parahumans(pnts);
 			break;
 		case "Sense Powers":
 			ab = new Sense_Powers(pnts);
 			break;
-		case "Sense Element": // NOT DONE
+		case "Sense Element":
 			ab = new Sense_Element_E(element, pnts);
 			break;
 		case "Elemental Combat I":

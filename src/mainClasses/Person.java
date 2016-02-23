@@ -1199,10 +1199,9 @@ public class Person extends RndPhysObj implements Mover
 
 	}
 
-	public void drawData(Graphics2D buffer, boolean drawLife, boolean drawMana, boolean drawStamina, Color nameColor, double cameraRotation)
+	public void drawName(Graphics2D buffer, Color nameColor, double cameraRotation)
 	{
 		buffer.rotate(cameraRotation, x, y);
-
 		// name
 		buffer.setFont(new Font(Font.MONOSPACED, Font.BOLD, 16));
 		String s = name;
@@ -1217,6 +1216,13 @@ public class Person extends RndPhysObj implements Mover
 		buffer.setColor(Color.black);
 		buffer.drawString(s, (int) (x - s.length() / 2 * 10), (int) (y - radius - 28));
 
+		buffer.rotate(cameraRotation, x, y);
+	}
+
+	public void drawData(Graphics2D buffer, boolean drawLife, boolean drawMana, boolean drawStamina, double cameraRotation)
+	{
+		buffer.rotate(cameraRotation, x, y);
+
 		// Does not draw data if the person is dead
 		if (!dead)
 		{
@@ -1227,7 +1233,7 @@ public class Person extends RndPhysObj implements Mover
 			if (drawStamina)
 				drawStamina(buffer);
 		}
-		buffer.rotate(-cameraRotation, x, y);
+		buffer.rotate(cameraRotation, x, y);
 	}
 
 	public void drawLife(Graphics2D buffer)
@@ -1413,5 +1419,45 @@ public class Person extends RndPhysObj implements Mover
 	public Point Point()
 	{
 		return new Point((int) x, (int) y);
+	}
+
+	public boolean isParahuman()
+	{
+		return !DNA.isEmpty();
+	}
+
+	public boolean elementSensed(int elementNum)
+	{
+		// check if this person has any powers of that element
+		// (TODO reconsider - maybe check DNA instead of abilities, which would not detect given abilities and minor "random" power generation abilities)
+		for (Ability a : abilities)
+			if (a.getElementNum() == elementNum)
+				return true;
+
+		// check if any effect
+		for (Effect e : effects)
+			switch (e.name)
+			{
+			case "Burning":
+				if ("Fire".equals(EP.elementList[elementNum]) || "Lava".equals(EP.elementList[elementNum]))
+					return true;
+				break;
+			case "Tangled":
+				if ("Plant".equals(EP.elementList[elementNum]))
+					return true;
+				break;
+			case "Stunned": // TODO make sure it's called Stunned and not Stun or something
+				if ("Electricity".equals(EP.elementList[elementNum]))
+					return true;
+				break;
+			case "Frozen": // TODO make sure it's called Frozen and not Freeze or something
+				if ("Ice".equals(EP.elementList[elementNum]))
+					return true;
+				break;
+			default:
+				break;
+			}
+
+		return false;
 	}
 }

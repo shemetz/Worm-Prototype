@@ -428,6 +428,7 @@ public class Resources
 			{
 			case "Sense Element":
 				BufferedImage senseElement = ResourceLoader.getBufferedImage("icons/abilities/Sense Element.png");
+				icons.put("Sense Element", senseElement);
 				for (int j = 0; j < numOfElements; j++)
 				{
 					BufferedImage senseImage = new BufferedImage(60, 60, BufferedImage.TYPE_INT_ARGB);
@@ -435,7 +436,7 @@ public class Resources
 					buffy.drawImage(senseElement, 0, 0, null);
 					buffy.drawImage(ResourceLoader.getBufferedImage("icons/elements/" + EP.elementList[j] + ".png"), 0, 0, null);
 					buffy.dispose();
-					icons.put(Ability.getName(Ability.descriptions.get(i)) + " <" + EP.elementList[j] + ">", senseImage);
+					icons.put("Sense Element" + " <" + EP.elementList[j] + ">", senseImage);
 				}
 				break;
 			default: // will add unecessary empty icons for stuff that must include an element. That stuff gets its icons somewhere else in the code (above this part I think)
