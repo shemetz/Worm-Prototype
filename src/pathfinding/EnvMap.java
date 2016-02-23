@@ -41,15 +41,17 @@ public class EnvMap implements TileBasedMap
 			if (ff.z < 1)
 				for (int x = (int) (ff.x - ff.length / 2) / SQUARE; x <= (int) (ff.x + ff.length / 2) / SQUARE; x++)
 					for (int y = (int) (ff.y - ff.length / 2) / SQUARE; y <= (int) (ff.y + ff.length / 2) / SQUARE; y++)
-						FFs[x][y] = true; // TODO make it real
+						if (x >= 0 && y >= 0 && x < width && y < height)
+							FFs[x][y] = true; // TODO make it real
 		}
 		for (Portal p : env.portals)
 			if (p.z < 1)
 				if (p.partner != null)
 					if (p.partner.z < 1)
 					{
-						for (int x = Math.max((int) (p.x - p.length / 2) / SQUARE, 0); x <= Math.min((int) (p.x + p.length / 2) / SQUARE, env.width - 1); x++)
-							for (int y = Math.max((int) (p.y - p.length / 2) / SQUARE, 0); y <= Math.min((int) (p.y + p.length / 2) / SQUARE, env.height - 1); y++)
+						for (int x = (int) (p.x - p.length / 2) / SQUARE; x <= (int) (p.x + p.length / 2) / SQUARE; x++)
+							for (int y = (int) (p.y - p.length / 2) / SQUARE; y <= (int) (p.y + p.length / 2) / SQUARE; y++)
+								if (x >= 0 && y >= 0 && x < width && y < height)
 								if (Methods.getSegmentPointDistancePow2(p.start.x, p.start.y, p.end.x, p.end.y, x * SQUARE + SQUARE / 2, y * SQUARE + SQUARE / 2) < SQUARE / 2 * SQUARE / 2)
 								{
 									if (Methods.DistancePow2(p.start.x, p.start.y, x * SQUARE + SQUARE / 2, y * SQUARE + SQUARE / 2) < SQUARE / 2 * SQUARE / 2)

@@ -884,9 +884,7 @@ public class Environment
 			// People-people collisions
 			for (Person p2 : people)
 				if (!p.equals(p2))
-				{
-					Rectangle2D p2rect = new Rectangle2D.Double(p2.x - p2.radius, p2.y - p2.radius, p2.radius * 2, p2.radius * 2);
-					if (personRect.intersects(p2rect)) // collision check
+					if (Methods.DistancePow2(p.Point(), p2.Point()) <= Math.pow(p.radius + p2.radius, 2)) // collision check
 					{
 						if (p2.highestPoint() > p.z && p2.z < p.highestPoint())
 						{
@@ -922,7 +920,6 @@ public class Environment
 							}
 						}
 					}
-				}
 			for (ForceField ff : FFs)
 			{
 				// checks if (rotated) force field corners are inside person hitbox

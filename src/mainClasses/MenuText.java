@@ -62,26 +62,39 @@ public class MenuText extends MenuElement
 		if (type == MenuElement.Type.CHEATS_RESULT_ABILITY)
 		{
 			buffer.setFont(new Font("Serif", Font.PLAIN, 20));
-			buffer.setColor(Color.black);
-			buffer.drawString(text.substring(0, text.indexOf('\n')), x + 5 + 1, y + 1 + 20);
-			buffer.drawString(text.substring(text.indexOf('\n') + 1), x + 5 + 1, y + 1 + 100);
-			buffer.drawString(text.substring(0, text.indexOf('\n')), x + 5 - 1, y + 1 + 20);
-			buffer.drawString(text.substring(text.indexOf('\n') + 1), x + 5 - 1, y + 1 + 100);
-			buffer.drawString(text.substring(0, text.indexOf('\n')), x + 5 + 1, y - 1 + 20);
-			buffer.drawString(text.substring(text.indexOf('\n') + 1), x + 5 + 1, y - 1 + 100);
-			buffer.drawString(text.substring(0, text.indexOf('\n')), x + 5 - 1, y - 1 + 20);
-			buffer.drawString(text.substring(text.indexOf('\n') + 1), x + 5 - 1, y - 1 + 100);
-			if (selected)
+			int[] a =
+			{ -1, -1, +1, +1, 0 };
+			int[] b =
+			{ -1, +1, -1, +1, 0 };
+			for (int i = 0; i < 5; i++)
 			{
-				buffer.setColor(Color.orange);
-				buffer.setStroke(new BasicStroke(3));
-				buffer.drawRect(x, y, width, height);
+				if (i == 4)
+				{
+					if (selected)
+					{
+						buffer.setColor(Color.orange);
+						buffer.setStroke(new BasicStroke(3));
+						buffer.drawRect(x + a[i], y + b[i], width, height);
+					}
+					else
+						buffer.setColor(Color.white);
+				}
+				else
+					buffer.setColor(Color.black);
+
+				// NAME
+				buffer.drawString(text.substring(0, text.indexOf('\n')), x + a[i] + 5, y + b[i] + 20);
+				// DESCRIPTION
+				String string = text.substring(text.indexOf('\n') + 1);
+				if (string.length() < 80)
+					buffer.drawString(string, x + a[i] + 5, y + b[i] + 100);
+				else // possibly+b[i] spannning two lines
+				{
+					int lastSpaceIndex = string.lastIndexOf(" ", 80);
+					buffer.drawString(string.substring(0, lastSpaceIndex), x + a[i] + 5, y + b[i] + 100);
+					buffer.drawString(string.substring(lastSpaceIndex), x + a[i] + 5, y + b[i] + 130);
+				}
 			}
-			else
-				buffer.setColor(Color.white);
-			// color depends
-			buffer.drawString(text.substring(0, text.indexOf('\n')), x + 5, y + 20);
-			buffer.drawString(text.substring(text.indexOf('\n') + 1), x + 5, y + 100);
 		}
 		else
 		{

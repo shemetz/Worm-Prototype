@@ -3199,9 +3199,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 
 	public void windowLostFocus(WindowEvent arg0)
 	{
-		paused = true;
-		extraPauseBoolean = false;
-		tooltip = "";
+		pause(Menu.ESC, true);
 	}
 
 	// IGNORE
