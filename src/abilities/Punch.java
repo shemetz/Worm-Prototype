@@ -19,6 +19,7 @@ public class Punch extends Ability
 {
 	final double punchRotationSpeed = 1.3;
 	final int squareSize = 96;
+	final double timeNotMovingAfterPunch = 0.3;
 
 	public Punch(int p)
 	{
@@ -29,7 +30,7 @@ public class Punch extends Ability
 		rangeType = RangeType.EXACT_RANGE;
 		stopsMovement = true;
 		instant = true;
-		// range = (int) (1.15 * radius); //in person's
+		range = 6174; // will be recalculated the moment this ability is added in Person.something()
 		natural = true;
 
 		sounds.add(new SoundEffect("Punch_hit_1.wav"));
@@ -58,7 +59,7 @@ public class Punch extends Ability
 			if (!user.prone && (!user.maintaining || user.abilities.get(user.abilityMaintaining) instanceof Sprint)) // special enable for sprint-punching
 				if (cost <= user.stamina)
 				{
-					user.notMoving = stopsMovement; // returns to be False in hotkey();
+					user.notMovingTimer = timeNotMovingAfterPunch;
 					user.switchAnimation(0); // before punching the user simply rotates to the target direction
 					if (cooldownLeft <= 0)
 					{
@@ -88,8 +89,6 @@ public class Punch extends Ability
 							testUserPunch(user, env, false, false);
 					}
 				}
-				else
-					user.notMoving = false;
 		}
 		else if (user.z >= 1.1 && user.flySpeed > 0) // Fly, flight punch
 		{

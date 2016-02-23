@@ -5,8 +5,6 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
 
-import abilities.Ball_E;
-import abilities.Beam_E;
 import abilities.Punch;
 import pathfinding.AStarPathFinder;
 import pathfinding.EnvMap;
@@ -31,14 +29,14 @@ public class NPC extends Person
 
 	enum Tactic
 	{
-		CIRCLE_STRAFING, MOVE_INTO_POSITION, NO_TARGET, RETREAT, PANIC, PUNCH_CHASING
+		CIRCLE_STRAFING, NO_TARGET, RETREAT, PANIC, CHASING, USE_TARGETING_ABILITY, PUNCH
 	};
 	// CIRCLE_STRAFING = move in a constant angular direction around the target, shooting at it when able. When hitting something or randomly while moving, change direction.
-	// MOVE_INTO_POSITION = move towards or away from the target until in optimalRange, strafing left or right when being hit by something. If can't see target, stop.
 	// NO_TARGET = no target. Do nothing, wait to find a tactic.
-	// RETREAT = move away from any person within retreat range.
+	// RETREAT = move away from any person within retreat range. Use a helpful escape ability if possible.
 	// PANIC = run aimlessly, not stopping, randomly rotating (panic).
 	// PUNCH_CHASING = move towards the target, and punch them when able.
+	// USE_TARGETING_ABILITY = use an ability that targets the enemy
 
 	boolean hasAllies = false;
 
@@ -48,10 +46,14 @@ public class NPC extends Person
 	double instinctDelayTime;
 	double timeSinceLastInstinct;
 	double angleOfLastInstinct;
-	double timeSinceLastDistCheck = 0;
+	double timeSinceLastDistCheck;
 	double lastDistPow2 = Double.MAX_VALUE;
 	List<WayPoint> path;
 	EnvMap envMap = null;
+	AI ai;
+
+	// stuff for tactics?
+	double noCircleStrafeTimer = 0;
 
 	public NPC(double x1, double y1, Strategy s1)
 	{
@@ -62,8 +64,10 @@ public class NPC extends Person
 		tactic = Tactic.NO_TARGET;
 		timeSinceLastInstinct = instinctDelayTime;
 		angleOfLastInstinct = 0;
+		timeSinceLastDistCheck = 0;
 		path = new ArrayList<WayPoint>();
 		rename(); // random npc name - no abilities yet
+		ai = null;
 	}
 
 	public void updateSubStats()
@@ -90,302 +94,128 @@ public class NPC extends Person
 		return true;
 	}
 
-	void frameAIupdate(double deltaTime, int frameNum, Environment env, MAIN main)
+	int frameNum = 0;
+
+	void frameAIupdate(double deltaTime, Environment env, MAIN main)
 	{
+		if (ai == null)
+			ai = new AI(this, env, main);
+		frameNum++;
 		// Refresh environment map every 0.5 seconds
 		if (frameNum % 25 == 0 || envMap == null)
 			refreshMap(env);
 
-		// choose target
-		switch (this.tactic)
-		{
-		case RETREAT:
-		case CIRCLE_STRAFING:
-		case PUNCH_CHASING:
-			if (frameNum % 25 == 0) // don't check a lot of times in a short period
+		// ~React to situation~
+
+		// Use all defensive instant abilities if being hit (e.g. Protective Bubble)
+		if (this.timeSinceLastHit == 0)
+			for (int aIndex = 0; aIndex < this.abilities.size(); aIndex++)
 			{
-				// Choose as target the closest enemy (considering pathfinding).
-				List<Person> possibleTargets = new ArrayList<Person>();
-				for (Person p2 : env.people)
-					if (this.viableTarget(p2))
-						possibleTargets.add(p2);
-				if (!possibleTargets.isEmpty())
+				Ability a = this.abilities.get(aIndex);
+				if (a.hasTag("defensive") && a.instant)
 				{
-					int bestTargetIndex = 0;
-					double shortestPathLength = Integer.MAX_VALUE;
-					for (int i = 0; i < possibleTargets.size(); i++)
+					main.pressAbilityKey(aIndex, true, this); // activate defensive ability
+					this.abilityTryingToRepetitivelyUse = -1;
+				}
+			}
+
+		// Choose as target the closest viable target (closest in path)
+		if (frameNum % 25 == 0) // don't check a lot of times in a short period
+		{
+			// Choose as target the closest enemy (considering pathfinding).
+			List<Person> possibleTargets = new ArrayList<Person>();
+			for (Person p2 : env.people)
+				if (this.viableTarget(p2))
+					possibleTargets.add(p2);
+			if (!possibleTargets.isEmpty())
+			{
+				int bestTargetIndex = 0;
+				double shortestPathLength = Integer.MAX_VALUE;
+				for (int i = 0; i < possibleTargets.size(); i++)
+				{
+					List<WayPoint> pathToTarget = pathFind(possibleTargets.get(i).Point());
+					if (pathToTarget != null) // it's null if it's impossible
 					{
-						List<WayPoint> pathToTarget = pathFind(possibleTargets.get(i).Point());
-						if (pathToTarget != null)
+						double pathLength = pathLength(pathToTarget);
+						if (pathLength < shortestPathLength)
 						{
-							double pathLength = pathLength(pathToTarget);
-							if (pathLength < shortestPathLength)
-							{
-								shortestPathLength = pathLength;
-								bestTargetIndex = i;
-							}
+							shortestPathLength = pathLength;
+							bestTargetIndex = i;
 						}
 					}
-					this.targetID = possibleTargets.get(bestTargetIndex).id;
 				}
-				else
-					;// NPCs will just punch the corpse of the last person they attacked. I guess that's fine.
+				this.targetID = possibleTargets.get(bestTargetIndex).id;
 			}
-			break;
-		case NO_TARGET:
-		case PANIC:
-		default:
-			this.targetID = -1;
-			break;
+			else
+				;// NPCs will just punch the corpse of the last person they attacked. I guess that's fine.
 		}
 		Person targetPerson = null;
-		if (this.targetID != -1 && this.tactic != Tactic.NO_TARGET)
+		if (this.targetID != -1)
 			for (Person p2 : env.people)
 				if (p2.id == this.targetID)
 				{
 					targetPerson = p2;
 					break;
 				}
-		if (targetPerson != null)
+
+		// tactic-switching decisions. TODO make it make sense
+		double distanceToTargetPow2 = targetPerson == null ? -1 : Methods.DistancePow2(this.x, this.y, targetPerson.x, targetPerson.y);
+		Tactic prevTactic = this.tactic;
+		tacticSearch: switch (this.strategy)
 		{
-			double angleToTarget = Math.atan2(targetPerson.y - this.y, targetPerson.x - this.x);
-			double distanceToTargetPow2 = Methods.DistancePow2(this.x, this.y, targetPerson.x, targetPerson.y);
-			// target-type tactics
-			switch (this.tactic)
+		case AGGRESSIVE:
+			// Panic if panicking
+			if (this.panic)
 			{
-			case PUNCH_CHASING:
-				// move towards target and punch them.
-				Ability punch = null;
-				int index = -1;
-				for (int i = 0; i < this.abilities.size(); i++)
-					if (this.abilities.get(i) instanceof Punch)
-					{
-						index = i;
-						punch = this.abilities.get(index);
-					}
-				if (punch == null)
-					break;
-				this.timeSinceLastDistCheck += deltaTime;
-				if (distanceToTargetPow2 > Math.pow(96, 2)) // If distance to target > 2 blocks
+				this.tactic = Tactic.PANIC;
+				break tacticSearch;
+			}
+			// Retreat if life is less than 15% of max life
+			if (targetPerson != null)
+				if (this.life < 0.15 * this.maxLife)
 				{
-					if (this.timeSinceLastDistCheck >= 1) // once per second. that variable is reduced by 1 soon after this
-					{
-						Point targetPoint = new Point((int) (targetPerson.x + targetPerson.xVel * deltaTime * 4), (int) (targetPerson.y + targetPerson.yVel * deltaTime * 4));
-						path = pathFind(targetPoint);
-					}
+					this.tactic = Tactic.RETREAT;
+					break tacticSearch;
+				}
+			// no break; on PURPOSE
+		case CLONE:
+			// Circle-strafe around target if there exists a useable projectile/beam power
+			if (targetPerson != null)
+				if (noCircleStrafeTimer <= 0)
+					for (Ability a : this.abilities)
+						if (a.hasTag("projectile") || a.hasTag("beam"))
+							if (!a.disabled)
+							{
+								if (a.costPerSecond < this.mana) // if 1 second cost is less than available mana
+								{
+									this.tactic = Tactic.CIRCLE_STRAFING;
+									break tacticSearch;
+								}
+								else
+									noCircleStrafeTimer = 15; // 15 seconds of not using this tactic
+							}
 
-					// move according to pathfinding
-					updatePath(env);
-					if (this.path != null && !this.path.isEmpty())
-					{
-						angleToTarget = Math.atan2(this.path.get(0).y - this.y, this.path.get(0).x - this.x);
-						this.target = new Point(this.path.get(0).x, this.path.get(0).y);
-					}
-
-					// even if path is finished, will just walk towards targeted person
-					this.rotate(angleToTarget, deltaTime);
-					this.directionOfAttemptedMovement = angleToTarget;
-					this.strengthOfAttemptedMovement = 1;
+			// Chase target if target isn't in punch range
+			Ability punch = null;
+			for (Ability a : this.abilities)
+				if (a instanceof Punch)
+					punch = a;
+			if (targetPerson != null)
+				if (distanceToTargetPow2 >= punch.range * punch.range)
+				{
+					this.tactic = Tactic.CHASING;
+					break tacticSearch;
 				}
 				else
 				{
-					this.rotate(angleToTarget, deltaTime);
-					this.directionOfAttemptedMovement = angleToTarget;
-					this.strengthOfAttemptedMovement = 1;
-					this.target = new Point((int) targetPerson.x, (int) targetPerson.y);
+					this.tactic = Tactic.PUNCH;
+					break tacticSearch;
 				}
-				double maxDistanceNeeded = punch.range + targetPerson.radius;
-				for (ArcForceField aff : env.AFFs)
-					if (aff.target.equals(targetPerson))
-					{
-						// angle check
-						double angleToMe = Math.atan2(this.y - targetPerson.y, this.x - targetPerson.x);
-						while (aff.rotation > Math.PI)
-							aff.rotation -= 2 * Math.PI;
-						while (aff.rotation < -Math.PI)
-							aff.rotation += 2 * Math.PI;
-						if (angleToMe > aff.rotation - aff.arc / 2 && angleToMe < aff.rotation + aff.arc / 2)
-							maxDistanceNeeded = punch.range + aff.maxRadius;
-					}
-				if (distanceToTargetPow2 < Math.pow(maxDistanceNeeded, 2))
-					main.pressAbilityKey(index, true, this);
-				else if (punch.cooldownLeft <= 0)
-				{
-					main.pressAbilityKey(index, false, this); // stop punching
-				}
-				if (this.timeSinceLastDistCheck >= 1) // Check distance every second
-				{
-					this.lastDistPow2 = distanceToTargetPow2;
-					this.timeSinceLastDistCheck -= 1;
-				}
-				break;
-			case CIRCLE_STRAFING:
-				// move around target. Also, get close to it or away from it to get into the "circle strafing" range.
-				this.rotate(angleToTarget, deltaTime);
-
-				// Fucking fuck shit code is not fucking working and I have no bloody idea what's wrong with it and I rewrote it to something that looks different but does the same and guess what? yes the bug is still happening. gahhhhhhhhhhhhh,
-				// hopefully one day I will figure out what's wrong here.
-
-				// double diffAngleFromTarget = Math.asin(7097.42205 * globalDeltaTime * 0.5 / Math.sqrt(distanceToTargetPow2)); // KILL ME
-				// double newAngle = -Math.PI + angleToTarget + diffAngleFromTarget * (p.rightOrLeft ? 1 : -1);
-				// double newX = target.x + dist * Math.cos(newAngle);
-				// double newY = target.y + dist * Math.sin(newAngle);
-				// p.directionOfAttemptedMovement = Math.atan2(newY - p.y, newX - p.x);
-				// p.strengthOfAttemptedMovement = 1;
-				// if (random.nextDouble() < 0.01) // chance of switching direction mid-circle
-				// p.rightOrLeft = !p.rightOrLeft;
-				double deviationAngle = Math.acos(3062.332465 * deltaTime * 0.5 / Math.sqrt(distanceToTargetPow2)); // Haha I'm just throwing random numbers that make it stop growing
-				if (Double.isNaN(deviationAngle))
-				{
-					// ughhhhhhhhh
-					deviationAngle = Math.PI / 1;
-				}
-
-				this.directionOfAttemptedMovement = angleToTarget + deviationAngle * (this.rightOrLeft ? 1 : -1); // BUG - distance grows between p and target for some reason!!!! TODO
-				this.strengthOfAttemptedMovement = 1;
-
-				if (this.timeSinceLastHit == 0 || this.justCollided || Math.random() < 0.005) // chance of switching direction mid-circle
-					this.rightOrLeft = !this.rightOrLeft;
-
-				// moving away or into range
-				// range is ALWAYS between 250 and 500 cm, because....because I said so
-				// TODO ....yeah...
-				if (distanceToTargetPow2 < 250 * 250)
-					this.directionOfAttemptedMovement = Methods.meanAngle(angleToTarget + Math.PI, this.directionOfAttemptedMovement);
-				if (distanceToTargetPow2 > 500 * 500)
-					this.directionOfAttemptedMovement = Methods.meanAngle(angleToTarget, this.directionOfAttemptedMovement);
-
-				// Attacking
-				for (int aIndex = 0; aIndex < this.abilities.size(); aIndex++)
-				{
-					Ability a = this.abilities.get(aIndex);
-					if (a.hasTag("projectile")) // ball
-						if (a instanceof Ball_E)
-						{
-							// aim the ball the right direction, taking into account the velocity addition caused by the person moving
-							double v = Ball.giveVelocity(a.level);
-							double xv = v * Math.cos(angleToTarget);
-							double yv = v * Math.sin(angleToTarget);
-							xv -= this.xVel;
-							yv -= this.yVel;
-							this.target = new Point((int) (this.x + xv), (int) (this.y + yv));
-							main.pressAbilityKey(aIndex, true, this);
-						}
-					if (a instanceof Beam_E) // beam
-					{
-						// aims the beam exactly at the target, so will miss often
-						this.target = new Point((int) (this.x), (int) (this.y));
-						main.pressAbilityKey(aIndex, true, this);
-					}
-				}
-				break;
-			case RETREAT:
-				// Back away from any enemy nearby when low on health
-				this.strengthOfAttemptedMovement = 0; // stop if there's nobody to retreat from
-				double shortestSquaredDistance = 400000; // minimum distance to keep from enemies. About 7 tiles
-				if (distanceToTargetPow2 < shortestSquaredDistance)
-				{
-					this.directionOfAttemptedMovement = angleToTarget + Math.PI; // away from target
-					this.rotate(this.directionOfAttemptedMovement, deltaTime);
-					this.strengthOfAttemptedMovement = 1;
-				}
-				break;
-			default:
-				MAIN.errorMessage("6j93k, no target-tactic - " + this.tactic);
-				break;
-			}
-		}
-		else // no-target tactics
-			switch (this.tactic)
-			{
-			case PANIC:
-				// run around aimlessly
-				if (frameNum % 40 == 0)
-					this.directionOfAttemptedMovement = this.rotation - 0.5 * Math.PI + Math.random() * Math.PI; // random direction in 180 degree arc
-				this.rotate(this.directionOfAttemptedMovement, deltaTime);
-				this.strengthOfAttemptedMovement = 1;
-				break;
-			case CIRCLE_STRAFING:
-			case PUNCH_CHASING:
-				// waiting for tactic-switching
-				break;
-			case NO_TARGET:
-				// don't move
-				this.strengthOfAttemptedMovement = 0;
-				// try to switch tactics
-				if (this.strategy.equals(Strategy.AGGRESSIVE))
-				{
-					// Choose as target the closest enemy (considering pathfinding).
-					List<Person> possibleTargets = new ArrayList<Person>();
-					for (Person p2 : env.people)
-						if (this.viableTarget(p2))
-							possibleTargets.add(p2);
-					if (!possibleTargets.isEmpty())
-					{
-						int bestTargetIndex = 0;
-						double shortestPathLength = Integer.MAX_VALUE;
-						for (int i = 0; i < possibleTargets.size(); i++)
-						{
-							double pathLength = pathLength(pathFind(possibleTargets.get(i).Point()));
-							if (pathLength < shortestPathLength)
-							{
-								shortestPathLength = pathLength;
-								bestTargetIndex = i;
-							}
-						}
-						targetPerson = possibleTargets.get(bestTargetIndex);
-						this.targetID = targetPerson.id; // not necessary?
-					}
-					if (targetPerson != null)
-						if (Methods.DistancePow2(this.x, this.y, targetPerson.x, targetPerson.y) < 600 * 600) // 600 sounds like an OK number
-							if (this.mana > 0.4 * this.maxMana)
-								this.tactic = Tactic.CIRCLE_STRAFING;
-							else if (this.stamina > 0.1 * this.maxStamina)
-								this.tactic = Tactic.PUNCH_CHASING;
-							else
-								this.tactic = Tactic.RETREAT;
-				}
-				if (this.strategy.equals(Strategy.PASSIVE)) // TEMP TODO
-				{
-					if (this.timeSinceLastHit == 0)
-						for (int aIndex = 0; aIndex < this.abilities.size(); aIndex++)
-						{
-							Ability a = this.abilities.get(aIndex);
-							if (a.hasTag("defensive") && a.instant)
-							{
-								main.pressAbilityKey(aIndex, true, this); // activate defensive ability
-								this.abilityTryingToRepetitivelyUse = -1;
-							}
-						}
-				}
-				break;
-
-			default:
-				MAIN.errorMessage("shpontzilontz. no no-target-tactic - " + this.tactic);
-				break;
-			}
-		// tactic-switching decisions. TODO make it make sense
-		Tactic prevTactic = this.tactic;
-
-		if (this.strategy == Strategy.AGGRESSIVE)
-		{
-			if (this.panic)
-				this.tactic = Tactic.PANIC;
-			else if (this.life < 0.15 * this.maxLife)
-				this.tactic = Tactic.RETREAT;
-			else if (this.tactic == Tactic.RETREAT) // stop retreating when uninjured
-				this.tactic = Tactic.NO_TARGET;
-			else
-			{
-				this.tactic = Tactic.PUNCH_CHASING;
-				for (Ability a : this.abilities)
-					if (a.hasTag("projectile") || a.hasTag("beam"))
-						this.tactic = Tactic.CIRCLE_STRAFING;
-			}
-		}
-		if (this.strategy == Strategy.CLONE)
-		{
-			this.tactic = Tactic.PUNCH_CHASING;
+			this.tactic = Tactic.NO_TARGET;
+			break tacticSearch;
+		default:
+			MAIN.errorMessage("No code found for strategy named   " + this.strategy);
+			break;
 		}
 
 		if (prevTactic != this.tactic)
@@ -396,8 +226,38 @@ public class NPC extends Person
 			this.abilityAiming = -1;
 			this.abilityTryingToRepetitivelyUse = -1;
 		}
+
+		// Do the AI tactic chosen
+		switch (this.tactic)
+		{
+		case CHASING:
+			ai.CHASE(targetPerson, deltaTime);
+			break;
+		case CIRCLE_STRAFING:
+			ai.CIRCLE_STRAFE(targetPerson, deltaTime);
+			break;
+		case RETREAT:
+			ai.RETREAT(targetPerson, deltaTime);
+			break;
+		case PANIC:
+			ai.PANIC(deltaTime);
+			break;
+		case PUNCH:
+			ai.PUNCH(targetPerson);
+			break;
+		case NO_TARGET:
+			break;
+		default:
+			MAIN.errorMessage("6j93k, no tactic - " + this.tactic);
+			break;
+		}
+
 		// resetting check-booleans
 		this.justCollided = false;
+
+		// decreasing some timers
+		if (noCircleStrafeTimer > 0)
+			noCircleStrafeTimer -= deltaTime;
 
 		if (Double.isNaN(this.directionOfAttemptedMovement)) // to fix a certain irritating bug
 		{
@@ -407,6 +267,7 @@ public class NPC extends Person
 		boolean nothingToDo = false;
 		if (this.strengthOfAttemptedMovement == 0)
 			nothingToDo = true;
+
 		// Instincts - move away from dangerous objects
 		if (this.timeSinceLastInstinct < 0)
 			this.timeSinceLastInstinct += deltaTime;

@@ -342,7 +342,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				{
 					NPC npc = (NPC) p;
 					if (!p.twitching)
-						npc.frameAIupdate(deltaTime, frameNum, env, this);
+						npc.frameAIupdate(deltaTime, env, this);
 				}
 
 				// maintaining person abilities
@@ -1258,6 +1258,17 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		frameTimer.start();
 	}
 
+	void pressAbilityKey(Ability ability, boolean press, Person p)
+	{
+		for (int i = 0; i < p.abilities.size(); i++)
+			if (p.abilities.get(i).equals(ability))
+			{
+				pressAbilityKey(i, press, p);
+				return;
+			}
+		MAIN.errorMessage("Keep Beach City Weird");
+	}
+
 	void pressAbilityKey(int abilityIndex, boolean press, Person p)
 	{
 		if (p.dead)
@@ -1328,7 +1339,6 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			else if (p.abilityTryingToRepetitivelyUse == abilityIndex)
 			{
 				p.abilityTryingToRepetitivelyUse = -1;
-				p.notMoving = false;
 			}
 
 		}
@@ -2268,7 +2278,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			}
 		}
 		// can't move or auto-rotate to movement direction while fisting
-		if (p.notMoving) // should never be happening when in the air
+		if (p.notMovingTimer > 0) // should never be happening when in the air
 			return;
 		// A very specific fix for a case. TODO fix this mess one day (See what happens when you punch with minimum amount of stamina, while holding a movement key)
 		if (p.abilityTryingToRepetitivelyUse != -1 && p.abilities.get(p.abilityTryingToRepetitivelyUse).justName().equals("Punch")

@@ -113,7 +113,9 @@ public class Methods
 		if ((xDelta == 0) && (yDelta == 0))
 		{
 			MAIN.errorMessage("That's not a line");
-			return null;
+			double CAUSEERROR = 0 / 0;
+			if (CAUSEERROR / 0 == xDelta / yDelta / yDelta / yDelta * xDelta / Math.E)
+				return null;
 		}
 
 		double u = ((px - sx1) * xDelta + (py - sy1) * yDelta) / (xDelta * xDelta + yDelta * yDelta);

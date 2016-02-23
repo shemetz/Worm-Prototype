@@ -85,7 +85,7 @@ public class Person extends RndPhysObj implements Mover
 	public Point target;
 	public boolean lastHandUsedIsRight = false;
 	public boolean punchedSomething = false;
-	public boolean notMoving = false;
+	public double notMovingTimer = 0;
 	public boolean notAnimating = false;
 	public double directionOfAttemptedMovement = 0;
 	public double strengthOfAttemptedMovement = 0; // between 0 and 1
@@ -345,7 +345,7 @@ public class Person extends RndPhysObj implements Mover
 
 		// Natural abilities
 		abilities.add(Ability.ability("Punch", 0));
-		abilities.get(0).range = (int) (1.15 * radius);
+		abilities.get(0).range = (int) (2.3 * radius);
 		abilities.add(Ability.ability("Sprint", 0));
 	}
 
@@ -916,6 +916,8 @@ public class Person extends RndPhysObj implements Mover
 			timeBetweenDamageTexts += deltaTime;
 		if (timeSincePortal > 0)
 			timeSincePortal -= deltaTime;
+		if (notMovingTimer > 0)
+			notMovingTimer -= deltaTime;
 
 		if (prone)
 		{

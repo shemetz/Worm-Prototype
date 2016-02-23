@@ -94,6 +94,8 @@ public class EnvMap implements TileBasedMap
 		if (mover instanceof Person)
 			if (((Person) mover).ghostMode)
 				return false;
+		if (x < 0 || y < 0 || x >= width || y >= height)
+			return true;
 		if (wallTypes[x][y] != -1)
 			return true;
 		if (FFs[x][y])
