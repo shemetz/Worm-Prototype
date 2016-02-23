@@ -163,6 +163,22 @@ public class NPC extends Person
 		Tactic prevTactic = this.tactic;
 		tacticSearch: switch (this.strategy)
 		{
+		case PASSIVE:
+			// Panic if panicking
+			if (this.panic)
+			{
+				this.tactic = Tactic.PANIC;
+				break tacticSearch;
+			}
+
+			// Retreat if life is less than 25% of max life
+			if (targetPerson != null)
+				if (this.life < 0.25 * this.maxLife)
+				{
+					this.tactic = Tactic.RETREAT;
+					break tacticSearch;
+				}
+			break;
 		case AGGRESSIVE:
 			// Panic if panicking
 			if (this.panic)
@@ -177,8 +193,10 @@ public class NPC extends Person
 					this.tactic = Tactic.RETREAT;
 					break tacticSearch;
 				}
+
 			// no break; on PURPOSE
 		case CLONE:
+
 			// Circle-strafe around target if there exists a useable projectile/beam power
 			if (targetPerson != null)
 				if (noCircleStrafeTimer <= 0)

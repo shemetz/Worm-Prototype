@@ -56,13 +56,13 @@ public class Beam extends Drawable
 
 	public double getDamage()
 	{
-		// 0.6 * points * 0.25 * attackRate * damage
+		// 0.6 * strength * 0.25 * attackRate * damage
 		return 0.6 * strength * 0.25 * Ability.elementalAttackNumbers[elementNum][2] * Ability.elementalAttackNumbers[elementNum][0];
 	}
 
 	public double getPushback()
 	{
-		// 0.6 * points * 0.25 * attackRate * pushback.
+		// 0.6 * strength * 0.25 * attackRate * pushback.
 		return 0.6 * strength * 0.25 * Ability.elementalAttackNumbers[elementNum][2] * Ability.elementalAttackNumbers[elementNum][1];
 	}
 

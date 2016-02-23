@@ -308,6 +308,11 @@ public class Methods
 		return DistancePow2((int) a.x, (int) a.y, (int) b.getX(), (int) b.getY());
 	}
 
+	public static double DistancePow2(Point3D a, Point3D b)
+	{
+		return DistancePow2((int) a.x, (int) a.y, (int) b.x, (int) b.y);
+	}
+
 	public static double lerpAngle(double angle, double target, double amount)
 	{
 		// TODO um. Does it accept all angles, or only ones between 0 and tau, or only ones between -pi and +pi?

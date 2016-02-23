@@ -2012,6 +2012,8 @@ public class Environment
 			for (Evasion e : b.theAbility.evasions)
 				if (e.id == p.id)
 					continue peopleLoop;
+			if (p.prone)
+				continue peopleLoop;
 			if (p.z <= b.z + b.height / 2 && p.highestPoint() > b.z - b.height / 2) // height check
 			{
 				Rectangle2D TyrannosaurusRect = new Rectangle2D.Double(p.x - 0.5 * p.radius, p.y - 0.5 * p.radius, p.radius, p.radius);
@@ -2131,6 +2133,27 @@ public class Environment
 			}
 		}
 
+		// Spray debris under beam if needed
+		if (Math.random() < 0.12) // 12% chance
+			switch (b.elementNum)
+			{
+			case 1: // water
+			case 7: // acid
+			case 8: // lava
+			case 9: // blood
+				double distance = Math.sqrt(Methods.DistancePow2(b.start, b.end));
+				int amount = (int) (distance / 200);
+				for (int i = 0; i < amount; i++)
+				{
+					double d = Math.random() * distance;
+					debris.add(new Debris(b.start.x + d * Math.cos(angle) + d / 10 * Math.sin(angle) * (Math.random() * 2 - 1),
+							b.start.y + d * Math.sin(angle) + d / 10 * Math.cos(angle) * (Math.random() * 2 - 1), b.z, Math.random() * Math.PI * 2, b.elementNum, true, 3 * Math.random()));
+				}
+				break;
+			default:
+				break;
+			}
+
 		if (collisionType == -1)
 		{
 			b.endType = 0;
@@ -2225,11 +2248,22 @@ public class Environment
 			{
 				// damaging the person
 				hitPerson(collidedPerson, b.getDamage(), b.getPushback(), angle, b.elementNum, deltaTime);
-				// sound effect (scorched flesh)
-				if (!collidedPerson.sounds.get(0).active)
-					collidedPerson.sounds.get(0).loop();
-				else
-					collidedPerson.sounds.get(0).justActivated = true;
+
+				switch (b.elementNum)
+				{
+				case 0: // fire
+				case 6: // energy
+				case 8: // lava
+					// sound effect (scorched flesh)
+					if (!collidedPerson.sounds.get(0).active)
+						collidedPerson.sounds.get(0).loop();
+					else
+						collidedPerson.sounds.get(0).justActivated = true;
+					break;
+				default:
+					break;
+
+				}
 			}
 			break;
 		case 4: // Ball

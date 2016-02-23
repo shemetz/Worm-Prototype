@@ -351,6 +351,9 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 						if (a.on)
 							if (!a.disabled)
 								a.maintain(env, p, p.target, deltaTime); // not affected by timeEffect. TODO double check this! (try using abilities like Beam with it)
+				// If trying to maintain after slipping
+				if (p.maintaining && p.prone)
+					p.abilities.get(p.abilityMaintaining).use(env, p, p.target);
 				// using abilities the person is trying to repetitively use (e.g. holding down the Punch ability's key)
 				if (p.abilityTryingToRepetitivelyUse != -1)
 				{
@@ -1238,12 +1241,11 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		shmulik.name = "Shmulik";
 		env.people.add(shmulik);
 
-		for (int i = 0; i < 1; i++)
+		// three neutral people
+		for (int i = 0; i < 3; i++)
 		{
-			Person person = new NPC((int) (100 + Math.random() * (env.widthPixels - 200)), (int) (100 + Math.random() * (env.heightPixels - 200)), Strategy.AGGRESSIVE);
-			person.commanderID = 1;
-			person.abilities.add(Ability.ability("Nullification Aura I", 9));
-			// env.people.add(person);
+			Person person = new NPC((int) (100 + Math.random() * (env.widthPixels - 200)), (int) (100 + Math.random() * (env.heightPixels - 200)), Strategy.PASSIVE);
+			env.people.add(person);
 		}
 
 		// Fix walls spawning on people
