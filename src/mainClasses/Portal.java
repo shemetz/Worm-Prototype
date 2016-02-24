@@ -25,8 +25,10 @@ public class Portal extends Drawable
 	SoundEffect sound;
 	Polygon clip1;
 	Polygon clip2;
-
-	public Portal(double x_, double y_, double z_, double angle1, double length1)
+	int envID;
+	public boolean destroyThis = false;
+	
+	public Portal(double x_, double y_, double z_, double angle1, double length1, int envid)
 	{
 		x = x_;
 		y = y_;
@@ -34,12 +36,25 @@ public class Portal extends Drawable
 		height = 1;
 		angle = angle1;
 		length = length1;
+		envID = envid;
 		start = new Point3D((int) (x - Math.cos(angle) * length * 0.5), (int) (y - Math.sin(angle) * length * 0.5), z);
 		end = new Point3D((int) (x + Math.cos(angle) * length * 0.5), (int) (y + Math.sin(angle) * length * 0.5), z);
 		image = new BufferedImage((int) length, (int) length, BufferedImage.TYPE_INT_ARGB);
 		slope = length / 6 / 6;
 		this.sound = new SoundEffect("Portal_1.wav"); // is not used, but is needed, temporarily
 		setClips();
+	}
+
+	public Portal(Line2D line, double z_)
+	{
+		// For collision detection purposes
+		start = new Point3D((int) line.getX1(), (int) line.getY1(), z);
+		end = new Point3D((int) line.getX2(), (int) line.getY2(), z);
+		x = (line.getX1() + line.getX2()) / 2;
+		y = (line.getY1() + line.getY2()) / 2;
+		z = z_;
+		angle = Math.atan2(end.y - start.y, end.x - start.x);
+		length = Math.sqrt(Methods.DistancePow2(start, end));
 	}
 
 	public void setClips()
@@ -71,13 +86,6 @@ public class Portal extends Drawable
 	{
 		if (!sound.active)
 			sound.play();
-	}
-
-	public Portal(Line2D line)
-	{
-		// For collision detection purposes
-		start = new Point3D((int) line.getX1(), (int) line.getY1(), z);
-		end = new Point3D((int) line.getX2(), (int) line.getY2(), z);
 	}
 
 	public Line2D Line2D()
@@ -119,8 +127,10 @@ public class Portal extends Drawable
 
 			buffer.setStroke(new BasicStroke(2));
 
+			double n = this.partner == null ? 0.5 : 1;
+			
 			buffer.setColor((blackOrWhite ? black : white));
-			for (int i = 1; i < 6; i++)
+			for (int i = 1; i < 6*n; i++)
 			{
 				buffer.drawLine((int) (start.x + i * Math.cos(angle + Math.PI / 2) + i * i * slope * Math.cos(angle)),
 						(int) (start.y + i * Math.sin(angle + Math.PI / 2) + i * i * slope * Math.sin(angle)), (int) (end.x + i * Math.cos(angle + Math.PI / 2) - i * i * slope * Math.cos(angle)),
@@ -133,7 +143,7 @@ public class Portal extends Drawable
 			buffer.setStroke(new BasicStroke(2));
 			buffer.setColor((blackOrWhite ? white : black));
 
-			for (int i = 1; i < 6; i++)
+			for (int i = 1; i < 6*n; i++)
 			{
 				buffer.drawLine((int) (start.x - i * Math.cos(angle + Math.PI / 2) + i * i * slope * Math.cos(angle)),
 						(int) (start.y - i * Math.sin(angle + Math.PI / 2) + i * i * slope * Math.sin(angle)), (int) (end.x - i * Math.cos(angle + Math.PI / 2) - i * i * slope * Math.cos(angle)),

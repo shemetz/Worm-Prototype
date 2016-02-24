@@ -16,8 +16,9 @@ public class Portals extends Ability
 	public Portal p1, p2;
 	public double minPortalLength;
 	public double maxPortalLength;
-	public double minimumDistanceBetweenPortalsPow2;
+	public static double minimumDistanceBetweenPortalsPow2;
 	public boolean alignPortals;
+	int idOfFirstPortalEnv = -1;
 
 	public Point holdTarget = null;
 
@@ -37,8 +38,7 @@ public class Portals extends Ability
 		minPortalLength = 100;
 		maxPortalLength = 2000;
 		minimumDistanceBetweenPortalsPow2 = 120 * 120;
-		sounds.add(new SoundEffect("Portal_1.wav"));
-		sounds.add(new SoundEffect("Portal_2.wav"));
+		sounds.add(new SoundEffect("Portal_failure.wav"));
 	}
 
 	public void use(Environment env, Person user, Point target)
@@ -50,7 +50,7 @@ public class Portals extends Ability
 		}
 		if (p2 != null)
 		{
-			removePortals(env);
+			removePortals();
 			alignPortals = false;
 			holdTarget = null;
 			return;
@@ -81,19 +81,27 @@ public class Portals extends Ability
 			{
 				double length = Math.min(maxPortalLength, Math.sqrt(Methods.DistancePow2(holdTarget.x, holdTarget.y, target.x, target.y)));
 				length = Math.max(minPortalLength, length);
-				p1 = new Portal(holdTarget.x + length / 2 * Math.cos(angle), holdTarget.y + length / 2 * Math.sin(angle), user.z, angle, length);
-				env.portals.add(p1);
-				user.mana -= cost;
-				sounds.get(0).play();
+				p1 = new Portal(holdTarget.x + length / 2 * Math.cos(angle), holdTarget.y + length / 2 * Math.sin(angle), user.z, angle, length, env.id);
+				if (env.checkPortal(p1))
+				{
+					env.portals.add(p1);
+					user.mana -= cost;
+					p1.playPortalSound();
+				}
+				else
+				{
+					p1 = null;
+					sounds.get(0).play();
+				}
 			}
 			else if (p2 == null)
 			{
 				double length = p1.length;
-				p2 = new Portal(holdTarget.x + length / 2 * Math.cos(angle), holdTarget.y + length / 2 * Math.sin(angle), user.z, angle, length);
-				if (portalsCollide(p1, p2))
+				p2 = new Portal(holdTarget.x + length / 2 * Math.cos(angle), holdTarget.y + length / 2 * Math.sin(angle), user.z, angle, length, env.id);
+				if (!env.checkPortal(p2))
 				{
 					p2 = null;
-					// TODO portal creation failure sound effect
+					sounds.get(0).play();
 				}
 				else
 				{
@@ -101,7 +109,7 @@ public class Portals extends Ability
 					p1.join(p2);
 					on = true;
 					user.mana -= cost;
-					sounds.get(1).play();
+					p2.playPortalSound();
 				}
 			}
 		}
@@ -109,28 +117,15 @@ public class Portals extends Ability
 		holdTarget = null;
 	}
 
-	public void removePortals(Environment env)
+	public void removePortals()
 	{
 		on = false;
-		env.portals.remove(p1);
-		env.portals.remove(p2);
+		p1.destroyThis = true;
+		p2.destroyThis = true;
+		p1.partner = null;
+		p2.partner = null;
 		p1 = null;
 		p2 = null;
-	}
-
-	public boolean portalsCollide(Portal a, Portal b)
-	{
-		if (a.Line2D().intersectsLine(b.Line2D()))
-			return true;
-		if (Methods.getSegmentPointDistancePow2(b.start.x, b.start.y, b.end.x, b.end.y, a.start.x, a.start.y) < minimumDistanceBetweenPortalsPow2)
-			return true;
-		if (Methods.getSegmentPointDistancePow2(b.start.x, b.start.y, b.end.x, b.end.y, a.end.x, a.end.y) < minimumDistanceBetweenPortalsPow2)
-			return true;
-		if (Methods.getSegmentPointDistancePow2(a.start.x, a.start.y, a.end.x, a.end.y, b.start.x, b.start.y) < minimumDistanceBetweenPortalsPow2)
-			return true;
-		if (Methods.getSegmentPointDistancePow2(a.start.x, a.start.y, a.end.x, a.end.y, b.end.x, b.end.y) < minimumDistanceBetweenPortalsPow2)
-			return true;
-		return false;
 	}
 
 	public void maintain(Environment env, Person user, Point target, double deltaTime)
@@ -142,7 +137,7 @@ public class Portals extends Ability
 	{
 		disabled = true;
 		if (on)
-			removePortals(env);
+			removePortals();
 	}
 
 	public void toggle()

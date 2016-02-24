@@ -123,6 +123,9 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 	Graphics bufferGraphics;
 
 	// Variables, lists
+	List<Environment> environmentList;
+	Environment[][] world;
+	int worldCoordsX = 2, worldCoordsY = 2;
 	Environment env;
 	Player player;
 	int frameNum = 0;
@@ -164,6 +167,95 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 	// METHODS
 	void frame()
 	{
+		/////////////
+		Environment newEnv = env;
+		if (player.portalToOtherEnvironment == -1)
+		{
+			if (env.parent == null) // which means it's a World environment
+			{
+				if (player.x >= env.widthPixels - 1)
+					if (worldCoordsX < world.length - 1)
+					{
+						worldCoordsX++;
+					}
+				if (player.x <= 0)
+					if (worldCoordsX > 0)
+					{
+						worldCoordsX--;
+					}
+				if (player.y >= env.heightPixels - 1)
+					if (worldCoordsY < world[worldCoordsX].length - 1)
+					{
+						worldCoordsY++;
+					}
+				if (player.y <= 0)
+					if (worldCoordsY > 0)
+					{
+						worldCoordsY--;
+					}
+				newEnv = world[worldCoordsX][worldCoordsY];
+			}
+			if (env.parent != null) // which means it's an inner environment. Checks if exited
+			{
+				if (player.x >= env.widthPixels - 1)
+				{
+					newEnv = env.parent;
+				}
+				if (player.x <= 0)
+				{
+					newEnv = env.parent;
+				}
+				if (player.y >= env.heightPixels - 1)
+				{
+					newEnv = env.parent;
+				}
+				if (player.y <= 0)
+				{
+					newEnv = env.parent;
+				}
+			}
+			for (Environment innerEnv : env.subEnvironments)
+			{
+				if (player.x >= innerEnv.globalX - env.globalX)
+					if (player.x <= innerEnv.globalX - env.globalX + innerEnv.widthPixels - 1)
+						if (player.y >= innerEnv.globalY - env.globalY)
+							if (player.y <= innerEnv.globalY - env.globalY + innerEnv.heightPixels - 1)
+								newEnv = innerEnv;
+			}
+			if (newEnv == null || newEnv.id != env.id)
+			{
+				if (newEnv == null)
+				{
+					world[worldCoordsX][worldCoordsY] = new Environment(worldCoordsX * 50 * squareSize, worldCoordsY * 50 * squareSize, 50, 50);
+					environmentList.add(world[worldCoordsX][worldCoordsY]);
+					newEnv = world[worldCoordsX][worldCoordsY];
+					newEnv.tempBuild();
+				}
+
+				double xChange = 0, yChange = 0;
+
+				xChange += env.globalX;
+				yChange += env.globalY;
+
+				pauseAllSounds(true);
+				env.people.remove(player);
+				env = newEnv;
+				pauseAllSounds(false);
+				env.people.add(player);
+
+				xChange -= env.globalX;
+				yChange -= env.globalY;
+
+				player.x += xChange;
+				player.y += yChange;
+				camera.x += xChange;
+				camera.y += yChange;
+				env.removeAroundPerson(player);
+			}
+		}
+
+		/////////////
+
 		double deltaTime = globalDeltaTime;
 		// Remember: 20 milliseconds between frames, 50 frames per second
 
@@ -386,12 +478,14 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			// damage because of standing on pools
 			if (p.z < 0.1)
 			{
-				int type = env.poolTypes[(int) ((p.x) / squareSize)][(int) ((p.y) / squareSize)];
+				int gridX = Math.min(Math.max((int) (p.x) / squareSize, 0), env.width - 1);
+				int gridY = Math.min(Math.max((int) (p.y) / squareSize, 0), env.height - 1);
+				int type = env.poolTypes[gridX][gridY];
 				if (type != -1)
 				{
 					// also damage the pool the person is standing on. Standing on a full-health pool deals it 10 damage per second (out of 100)
 					if (frameNum % 5 == 0) // ten times per second, deal 1 damage
-						env.poolHealths[(int) ((p.x) / squareSize)][(int) ((p.y) / squareSize)] -= 1;
+						env.poolHealths[gridX][gridY] -= 1;
 					switch (type)
 					{
 					case 1: // water
@@ -457,6 +551,37 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 
 				env.hitPerson(p, tangleDamage, 0, 0, -1); // not 11!!!! don't!
 
+			}
+
+			// Portals to other environments
+			if (p.portalToOtherEnvironment != -1)
+			{
+				newEnv = environmentList.get(p.portalToOtherEnvironment);
+
+				if (p instanceof Player)
+				{
+					pauseAllSounds(true);
+					env.people.remove(player);
+					env = newEnv;
+					pauseAllSounds(false);
+					env.people.add(player);
+					camera.x += p.portalVariableX - p.x;
+					camera.y += p.portalVariableY - p.y;
+					worldCoordsX = env.globalX / env.widthPixels;
+					worldCoordsY = env.globalY / env.heightPixels;
+				}
+				else
+				{
+					env.people.remove(p);
+					newEnv.people.add(p);
+				}
+
+				p.x = p.portalVariableX;
+				p.y = p.portalVariableY;
+
+				p.portalToOtherEnvironment = -1;
+				p.portalVariableX = 0;
+				p.portalVariableY = 0;
 			}
 		}
 
@@ -635,6 +760,13 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			}
 
 		// PORTALS
+		for (int i = 0; i < env.portals.size(); i++)
+			if (env.portals.get(i).destroyThis)
+			{
+				env.portals.remove(i);
+				i--;
+			}
+		// PORTALS
 		List<Drawable> stuff = new ArrayList<Drawable>();
 		stuff.addAll(env.people);
 		stuff.addAll(env.balls);
@@ -712,6 +844,13 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		{
 			cameraRotation += player.portalCameraRotation;
 			player.portalCameraRotation = 0;
+		}
+		if (player.portalVariableX != 0 || player.portalVariableY != 0)
+		{
+			camera.x += player.x - player.portalVariableX;
+			camera.y += player.y - player.portalVariableY;
+			player.portalVariableX = 0;
+			player.portalVariableY = 0;
 		}
 		camera.x += diffX;
 		camera.y += diffY;
@@ -927,8 +1066,6 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				break;
 			if (p.p1 == null) // first portal - variable length
 			{
-				buffer.setStroke(dashedStroke3);
-				buffer.setColor(Color.orange);
 				double portalAngle = Math.atan2(player.target.y - p.holdTarget.y, player.target.x - p.holdTarget.x);
 				if (p.alignPortals) // snap to cardinal directions
 				{
@@ -941,7 +1078,17 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				double length;
 				length = Math.min(p.maxPortalLength, Math.sqrt(Methods.DistancePow2(p.holdTarget.x, p.holdTarget.y, player.target.x, player.target.y)));
 				length = Math.max(p.minPortalLength, length);
-				buffer.drawLine((int) (p.holdTarget.x), (int) (p.holdTarget.y), (int) (p.holdTarget.x + length * Math.cos(portalAngle)), (int) (p.holdTarget.y + length * Math.sin(portalAngle)));
+				Line2D newPortal = new Line2D.Double(p.holdTarget.x, p.holdTarget.y, p.holdTarget.x + length * Math.cos(portalAngle), p.holdTarget.y + length * Math.sin(portalAngle));
+				Portal p1 = new Portal(newPortal, player.z);
+				if (env.checkPortal(p1))
+					buffer.setColor(Color.orange);
+				else
+				{
+					checkDrawPortalProblem(buffer, p1);
+					buffer.setColor(Color.red);
+				}
+				buffer.setStroke(dashedStroke3);
+				buffer.drawLine((int) (newPortal.getX1()), (int) (newPortal.getY1()), (int) (newPortal.getX2()), (int) (newPortal.getY2()));
 			}
 			else if (p.p2 == null)
 			{
@@ -955,26 +1102,10 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 					portalAngle = p.p1.angle;
 					newPortal = new Line2D.Double(htx, hty, htx + length * Math.cos(portalAngle), hty + length * Math.sin(portalAngle));
 				}
-				if (p.portalsCollide(p.p1, new Portal(newPortal)))
+				Portal p2 = new Portal(newPortal, player.z);
+				if (!env.checkPortal(p2))
 				{
-					double minDist = Math.sqrt(p.minimumDistanceBetweenPortalsPow2);
-					// rectangle
-					Polygon polygon = new Polygon();
-					polygon.addPoint((int) (p.p1.start.x + minDist * Math.cos(p.p1.angle + Math.PI / 2)), (int) (p.p1.start.y + minDist * Math.sin(p.p1.angle + Math.PI / 2)));
-					polygon.addPoint((int) (p.p1.start.x - minDist * Math.cos(p.p1.angle + Math.PI / 2)), (int) (p.p1.start.y - minDist * Math.sin(p.p1.angle + Math.PI / 2)));
-					polygon.addPoint((int) (p.p1.end.x - minDist * Math.cos(p.p1.angle + Math.PI / 2)), (int) (p.p1.end.y - minDist * Math.sin(p.p1.angle + Math.PI / 2)));
-					polygon.addPoint((int) (p.p1.end.x + minDist * Math.cos(p.p1.angle + Math.PI / 2)), (int) (p.p1.end.y + minDist * Math.sin(p.p1.angle + Math.PI / 2)));
-					Area a = new Area(polygon);
-					// two circles
-					Area e1 = new Area(new Ellipse2D.Double(p.p1.start.x - minDist, p.p1.start.y - minDist, minDist * 2, minDist * 2));
-					Area e2 = new Area(new Ellipse2D.Double(p.p1.end.x - minDist, p.p1.end.y - minDist, minDist * 2, minDist * 2));
-					a.add(e1);
-					a.add(e2);
-					buffer.setColor(new Color(255, 0, 0, 78));
-					buffer.fill(a);
-					buffer.setColor(Color.red);
-					buffer.setStroke(new BasicStroke(2));
-					buffer.draw(a);
+					checkDrawPortalProblem(buffer, p2);
 					buffer.setColor(Color.red);
 				}
 				else
@@ -1160,6 +1291,46 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		}
 	}
 
+	void checkDrawPortalProblem(Graphics2D buffer, Portal p1)
+	{
+		for (Portal p2 : env.portals)
+			if (p1.z <= p2.highestPoint() && p2.z <= p1.highestPoint())
+			{
+				if (p1.Line2D().intersectsLine(p2.Line2D()))
+					drawPortalProblem(buffer, p2);
+				else if (Methods.getSegmentPointDistancePow2(p2.start.x, p2.start.y, p2.end.x, p2.end.y, p1.start.x, p1.start.y) < Portals.minimumDistanceBetweenPortalsPow2)
+					drawPortalProblem(buffer, p2);
+				else if (Methods.getSegmentPointDistancePow2(p2.start.x, p2.start.y, p2.end.x, p2.end.y, p1.end.x, p1.end.y) < Portals.minimumDistanceBetweenPortalsPow2)
+					drawPortalProblem(buffer, p2);
+				else if (Methods.getSegmentPointDistancePow2(p1.start.x, p1.start.y, p1.end.x, p1.end.y, p2.start.x, p2.start.y) < Portals.minimumDistanceBetweenPortalsPow2)
+					drawPortalProblem(buffer, p2);
+				else if (Methods.getSegmentPointDistancePow2(p1.start.x, p1.start.y, p1.end.x, p1.end.y, p2.end.x, p2.end.y) < Portals.minimumDistanceBetweenPortalsPow2)
+					drawPortalProblem(buffer, p2);
+			}
+	}
+
+	void drawPortalProblem(Graphics2D buffer, Portal p1)
+	{
+		double minDist = Math.sqrt(Portals.minimumDistanceBetweenPortalsPow2);
+		// rectangle
+		Polygon polygon = new Polygon();
+		polygon.addPoint((int) (p1.start.x + minDist * Math.cos(p1.angle + Math.PI / 2)), (int) (p1.start.y + minDist * Math.sin(p1.angle + Math.PI / 2)));
+		polygon.addPoint((int) (p1.start.x - minDist * Math.cos(p1.angle + Math.PI / 2)), (int) (p1.start.y - minDist * Math.sin(p1.angle + Math.PI / 2)));
+		polygon.addPoint((int) (p1.end.x - minDist * Math.cos(p1.angle + Math.PI / 2)), (int) (p1.end.y - minDist * Math.sin(p1.angle + Math.PI / 2)));
+		polygon.addPoint((int) (p1.end.x + minDist * Math.cos(p1.angle + Math.PI / 2)), (int) (p1.end.y + minDist * Math.sin(p1.angle + Math.PI / 2)));
+		Area a = new Area(polygon);
+		// two circles
+		Area e1 = new Area(new Ellipse2D.Double(p1.start.x - minDist, p1.start.y - minDist, minDist * 2, minDist * 2));
+		Area e2 = new Area(new Ellipse2D.Double(p1.end.x - minDist, p1.end.y - minDist, minDist * 2, minDist * 2));
+		a.add(e1);
+		a.add(e2);
+		buffer.setColor(new Color(255, 0, 0, 78));
+		buffer.fill(a);
+		buffer.setColor(Color.red);
+		buffer.setStroke(new BasicStroke(2));
+		buffer.draw(a);
+	}
+
 	// Start of the program. Set-up stuff happens here!
 	void restart()
 	{
@@ -1172,6 +1343,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		Resources.initialize();
 		NameGenerator.initialize();
 		Person.resetIDs();
+		Environment.resetIDs();
 
 		niceHotKeys = new Point[10];
 		updateNiceHotkeys();
@@ -1180,48 +1352,21 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 
 		// ~~~TEMPORARY TESTING~~~
 
-		env = new Environment(50, 50);
+		environmentList = new ArrayList<Environment>();
+		world = new Environment[5][5];
+		world[2][2] = new Environment(2 * squareSize * 50, 2 * squareSize * 50, 50, 50);
+		environmentList.add(world[2][2]);
+		env = world[2][2];
+		env.tempBuild();
 
-		// outer bounds - grey walls
-		for (int i = 0; i < env.width; i++)
-			for (int j = 0; j < env.height; j++)
-			{
-				env.floorTypes[i][j] = 0;
-				if (i == 0 || j == 0 || i == env.width - 1 || j == env.height - 1)
-				{
-					env.addWall(i, j, -2, true);
-				}
-			}
-
-		// Shadow direction and distance of every object
-		env.shadowX = 1;
-		env.shadowY = -0.7;
-
-		// Random 5x5 walls
-		for (int i = 0; i < 15; i++)
-		{
-			int sx = random.nextInt(env.width - 7) + 1;
-			int sy = random.nextInt(env.height - 7) + 1;
-			for (int x = sx; x < sx + 5; x++)
-				for (int y = sy; y < sy + 5; y++)
-					env.addWall(x, y, 10, true);
-		}
-		// Random 5x1 lines
-		for (int i = 0; i < 10; i++)
-		{
-			int sx = random.nextInt(env.width - 7) + 1;
-			int sy = random.nextInt(env.height - 2) + 1;
-			for (int x = sx; x < sx + 5; x++)
-				env.addWall(x, sy, 10, true);
-		}
-		// Random 1x5 lines
-		for (int i = 0; i < 10; i++)
-		{
-			int sx = random.nextInt(env.width - 2) + 1;
-			int sy = random.nextInt(env.height - 7) + 1;
-			for (int y = sy; y < sy + 5; y++)
-				env.addWall(sx, y, 10, true);
-		}
+		// env.subEnvironments.add(new Environment(env.globalX + squareSize * 3, env.globalY + squareSize * 3, 10, 10));
+		// Environment sub = env.subEnvironments.get(0);
+		// environmentList.add(sub);
+		// sub.tempBuild();
+		// for (int i = 3; i < 3 + sub.width; i++)
+		// for (int j = 3; j < 3 + sub.height; j++)
+		// env.addWall(i, j, -2, true);
+		// sub.parent = env;
 
 		player = new Player(96 * 15, 96 * 15);
 		player.tempTrigger();
@@ -1250,12 +1395,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 
 		// Fix walls spawning on people
 		for (Person p : env.people)
-		{
-			env.remove((int) (p.x - p.radius) / squareSize, (int) (p.y - p.radius) / squareSize);
-			env.remove((int) (p.x - p.radius) / squareSize, (int) (p.y + p.radius) / squareSize);
-			env.remove((int) (p.x + p.radius) / squareSize, (int) (p.y - p.radius) / squareSize);
-			env.remove((int) (p.x + p.radius) / squareSize, (int) (p.y + p.radius) / squareSize);
-		}
+			env.removeAroundPerson(p);
 
 		frameTimer.start();
 	}
@@ -1469,12 +1609,14 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 					p.sounds.get(2).play(); // fall hit
 			}
 		}
-		if (p.z < 0.1 || (p.z == 1 && !p.ghostMode && env.wallTypes[(int) (p.x) / squareSize][(int) (p.y) / squareSize] != -1)) // on ground or on a wall
+		int gridX = Math.min(Math.max((int) (p.x) / squareSize, 0), env.width - 1);
+		int gridY = Math.min(Math.max((int) (p.y) / squareSize, 0), env.height - 1);
+		if (p.z < 0.1 || (p.z == 1 && !p.ghostMode && env.wallTypes[gridX][gridY] != -1)) // on ground or on a wall
 		{
 			p.zVel = 0;
-			int floorType = env.floorTypes[(int) (p.x) / squareSize][(int) (p.y) / squareSize];
-			int poolType = env.poolTypes[(int) (p.x) / squareSize][(int) (p.y) / squareSize];
-			int wallType = env.wallTypes[(int) (p.x) / squareSize][(int) (p.y) / squareSize];
+			int floorType = env.floorTypes[gridX][gridY];
+			int poolType = env.poolTypes[gridX][gridY];
+			int wallType = env.wallTypes[gridX][gridY];
 			double friction = Environment.floorFriction[floorType];
 
 			if (poolType != -1)
@@ -1537,41 +1679,78 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			bounds = new Rectangle((int) (camera.x - halfBoundsDiagonal), (int) (camera.y - halfBoundsDiagonal), (int) (halfBoundsDiagonal * 2), (int) (halfBoundsDiagonal * 2));
 		}
 
-		if (player.limitedVisibility)
-		{
-			drawExtraEnvironmentInfo(buffer);
-
-			// visibility
-			if (player.seenBefore == null) // TODO move this to initialization in restart() probably
-			{
-				player.seenBefore = new int[env.width][env.height];
-				player.rememberArea = new Area();
-			}
-			if (player.visibleArea == null || frameNum % 2 == 0)
-			{
-				player.visibleArea = env.updateVisibility(player, bounds, player.seenBefore); // maybe this slows down the game a tiny bit
-				player.rememberArea.add(player.visibleArea);
-				double viewRangeDistance = Math.max(player.flightVisionDistance * player.z, 1350);
-				Ellipse2D viewRange = new Ellipse2D.Double(player.x - viewRangeDistance, player.y - viewRangeDistance, 2 * viewRangeDistance, 2 * viewRangeDistance);
-				player.visibleRememberArea = new Area();
-				player.visibleRememberArea.add(player.rememberArea);
-				player.visibleRememberArea.intersect(new Area(viewRange));
-			}
-			// Draws everything within the player's view range that is inside the rememberArea.
-			buffer.setClip(player.visibleRememberArea);
-			env.drawFloor(buffer, bounds);
-			drawBottomEffects(buffer);
-			env.draw(buffer, (int) camera.z, bounds, cameraRotation);
-			drawTopEffects(buffer);
-			buffer.setClip(null);
-		}
-
+		List<Environment> drawnEnvironments = new ArrayList<Environment>();
+		if (env.parent != null)
+			drawnEnvironments.add(env.parent);
 		else
+		// world
 		{
-			env.drawFloor(buffer, bounds);
-			drawBottomEffects(buffer);
-			env.draw(buffer, (int) camera.z, bounds, cameraRotation);
-			drawTopEffects(buffer);
+			for (int i = 0; i < world.length; i++)
+				for (int j = 0; j < world[0].length; j++)
+					if (world[i][j] != null && world[i][j].id != env.id)
+						drawnEnvironments.add(world[i][j]);
+		}
+		drawnEnvironments.add(env);
+		drawnEnvironments.addAll(env.subEnvironments); // but not THEIR subEnvironments!
+		for (Environment e : drawnEnvironments)
+		{
+			buffer.translate(e.globalX - env.globalX, e.globalY - env.globalY);
+			player.x -= e.globalX - env.globalX;
+			player.y -= e.globalY - env.globalY;
+			bounds.x -= e.globalX - env.globalX;
+			bounds.y -= e.globalY - env.globalY;
+			if (player.limitedVisibility)
+			{
+				drawExtraEnvironmentInfo(buffer, e);
+
+				// visibility
+				if (!player.rememberArea.containsKey(e))
+				{
+					player.seenBefore.put(e, new int[e.width][e.height]);
+					player.rememberArea.put(e, new Area());
+				}
+				if (player.visibleArea.get(e) == null || frameNum % 2 == 0)
+				{
+					player.visibleArea.put(e, e.updateVisibility(player, bounds, player.seenBefore.get(e))); // maybe this slows down the game a tiny bit
+					player.rememberArea.get(e).add(player.visibleArea.get(e));
+					double viewRangeDistance = Math.max(player.flightVisionDistance * player.z, 1350);
+					Ellipse2D viewRange = new Ellipse2D.Double(player.x - viewRangeDistance, player.y - viewRangeDistance, 2 * viewRangeDistance, 2 * viewRangeDistance);
+					player.visibleRememberArea.put(e, new Area());
+					player.visibleRememberArea.get(e).add(player.rememberArea.get(e));
+					player.visibleRememberArea.get(e).intersect(new Area(viewRange));
+				}
+				// fill with black
+				buffer.setClip(new Area(new Rectangle2D.Double(0, 0, e.widthPixels, e.heightPixels)));
+				buffer.setColor(Color.black);
+				buffer.fillRect(0, 0, e.widthPixels, e.heightPixels);
+				// Draws everything within the player's view range that is inside the rememberArea.
+				buffer.setClip(player.visibleRememberArea.get(e));
+				e.drawFloor(buffer, bounds);
+				drawBottomEffects(buffer, e);
+				e.draw(buffer, (int) camera.z, bounds, cameraRotation);
+				drawTopEffects(buffer, e);
+				buffer.setClip(null);
+				// Draw this environment's boundaries
+				buffer.setColor(new Color(128, 255, 255, 60));
+				buffer.setStroke(new BasicStroke(6));
+				buffer.drawRect(0, 0, e.widthPixels, e.heightPixels);
+				buffer.setStroke(new BasicStroke(3));
+				buffer.drawRect(0, 0, e.widthPixels, e.heightPixels);
+				buffer.setStroke(new BasicStroke(2));
+				buffer.drawRect(0, 0, e.widthPixels, e.heightPixels);
+			}
+			else
+			{
+				e.drawFloor(buffer, bounds);
+				drawBottomEffects(buffer, e);
+				e.draw(buffer, (int) camera.z, bounds, cameraRotation);
+				drawTopEffects(buffer, e);
+			}
+			buffer.translate(-(e.globalX - env.globalX), -(e.globalY - env.globalY));
+			player.x += e.globalX - env.globalX;
+			player.y += e.globalY - env.globalY;
+			bounds.x += e.globalX - env.globalX;
+			bounds.y += e.globalY - env.globalY;
 		}
 
 		if (hotkeySelected != -1 && player.hotkeys[hotkeySelected] != -1)
@@ -1590,7 +1769,16 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		if (drawRect != null)
 			buffer.drawRect((int) (drawRect.getX()), (int) (drawRect.getY()), (int) (drawRect.getWidth()), (int) (drawRect.getHeight()));
 
-		drawExtraPeopleInfo(buffer);
+		for (Environment e : drawnEnvironments)
+		{
+			buffer.translate(e.globalX - env.globalX, e.globalY - env.globalY);
+			player.x -= e.globalX - env.globalX;
+			player.y -= e.globalY - env.globalY;
+			drawExtraPeopleInfo(buffer, e);
+			buffer.translate(-(e.globalX - env.globalX), -(e.globalY - env.globalY));
+			player.x += e.globalX - env.globalX;
+			player.y += e.globalY - env.globalY;
+		}
 
 		// Move camera back
 		buffer.rotate(cameraRotation, camera.x, camera.y);
@@ -1637,7 +1825,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		}
 	}
 
-	void drawExtraEnvironmentInfo(Graphics2D buffer)
+	void drawExtraEnvironmentInfo(Graphics2D buffer, Environment e)
 	{
 		// like drawExtraPeopleInfo but for walls and stuff
 		double[] elementSenses = new double[12];
@@ -1657,34 +1845,34 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				default:
 					break;
 				}
-		for (int x = 0; x < env.widthPixels; x += squareSize)
-			for (int y = 0; y < env.heightPixels; y += squareSize)
+		for (int x = 0; x < e.widthPixels; x += squareSize)
+			for (int y = 0; y < e.heightPixels; y += squareSize)
 			{
 				int gx = (int) (x / squareSize), gy = (int) (y / squareSize);
 				double distPow2 = Methods.DistancePow2(gx * squareSize + squareSize / 2, gy * squareSize + squareSize / 2, player.x, player.y);
 				// Sense Structure
 				if (distPow2 <= drawStructureDistancePow2)
-					if (env.wallTypes[gx][gy] != -1)
+					if (e.wallTypes[gx][gy] != -1)
 					{
 						buffer.setStroke(new BasicStroke(3));
 						buffer.setColor(new Color(40, 40, 40));
 						buffer.drawRect(gx * squareSize + 3, gy * squareSize + 3, squareSize - 6, squareSize - 6);
 					}
 				// Sense Element - Walls
-				if (env.wallTypes[gx][gy] >= 0 && env.wallTypes[gx][gy] < 12)
-					if (distPow2 <= elementSenses[env.wallTypes[gx][gy]])
+				if (e.wallTypes[gx][gy] >= 0 && e.wallTypes[gx][gy] < 12)
+					if (distPow2 <= elementSenses[e.wallTypes[gx][gy]])
 					{
 						buffer.setStroke(new BasicStroke(3));
-						buffer.setColor(EP.elementColors[env.wallTypes[gx][gy]]);
+						buffer.setColor(EP.elementColors[e.wallTypes[gx][gy]]);
 						buffer.drawRect(gx * squareSize + 3, gy * squareSize + 3, squareSize - 6, squareSize - 6);
 					}
 				// Sense Element - Pools
-				if (env.poolTypes[gx][gy] >= 0 && env.poolTypes[gx][gy] < 12)
+				if (e.poolTypes[gx][gy] >= 0 && e.poolTypes[gx][gy] < 12)
 				{
-					if (distPow2 <= elementSenses[env.poolTypes[gx][gy]])
+					if (distPow2 <= elementSenses[e.poolTypes[gx][gy]])
 					{
 						buffer.setStroke(new BasicStroke(3));
-						buffer.setColor(EP.elementColors[env.poolTypes[gx][gy]]);
+						buffer.setColor(EP.elementColors[e.poolTypes[gx][gy]]);
 						buffer.drawOval(gx * squareSize + 3, gy * squareSize + 3, squareSize - 6, squareSize - 6);
 					}
 				}
@@ -1692,7 +1880,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			}
 	}
 
-	void drawExtraPeopleInfo(Graphics2D buffer)
+	void drawExtraPeopleInfo(Graphics2D buffer, Environment e)
 	{
 		// exists after coordinate shift
 		double drawLifeDistancePow2 = 0, drawManaDistancePow2 = 0, drawStaminaDistancePow2 = 0, drawParahumansDistancePow2 = 0;
@@ -1745,7 +1933,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 					break;
 				}
 
-		for (Person p : env.people)
+		for (Person p : e.people)
 		{
 			// does not draw info for the player herself/himself
 			if (!p.equals(player) && p.z <= camera.z)
@@ -1762,7 +1950,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 					{
 						buffer.setStroke(new BasicStroke(3));
 						// if within sight, color is less noticeable
-						if (!player.limitedVisibility || player.visibleRememberArea.contains(p.x, p.y))
+						if (!player.limitedVisibility || player.visibleRememberArea.get(e).contains(p.x, p.y))
 							buffer.setColor(new Color(200, 210, 255, 91));
 						else
 							buffer.setColor(new Color(200, 210, 255));
@@ -1779,7 +1967,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 					if (distancePow2 < elementSenses[elementNum])
 					{
 						Color color = EP.elementColors[elementNum];
-						if (!player.limitedVisibility || player.visibleRememberArea.contains(p.x, p.y))
+						if (!player.limitedVisibility || player.visibleRememberArea.get(e).contains(p.x, p.y))
 							buffer.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue(), 91)); // more transparent
 						else
 							buffer.setColor(color);
@@ -1793,7 +1981,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 						}
 					}
 				// DOES NOT draw name out of visibility
-				if (!player.limitedVisibility || player.visibleRememberArea.contains(p.x, p.y))
+				if (!player.limitedVisibility || player.visibleRememberArea.get(e).contains(p.x, p.y))
 				{
 					Color nameColor = Color.white; // neutral
 					if (p.commanderID == player.commanderID) // friendly
@@ -1851,22 +2039,18 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		}
 	}
 
-	void drawBottomEffects(Graphics2D buffer)
+	void drawBottomEffects(Graphics2D buffer, Environment e)
 	{
-		for (VisualEffect eff : env.visualEffects)
+		for (VisualEffect eff : e.visualEffects)
 			if (!eff.onTop)
-			{
 				eff.draw(buffer);
-			}
 	}
 
-	void drawTopEffects(Graphics2D buffer)
+	void drawTopEffects(Graphics2D buffer, Environment e)
 	{
-		for (VisualEffect eff : env.visualEffects)
+		for (VisualEffect eff : e.visualEffects)
 			if (eff.onTop)
-			{
 				eff.draw(buffer);
-			}
 	}
 
 	void drawPlayerStats(Graphics2D buffer)

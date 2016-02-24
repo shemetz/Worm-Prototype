@@ -10,7 +10,9 @@ import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import abilities.Elemental_Void;
@@ -106,9 +108,9 @@ public class Person extends RndPhysObj implements Mover
 
 	// stuff
 	String voiceType; // Male, Female. TODO add more
-	public Area visibleArea = null;
-	public Area rememberArea = null;
-	public int[][] seenBefore;
+	public Map<Environment, Area> visibleArea;
+	public Map<Environment, Area> rememberArea;
+	public Map<Environment, int[][]> seenBefore;
 
 	// Inventory and stuff?
 	public List<Item> inventory;
@@ -130,9 +132,17 @@ public class Person extends RndPhysObj implements Mover
 	List<PersonCopy> pastCopies;
 	double pastCopyTimer;
 
+	// this:
+	public int portalToOtherEnvironment = -1;
+	public double portalVariableX = 0;
+	public double portalVariableY = 0;
+
 	public Person(double x1, double y1)
 	{
 		super(x1, y1, 0, 0);
+		visibleArea = new HashMap<Environment, Area>();
+		rememberArea = new HashMap<Environment, Area>();
+		seenBefore = new HashMap<Environment, int[][]>();
 		mass = 70; // TODO
 		radius = 24;
 		id = Person.giveID();
@@ -1052,9 +1062,12 @@ public class Person extends RndPhysObj implements Mover
 	{
 		if (yes)
 		{
-			slippedTimeLeft = 3;
-			prone = true;
-			evasion = 0.8 * evasion; // reducing evasion
+			if (!prone)
+			{
+				slippedTimeLeft = 3;
+				prone = true;
+				evasion = 0.8 * evasion; // reducing evasion
+			}
 		}
 		else
 		{
@@ -1216,7 +1229,7 @@ public class Person extends RndPhysObj implements Mover
 		buffer.setColor(Color.black);
 		buffer.drawString(s, (int) (x - s.length() / 2 * 10), (int) (y - radius - 28));
 
-		buffer.rotate(cameraRotation, x, y);
+		buffer.rotate(-cameraRotation, x, y);
 	}
 
 	public void drawData(Graphics2D buffer, boolean drawLife, boolean drawMana, boolean drawStamina, double cameraRotation)
@@ -1233,7 +1246,7 @@ public class Person extends RndPhysObj implements Mover
 			if (drawStamina)
 				drawStamina(buffer);
 		}
-		buffer.rotate(cameraRotation, x, y);
+		buffer.rotate(-cameraRotation, x, y);
 	}
 
 	public void drawLife(Graphics2D buffer)

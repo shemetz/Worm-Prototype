@@ -170,8 +170,8 @@ public class Methods
 
 		if ((xDelta == 0) && (yDelta == 0))
 		{
-			MAIN.errorMessage("That's not a line");
-			return null;
+			// oh who cares
+			return new Point2D.Double(sx1, sy1);
 		}
 
 		double u = ((px - sx1) * xDelta + (py - sy1) * yDelta) / (xDelta * xDelta + yDelta * yDelta);

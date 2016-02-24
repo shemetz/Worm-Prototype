@@ -1,6 +1,8 @@
 package mainClasses;
 
 import java.awt.geom.Area;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Player extends Person
 {
@@ -24,8 +26,8 @@ public class Player extends Person
 	public double portalMovementRotation = 0;
 	public double portalCameraRotation = 0;
 	public boolean[] wasdPortalArray; // used to disable/enable movement axis rotation
-	Area visibleRememberArea = null;
 	boolean limitedVisibility = true;
+	Map<Environment, Area> visibleRememberArea;
 
 	// maybe hotkeys shouldn't belong to the player?
 
@@ -38,6 +40,7 @@ public class Player extends Person
 		wasdPortalArray = new boolean[4];
 		for (int i = 0; i < 4; i++)
 			wasdPortalArray[i] = false;
+		visibleRememberArea = new HashMap<Environment, Area>();
 	}
 
 	public void updateSubStats()

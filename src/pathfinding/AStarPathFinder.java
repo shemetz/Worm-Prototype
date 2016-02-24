@@ -80,7 +80,7 @@ public class AStarPathFinder implements PathFinder
 	{
 		// easy first check, if the destination is blocked, we can't get there
 
-		if (map.blocked(mover, tx, ty))
+		if (map.blocked(mover, tx, ty) || map.blocked(mover, sx, sy))
 		{
 			return null;
 		}

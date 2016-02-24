@@ -17,8 +17,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Random;
 import java.util.function.Predicate;
 
+import abilities.Portals;
 import effects.Burning;
 import effects.E_Resistant;
 import effects.Tangled;
@@ -41,21 +43,20 @@ public class Environment
 	public boolean showDamageNumbers = true;
 	public Point windDirection;
 	public double shadowX, shadowY;
-	
+
 	// All of these shouldn't be ints, they range from -1 to 12 or -1 to 100. :/
-	public int[][] wallHealths; // 2D array of wall healths. -1 = no wall. 100 = full health wall.
+	public int width, height, widthPixels, heightPixels;
+	public int[][] floorTypes; // -1 = no floor. 0 = ground.
 	public int[][] wallTypes; // 2D array of wall types. Types are equal to the wall's element. -1 = no wall.
-	public int[][] poolHealths; // ditto, for pools
+	public int[][] wallHealths; // 2D array of wall healths. -1 = no wall. 100 = full health wall.
 	public int[][] poolTypes; // ditto, for pools
+	public int[][] poolHealths; // ditto, for pools
+
 	public BufferedImage[][] poolImages; // cropped images, to join the pool corners
 	public int[][] cornerCracks;
 	public int[][][] wCornerStyles; // x, y, element; corners on the *UP-LEFT* corner of the corresponding square. +1 = +90 degrees clockwise
 	public int[][][] pCornerStyles; // x, y, element; the int means both the shape and its rotation
 	public int[][][] pCornerTransparencies;
-	public int[][] floorTypes; // -1 = no floor. 0 = ground.
-	public int width, height, widthPixels, heightPixels; // used for camera-blocking purposes
-	// 0 1 2 3 4 5 6 7 8 9 10 11
-	// "Fire", "Water", "Wind", "Electricity", "Metal", "Ice", "Energy", "Acid", "Lava", "Flesh", "Earth", "Plant"
 
 	public List<VisualEffect> visualEffects;
 	public List<ArcForceField> AFFs; // Arc Force Fields
@@ -70,13 +71,24 @@ public class Environment
 	public List<SprayDrop> sprayDrops;
 	public List<Portal> portals;
 
+	Area visibleRememberArea = null;
+
+	List<Environment> subEnvironments;
+	Environment parent = null;
+	int globalX, globalY;
+	public int id;
+
 	// Sounds
 	public List<SoundEffect> ongoingSounds = new ArrayList<SoundEffect>();
 
-	public Environment(int width1, int height1)
+	public Environment(int globalx, int globaly, int width1, int height1)
 	{
-		this.width = width1;
-		this.height = height1;
+		globalX = globalx;
+		globalY = globaly;
+		width = width1;
+		height = height1;
+		id = Environment.giveID();
+		subEnvironments = new ArrayList<Environment>();
 		amountOfElements = Resources.numOfElements;
 		wallHealths = new int[width][height];
 		wallTypes = new int[width][height];
@@ -88,8 +100,8 @@ public class Environment
 		wCornerStyles = new int[width][height][amountOfElements];
 		pCornerStyles = new int[width][height][amountOfElements];
 		pCornerTransparencies = new int[width][height][amountOfElements];
-		this.widthPixels = width * squareSize;
-		this.heightPixels = height * squareSize;
+		widthPixels = width * squareSize;
+		heightPixels = height * squareSize;
 		// default shadow position is directly below.
 		shadowX = 0;
 		shadowY = 0;
@@ -824,62 +836,73 @@ public class Environment
 			p.x += moveQuantumX;
 			p.y += moveQuantumY;
 
-			// boundary check
-			if (p.x < 0 + 80 + p.radius)
-				p.x = 0 + 80 + p.radius;
-			if (p.y < 0 + 80 + p.radius)
-				p.y = 0 + 80 + p.radius;
-			if (p.x > this.widthPixels - 80 - p.radius)
-				p.x = this.widthPixels - 80 - p.radius;
-			if (p.y > this.heightPixels - 80 - p.radius)
-				p.y = this.heightPixels - 80 - p.radius;
-
 			// check collisions with walls in the environment, locked to a grid
-			if (p.z <= 1)
-				for (int i = (int) (p.x - p.radius); velocityLeft > 0 && i / squareSize <= (int) (p.x + p.radius) / squareSize; i += squareSize)
-					for (int j = (int) (p.y - p.radius); velocityLeft > 0 && j / squareSize <= (int) (p.y + p.radius) / squareSize; j += squareSize)
+			int minGridX = Math.min(Math.max((int) (p.x - p.radius) / squareSize, 0), width - 1);
+			int minGridY = Math.min(Math.max((int) (p.y - p.radius) / squareSize, 0), height - 1);
+			int maxGridX = Math.min(Math.max((int) (p.x + p.radius) / squareSize, 0), width - 1);
+			int maxGridY = Math.min(Math.max((int) (p.y + p.radius) / squareSize, 0), height - 1);
+			for (int i = minGridX; i <= maxGridX; i++)
+				for (int j = minGridY; j <= maxGridY; j++)
+				{
+					if (p.z <= 1 && wallTypes[i][j] != -1)
 					{
-						if (wallTypes[i / squareSize][j / squareSize] != -1)
+						if (!p.ghostMode) // ghosts pass through stuff
 						{
-							if (!p.ghostMode) // ghosts pass through stuff
+							if (p.z > 0.1 && p.z <= 1 && p.zVel < 0) // if falling into a wall
 							{
-								if (p.z > 0.1 && p.z <= 1 && p.zVel < 0) // if falling into a wall
+								p.z = 1; // standing on a wall
+								p.zVel = 0;
+								if (p instanceof NPC)
+									((NPC) p).justCollided = true;
+							}
+							else if (p.z < 1)
+							{
+								double prevVelocity = velocityLeft;
+								if (collideWithWall(p, i, j))
 								{
-									p.z = 1; // standing on a wall
-									p.zVel = 0;
+									p.x -= moveQuantumX;
+									p.y -= moveQuantumY;
 									if (p instanceof NPC)
 										((NPC) p).justCollided = true;
-								}
-								else if (p.z < 1)
-								{
-									double prevVelocity = velocityLeft;
-									if (collideWithWall(p, i / squareSize, j / squareSize))
+									if (p.z > 0 && p.zVel < 0)
 									{
-										p.x -= moveQuantumX;
-										p.y -= moveQuantumY;
-										if (p instanceof NPC)
-											((NPC) p).justCollided = true;
-										if (p.z > 0 && p.zVel < 0)
-										{
-											p.z -= p.zVel * deltaTime;
-											p.zVel = 0;
-										}
-										velocityLeft *= Math.sqrt(p.xVel * p.xVel + p.yVel * p.yVel) * deltaTime / prevVelocity;
-										// "velocity" decreases as the thing moves. If speed is decreased, velocity is multiplied by the ratio of the previous speed and the current one.
-										if (velocityLeft != 0)
-										{
-											moveQuantumX = p.xVel / velocityLeft * deltaTime;
-											moveQuantumY = p.yVel / velocityLeft * deltaTime;
-											p.x += moveQuantumX;
-											p.y += moveQuantumY;
-										}
+										p.z -= p.zVel * deltaTime;
+										p.zVel = 0;
+									}
+									velocityLeft *= Math.sqrt(p.xVel * p.xVel + p.yVel * p.yVel) * deltaTime / prevVelocity;
+									// "velocity" decreases as the thing moves. If speed is decreased, velocity is multiplied by the ratio of the previous speed and the current one.
+									if (velocityLeft != 0)
+									{
+										moveQuantumX = p.xVel / velocityLeft * deltaTime;
+										moveQuantumY = p.yVel / velocityLeft * deltaTime;
+										p.x += moveQuantumX;
+										p.y += moveQuantumY;
 									}
 								}
 							}
-							else // to avoid ghosts reappearing inside walls
-								p.insideWall = true;
+						}
+						else // to avoid ghosts reappearing inside walls
+							p.insideWall = true;
+					}
+					else if (wallTypes[i][j] == -2) // Edge walls
+					{
+						p.x -= moveQuantumX;
+						p.y -= moveQuantumY;
+						if (p instanceof NPC)
+							((NPC) p).justCollided = true;
+						double prevVelocity = velocityLeft;
+						collideWithWall(p, i, j);
+						velocityLeft *= Math.sqrt(p.xVel * p.xVel + p.yVel * p.yVel) * deltaTime / prevVelocity;
+						// "velocity" decreases as the thing moves. If speed is decreased, velocity is multiplied by the ratio of the previous speed and the current one.
+						if (velocityLeft != 0)
+						{
+							moveQuantumX = p.xVel / velocityLeft * deltaTime;
+							moveQuantumY = p.yVel / velocityLeft * deltaTime;
+							p.x += moveQuantumX;
+							p.y += moveQuantumY;
 						}
 					}
+				}
 
 			// People-people collisions
 			for (Person p2 : people)
@@ -1023,6 +1046,16 @@ public class Environment
 			personRect = new Rectangle2D.Double((int) p.x - p.radius, (int) p.y - p.radius, p.radius * 2, p.radius * 2);
 		}
 
+		// boundary check
+		if (p.x < 0)
+			p.x = 0;
+		if (p.y < 0)
+			p.y = 0;
+		if (p.x > this.widthPixels - 1)
+			p.x = this.widthPixels - 1;
+		if (p.y > this.heightPixels - 1)
+			p.y = this.heightPixels - 1;
+
 		// check if person passed through a Portal
 		/*
 		 * NOTE: This WILL fail if the player tries a lot of time in different rottions, "edging" the portal, and so sometimes players will exit on the other side of the portal. Right now this is a known bug, because I'm not really sure how to fix
@@ -1039,8 +1072,22 @@ public class Environment
 				double angleChange = intersectedPortal.partner.angle - intersectedPortal.angle;
 				double angleRelativeToPortal = Math.atan2(p.y - intersectedPortal.y, p.x - intersectedPortal.x);
 				double distanceRelativeToPortal = Math.sqrt(Methods.DistancePow2(intersectedPortal.x, intersectedPortal.y, p.x, p.y));
-				p.x = intersectedPortal.partner.x + distanceRelativeToPortal * Math.cos(angleRelativeToPortal + angleChange);
-				p.y = intersectedPortal.partner.y + distanceRelativeToPortal * Math.sin(angleRelativeToPortal + angleChange);
+				if (this.id != intersectedPortal.partner.envID)
+				{
+					p.portalToOtherEnvironment = intersectedPortal.partner.envID;
+					p.portalVariableX = intersectedPortal.partner.x + distanceRelativeToPortal * Math.cos(angleRelativeToPortal + angleChange);
+					p.portalVariableY = intersectedPortal.partner.y + distanceRelativeToPortal * Math.sin(angleRelativeToPortal + angleChange);
+				}
+				else
+				{
+					p.x = intersectedPortal.partner.x + distanceRelativeToPortal * Math.cos(angleRelativeToPortal + angleChange);
+					p.y = intersectedPortal.partner.y + distanceRelativeToPortal * Math.sin(angleRelativeToPortal + angleChange);
+					if (p instanceof Player)
+					{
+						p.portalVariableX = intersectedPortal.x + distanceRelativeToPortal * Math.cos(angleRelativeToPortal + angleChange);
+						p.portalVariableY = intersectedPortal.y + distanceRelativeToPortal * Math.sin(angleRelativeToPortal + angleChange);
+					}
+				}
 				p.z += intersectedPortal.partner.z - intersectedPortal.z;
 				p.rotation += angleChange;
 				double newAngle = p.angle() + angleChange;
@@ -1070,14 +1117,6 @@ public class Environment
 				for (int j = (int) (p.y - 0.5 * p.radius); j / squareSize <= (int) (p.y + 0.5 * p.radius) / squareSize; j += squareSize)
 					if (wallTypes[i / squareSize][j / squareSize] != -1)
 						p.insideWall = true;
-		// test boundaries
-		if (p.x < 0 || p.y < 0 || p.x > widthPixels || p.y > heightPixels)
-		{
-			p.x -= p.xVel;
-			p.y -= p.yVel;
-			p.xVel = 0;
-			p.yVel = 0;
-		}
 
 		// rotate if corpse
 		double someConstant = 0.1623542545; // whatever
@@ -1150,8 +1189,9 @@ public class Environment
 				.intersection(new Rectangle((int) (p.x - 0.5 * p.radius), (int) (p.y - 0.5 * p.radius), (int) (p.radius), (int) (p.radius)));
 		// Damage to walls is mass of person * velocity * 0.00005; (kg * cm/s)
 		// Damage to people is velocity * wall health * 0.00001;
-		hitPerson(p, wallHealths[x][y] * p.velocity() * 0.00004, 0, p.angle() + TAU / 2, 10); // earth damage
-		damageWall(x, y, p.mass * p.velocity() * 0.0005, 0); // blunt damage
+		hitPerson(p, wallHealths[x][y] * p.velocity() * 0.00004, 0, p.angle() + TAU / 2, -1); // blunt damage
+		if (wallElement != -2)
+			damageWall(x, y, p.mass * p.velocity() * 0.0005, 0); // blunt damage
 		if (wallHealths[x][y] > 0) // if wall survives the collision, it deflects the person
 		{
 			if (p.x > intersectRect.x + 0.5 * intersectRect.width)
@@ -2012,8 +2052,6 @@ public class Environment
 			for (Evasion e : b.theAbility.evasions)
 				if (e.id == p.id)
 					continue peopleLoop;
-			if (p.prone)
-				continue peopleLoop;
 			if (p.z <= b.z + b.height / 2 && p.highestPoint() > b.z - b.height / 2) // height check
 			{
 				Rectangle2D TyrannosaurusRect = new Rectangle2D.Double(p.x - 0.5 * p.radius, p.y - 0.5 * p.radius, p.radius, p.radius);
@@ -2124,40 +2162,25 @@ public class Environment
 			{
 				Point2D intersection = Methods.getSegmentIntersection(beamLine, p.Line2D());
 				if (intersection != null)
-					if (Methods.DistancePow2(b.start, intersection) > minimumDistanceFromStart * minimumDistanceFromStart)
-					{
-						collisionLine = p.Line2D();
-						collisionType = 6;
-						collidedPortal = p;
-					}
+				{
+					double distPow2 = Methods.DistancePow2(b.start, intersection);
+					if (distPow2 > minimumDistanceFromStart * minimumDistanceFromStart)
+						if (distPow2 < shortestDistancePow2)
+						{
+							shortestDistancePow2 = distPow2;
+							collisionLine = p.Line2D();
+							collisionType = 6;
+							collidedPortal = p;
+						}
+				}
 			}
 		}
-
-		// Spray debris under beam if needed
-		if (Math.random() < 0.12) // 12% chance
-			switch (b.elementNum)
-			{
-			case 1: // water
-			case 7: // acid
-			case 8: // lava
-			case 9: // blood
-				double distance = Math.sqrt(Methods.DistancePow2(b.start, b.end));
-				int amount = (int) (distance / 200);
-				for (int i = 0; i < amount; i++)
-				{
-					double d = Math.random() * distance;
-					debris.add(new Debris(b.start.x + d * Math.cos(angle) + d / 10 * Math.sin(angle) * (Math.random() * 2 - 1),
-							b.start.y + d * Math.sin(angle) + d / 10 * Math.cos(angle) * (Math.random() * 2 - 1), b.z, Math.random() * Math.PI * 2, b.elementNum, true, 3 * Math.random()));
-				}
-				break;
-			default:
-				break;
-			}
 
 		if (collisionType == -1)
 		{
 			b.endType = 0;
 			b.endAngle = angle;
+			sprayDebris(b);
 			return;
 		}
 
@@ -2167,6 +2190,7 @@ public class Environment
 		{
 			b.endType = 0;
 			b.endAngle = angle;
+			sprayDebris(b);
 			return;
 		}
 		Point roundedIntersectionPoint = new Point((int) intersectionPoint.getX(), (int) intersectionPoint.getY());
@@ -2313,7 +2337,32 @@ public class Environment
 
 		if (b.endType != 1)
 			b.endAngle = angle;
+		sprayDebris(b);
+	}
 
+	void sprayDebris(Beam b)
+	{
+		double angle = Math.atan2(b.end.y - b.start.y, b.end.x - b.start.x);
+		// Spray debris under beam if needed
+		if (Math.random() < 0.12) // 12% chance
+			switch (b.elementNum)
+			{
+			case 1: // water
+			case 7: // acid
+			case 8: // lava
+			case 9: // blood
+				double distance = Math.sqrt(Methods.DistancePow2(b.start, b.end));
+				int amount = (int) (distance / 200);
+				for (int i = 0; i < amount; i++)
+				{
+					double d = Math.random() * distance;
+					debris.add(new Debris(b.start.x + d * Math.cos(angle) + d / 10 * Math.sin(angle) * (Math.random() * 2 - 1),
+							b.start.y + d * Math.sin(angle) + d / 10 * Math.cos(angle) * (Math.random() * 2 - 1), b.z, Math.random() * Math.PI * 2, b.elementNum, true, 3 * Math.random()));
+				}
+				break;
+			default:
+				break;
+			}
 	}
 
 	Beam getReflectedBeam(Beam b, Line2D collisionLine)
@@ -2944,6 +2993,8 @@ public class Environment
 
 	private void recursivePoolUpdate(int x, int y, int elementNum, int newHealth)
 	{
+		if (x < 0 || y < 0 || x >= width || y >= height)
+			return;
 		if (poolTypes[x][y] != elementNum || !checkedSquares[x][y])
 			return;
 		poolHealths[x][y] = newHealth;
@@ -3361,10 +3412,18 @@ public class Environment
 		final double minDistance = 0;
 		final double extra = 70;
 
-		Line2D top = new Line2D.Double(bounds.getX(), bounds.getY(), bounds.getX() + bounds.getWidth(), bounds.getY());
-		Line2D left = new Line2D.Double(bounds.getX(), bounds.getY(), bounds.getX(), bounds.getY() + bounds.getHeight());
-		Line2D bottom = new Line2D.Double(bounds.getX(), bounds.getY() + bounds.getHeight(), bounds.getX() + bounds.getWidth(), bounds.getY() + bounds.getHeight());
-		Line2D right = new Line2D.Double(bounds.getX() + bounds.getWidth(), bounds.getY(), bounds.getX() + bounds.getWidth(), bounds.getY() + bounds.getHeight());
+		double minX = Math.min(Math.max(bounds.getX(), 0 + 6), widthPixels - 1 - 6);
+		double maxX = Math.min(Math.max(bounds.getX() + bounds.getWidth(), 0 + 6), widthPixels - 1 - 6);
+		double minY = Math.min(Math.max(bounds.getY(), 0 + 6), heightPixels - 1 - 6);
+		double maxY = Math.min(Math.max(bounds.getY() + bounds.getHeight(), 0 + 6), heightPixels - 1 - 6);
+		// if (minX == maxX || minY == maxY)
+		// return new Area();
+		if (person.x < minX || person.x > maxX || person.y < minY || person.y > maxY)
+			return new Area();
+		Line2D top = new Line2D.Double(minX, minY, maxX, minY);
+		Line2D left = new Line2D.Double(minX, minY, minX, maxY);
+		Line2D bottom = new Line2D.Double(minX, maxY, maxX, maxY);
+		Line2D right = new Line2D.Double(maxX, minY, maxX, maxY);
 		List<Line2D> boundsLines = new ArrayList<Line2D>();
 		boundsLines.add(top);
 		boundsLines.add(left);
@@ -3423,22 +3482,27 @@ public class Environment
 									}
 								}
 
-			// update seenBefore
-			int x = (int) (closestPoint.getX() + 1 * Math.cos(angle)) / squareSize;
-			x = Math.max(0, x);
-			x = Math.min(x, width - 1);
-			int y = (int) (closestPoint.getY() + 1 * Math.sin(angle)) / squareSize;
-			y = Math.max(0, y);
-			y = Math.min(y, height - 1);
-			seenBefore[x][y] = 1;
+			if (closestPoint != null)
+			{
+				// update seenBefore
+				int x = (int) (closestPoint.getX() + 1 * Math.cos(angle)) / squareSize;
+				x = Math.max(0, x);
+				x = Math.min(x, width - 1);
+				int y = (int) (closestPoint.getY() + 1 * Math.sin(angle)) / squareSize;
+				y = Math.max(0, y);
+				y = Math.min(y, height - 1);
+				seenBefore[x][y] = 1;
 
-			visibleAreaPolygon.addPoint((int) (closestPoint.getX() + extra * Math.cos(angle)), (int) (closestPoint.getY() + extra * Math.sin(angle)));
+				visibleAreaPolygon.addPoint((int) (closestPoint.getX() + extra * Math.cos(angle)), (int) (closestPoint.getY() + extra * Math.sin(angle)));
+			}
 		}
 		return new Area(visibleAreaPolygon);
 	}
 
 	public void addWall(int x, int y, int elementalType, boolean fullHealth)
 	{
+		if (x < 0 || y < 0 || x >= width || y >= height)
+			return;
 		if (poolTypes[x][y] != -1 || (wallTypes[x][y] != -1 && fullHealth))
 			remove(x, y);
 		wallTypes[x][y] = elementalType;
@@ -3452,6 +3516,8 @@ public class Environment
 
 	public void addPool(int x, int y, int elementalType, boolean fullHealth)
 	{
+		if (x < 0 || y < 0 || x >= width || y >= height)
+			return;
 		if ((wallTypes[x][y] != -1 || poolTypes[x][y] != -1) && !fullHealth)
 			return; // can't create where there's already something
 		for (Person p : people)
@@ -3556,6 +3622,8 @@ public class Environment
 
 	void checkWCorner(int e, int x, int y)
 	{
+		if (e == -2)
+			return;
 		if (x < width - 1 && y < height - 1 && x > 1 && y > 1)
 		{
 			boolean a = wallTypes[x - 1][y - 1] == e; // LU
@@ -3682,5 +3750,119 @@ public class Environment
 			return 2;
 		else
 			return 3;
+	}
+
+	private static int lastIDgiven = 0;
+
+	public static int giveID()
+	{
+		if (lastIDgiven >= Integer.MAX_VALUE)
+		{
+			MAIN.errorMessage("HAHAHAHAHAHAHAHA what the fuck?");
+			lastIDgiven = Integer.MIN_VALUE;
+		}
+		return lastIDgiven++;
+	}
+
+	public static void resetIDs()
+	{
+		lastIDgiven = 0;
+	}
+
+	public void tempBuild()
+	{
+		Random random = new Random();
+		// outer bounds - grey walls
+		for (int i = 0; i < width; i++)
+			for (int j = 0; j < height; j++)
+			{
+				floorTypes[i][j] = 0;
+				if (i == 0 || j == 0 || i == width - 1 || j == height - 1)
+				{
+					if (random.nextDouble() > 0.05) // 5% of an opening
+						addWall(i, j, -2, true);
+				}
+			}
+
+		// Shadow direction and distance of every object
+		shadowX = 1;
+		shadowY = -0.7;
+
+		if (width > 7 && height > 7)
+			// Random 5x5 walls
+			for (int i = 0; i < 15; i++)
+			{
+				int sx = random.nextInt(width - 7) + 1;
+				int sy = random.nextInt(height - 7) + 1;
+				for (int x = sx; x < sx + 5; x++)
+					for (int y = sy; y < sy + 5; y++)
+						addWall(x, y, 10, true);
+			}
+		if (width > 7)
+			// Random 5x1 lines
+			for (int i = 0; i < 10; i++)
+			{
+				int sx = random.nextInt(width - 7) + 1;
+				int sy = random.nextInt(height - 2) + 1;
+				for (int x = sx; x < sx + 5; x++)
+					addWall(x, sy, 10, true);
+			}
+		if (height > 7)
+			// Random 1x5 lines
+			for (int i = 0; i < 10; i++)
+			{
+				int sx = random.nextInt(width - 2) + 1;
+				int sy = random.nextInt(height - 7) + 1;
+				for (int y = sy; y < sy + 5; y++)
+					addWall(sx, y, 10, true);
+			}
+	}
+
+	public void removeAroundPerson(Person p)
+	{
+		remove((int) (p.x - p.radius) / squareSize, (int) (p.y - p.radius) / squareSize);
+		remove((int) (p.x - p.radius) / squareSize, (int) (p.y + p.radius) / squareSize);
+		remove((int) (p.x + p.radius) / squareSize, (int) (p.y - p.radius) / squareSize);
+		remove((int) (p.x + p.radius) / squareSize, (int) (p.y + p.radius) / squareSize);
+	}
+
+	public boolean checkPortal(Portal p1)
+	{
+		// boundary tests
+		if (p1.start.x < 0 || p1.start.y < 0 || p1.start.x >= widthPixels || p1.start.y >= heightPixels)
+			return false;
+		if (p1.end.x < 0 || p1.end.y < 0 || p1.end.x >= widthPixels || p1.end.y >= heightPixels)
+			return false;
+
+		// wall tests
+		if (p1.z <= 1)
+		{
+			int minX = Math.min(Math.max((int) (p1.x - p1.length / 2) / squareSize, 0), width - 1);
+			int maxX = Math.min(Math.max((int) (p1.x + p1.length / 2) / squareSize, 0), width - 1);
+			int minY = Math.min(Math.max((int) (p1.y - p1.length / 2) / squareSize, 0), height - 1);
+			int maxY = Math.min(Math.max((int) (p1.y + p1.length / 2) / squareSize, 0), height - 1);
+			for (int x = minX; x <= maxX; x++)
+				for (int y = minY; y <= maxY; y++)
+					if (wallTypes[x][y] != -1)
+						if (Methods.getSegmentPointDistancePow2(p1.start.x, p1.start.y, p1.end.x, p1.end.y, x * squareSize + squareSize / 2, y * squareSize + squareSize / 2) < squareSize / 2
+								* squareSize / 2)
+							return false;
+		}
+
+		for (Portal p2 : portals)
+			if (p1.z <= p2.highestPoint() && p2.z <= p1.highestPoint())
+			{
+				if (p1.Line2D().intersectsLine(p2.Line2D()))
+					return false;
+				if (Methods.getSegmentPointDistancePow2(p2.start.x, p2.start.y, p2.end.x, p2.end.y, p1.start.x, p1.start.y) < Portals.minimumDistanceBetweenPortalsPow2)
+					return false;
+				if (Methods.getSegmentPointDistancePow2(p2.start.x, p2.start.y, p2.end.x, p2.end.y, p1.end.x, p1.end.y) < Portals.minimumDistanceBetweenPortalsPow2)
+					return false;
+				if (Methods.getSegmentPointDistancePow2(p1.start.x, p1.start.y, p1.end.x, p1.end.y, p2.start.x, p2.start.y) < Portals.minimumDistanceBetweenPortalsPow2)
+					return false;
+				if (Methods.getSegmentPointDistancePow2(p1.start.x, p1.start.y, p1.end.x, p1.end.y, p2.end.x, p2.end.y) < Portals.minimumDistanceBetweenPortalsPow2)
+					return false;
+			}
+		return true;
 	}
 }

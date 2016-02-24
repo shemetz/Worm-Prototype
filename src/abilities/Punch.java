@@ -10,6 +10,7 @@ import mainClasses.ArcForceField;
 import mainClasses.Ball;
 import mainClasses.Environment;
 import mainClasses.ForceField;
+import mainClasses.MAIN;
 import mainClasses.Methods;
 import mainClasses.Person;
 import mainClasses.Player;
@@ -56,6 +57,11 @@ public class Punch extends Ability
 
 		if (user.z == 0 || user.z == 1)
 		{
+			if (user.maintaining && user.abilityMaintaining == -1)
+			{
+				// BUG !!!!!! THIS CODE IS NOT PERMANENT IT IS TEMPORARY
+				MAIN.errorMessage("shvbypxuh .. . ?  " + user.name + "   " + user.abilities + " " + user.abilityTryingToRepetitivelyUse);
+			}
 			if (!user.prone && (!user.maintaining || user.abilities.get(user.abilityMaintaining) instanceof Sprint)) // special enable for sprint-punching
 				if (cost <= user.stamina)
 				{
