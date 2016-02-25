@@ -25,10 +25,6 @@ import effects.Burning;
 import effects.E_Resistant;
 import effects.Tangled;
 import mainResourcesPackage.SoundEffect;
-import pathfinding.Path;
-import pathfinding.PathFinder;
-import pathfinding.ProcGenPathFinder;
-import pathfinding.ProceduralGenerationMap;
 
 public class Environment
 {
@@ -42,7 +38,7 @@ public class Environment
 	public final static double[] poolFriction = new double[]
 	{ -1, 0.3, -1, -1, 0.8, 0.2, -1, 0.6, 0.7, 0.3, 0.8, 0.6 }; // depending on pool type
 	public final static double[] wallFriction = new double[]
-	{ -1, 0.3, -1, -1, 0.8, 0.2, -1, 0.6, 0.7, 0.3, 0.8, 0.6 }; // depending on wall type
+	{ -1, 0.3, -1, -1, 0.8, 0.2, -1, 0.6, 0.7, 0.3, 0.8, 0.6, 0.75 }; // depending on wall type
 	public boolean devMode = false;
 	public boolean showDamageNumbers = true;
 	public Point windDirection;
@@ -3920,7 +3916,7 @@ public class Environment
 
 				// floor
 				for (int xx = x + 1; xx < x + w; xx++)
-					for (int yy = y + 1; yy <= y + h; yy++)
+					for (int yy = y + 1; yy < y + h; yy++)
 						floorTypes[xx][yy] = roomFloor;
 
 				rooms.add(room);
@@ -3962,6 +3958,16 @@ public class Environment
 					badPlaces.add(new Point(x, y));
 		while (!badPlaces.isEmpty())
 		{
+			System.out.println();
+			for (int y = 1; y < height - 1; y++)
+			{
+				for (int x = 1; x < width - 1; x++)
+					System.out.print(scores[x][y]);
+				System.out.print("     ");
+				for (int x = 1; x < width - 1; x++)
+					System.out.print(wallTypes[x][y] >= 0 ? "X" : "*");
+				System.out.println();
+			}
 			Point spot = badPlaces.get(0);
 			removeFast(spot.x, spot.y);
 			for (int x2 = spot.x - 1; x2 <= spot.x + 1; x2++)
@@ -3971,11 +3977,25 @@ public class Environment
 					if (x2 > 1 && y2 > 1 && x2 < width - 1 && y2 < height - 1)
 						if (wallTypes[x2][y2] >= 0)
 						{
+							int directlyAdjacents = 0 + (wallTypes[x2 - 1][y2] >= 0 ? 1 : 0) + (wallTypes[x2 + 1][y2] >= 0 ? 1 : 0) + (wallTypes[x2][y2 + 1] >= 0 ? 1 : 0)
+									+ (wallTypes[x2][y2 - 1] >= 0 ? 1 : 0);
+							// OOO
+							// OXX
+							// OOO
 							if (scores[x2][y2] == 2)
-								badPlaces.add(new Point(x2, y2));
+								badPlaces.add(1, new Point(x2, y2));
+							// OOX
+							// OXX
+							// OOX
 							if (scores[x2][y2] == 4)
-								if (!(wallTypes[x2 - 1][y2] >= 0 && wallTypes[x2 + 1][y2] >= 0) && !(wallTypes[x2][y2 - 1] >= 0 && wallTypes[x2][y2 + 1] >= 0))
-									badPlaces.add(new Point(x2, y2));
+								if (directlyAdjacents == 1)
+									badPlaces.add(1, new Point(x2, y2));
+							// OOX
+							// OXX
+							// OOO
+							if (scores[x2][y2] == 3)
+								if (directlyAdjacents == 1)
+									badPlaces.add(1, new Point(x2, y2));
 						}
 				}
 			badPlaces.remove(0);
@@ -3989,20 +4009,20 @@ public class Environment
 						if (random.nextDouble() < 0.12) // chance of door
 							removeFast(x, y);
 
-		// Pathways! Fun!
-		for (int i = 0; i < 40; i++)
-		{
-			ProceduralGenerationMap map = new ProceduralGenerationMap(width, height, rooms, wallTypes);
-			PathFinder pf = new ProcGenPathFinder(map, width + height, false);
-
-			Room r1 = rooms.get(random.nextInt(rooms.size()));
-			Room r2 = rooms.get(random.nextInt(rooms.size()));
-			Path path = pf.findPath(null, r1.x + r1.width / 2, r1.y + r1.height / 2, r2.x + r2.width / 2, r2.y + r2.height / 2);
-			if (path != null)
-				for (int j = 0; j < path.getLength(); j++)
-					if (floorTypes[path.getX(j)][path.getY(j)] == noFloor || floorTypes[path.getX(j)][path.getY(j)] == roomFloorEdge)
-						floorTypes[path.getX(j)][path.getY(j)] = pavement;
-		}
+		// // Pathways! Fun!
+		// for (int i = 0; i < 40; i++)
+		// {
+		// ProceduralGenerationMap map = new ProceduralGenerationMap(width, height, rooms, wallTypes);
+		// PathFinder pf = new ProcGenPathFinder(map, width + height, false);
+		//
+		// Room r1 = rooms.get(random.nextInt(rooms.size()));
+		// Room r2 = rooms.get(random.nextInt(rooms.size()));
+		// Path path = pf.findPath(null, r1.x + r1.width / 2, r1.y + r1.height / 2, r2.x + r2.width / 2, r2.y + r2.height / 2);
+		// if (path != null)
+		// for (int j = 0; j < path.getLength(); j++)
+		// if (floorTypes[path.getX(j)][path.getY(j)] == noFloor || floorTypes[path.getX(j)][path.getY(j)] == roomFloorEdge)
+		// floorTypes[path.getX(j)][path.getY(j)] = pavement;
+		// }
 	}
 
 	void weirdWallGen(Random random)
