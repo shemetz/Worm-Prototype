@@ -101,7 +101,7 @@ public class Environment
 		poolImages = new BufferedImage[width][height];
 		floorTypes = new int[width][height];
 		cornerCracks = new int[width][height];
-		wCornerStyles = new int[width][height][amountOfElements];
+		wCornerStyles = new int[width][height][amountOfElements + 1]; // 12 = cement
 		pCornerStyles = new int[width][height][amountOfElements];
 		pCornerTransparencies = new int[width][height][amountOfElements];
 		widthPixels = width * squareSize;
@@ -132,9 +132,10 @@ public class Environment
 				poolImages[x][y] = null;
 				floorTypes[x][y] = -1;
 				cornerCracks[x][y] = -1;
-				for (int i = 0; i < amountOfElements; i++)
-				{
+				for (int i = 0; i < wCornerStyles[0][0].length; i++)
 					wCornerStyles[x][y][i] = -1;
+				for (int i = 0; i < pCornerStyles[0][0].length; i++)
+				{
 					pCornerStyles[x][y][i] = -1;
 					pCornerTransparencies[x][y][i] = 100;
 				}
@@ -2705,11 +2706,36 @@ public class Environment
 					debris.add(new Debris(x, y, 0, i + Math.random(), n, 300));
 			break;
 		case "destroy":
-			debris.add(new Debris(x, y, 0, Math.random() * 2 * Math.PI, n, 300));
+			for (int i = 0; i < 5; i++)
+				debris.add(new Debris(x * squareSize + 0.5 * squareSize, y * squareSize + 0.5 * squareSize, 0, Math.PI * 2 / 5 * i, n, 200));
 			break;
 		default:
 			MAIN.errorMessage("Error message 7: BEBHMAXBRI0903 T");
 			break;
+		}
+	}
+
+	public int getWallDebrisType(int wallType)
+	{
+		switch (wallType)
+		{
+		case -2:
+			return -1;
+		case 12: // cement
+			return 15;
+		default:
+			return wallType;
+		}
+	}
+
+	public int getPoolDebrisType(int poolType)
+	{
+		switch (poolType)
+		{
+		case -2:
+			return -1;
+		default:
+			return poolType;
 		}
 	}
 
@@ -3117,7 +3143,7 @@ public class Environment
 							buffer.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
 						}
 						// pool corners
-						for (int i = amountOfElements - 1; i >= 0; i--)
+						for (int i = pCornerStyles[0][0].length - 1; i >= 0; i--)
 							// decreasing order because I want earth walls to be bottomest and earth is one of the last elements
 							if (pCornerStyles[x][y][i] != -1)
 							{
@@ -3153,7 +3179,7 @@ public class Environment
 								buffer.drawImage(Resources.cracks[0][11], x * squareSize, y * squareSize, null);
 						}
 						// wall corners
-						for (int i = amountOfElements - 1; i >= 0; i--)
+						for (int i = wCornerStyles[0][0].length - 1; i >= 0; i--)
 							if (wCornerStyles[x][y][i] != -1)
 							{
 								BufferedImage cornerImg = Resources.wCorner[i][getCornerStyle(wCornerStyles[x][y][i])][Environment.getCornerAngle(wCornerStyles[x][y][i])];
@@ -3599,7 +3625,7 @@ public class Environment
 	{
 		for (int i = 0; i < wCornerStyles.length; i++)
 			for (int j = 0; j < wCornerStyles[0].length; j++)
-				for (int e = 0; e < amountOfElements; e++)
+				for (int e = 0; e < wCornerStyles[0][0].length; e++)
 					checkWCorner(e, i, j);
 	}
 
@@ -3623,18 +3649,14 @@ public class Environment
 	{
 		int elementNum = wallTypes[x][y];
 		if (remove(x, y))
-		{
-			for (int i = 0; i < 5; i++)
-				debris.add(new Debris(x * squareSize + 0.5 * squareSize, y * squareSize + 0.5 * squareSize, 0, Math.PI * 2 / 5 * i, elementNum, 200));
-		}
+			otherDebris(x, y, getWallDebrisType(elementNum), "destroy", 0);
 	}
 
 	public void destroyPool(int x, int y)
 	{
 		int elementNum = poolTypes[x][y];
-		for (int i = 0; i < 5; i++)
-			debris.add(new Debris(x * squareSize + 0.5 * squareSize, y * squareSize + 0.5 * squareSize, 0, Math.PI * 2 / 5 * i, elementNum, 200));
-		remove(x, y);
+		if (remove(x, y))
+			otherDebris(x, y, getPoolDebrisType(elementNum), "destroy", 0);
 	}
 
 	public void connectPool(int x, int y)
@@ -3854,7 +3876,7 @@ public class Environment
 
 	void cityLikeWallGen(Random random)
 	{
-		int cement = 4; // It's metal. :|
+		int cement = 12;
 		int roomFloor = 1;
 		int roomFloorEdge = 2;
 		int noFloor = 0;
@@ -3968,7 +3990,7 @@ public class Environment
 							removeFast(x, y);
 
 		// Pathways! Fun!
-		for (int i = 0; i < 15; i++)
+		for (int i = 0; i < 40; i++)
 		{
 			ProceduralGenerationMap map = new ProceduralGenerationMap(width, height, rooms, wallTypes);
 			PathFinder pf = new ProcGenPathFinder(map, width + height, false);
@@ -4139,5 +4161,21 @@ public class Environment
 					return false;
 			}
 		return true;
+	}
+
+	public void personPunchWall(Person user, double leftoverPushback, int wallType)
+	{
+		int element = -1;
+		switch (wallType)
+		{
+		case -2: // edge walls
+		case 12: // cement
+			element = 10;
+			break;
+		default:
+			element = wallType;
+			break;
+		}
+		hitPerson(user, Math.max(0, 7 - 0.5 * user.STRENGTH), leftoverPushback, user.rotation - Math.PI, element);
 	}
 }

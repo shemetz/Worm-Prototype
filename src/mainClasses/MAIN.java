@@ -696,37 +696,47 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 											((NPC) p).justCollided = true;
 									}
 								}
+			Person p = null;
+			for (Person p2 : env.people)
+				if (p2.equals(aff.target))
+					p = p2;
+			//If person inside is gone
+			if (p == null)
+			{
+				env.shieldDebris(aff, "bubble");
+				env.AFFs.remove(i);
+				i--;
+				continue affloop;
+			}
 			if (aff.life <= 0)
 			{
-				for (Person p : env.people)
-					if (p.equals(aff.target))
-						for (Ability a : p.abilities)
+				for (Ability a : p.abilities)
+				{
+					if (a instanceof Shield_E)
+					{
+						Shield_E ability = (Shield_E) a;
+						if (aff.equals(ability.shield))
 						{
-							if (a instanceof Shield_E)
-							{
-								Shield_E ability = (Shield_E) a;
-								if (aff.equals(ability.shield))
-								{
-									ability.use(env, p, p.target); // that method will remove the arc force field.
-									i--;
-									continue affloop;
-								}
-							}
-							if (a instanceof Protective_Bubble_I)
-							{
-								Protective_Bubble_I ability = (Protective_Bubble_I) a;
-								if (aff.equals(ability.bubble))
-								{
-									ability.on = false;
-									ability.sounds.get(1).play();
-									ability.cooldownLeft = ability.cooldown;
-									env.shieldDebris(aff, "bubble");
-									env.AFFs.remove(i);
-									i--;
-									continue affloop;
-								}
-							}
+							ability.use(env, p, p.target); // that method will remove the arc force field.
+							i--;
+							continue affloop;
 						}
+					}
+					if (a instanceof Protective_Bubble_I)
+					{
+						Protective_Bubble_I ability = (Protective_Bubble_I) a;
+						if (aff.equals(ability.bubble))
+						{
+							ability.on = false;
+							ability.sounds.get(1).play();
+							ability.cooldownLeft = ability.cooldown;
+							env.shieldDebris(aff, "bubble");
+							env.AFFs.remove(i);
+							i--;
+							continue affloop;
+						}
+					}
+				}
 			}
 		}
 		// FORCE FIELDS

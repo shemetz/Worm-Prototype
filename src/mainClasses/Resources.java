@@ -12,7 +12,7 @@ import mainResourcesPackage.ResourceLoader;
 
 public class Resources
 {
-	public static BufferedImage[] wall; // type
+	public static BufferedImage[] wall; // type. 12 = cement
 	public static BufferedImage[] pool; // type
 	public static BufferedImage[][] croppedPool; // type, 0123 = abcd, 45 = two bridge types
 	public static BufferedImage[] floor; // type
@@ -27,7 +27,7 @@ public class Resources
 	public static BufferedImage[] balls; // element
 	public static BufferedImage[][] beams; // element, type (0,1,2,3 = start, 4,5,6,7 = middle, 8,9,10,11 = flat end, 12,13,14,15 regular end)
 	public static BufferedImage[][] sprayDrops; // element, type
-	public static BufferedImage[][] debris; // element, type. 12 = smoke, 13 = Force Field, 14 = blood.
+	public static BufferedImage[][] debris; // element, type. 12 = smoke, 13 = Force Field, 14 = blood, 15 = cement
 	public static BufferedImage[][] debrisShadows; // element, type. ^
 	public final static int debrisWidth = 40;
 	public static List<BufferedImage> clouds;
@@ -39,12 +39,12 @@ public class Resources
 
 	public static void initialize()
 	{
-		wall = new BufferedImage[numOfElements];
+		wall = new BufferedImage[numOfElements + 1];
 		pool = new BufferedImage[numOfElements];
 		croppedPool = new BufferedImage[numOfElements][14];
 		floor = new BufferedImage[3];
-		wCorner = new BufferedImage[numOfElements][4][4];
-		pCorner = new BufferedImage[numOfElements][4][4];
+		wCorner = new BufferedImage[wall.length][4][4];
+		pCorner = new BufferedImage[pool.length][4][4];
 
 		bodyPart = new ArrayList<List<List<List<BufferedImage>>>>(); // LEGS, CHEST (+arms), HEAD, HAIR, VINES
 
@@ -52,7 +52,7 @@ public class Resources
 		arcForceFields = new BufferedImage[numOfElements + 1][4]; // 0-11 = elemental, 12 = Prot. Bubble
 		balls = new BufferedImage[numOfElements];
 		sprayDrops = new BufferedImage[numOfElements][3];
-		debris = new BufferedImage[numOfElements + 3][6];
+		debris = new BufferedImage[numOfElements + 4][6];
 		debrisShadows = new BufferedImage[debris.length][6];
 		cracks = new BufferedImage[3][12]; // 11 is saved for the original wall, not corners
 		clouds = new ArrayList<BufferedImage>();
@@ -184,27 +184,27 @@ public class Resources
 			}
 		}
 
-		// Smoke debris
-		for (int j = 0; j < 3; j++)
-			debris[12][j] = ResourceLoader.getBufferedImage("debris/Smoke_debris_" + j + ".png");
-		for (int j = 0; j < 3; j++)
-			debris[12][j + 3] = ResourceLoader.getBufferedImage("debris/Smoke_smalldebris_" + j + ".png");
-		for (int j = 0; j < debris[0].length; j++)
-			debrisShadows[12][j] = Drawable.createShadow(debris[12][j]);
-		// FF debris
-		for (int j = 0; j < 3; j++)
-			debris[13][j] = ResourceLoader.getBufferedImage("debris/FF_debris_" + j + ".png");
-		for (int j = 0; j < 3; j++)
-			debris[13][j + 3] = ResourceLoader.getBufferedImage("debris/FF_smalldebris_" + j + ".png");
-		for (int j = 0; j < debris[0].length; j++)
-			debrisShadows[13][j] = Drawable.createShadow(debris[13][j]);
-		// Blood debris
-		for (int j = 0; j < 3; j++)
-			debris[14][j] = ResourceLoader.getBufferedImage("debris/Blood_debris_" + j + ".png");
-		for (int j = 0; j < 3; j++)
-			debris[14][j + 3] = ResourceLoader.getBufferedImage("debris/Blood_smalldebris_" + j + ".png");
-		for (int j = 0; j < debris[0].length; j++)
-			debrisShadows[14][j] = Drawable.createShadow(debris[14][j]);
+		// Cement walls, and corners
+		wall[12] = ResourceLoader.getBufferedImage("environment/wall_Cement.png");
+		wCorner[12][0][0] = ResourceLoader.getBufferedImage("environment/wCorner_Cement_up.png");
+		wCorner[12][1][0] = ResourceLoader.getBufferedImage("environment/wCorner_Cement_bridge.png");
+		wCorner[12][2][0] = ResourceLoader.getBufferedImage("environment/wCorner_Cement_bite.png");
+		wCorner[12][3][0] = ResourceLoader.getBufferedImage("environment/wCorner_Cement_full.png");
+		for (int j = 0; j < 4; j++) // Rotated corner images
+			for (int k = 1; k < 4; k++)
+				wCorner[12][j][k] = Methods.rotate(wCorner[12][j][0], 0.5 * Math.PI * k);
+
+		String[] moreDebris = new String[]
+		{ "Smoke", "FF", "Blood", "Cement" };
+		for (int i = 0; i < moreDebris.length; i++)
+		{
+			for (int j = 0; j < 3; j++)
+				debris[12 + i][j] = ResourceLoader.getBufferedImage("debris/" + moreDebris[i] + "_debris_" + j + ".png");
+			for (int j = 0; j < 3; j++)
+				debris[12 + i][j + 3] = ResourceLoader.getBufferedImage("debris/" + moreDebris[i] + "_smalldebris_" + j + ".png");
+			for (int j = 0; j < debris[0].length; j++)
+				debrisShadows[12 + i][j] = Drawable.createShadow(debris[12 + i][j]);
+		}
 
 		// Protective bubble
 		for (int j = 0; j < 4; j++)

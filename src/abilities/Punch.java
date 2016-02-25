@@ -180,7 +180,7 @@ public class Punch extends Ability
 							int wallHealth = env.wallHealths[i][j];
 							double leftoverPushback = wallHealth > damage + pushback ? pushback : Math.min(wallHealth, pushback);
 							env.damageWall(i, j, damage + pushback, punchDamageType);
-							env.hitPerson(user, Math.max(0, 7 - 0.5 * user.STRENGTH), leftoverPushback, user.rotation - Math.PI, env.wallTypes[i][j]); // When punching walls, you damage yourself by 7 damage points.
+							env.personPunchWall(user, leftoverPushback, env.wallTypes[i][j]);
 							user.punchedSomething = true;
 							break collisionCheck;
 						}

@@ -62,7 +62,7 @@ public class Elemental_Void extends Ability
 							if (env.wallHealths[x][y] > 0)
 							{
 								env.wallHealths[x][y] -= damage / distancePow2;
-								env.debris.add(new Debris(centerX, centerY, 1, Math.atan2(user.y - centerY, user.x - centerX) + Math.PI / 2, env.wallTypes[x][y], speed));
+								env.debris.add(new Debris(centerX, centerY, 1, Math.atan2(user.y - centerY, user.x - centerX) + Math.PI / 2, env.getWallDebrisType(env.wallTypes[x][y]), speed));
 								if (env.wallHealths[x][y] <= 0)
 									env.destroyWall(x, y);
 								env.connectWall(x, y);
@@ -70,7 +70,7 @@ public class Elemental_Void extends Ability
 						if (env.poolHealths[x][y] > 0)
 						{
 							env.poolHealths[x][y] -= damage / distancePow2;
-							env.debris.add(new Debris(centerX, centerY, 1, Math.atan2(user.y - centerY, user.x - centerX) + Math.PI / 2, env.poolTypes[x][y], speed));
+							env.debris.add(new Debris(centerX, centerY, 1, Math.atan2(user.y - centerY, user.x - centerX) + Math.PI / 2, env.getPoolDebrisType(env.poolTypes[x][y]), speed));
 							if (env.poolHealths[x][y] <= 0)
 								env.destroyPool(x, y);
 						}
@@ -78,7 +78,7 @@ public class Elemental_Void extends Ability
 				}
 		}
 	}
-	
+
 	public void disable(Environment env, Person user)
 	{
 		disabled = true;
