@@ -5,7 +5,7 @@ import mainClasses.Effect;
 
 public class E_Resistant extends Effect
 {
-	String element;
+	public String element;
 
 	public E_Resistant(String element1, int strength1, Ability CA)
 	{

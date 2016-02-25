@@ -42,7 +42,7 @@ public class Resources
 		wall = new BufferedImage[numOfElements];
 		pool = new BufferedImage[numOfElements];
 		croppedPool = new BufferedImage[numOfElements][14];
-		floor = new BufferedImage[1];
+		floor = new BufferedImage[3];
 		wCorner = new BufferedImage[numOfElements][4][4];
 		pCorner = new BufferedImage[numOfElements][4][4];
 
@@ -219,7 +219,8 @@ public class Resources
 
 		// no need to transform it into BufferedImage.TYPE_INT_RGB or anything similar, won't work :(
 		floor[0] = ResourceLoader.getBufferedImage("environment/floor_Earth.png");
-		// TODO additional forcefield types
+		floor[1] = ResourceLoader.getBufferedImage("environment/floor_room.png");
+		floor[2] = ResourceLoader.getBufferedImage("environment/floor_roomSide.png");
 
 		disabled = ResourceLoader.getBufferedImage("icons/effects/disabled.png");
 

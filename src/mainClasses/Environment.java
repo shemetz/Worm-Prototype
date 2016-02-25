@@ -25,6 +25,10 @@ import effects.Burning;
 import effects.E_Resistant;
 import effects.Tangled;
 import mainResourcesPackage.SoundEffect;
+import pathfinding.Path;
+import pathfinding.PathFinder;
+import pathfinding.ProcGenPathFinder;
+import pathfinding.ProceduralGenerationMap;
 
 public class Environment
 {
@@ -34,7 +38,7 @@ public class Environment
 	public final int numOfClouds = 0;
 	public final int minCloudHeight = 60, maxCloudHeight = 400;
 	public final static double[] floorFriction = new double[]
-	{ 0.6 }; // depending on floor type
+	{ 0.6, 0.55, 0.7 }; // depending on floor type
 	public final static double[] poolFriction = new double[]
 	{ -1, 0.3, -1, -1, 0.8, 0.2, -1, 0.6, 0.7, 0.3, 0.8, 0.6 }; // depending on pool type
 	public final static double[] wallFriction = new double[]
@@ -2742,8 +2746,8 @@ public class Environment
 
 			// TODO all damage-related powers
 			damage = p.damageAfterHittingArmor(damage, elementNum, percentageOfTheDamage);
-			if (p.ghostMode && elementNum != 9) // damageType 9 is ghost wall-clipping
-				if (elementNum != 2 && elementNum != 4)
+			if (p.ghostMode && elementNum != -1) // ghost wall-clipping
+				if (EP.damageType(elementNum) == 2 || EP.damageType(elementNum) == 4)
 				{
 					damage = 0;
 					pushback = 0;
@@ -2756,12 +2760,13 @@ public class Environment
 			// Elemental resistance
 			for (Effect e : p.effects)
 				if (e instanceof E_Resistant)
-				{
-					if (e.strength >= 5)
-						damage = 0;
-					else
-						damage *= Math.pow(0.75, e.strength); // maybe change it to 1-0.15*e.strength ?
-				}
+					if (EP.damageType(((E_Resistant) e).element) == EP.damageType(elementNum))
+					{
+						if (e.strength >= 5)
+							damage = 0;
+						else
+							damage *= Math.pow(0.75, e.strength); // maybe change it to 1-0.15*e.strength ?
+					}
 
 			double randomNumber = Math.random(); // for elemental effect checks
 
@@ -3514,6 +3519,23 @@ public class Environment
 		checkWCorner(elementalType, x + 1, y + 1);
 	}
 
+	/**
+	 * Adds a full health wall without removing walls or updating corners. After doing this a lot of times, do updateAllWallCorners() Will not add if it's -6174
+	 * 
+	 * @param x
+	 * @param y
+	 * @param elementalType
+	 */
+	public void addWall(int x, int y, int elementalType)
+	{
+		if (x < 0 || y < 0 || x >= width || y >= height)
+			return;
+		if (wallTypes[x][y] == -6174)
+			return;
+		wallTypes[x][y] = elementalType;
+		wallHealths[x][y] = 100;
+	}
+
 	public void addPool(int x, int y, int elementalType, boolean fullHealth)
 	{
 		if (x < 0 || y < 0 || x >= width || y >= height)
@@ -3532,6 +3554,20 @@ public class Environment
 		checkPCorner(elementalType, x, y + 1);
 		checkPCorner(elementalType, x + 1, y + 1);
 		updatePools();
+	}
+
+	/**
+	 * Removes without checking or updating stuff
+	 * 
+	 * @param x
+	 * @param y
+	 */
+	public void removeFast(int x, int y)
+	{
+		wallTypes[x][y] = -1;
+		wallHealths[x][y] = -1;
+		poolTypes[x][y] = -1;
+		poolHealths[x][y] = -1;
 	}
 
 	public boolean remove(int x, int y)
@@ -3557,6 +3593,14 @@ public class Environment
 			return true;
 		}
 		return false;
+	}
+
+	public void updateAllWallCorners()
+	{
+		for (int i = 0; i < wCornerStyles.length; i++)
+			for (int j = 0; j < wCornerStyles[0].length; j++)
+				for (int e = 0; e < amountOfElements; e++)
+					checkWCorner(e, i, j);
 	}
 
 	public void updateWallCorners(int x, int y, int element)
@@ -3624,7 +3668,7 @@ public class Environment
 	{
 		if (e == -2)
 			return;
-		if (x < width - 1 && y < height - 1 && x > 1 && y > 1)
+		if (x <= width - 1 && y <= height - 1 && x >= 1 && y >= 1)
 		{
 			boolean a = wallTypes[x - 1][y - 1] == e; // LU
 			boolean b = wallTypes[x][y - 1] == e; // RU
@@ -3769,53 +3813,284 @@ public class Environment
 		lastIDgiven = 0;
 	}
 
+	static long getSeed(Environment e)
+	{
+		Long l = (long) Integer.hashCode(7 * e.globalX * e.globalY);
+		return l;
+	}
+
 	public void tempBuild()
 	{
-		Random random = new Random();
-		// outer bounds - grey walls
+		Random random = new Random(Environment.getSeed(this));
+		// floor
 		for (int i = 0; i < width; i++)
 			for (int j = 0; j < height; j++)
 			{
 				floorTypes[i][j] = 0;
-				if (i == 0 || j == 0 || i == width - 1 || j == height - 1)
-				{
-					if (random.nextDouble() > 0.05) // 5% of an opening
-						addWall(i, j, -2, true);
-				}
+				// if (i == 0 || j == 0 || i == width - 1 || j == height - 1)
+				// {
+				// if (random.nextDouble() > 0.05 || (i == 0 && j == 0) || (i == width - 1 && j == 0) || (i == 0 && j == height - 1) || (i == width - 1 && j == height - 1)) // 5% of an opening if this is not a corner
+				// addWall(i, j, -2, true);
+				// }
 			}
 
 		// Shadow direction and distance of every object
 		shadowX = 1;
 		shadowY = -0.7;
 
-		if (width > 7 && height > 7)
-			// Random 5x5 walls
-			for (int i = 0; i < 15; i++)
+		cityLikeWallGen(random);
+
+		// Cut open all marked doors
+		for (int i = 0; i < width; i++)
+			for (int j = 0; j < height; j++)
+				if (wallTypes[i][j] == -6174)
+				{
+					wallTypes[i][j] = 5;
+					wallHealths[i][j] = 100;
+				}
+
+		updateAllWallCorners();
+	}
+
+	void cityLikeWallGen(Random random)
+	{
+		int cement = 4; // It's metal. :|
+		int roomFloor = 1;
+		int roomFloorEdge = 2;
+		int noFloor = 0;
+		int pavement = 1;
+
+		List<Room> rooms = new ArrayList<Room>();
+		// rooms
+		for (int i = 0; i < 30; i++)
+		{
+			int w = random.nextInt(8) + 4;
+			int h = random.nextInt(8) + 4;
+			int x = random.nextInt(width - w);
+			int y = random.nextInt(height - h);
+			Room room = new Room(x, y, w, h, -1);
+			boolean no = false;
+			for (Room r : rooms)
+				if (r.intersects(room))
+					no = true;
+			if (!no)
 			{
-				int sx = random.nextInt(width - 7) + 1;
-				int sy = random.nextInt(height - 7) + 1;
-				for (int x = sx; x < sx + 5; x++)
-					for (int y = sy; y < sy + 5; y++)
-						addWall(x, y, 10, true);
+				for (int xx = room.x; xx <= room.x + room.width; xx++)
+				{
+					floorTypes[xx][room.y] = roomFloorEdge;
+					addWall(xx, room.y, cement);
+				}
+				for (int xx = room.x; xx <= room.x + room.width; xx++)
+				{
+					floorTypes[xx][room.y + room.height] = roomFloorEdge;
+					addWall(xx, room.y + room.height, cement);
+				}
+				for (int yy = room.y; yy <= room.y + room.height; yy++)
+				{
+					floorTypes[room.x][yy] = roomFloorEdge;
+					addWall(room.x, yy, cement);
+				}
+				for (int yy = room.y; yy <= room.y + room.height; yy++)
+				{
+					floorTypes[room.x + room.width][yy] = roomFloorEdge;
+					addWall(room.x + room.width, yy, cement);
+				}
+
+				// floor
+				for (int xx = x + 1; xx < x + w; xx++)
+					for (int yy = y + 1; yy <= y + h; yy++)
+						floorTypes[xx][yy] = roomFloor;
+
+				rooms.add(room);
 			}
-		if (width > 7)
-			// Random 5x1 lines
-			for (int i = 0; i < 10; i++)
+		}
+
+		// lines
+		for (int i = 0; i < 10; i++)
+		{
+			int w = random.nextInt(12) + 3;
+			int x = random.nextInt(width - w);
+			int y = random.nextInt(height);
+			for (int xx = x; xx <= x + w; xx++)
+				addWall(xx, y, cement);
+		}
+		for (int i = 0; i < 10; i++)
+		{
+			int h = random.nextInt(12) + 3;
+			int x = random.nextInt(width);
+			int y = random.nextInt(height - h);
+			for (int yy = y; yy <= y + h; yy++)
+				addWall(x, yy, cement);
+		}
+
+		// remove bulbs until there are none
+		List<Point> badPlaces = new ArrayList<Point>();
+		int[][] scores = new int[width][height];
+		for (int x = 0; x < width; x++)
+			for (int y = 0; y < height; y++)
+				scores[x][y] = 0;
+		for (int x = 1; x < width - 1; x++)
+			for (int y = 1; y < height - 1; y++)
+				for (int x2 = x - 1; x2 <= x + 1; x2++)
+					for (int y2 = y - 1; y2 <= y + 1; y2++)
+						scores[x2][y2] += (wallTypes[x][y] == -1 ? 0 : 1);
+		for (int x = 1; x < width - 1; x++)
+			for (int y = 1; y < height - 1; y++)
+				if (wallTypes[x][y] > 0 && scores[x][y] == 2)
+					badPlaces.add(new Point(x, y));
+		while (!badPlaces.isEmpty())
+		{
+			Point spot = badPlaces.get(0);
+			removeFast(spot.x, spot.y);
+			for (int x2 = spot.x - 1; x2 <= spot.x + 1; x2++)
+				for (int y2 = spot.y - 1; y2 <= spot.y + 1; y2++)
+				{
+					scores[x2][y2]--;
+					if (x2 > 1 && y2 > 1 && x2 < width - 1 && y2 < height - 1)
+						if (wallTypes[x2][y2] >= 0)
+						{
+							if (scores[x2][y2] == 2)
+								badPlaces.add(new Point(x2, y2));
+							if (scores[x2][y2] == 4)
+								if (!(wallTypes[x2 - 1][y2] >= 0 && wallTypes[x2 + 1][y2] >= 0) && !(wallTypes[x2][y2 - 1] >= 0 && wallTypes[x2][y2 + 1] >= 0))
+									badPlaces.add(new Point(x2, y2));
+						}
+				}
+			badPlaces.remove(0);
+		}
+
+		// add random openings in "walls"
+		for (int x = 1; x < width - 1; x++)
+			for (int y = 1; y < height - 1; y++)
+				if (wallTypes[x][y] > 0 && scores[x][y] == 3) // two adjacent walls
+					if ((wallTypes[x - 1][y] >= 0 && wallTypes[x + 1][y] >= 0) || (wallTypes[x][y - 1] >= 0 && wallTypes[x][y + 1] >= 0)) // not corners
+						if (random.nextDouble() < 0.12) // chance of door
+							removeFast(x, y);
+
+		// Pathways! Fun!
+		for (int i = 0; i < 15; i++)
+		{
+			ProceduralGenerationMap map = new ProceduralGenerationMap(width, height, rooms, wallTypes);
+			PathFinder pf = new ProcGenPathFinder(map, width + height, false);
+
+			Room r1 = rooms.get(random.nextInt(rooms.size()));
+			Room r2 = rooms.get(random.nextInt(rooms.size()));
+			Path path = pf.findPath(null, r1.x + r1.width / 2, r1.y + r1.height / 2, r2.x + r2.width / 2, r2.y + r2.height / 2);
+			if (path != null)
+				for (int j = 0; j < path.getLength(); j++)
+					if (floorTypes[path.getX(j)][path.getY(j)] == noFloor || floorTypes[path.getX(j)][path.getY(j)] == roomFloorEdge)
+						floorTypes[path.getX(j)][path.getY(j)] = pavement;
+		}
+	}
+
+	void weirdWallGen(Random random)
+	{
+		int earth = 10; // the element of earth
+
+		// random room
+		int w = random.nextInt(8) + 6;
+		int h = random.nextInt(8) + 6;
+		int x = random.nextInt(width - 2 - w) + 1;
+		int y = random.nextInt(height - 2 - h) + 1;
+		Room room = new Room(x, y, w, h, -1);
+		List<Room> rooms = new ArrayList<Room>();
+		rooms.add(room);
+
+		int iterations = 6;
+
+		for (int i = 0; i < iterations; i++)
+		{
+			List<Room> newRooms = new ArrayList<Room>();
+			for (Room r : rooms)
 			{
-				int sx = random.nextInt(width - 7) + 1;
-				int sy = random.nextInt(height - 2) + 1;
-				for (int x = sx; x < sx + 5; x++)
-					addWall(x, sy, 10, true);
+				// rooms on this room's sides
+				for (int j = 0; j < 4; j++)
+					if (j != r.origin)
+						attempts: for (int attempts = 0; attempts < 5; attempts++)
+						{
+							int pos = 0;
+							if (j % 2 == 0)
+								pos = random.nextInt(r.height - 2) + 1;
+							else
+								pos = random.nextInt(r.width - 2) + 1;
+							w = random.nextInt(5) + 5;
+							h = random.nextInt(5) + 5;
+							switch (j)
+							{
+							case 0: // left
+								x = r.x - w;
+								y = r.y + pos - r.height + 4 + random.nextInt(h - 2);
+								break;
+							case 1: // up
+								x = r.x + pos - r.width + 4 + random.nextInt(w - 2);
+								y = r.y - h;
+								break;
+							case 2: // right
+								x = r.x + r.width;
+								y = r.y + pos - r.height + 4 + random.nextInt(h - 2);
+								break;
+							case 3: // down
+								x = r.x + pos - r.width + 4 + random.nextInt(w - 2);
+								y = r.y + r.height;
+								break;
+							default:
+								MAIN.errorMessage("[23:10:33] * user (uid141620@tooting.irccloud.com) Quit (Quit: Connection closed for inactivity)");
+								break;
+							}
+							room = new Room(x, y, w, h, j);
+							boolean yes = true;
+							// if (x <= 0 || y <= 0 || x + w >= width - 1 || y + h >= height - 1)
+							// yes = false;
+							x = Math.max(x, 0);
+							y = Math.max(y, 0);
+							w = Math.min(w, width - x - 1);
+							h = Math.min(h, height - y - 1);
+							innerCheck: for (int xx = x + 1; xx < x + w; xx++)
+								for (int yy = y + 1; yy < y + h; yy++)
+									if (wallTypes[xx][yy] > -1)
+									{
+										yes = false;
+										break innerCheck;
+									}
+							if (yes)
+							{
+								if (r.x >= 0 && r.y >= 0 && r.x + r.width < width && r.y + r.height < height)
+									switch (j)
+									{
+									case 0:
+										wallTypes[r.x][r.y + pos] = -6174; // Marks as a door
+										break;
+									case 1:
+										wallTypes[r.x + pos][r.y] = -6174; // Marks as a door
+										break;
+									case 2:
+										wallTypes[r.x + r.width][r.y + pos] = -6174; // Marks as a door
+										break;
+									case 3:
+										wallTypes[r.x + pos][r.y + r.height] = -6174; // Marks as a door
+										break;
+									default:
+										MAIN.errorMessage("LCVXJOIDFJ");
+										break;
+									}
+								newRooms.add(room);
+								// add the four sides
+								for (int xx = room.x; xx <= room.x + room.width; xx++)
+									addWall(xx, room.y, earth);
+								for (int xx = room.x; xx <= room.x + room.width; xx++)
+									addWall(xx, room.y + room.height, earth);
+								for (int yy = room.y; yy <= room.y + room.height; yy++)
+									addWall(room.x, yy, earth);
+								for (int yy = room.y; yy <= room.y + room.height; yy++)
+									addWall(room.x + room.width, yy, earth);
+								break attempts;
+							}
+						}
 			}
-		if (height > 7)
-			// Random 1x5 lines
-			for (int i = 0; i < 10; i++)
-			{
-				int sx = random.nextInt(width - 2) + 1;
-				int sy = random.nextInt(height - 7) + 1;
-				for (int y = sy; y < sy + 5; y++)
-					addWall(sx, y, 10, true);
-			}
+			rooms.clear();
+			rooms.addAll(newRooms);
+			newRooms.clear();
+		}
 	}
 
 	public void removeAroundPerson(Person p)

@@ -65,6 +65,7 @@ public class EP
 		{
 		case -2: // outer bound walls
 			return -2;
+		case -1: // blunt
 		case 1:
 		case 2:
 		case 4:
