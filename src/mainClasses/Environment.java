@@ -2475,16 +2475,75 @@ public class Environment
 			destroyWall(i, j);
 		if (damage > 30 && damageType == 0) // hits additional walls if high and blunt damage
 		{
-			// damages other walls by damage * 1 / (distance-1)^2
-			int extra = (int) (((damage - 1) / 11)); // extra number of grid squares from this wall that can possibly be damaged
-			for (int x = Math.max(i - extra, 0); x < i + extra && x < width; x++)
-				for (int y = Math.max(j - extra, 0); y < j + extra && y < height; y++)
-				{
-					if (wallHealths[x][y] > 0 && (x != i || y != j))
-						nonRecursiveDamageWall(x, y, damage / Math.sqrt(Methods.DistancePow2(i, j, x, y)));
-				}
+			damageConnectedWalls(i, j, damage);
 		}
 		connectWall(i, j); // update cracks
+	}
+
+	boolean[][] connectedWalls;
+
+	void damageConnectedWalls(int x, int y, double damage)
+	{
+		connectedWalls = new boolean[width][height];
+
+		// damages other walls by damage * 1 / (distance-1)^2
+		int extra = (int) (((damage - 1) / 11)); // extra number of grid squares from this wall that can possibly be damaged
+
+		// Connect walls that are connected
+		List<Point> iteratedWalls = new ArrayList<Point>();
+		iteratedWalls.add(new Point(x, y));
+		connectedWalls[x][y] = true;
+		List<Point> nextWalls = new ArrayList<Point>();
+		int step = 1;
+		while (step <= extra)
+		{
+			for (int k = 0; k < iteratedWalls.size(); k++)
+			{
+				Point w = iteratedWalls.get(k);
+				for (int i = -1; i <= 1; i++)
+					for (int j = -1; j <= 1; j++)
+					{
+						if (w.x + i < 0 || w.y + j < 0 || w.x + i >= width || w.y + j >= height)
+							continue;
+						if (connectedWalls[w.x + i][w.y + j])
+							continue;
+						if (wallTypes[w.x + i][w.y + j] >= 0)
+						{
+							connectedWalls[w.x + i][w.y + j] = true;
+							nextWalls.add(new Point(w.x + i, w.y + j));
+						}
+					}
+			}
+			iteratedWalls.clear();
+			iteratedWalls.addAll(nextWalls);
+			nextWalls.clear();
+			step++;
+		}
+
+		for (int xx = Math.max(x - extra, 0); xx < x + extra && xx < width; xx++)
+			for (int yy = Math.max(y - extra, 0); yy < y + extra && yy < height; yy++)
+				if (connectedWalls[xx][yy])
+					if (wallHealths[xx][yy] > 0 && (xx != x || yy != y))
+						nonRecursiveDamageWall(xx, yy, damage / Math.sqrt(Methods.DistancePow2(x, y, xx, yy)));
+	}
+
+	/**
+	 * Assumes wall exists in there and does not update cracks
+	 * 
+	 * @param x
+	 * @param y
+	 * @param damage
+	 */
+	void quickDamageWall(int i, int j, double damage)
+	{
+		if (wallTypes[i][j] == -2)
+			return;
+		final int wallArmor = 10;
+		if (damage - wallArmor < 1)
+			return;
+		wallHealths[i][j] -= (int) (damage - wallArmor);
+		if (wallHealths[i][j] <= 0)
+			destroyWall(i, j);
 	}
 
 	public void nonRecursiveDamageWall(int i, int j, double damage)
@@ -3958,16 +4017,6 @@ public class Environment
 					badPlaces.add(new Point(x, y));
 		while (!badPlaces.isEmpty())
 		{
-			System.out.println();
-			for (int y = 1; y < height - 1; y++)
-			{
-				for (int x = 1; x < width - 1; x++)
-					System.out.print(scores[x][y]);
-				System.out.print("     ");
-				for (int x = 1; x < width - 1; x++)
-					System.out.print(wallTypes[x][y] >= 0 ? "X" : "*");
-				System.out.println();
-			}
 			Point spot = badPlaces.get(0);
 			removeFast(spot.x, spot.y);
 			for (int x2 = spot.x - 1; x2 <= spot.x + 1; x2++)
