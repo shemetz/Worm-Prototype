@@ -3875,8 +3875,8 @@ public class Environment
 		int cement = 12;
 		int roomFloor = 1;
 		int roomFloorEdge = 2;
-		int noFloor = 0;
-		int pavement = 1;
+		// int noFloor = 0;
+		// int pavement = 1;
 
 		List<Room> rooms = new ArrayList<Room>();
 		// rooms
