@@ -14,8 +14,8 @@ public class Resources
 {
 	public static BufferedImage[] wall; // type. 12 = cement
 	public static BufferedImage[] pool; // type
+	public static BufferedImage[] floor; // type. dirt, in room, under wall, grass, pavement
 	public static BufferedImage[][] croppedPool; // type, 0123 = abcd, 45 = two bridge types
-	public static BufferedImage[] floor; // type
 	public static BufferedImage[][] cracks; // health type, connection style
 	public static BufferedImage[][][] wCorner; // type, connection (up, bridge, bite, full), angle (in quarter-circles)
 	public static BufferedImage[][][] pCorner; // type, connection (up, bridge, bite, full), angle (in quarter-circles)
@@ -42,7 +42,7 @@ public class Resources
 		wall = new BufferedImage[numOfElements + 1];
 		pool = new BufferedImage[numOfElements];
 		croppedPool = new BufferedImage[numOfElements][14];
-		floor = new BufferedImage[3];
+		floor = new BufferedImage[5];
 		wCorner = new BufferedImage[wall.length][4][4];
 		pCorner = new BufferedImage[pool.length][4][4];
 
@@ -221,6 +221,8 @@ public class Resources
 		floor[0] = ResourceLoader.getBufferedImage("environment/floor_Earth.png");
 		floor[1] = ResourceLoader.getBufferedImage("environment/floor_room.png");
 		floor[2] = ResourceLoader.getBufferedImage("environment/floor_roomSide.png");
+		floor[3] = ResourceLoader.getBufferedImage("environment/floor_grass.png");
+		floor[4] = ResourceLoader.getBufferedImage("environment/floor_pavement.png");
 
 		disabled = ResourceLoader.getBufferedImage("icons/effects/disabled.png");
 

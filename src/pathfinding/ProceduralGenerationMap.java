@@ -1,16 +1,15 @@
 package pathfinding;
 
+import java.awt.Rectangle;
 import java.util.List;
-
-import mainClasses.Room;
 
 public class ProceduralGenerationMap implements TileBasedMap
 {
 	int[][] grid;
 	int width, height;
-	List<Room> rooms;
+	List<Rectangle> rooms;
 
-	public ProceduralGenerationMap(int width1, int height1, List<Room> rooms1, int[][] walls)
+	public ProceduralGenerationMap(int width1, int height1, List<Rectangle> rooms1, int[][] walls)
 	{
 		width = width1;
 		height = height1;
@@ -23,7 +22,7 @@ public class ProceduralGenerationMap implements TileBasedMap
 				if (walls[i][j] > 0)
 					grid[i][j] = 100;
 			}
-		for (Room r : rooms)
+		for (Rectangle r : rooms)
 		{
 			for (int x = r.x; x <= r.x + r.width; x++)
 				grid[x][r.y] = 100;

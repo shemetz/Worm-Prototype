@@ -25,6 +25,10 @@ import effects.Burning;
 import effects.E_Resistant;
 import effects.Tangled;
 import mainResourcesPackage.SoundEffect;
+import pathfinding.Path;
+import pathfinding.PathFinder;
+import pathfinding.ProcGenPathFinder;
+import pathfinding.ProceduralGenerationMap;
 
 public class Environment
 {
@@ -34,7 +38,7 @@ public class Environment
 	public final int numOfClouds = 0;
 	public final int minCloudHeight = 60, maxCloudHeight = 400;
 	public final static double[] floorFriction = new double[]
-	{ 0.6, 0.55, 0.7 }; // depending on floor type
+	{ 0.65, 0.55, 0.7, 0.8, 0.55 };
 	public final static double[] poolFriction = new double[]
 	{ -1, 0.3, -1, -1, 0.8, 0.2, -1, 0.6, 0.7, 0.3, 0.8, 0.6 }; // depending on pool type
 	public final static double[] wallFriction = new double[]
@@ -2181,6 +2185,23 @@ public class Environment
 		{
 			b.endType = 0;
 			b.endAngle = angle;
+			// collide with environment edge
+			Line2D left = new Line2D.Double(0, 0, 0, heightPixels);
+			Line2D up = new Line2D.Double(0, 0, widthPixels, 0);
+			Line2D right = new Line2D.Double(widthPixels, 0, widthPixels, heightPixels);
+			Line2D down = new Line2D.Double(0, heightPixels, widthPixels, heightPixels);
+			Point2D leftIntersect = Methods.getSegmentIntersection(left, beamLine);
+			Point2D upIntersect = Methods.getSegmentIntersection(up, beamLine);
+			Point2D rightIntersect = Methods.getSegmentIntersection(right, beamLine);
+			Point2D downIntersect = Methods.getSegmentIntersection(down, beamLine);
+			if (leftIntersect != null)
+				b.end = new Point3D((int) leftIntersect.getX(), (int) leftIntersect.getY(), b.z);
+			if (upIntersect != null)
+				b.end = new Point3D((int) upIntersect.getX(), (int) upIntersect.getY(), b.z);
+			if (rightIntersect != null)
+				b.end = new Point3D((int) rightIntersect.getX(), (int) rightIntersect.getY(), b.z);
+			if (downIntersect != null)
+				b.end = new Point3D((int) downIntersect.getX(), (int) downIntersect.getY(), b.z);
 			sprayDebris(b);
 			return;
 		}
@@ -2202,6 +2223,7 @@ public class Environment
 			b.end.x = roundedIntersectionPoint.x;
 			b.end.y = roundedIntersectionPoint.y;
 			b.endType = 1;
+
 			if (roundedIntersectionPoint.x == collidedWall.x * squareSize) // left
 				b.endAngle = 0;
 			if (roundedIntersectionPoint.y == collidedWall.y * squareSize) // up
@@ -3915,7 +3937,7 @@ public class Environment
 		shadowX = 1;
 		shadowY = -0.7;
 
-		cityLikeWallGen(random);
+		cityBlockGen(random);
 
 		// Cut open all marked doors
 		for (int i = 0; i < width; i++)
@@ -3929,15 +3951,222 @@ public class Environment
 		updateAllWallCorners();
 	}
 
-	void cityLikeWallGen(Random random)
+	/**
+	 * for a 48x48 Environment
+	 * 
+	 * @param random
+	 */
+	void cityBlockGen(Random random)
+	{
+		final int shift = 3;
+
+		Point[] pos = new Point[]
+		{ new Point(0, 0), new Point(24, 0), new Point(0, 24), new Point(24, 24) };
+		for (int i = 0; i < 4; i++)
+			randomBlock(shift + pos[i].x, shift + pos[i].y, random);
+	}
+
+	enum Block
+	{
+		NORMAL, PARK
+	};
+
+	void randomBlock(int startX, int startY, Random random)
+	{
+		Block block = Block.values()[random.nextInt(Block.values().length)];
+		switch (block)
+		{
+		case NORMAL:
+			normalBuilding(startX, startY, random);
+			break;
+		case PARK:
+			park(startX, startY, random);
+			break;
+		default:
+			MAIN.errorMessage("stop parturing the derkagons, shleem!");
+			break;
+		}
+	}
+
+	void park(int startX, int startY, Random random)
+	{
+		int dirt = 0;
+		int pavement = 4;
+		int grass = 3;
+
+		int size = 16;
+
+		// pavement + big square of grass
+		for (int i = 0; i < size; i++)
+			for (int j = 0; j < size; j++)
+			{
+				if (i == 0 || j == 0 || i == size - 1 || j == size - 1)
+					floorTypes[startX + i][startY + j] = pavement;
+				else
+					floorTypes[startX + i][startY + j] = grass;
+			}
+
+		// path
+		Point[] p = new Point[]
+		{ new Point(-1, 0), new Point(1, 0), new Point(0, -1), new Point(0, 1) };
+		Point snakeHead = new Point(startX + 2, startY + 3 + random.nextInt(size - 4));
+		while (snakeHead.x < startX + size && snakeHead.y < startY + size && snakeHead.x > startX && snakeHead.y > startY)
+		{
+			floorTypes[snakeHead.x][snakeHead.y] = dirt;
+			Point next;
+			do
+			{
+				int i = random.nextInt(4);
+				next = new Point(snakeHead.x + p[i].x, snakeHead.y + p[i].y);
+			}
+			while (floorTypes[next.x][next.y] == dirt);
+			snakeHead = next;
+		}
+	}
+
+	void normalBuilding(int startX, int startY, Random random)
+	{
+		int cement = 12;
+		final int roomFloor = 1;
+		final int roomFloorEdge = 2;
+		int size = 16;
+
+		for (int x = 0; x < size; x++)
+		{
+			floorTypes[startX + x][startY + 0] = roomFloorEdge;
+			addWall(startX + x, startY + 0, cement);
+		}
+		for (int y = 0; y < size; y++)
+		{
+			floorTypes[startX + 0][startY + y] = roomFloorEdge;
+			addWall(startX + 0, startY + y, cement);
+		}
+		for (int x = 0; x < size; x++)
+		{
+			floorTypes[startX + x][startY + size] = roomFloorEdge;
+			addWall(startX + x, startY + size, cement);
+		}
+		for (int y = 0; y < size; y++)
+		{
+			floorTypes[startX + size][startY + y] = roomFloorEdge;
+			addWall(startX + size, startY + y, cement);
+		}
+		addWall(startX + size, startY + size, cement);
+		floorTypes[startX + size][startY + size] = roomFloorEdge;
+		for (int x = 1; x <= size - 1; x++)
+			for (int y = 1; y <= size - 1; y++)
+				floorTypes[startX + x][startY + y] = roomFloor;
+
+		// 0-2 doors on outer sides
+		int numOfDoors = random.nextInt(4);
+		for (int i = 0; i < numOfDoors; i++)
+		{
+			int pos = 1 + random.nextInt(size - 2);
+			switch (random.nextInt(4)) // side
+			{
+			case 0:
+				removeFast(startX + 0, startY + pos);
+				floorTypes[startX + 0][startY + pos] = roomFloor;
+				break;
+			case 1:
+				removeFast(startX + pos, startY + 0);
+				floorTypes[startX + pos][startY + 0] = roomFloor;
+				break;
+			case 2:
+				removeFast(startX + size, startY + pos);
+				floorTypes[startX + size][startY + pos] = roomFloor;
+				break;
+			case 3:
+				removeFast(startX + pos, startY + size);
+				floorTypes[startX + pos][startY + size] = roomFloor;
+				break;
+			default:
+				MAIN.errorMessage(".");
+				break;
+			}
+		}
+
+		// split into rooms
+		int amountOfSplits = random.nextInt(5);
+		if (amountOfSplits == 1)
+			amountOfSplits = 2;
+		boolean[] existing = new boolean[4]; // left up right down
+		for (int i = 0; i < amountOfSplits; i++)
+		{
+			int side;
+			// make sure it's not repeating an already chose side
+			do
+				side = random.nextInt(4);
+			while (existing[side]);
+			existing[side] = true;
+			boolean door = random.nextBoolean();
+			int pos = 1 + random.nextInt(size / 2 - 2); // door
+			switch (side)
+			{
+			case 0: // left
+				for (int x = 1; x < size / 2 + 1; x++)
+				{
+					floorTypes[startX + x][startY + size / 2] = roomFloorEdge;
+					addWall(startX + x, startY + size / 2, cement);
+				}
+				if (door)
+				{
+					removeFast(startX + pos, startY + size / 2);
+					floorTypes[startX + pos][startY + size / 2] = roomFloor;
+				}
+				break;
+			case 1: // up
+				for (int y = 1; y < size / 2 + 1; y++)
+				{
+					floorTypes[startX + size / 2][startY + y] = roomFloorEdge;
+					addWall(startX + size / 2, startY + y, cement);
+				}
+				if (door)
+				{
+					removeFast(startX + size / 2, startY + pos);
+					floorTypes[startX + size / 2][startY + pos] = roomFloor;
+				}
+				break;
+			case 2: // right
+				for (int x = 1; x < size / 2 + 1; x++)
+				{
+					floorTypes[startX + size / 2 + x][startY + size / 2] = roomFloorEdge;
+					addWall(startX + size / 2 + x, startY + size / 2, cement);
+				}
+				if (door)
+				{
+					removeFast(startX + size / 2 + pos, startY + size / 2);
+					floorTypes[startX + size / 2 + pos][startY + size / 2] = roomFloor;
+				}
+				break;
+			case 3:
+				for (int y = 1; y < size / 2 + 1; y++)
+				{
+					floorTypes[startX + size / 2][startY + size / 2 + y] = roomFloorEdge;
+					addWall(startX + size / 2, startY + size / 2 + y, cement);
+				}
+				if (door)
+				{
+					removeFast(startX + size / 2, startY + size / 2 + pos);
+					floorTypes[startX + size / 2][startY + size / 2 + pos] = roomFloor;
+				}
+				break;
+			default:
+				MAIN.errorMessage(".");
+				break;
+			}
+		}
+	}
+
+	void villageGen(Random random)
 	{
 		int cement = 12;
 		int roomFloor = 1;
 		int roomFloorEdge = 2;
-		// int noFloor = 0;
-		// int pavement = 1;
+		int noFloor = 0;
+		int pavement = 1;
 
-		List<Room> rooms = new ArrayList<Room>();
+		List<Rectangle> rooms = new ArrayList<Rectangle>();
 		// rooms
 		for (int i = 0; i < 30; i++)
 		{
@@ -3945,9 +4174,9 @@ public class Environment
 			int h = random.nextInt(8) + 4;
 			int x = random.nextInt(width - w);
 			int y = random.nextInt(height - h);
-			Room room = new Room(x, y, w, h, -1);
+			Rectangle room = new Rectangle(x, y, w, h);
 			boolean no = false;
-			for (Room r : rooms)
+			for (Rectangle r : rooms)
 				if (r.intersects(room))
 					no = true;
 			if (!no)
@@ -4058,129 +4287,19 @@ public class Environment
 						if (random.nextDouble() < 0.12) // chance of door
 							removeFast(x, y);
 
-		// // Pathways! Fun!
-		// for (int i = 0; i < 40; i++)
-		// {
-		// ProceduralGenerationMap map = new ProceduralGenerationMap(width, height, rooms, wallTypes);
-		// PathFinder pf = new ProcGenPathFinder(map, width + height, false);
-		//
-		// Room r1 = rooms.get(random.nextInt(rooms.size()));
-		// Room r2 = rooms.get(random.nextInt(rooms.size()));
-		// Path path = pf.findPath(null, r1.x + r1.width / 2, r1.y + r1.height / 2, r2.x + r2.width / 2, r2.y + r2.height / 2);
-		// if (path != null)
-		// for (int j = 0; j < path.getLength(); j++)
-		// if (floorTypes[path.getX(j)][path.getY(j)] == noFloor || floorTypes[path.getX(j)][path.getY(j)] == roomFloorEdge)
-		// floorTypes[path.getX(j)][path.getY(j)] = pavement;
-		// }
-	}
-
-	void weirdWallGen(Random random)
-	{
-		int earth = 10; // the element of earth
-
-		// random room
-		int w = random.nextInt(8) + 6;
-		int h = random.nextInt(8) + 6;
-		int x = random.nextInt(width - 2 - w) + 1;
-		int y = random.nextInt(height - 2 - h) + 1;
-		Room room = new Room(x, y, w, h, -1);
-		List<Room> rooms = new ArrayList<Room>();
-		rooms.add(room);
-
-		int iterations = 6;
-
-		for (int i = 0; i < iterations; i++)
+		// Pathways! Fun!
+		for (int i = 0; i < 40; i++)
 		{
-			List<Room> newRooms = new ArrayList<Room>();
-			for (Room r : rooms)
-			{
-				// rooms on this room's sides
-				for (int j = 0; j < 4; j++)
-					if (j != r.origin)
-						attempts: for (int attempts = 0; attempts < 5; attempts++)
-						{
-							int pos = 0;
-							if (j % 2 == 0)
-								pos = random.nextInt(r.height - 2) + 1;
-							else
-								pos = random.nextInt(r.width - 2) + 1;
-							w = random.nextInt(5) + 5;
-							h = random.nextInt(5) + 5;
-							switch (j)
-							{
-							case 0: // left
-								x = r.x - w;
-								y = r.y + pos - r.height + 4 + random.nextInt(h - 2);
-								break;
-							case 1: // up
-								x = r.x + pos - r.width + 4 + random.nextInt(w - 2);
-								y = r.y - h;
-								break;
-							case 2: // right
-								x = r.x + r.width;
-								y = r.y + pos - r.height + 4 + random.nextInt(h - 2);
-								break;
-							case 3: // down
-								x = r.x + pos - r.width + 4 + random.nextInt(w - 2);
-								y = r.y + r.height;
-								break;
-							default:
-								MAIN.errorMessage("[23:10:33] * user (uid141620@tooting.irccloud.com) Quit (Quit: Connection closed for inactivity)");
-								break;
-							}
-							room = new Room(x, y, w, h, j);
-							boolean yes = true;
-							// if (x <= 0 || y <= 0 || x + w >= width - 1 || y + h >= height - 1)
-							// yes = false;
-							x = Math.max(x, 0);
-							y = Math.max(y, 0);
-							w = Math.min(w, width - x - 1);
-							h = Math.min(h, height - y - 1);
-							innerCheck: for (int xx = x + 1; xx < x + w; xx++)
-								for (int yy = y + 1; yy < y + h; yy++)
-									if (wallTypes[xx][yy] > -1)
-									{
-										yes = false;
-										break innerCheck;
-									}
-							if (yes)
-							{
-								if (r.x >= 0 && r.y >= 0 && r.x + r.width < width && r.y + r.height < height)
-									switch (j)
-									{
-									case 0:
-										wallTypes[r.x][r.y + pos] = -6174; // Marks as a door
-										break;
-									case 1:
-										wallTypes[r.x + pos][r.y] = -6174; // Marks as a door
-										break;
-									case 2:
-										wallTypes[r.x + r.width][r.y + pos] = -6174; // Marks as a door
-										break;
-									case 3:
-										wallTypes[r.x + pos][r.y + r.height] = -6174; // Marks as a door
-										break;
-									default:
-										MAIN.errorMessage("LCVXJOIDFJ");
-										break;
-									}
-								newRooms.add(room);
-								// add the four sides
-								for (int xx = room.x; xx <= room.x + room.width; xx++)
-									addWall(xx, room.y, earth);
-								for (int xx = room.x; xx <= room.x + room.width; xx++)
-									addWall(xx, room.y + room.height, earth);
-								for (int yy = room.y; yy <= room.y + room.height; yy++)
-									addWall(room.x, yy, earth);
-								for (int yy = room.y; yy <= room.y + room.height; yy++)
-									addWall(room.x + room.width, yy, earth);
-								break attempts;
-							}
-						}
-			}
-			rooms.clear();
-			rooms.addAll(newRooms);
-			newRooms.clear();
+			ProceduralGenerationMap map = new ProceduralGenerationMap(width, height, rooms, wallTypes);
+			PathFinder pf = new ProcGenPathFinder(map, width + height, false);
+
+			Rectangle r1 = rooms.get(random.nextInt(rooms.size()));
+			Rectangle r2 = rooms.get(random.nextInt(rooms.size()));
+			Path path = pf.findPath(null, r1.x + r1.width / 2, r1.y + r1.height / 2, r2.x + r2.width / 2, r2.y + r2.height / 2);
+			if (path != null)
+				for (int j = 0; j < path.getLength(); j++)
+					if (floorTypes[path.getX(j)][path.getY(j)] == noFloor || floorTypes[path.getX(j)][path.getY(j)] == roomFloorEdge)
+						floorTypes[path.getX(j)][path.getY(j)] = pavement;
 		}
 	}
 

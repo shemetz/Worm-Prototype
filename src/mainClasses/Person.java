@@ -1050,7 +1050,7 @@ public class Person extends RndPhysObj implements Mover
 	public void loop(int secondsBackwards, boolean state, boolean position)
 	{
 		int index = pastCopies.size() - 1 - Math.min(secondsBackwards, pastCopies.size() - 1);
-		if (index < 0)
+		if (index < 0 || pastCopies.size() <= 0)
 			MAIN.errorMessage("nope this is not supposed to happen buddy");
 		if (state)
 			copyState(pastCopies.get(index));

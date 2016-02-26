@@ -226,7 +226,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			{
 				if (newEnv == null)
 				{
-					world[worldCoordsX][worldCoordsY] = new Environment(worldCoordsX * 50 * squareSize, worldCoordsY * 50 * squareSize, 50, 50);
+					world[worldCoordsX][worldCoordsY] = new Environment(worldCoordsX * 48 * squareSize, worldCoordsY * 48 * squareSize, 48, 48);
 					environmentList.add(world[worldCoordsX][worldCoordsY]);
 					newEnv = world[worldCoordsX][worldCoordsY];
 					newEnv.tempBuild();
@@ -700,7 +700,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			for (Person p2 : env.people)
 				if (p2.equals(aff.target))
 					p = p2;
-			//If person inside is gone
+			// If person inside is gone
 			if (p == null)
 			{
 				env.shieldDebris(aff, "bubble");
@@ -1364,7 +1364,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 
 		environmentList = new ArrayList<Environment>();
 		world = new Environment[5][5];
-		world[2][2] = new Environment(2 * squareSize * 50, 2 * squareSize * 50, 50, 50);
+		world[2][2] = new Environment(2 * squareSize * 48, 2 * squareSize * 48, 48, 48);
 		environmentList.add(world[2][2]);
 		env = world[2][2];
 		env.tempBuild();
