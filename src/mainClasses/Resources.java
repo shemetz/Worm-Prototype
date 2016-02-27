@@ -20,7 +20,7 @@ public class Resources
 	public static BufferedImage[][][] wCorner; // type, connection (up, bridge, bite, full), angle (in quarter-circles)
 	public static BufferedImage[][][] pCorner; // type, connection (up, bridge, bite, full), angle (in quarter-circles)
 	public static List<List<List<List<BufferedImage>>>> bodyPart; // body part, permutation, state, frame
-	public static Map<String, BufferedImage> icons; // ability, frame
+	public static Map<String, BufferedImage> icons;
 	public final static int numOfElements = 12;
 	public static BufferedImage[][] arcForceFields; // element (12 = Prot. Bubble), frame (healthy / 75% / 50% / 25%)
 	public final static int arcFFImageWidth = 288;
@@ -36,6 +36,7 @@ public class Resources
 	public static BufferedImage[] healingBeam; // frame
 	public static List<List<BufferedImage>> explosions; // type, frame
 	public static BufferedImage disabled;
+	public static Map<String, BufferedImage> furniture; // name, image
 
 	public static void initialize()
 	{
@@ -61,6 +62,7 @@ public class Resources
 		beams = new BufferedImage[numOfElements][16];
 		healingBeam = new BufferedImage[4];
 		explosions = new ArrayList<List<BufferedImage>>();
+		furniture = new HashMap<String, BufferedImage>();
 
 		for (int i = 0; i < numOfElements; i++) // all things that occur per element are in this loop
 		{
@@ -194,6 +196,7 @@ public class Resources
 			for (int k = 1; k < 4; k++)
 				wCorner[12][j][k] = Methods.rotate(wCorner[12][j][0], 0.5 * Math.PI * k);
 
+		// more debris
 		String[] moreDebris = new String[]
 		{ "Smoke", "FF", "Blood", "Cement" };
 		for (int i = 0; i < moreDebris.length; i++)
@@ -205,6 +208,12 @@ public class Resources
 			for (int j = 0; j < debris[0].length; j++)
 				debrisShadows[12 + i][j] = Drawable.createShadow(debris[12 + i][j]);
 		}
+
+		// furniture
+		String[] furnitureStrings = new String[]
+		{ "wood_chair", "door", "desk_0", "desk_1", "desk_2", "plant_pot" };
+		for (int i = 0; i < furnitureStrings.length; i++)
+			furniture.put(furnitureStrings[i], ResourceLoader.getBufferedImage("environment/objects/" + furnitureStrings[i] + ".png"));
 
 		// Protective bubble
 		for (int j = 0; j < 4; j++)

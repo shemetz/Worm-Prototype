@@ -74,6 +74,7 @@ public class Environment
 	public List<Vine> vines;
 	public List<SprayDrop> sprayDrops;
 	public List<Portal> portals;
+	public List<Furniture> furniture;
 
 	Area visibleRememberArea = null;
 
@@ -121,6 +122,7 @@ public class Environment
 		vines = new ArrayList<Vine>();
 		sprayDrops = new ArrayList<SprayDrop>();
 		portals = new ArrayList<Portal>();
+		furniture = new ArrayList<Furniture>();
 
 		for (int x = 0; x < width; x++)
 			for (int y = 0; y < height; y++)
@@ -3146,6 +3148,7 @@ public class Environment
 		drawableThings.addAll(vines);
 		drawableThings.addAll(sprayDrops);
 		drawableThings.addAll(portals);
+		drawableThings.addAll(furniture);
 		Predicate<Drawable> outOfScreen = new Predicate<Drawable>()
 		{
 			public boolean test(Drawable arg0)
@@ -4048,6 +4051,7 @@ public class Environment
 				shiftedWallTypes[(x + shift) % width][(y + shift) % height] = wallTypes[x][y];
 				shiftedWallHealths[(x + shift) % width][(y + shift) % height] = wallHealths[x][y];
 			}
+		//
 		for (int x = 0; x < width; x++)
 			for (int y = 0; y < height; y++)
 			{
@@ -4055,6 +4059,11 @@ public class Environment
 				wallTypes[x][y] = shiftedWallTypes[x][y];
 				wallHealths[x][y] = shiftedWallHealths[x][y];
 			}
+		for (Furniture f : furniture)
+		{
+			f.x = (f.x + shift * squareSize) % widthPixels;
+			f.y = (f.y + shift * squareSize) % heightPixels;
+		}
 	}
 
 	enum Block
@@ -4144,6 +4153,7 @@ public class Environment
 		final int roomFloor = 1;
 		final int roomFloorEdge = 2;
 		int size = 16;
+		int tempFloorUnderFurniture = 234128756;
 
 		for (int x = 0; x < size; x++)
 		{
@@ -4180,19 +4190,23 @@ public class Environment
 			{
 			case 0:
 				removeFast(startX + 0, startY + pos);
-				floorTypes[startX + 0][startY + pos] = roomFloor;
+				floorTypes[startX + 0][startY + pos] = tempFloorUnderFurniture;
+				furniture.add(new Furniture(startX * squareSize + 48, (startY + pos) * squareSize + 48, "door", Math.PI / 2 * 1));
 				break;
 			case 1:
 				removeFast(startX + pos, startY + 0);
-				floorTypes[startX + pos][startY + 0] = roomFloor;
+				floorTypes[startX + pos][startY + 0] = tempFloorUnderFurniture;
+				furniture.add(new Furniture((startX + pos) * squareSize + 48, (startY + 0) * squareSize + 48, "door", Math.PI / 2 * 2));
 				break;
 			case 2:
 				removeFast(startX + size, startY + pos);
-				floorTypes[startX + size][startY + pos] = roomFloor;
+				floorTypes[startX + size][startY + pos] = tempFloorUnderFurniture;
+				furniture.add(new Furniture((startX + size) * squareSize + 48, (startY + pos) * squareSize + 48, "door", Math.PI / 2 * 3));
 				break;
 			case 3:
 				removeFast(startX + pos, startY + size);
-				floorTypes[startX + pos][startY + size] = roomFloor;
+				floorTypes[startX + pos][startY + size] = tempFloorUnderFurniture;
+				furniture.add(new Furniture((startX + pos) * squareSize + 48, (startY + size) * squareSize + 48, "door", 0));
 				break;
 			default:
 				MAIN.errorMessage(".");
@@ -4270,6 +4284,35 @@ public class Environment
 				break;
 			}
 		}
+
+		// Furniture!
+		for (int x = startX + 1; x < startX + size; x++)
+			for (int y = startY + 1; y < startY + size; y++)
+				if (floorTypes[x][y] == roomFloor && wallTypes[x][y] == -1)
+				{
+					if (random.nextDouble() < 0.02) // 2% chance of chair
+					{
+						double angle = random.nextInt(4) * Math.PI * 0.5;
+						floorTypes[x][y] = tempFloorUnderFurniture;
+						furniture.add(new Furniture(x * squareSize + 48, y * squareSize + 48, "wood_chair", angle));
+					}
+					if (random.nextDouble() < 0.01) // 1% chance of desk
+					{
+						double angle = random.nextInt(4) * Math.PI * 0.5;
+						int otherX = (int) (x + Math.cos(angle));
+						int otherY = (int) (y + Math.sin(angle));
+						if (floorTypes[otherX][otherY] == roomFloor)
+						{
+							floorTypes[x][y] = tempFloorUnderFurniture;
+							floorTypes[otherX][otherY] = tempFloorUnderFurniture;
+							furniture.add(new Furniture(x * squareSize + 48 + 48 * Math.cos(angle), y * squareSize + 48 + 48 * Math.sin(angle), "desk", angle));
+						}
+					}
+				}
+		for (int x = startX; x <= startX + size; x++)
+			for (int y = startY; y <= startY + size; y++)
+				if (floorTypes[x][y] == tempFloorUnderFurniture)
+					floorTypes[x][y] = roomFloor;
 	}
 
 	void villageGen(Random random)
