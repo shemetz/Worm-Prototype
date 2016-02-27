@@ -4296,7 +4296,13 @@ public class Environment
 						floorTypes[x][y] = tempFloorUnderFurniture;
 						furniture.add(new Furniture(x * squareSize + 48, y * squareSize + 48, "wood_chair", angle));
 					}
-					if (random.nextDouble() < 0.01) // 1% chance of desk
+					else if (random.nextDouble() < 0.01) // 1% chance of plant pot
+					{
+						double angle = random.nextInt(4) * Math.PI * 0.5;
+						floorTypes[x][y] = tempFloorUnderFurniture;
+						furniture.add(new Furniture(x * squareSize + 48, y * squareSize + 48, "plant_pot", angle));
+					}
+					else if (random.nextDouble() < 0.01) // 1% chance of desk
 					{
 						double angle = random.nextInt(4) * Math.PI * 0.5;
 						int otherX = (int) (x + Math.cos(angle));
