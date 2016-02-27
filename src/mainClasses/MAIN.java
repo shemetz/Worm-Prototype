@@ -1394,7 +1394,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		shmulik.abilities.add(Ability.ability("Ball <Earth>", 6));
 		shmulik.abilities.add(Ability.ability("Heal I", 3));
 		shmulik.name = "Shmulik";
-		env.people.add(shmulik);
+		// env.people.add(shmulik);
 
 		// three neutral people
 		for (int i = 0; i < 3; i++)

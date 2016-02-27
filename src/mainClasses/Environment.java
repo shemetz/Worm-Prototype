@@ -38,7 +38,7 @@ public class Environment
 	public final int numOfClouds = 0;
 	public final int minCloudHeight = 60, maxCloudHeight = 400;
 	public final static double[] floorFriction = new double[]
-	{ 0.65, 0.55, 0.7, 0.8, 0.55 };
+	{ 0.65, 0.55, 0.7, 0.8, 0.55, 0.65, 0.65 };
 	public final static double[] poolFriction = new double[]
 	{ -1, 0.3, -1, -1, 0.8, 0.2, -1, 0.6, 0.7, 0.3, 0.8, 0.6 }; // depending on pool type
 	public final static double[] wallFriction = new double[]
@@ -3959,11 +3959,102 @@ public class Environment
 	void cityBlockGen(Random random)
 	{
 		final int shift = 3;
+		int asphalt = 5;
+		int sidewalk = 6;
 
 		Point[] pos = new Point[]
 		{ new Point(0, 0), new Point(24, 0), new Point(0, 24), new Point(24, 24) };
 		for (int i = 0; i < 4; i++)
-			randomBlock(shift + pos[i].x, shift + pos[i].y, random);
+			randomBlock(pos[i].x, pos[i].y, random);
+
+		// Streets
+		// vertical
+		for (int y = 0; y < height; y++)
+		{
+			for (int x = 18; x <= 22; x++)
+				floorTypes[x][y] = asphalt;
+			for (int x = 42; x <= 46; x++)
+				floorTypes[x][y] = asphalt;
+		}
+		// horizontal
+		for (int x = 0; x < width; x++)
+		{
+			for (int y = 18; y <= 22; y++)
+				floorTypes[x][y] = asphalt;
+			for (int y = 42; y <= 46; y++)
+				floorTypes[x][y] = asphalt;
+		}
+
+		// Sidewalks
+		// left
+		for (int x = 0; x <= 17; x++)
+		{
+			floorTypes[x][17] = sidewalk;
+			floorTypes[x][23] = sidewalk;
+		}
+		// up
+		for (int y = 0; y <= 17; y++)
+		{
+			floorTypes[17][y] = sidewalk;
+			floorTypes[23][y] = sidewalk;
+		}
+		// right
+		for (int x = 23; x < 42; x++)
+		{
+			floorTypes[x][17] = sidewalk;
+			floorTypes[x][23] = sidewalk;
+		}
+		// down
+		for (int y = 23; y < 42; y++)
+		{
+			floorTypes[17][y] = sidewalk;
+			floorTypes[23][y] = sidewalk;
+		}
+		// bottom bottom left
+		for (int x = 0; x <= 17; x++)
+		{
+			floorTypes[x][41] = sidewalk;
+			floorTypes[x][47] = sidewalk;
+		}
+		// bottom bottom right
+		for (int x = 23; x < 42; x++)
+		{
+			floorTypes[x][41] = sidewalk;
+			floorTypes[x][47] = sidewalk;
+		}
+		// right right up
+		for (int y = 0; y <= 17; y++)
+		{
+			floorTypes[41][y] = sidewalk;
+			floorTypes[47][y] = sidewalk;
+		}
+		// right right down
+		for (int y = 23; y < 42; y++)
+		{
+			floorTypes[41][y] = sidewalk;
+			floorTypes[47][y] = sidewalk;
+		}
+		// teeny tiny bottomest rightest point
+		floorTypes[47][47] = sidewalk;
+
+		// SHIFT EVERYTHING
+		int[][] shiftedFloorTypes = new int[width][height];
+		int[][] shiftedWallTypes = new int[width][height];
+		int[][] shiftedWallHealths = new int[width][height];
+		for (int x = 0; x < width; x++)
+			for (int y = 0; y < height; y++)
+			{
+				shiftedFloorTypes[(x + shift) % width][(y + shift) % height] = floorTypes[x][y];
+				shiftedWallTypes[(x + shift) % width][(y + shift) % height] = wallTypes[x][y];
+				shiftedWallHealths[(x + shift) % width][(y + shift) % height] = wallHealths[x][y];
+			}
+		for (int x = 0; x < width; x++)
+			for (int y = 0; y < height; y++)
+			{
+				floorTypes[x][y] = shiftedFloorTypes[x][y];
+				wallTypes[x][y] = shiftedWallTypes[x][y];
+				wallHealths[x][y] = shiftedWallHealths[x][y];
+			}
 	}
 
 	enum Block
@@ -3997,30 +4088,53 @@ public class Environment
 		int size = 16;
 
 		// pavement + big square of grass
-		for (int i = 0; i < size; i++)
-			for (int j = 0; j < size; j++)
+		for (int i = 0; i <= size; i++)
+			for (int j = 0; j <= size; j++)
 			{
-				if (i == 0 || j == 0 || i == size - 1 || j == size - 1)
+				if (i == 0 || j == 0 || i == size || j == size)
 					floorTypes[startX + i][startY + j] = pavement;
 				else
 					floorTypes[startX + i][startY + j] = grass;
 			}
 
-		// path
+		// paths
 		Point[] p = new Point[]
 		{ new Point(-1, 0), new Point(1, 0), new Point(0, -1), new Point(0, 1) };
-		Point snakeHead = new Point(startX + 2, startY + 3 + random.nextInt(size - 4));
-		while (snakeHead.x < startX + size && snakeHead.y < startY + size && snakeHead.x > startX && snakeHead.y > startY)
+		int numOfPaths = 4;
+		for (int k = 0; k < numOfPaths; k++)
 		{
-			floorTypes[snakeHead.x][snakeHead.y] = dirt;
-			Point next;
-			do
+			Point snakeHead = new Point(startX + 2 + random.nextInt(size - 4), startY + 2 + random.nextInt(size - 4));
+			int count = 0;
+			while (snakeHead.x < startX + size && snakeHead.y < startY + size && snakeHead.x > startX && snakeHead.y > startY && count < 30)
 			{
-				int i = random.nextInt(4);
-				next = new Point(snakeHead.x + p[i].x, snakeHead.y + p[i].y);
+				count++;
+				floorTypes[snakeHead.x][snakeHead.y] = 6666;
+				Point next = new Point(-1, -1); // doesn't matter
+				boolean bool = false;
+				int attempts = 0;
+				while (!bool && attempts < 9)
+				{
+					attempts++;
+					bool = true;
+					int i = random.nextInt(4);
+					next = new Point(snakeHead.x + p[i].x, snakeHead.y + p[i].y);
+					int neighbors = 0;
+					for (int j = 0; j < 4; j++)
+					{
+						if (next.x + p[j].x <= 0 || next.y + p[j].y <= 0)
+							continue;
+						if (floorTypes[next.x + p[j].x][next.y + p[j].y] == 6666)
+							neighbors++;
+					}
+					if (neighbors != 1)
+						bool = false;
+				}
+				snakeHead = next;
 			}
-			while (floorTypes[next.x][next.y] == dirt);
-			snakeHead = next;
+			for (int i = startX; i <= startX + size; i++)
+				for (int j = startY; j <= startY + size; j++)
+					if (floorTypes[i][j] == 6666)
+						floorTypes[i][j] = dirt;
 		}
 	}
 
@@ -4128,7 +4242,7 @@ public class Environment
 				}
 				break;
 			case 2: // right
-				for (int x = 1; x < size / 2 + 1; x++)
+				for (int x = 0; x < size / 2 + 1; x++)
 				{
 					floorTypes[startX + size / 2 + x][startY + size / 2] = roomFloorEdge;
 					addWall(startX + size / 2 + x, startY + size / 2, cement);
@@ -4140,7 +4254,7 @@ public class Environment
 				}
 				break;
 			case 3:
-				for (int y = 1; y < size / 2 + 1; y++)
+				for (int y = 0; y < size / 2 + 1; y++)
 				{
 					floorTypes[startX + size / 2][startY + size / 2 + y] = roomFloorEdge;
 					addWall(startX + size / 2, startY + size / 2 + y, cement);
