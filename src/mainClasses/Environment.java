@@ -193,8 +193,9 @@ public class Environment
 			if (b.x - b.radius < 0 || b.y - b.radius < 0 || b.x + b.radius > heightPixels || b.y + b.radius > heightPixels)
 				return false;
 
-			// check collisions with walls in the environment, locked to a grid
 			if (b.z < 1)
+			{
+				// check collisions with walls in the environment, locked to a grid
 				for (int i = (int) (b.x - b.radius); velocityLeft > 0 && i / squareSize <= (int) (b.x + b.radius) / squareSize; i += squareSize)
 					for (int j = (int) (b.y - b.radius); velocityLeft > 0 && j / squareSize <= (int) (b.y + b.radius) / squareSize; j += squareSize)
 					{
@@ -248,6 +249,46 @@ public class Environment
 							}
 						}
 					}
+				// furniture
+				for (Furniture f : furniture)
+					if (b.z <= f.z + f.height)
+						// to avoid needless computation, This line tests basic hitbox collisions first
+						if (f.x - 0.5 * f.w <= b.x + b.radius && f.x + 0.5 * f.w >= b.x - b.radius && f.y - 0.5 * f.w <= b.y + b.radius && f.y + 0.5 * f.w >= b.y - b.radius)
+						{
+							while (f.rotation < 0)
+								f.rotation += 2 * Math.PI;
+							while (f.rotation >= 2 * Math.PI)
+								f.rotation -= 2 * Math.PI;
+							Point ballCenter = new Point((int) b.x, (int) b.y);
+							// pow2 to avoid using Math.sqrt(), which is supposedly computationally expensive.
+							double ballRadiusPow2 = Math.pow(b.radius, 2);
+							Point[] fPoints = f.getPoints();
+							boolean collision = false;
+							if (0 <= Methods.realDotProduct(fPoints[0], ballCenter, fPoints[1]) && Methods.realDotProduct(fPoints[0], ballCenter, fPoints[1]) <= f.h * f.h
+									&& 0 <= Methods.realDotProduct(fPoints[0], ballCenter, fPoints[3]) && Methods.realDotProduct(fPoints[0], ballCenter, fPoints[3]) <= f.w * f.w)
+								// circle center is within furniture
+								collision = true;
+							else
+							{
+								if (Methods.LineToPointDistancePow2(fPoints[0], fPoints[1], ballCenter) < ballRadiusPow2)
+									collision = true;
+								else if (Methods.LineToPointDistancePow2(fPoints[2], fPoints[3], ballCenter) < ballRadiusPow2)
+									collision = true;
+								if (Methods.LineToPointDistancePow2(fPoints[1], fPoints[2], ballCenter) < ballRadiusPow2)
+									collision = true;
+								else if (Methods.LineToPointDistancePow2(fPoints[3], fPoints[0], ballCenter) < ballRadiusPow2)
+									collision = true;
+							}
+							if (collision)
+							{
+								damageFurniture(f, b.getDamage() + b.getPushback(), EP.damageType(b.elementNum));
+								// debris
+								ballDebris(b, "wall", b.angle());
+								// ball was destroyed
+								return false;
+							}
+						}
+			}
 
 			// check collisions with people!
 			peopleLoop: for (Person p : people)
@@ -593,8 +634,9 @@ public class Environment
 		if (sd.x - sd.radius < 0 || sd.y - sd.radius < 0 || sd.x + sd.radius > heightPixels || sd.y + sd.radius > heightPixels)
 			return false;
 
-		// check collisions with walls in the environment, locked to a grid
 		if (sd.z < 1)
+		{
+			// check collisions with walls in the environment, locked to a grid
 			for (int i = (int) (sd.x - sd.radius); i / squareSize <= (int) (sd.x + sd.radius) / squareSize; i += squareSize)
 				for (int j = (int) (sd.y - sd.radius); j / squareSize <= (int) (sd.y + sd.radius) / squareSize; j += squareSize)
 				{
@@ -623,6 +665,46 @@ public class Environment
 						}
 					}
 				}
+			// furniture
+			for (Furniture f : furniture)
+				if (sd.z <= f.z + f.height)
+					// to avoid needless computation, This line tests basic hitbox collisions first
+					if (f.x - 0.5 * f.w <= sd.x + sd.radius && f.x + 0.5 * f.w >= sd.x - sd.radius && f.y - 0.5 * f.w <= sd.y + sd.radius && f.y + 0.5 * f.w >= sd.y - sd.radius)
+					{
+						while (f.rotation < 0)
+							f.rotation += 2 * Math.PI;
+						while (f.rotation >= 2 * Math.PI)
+							f.rotation -= 2 * Math.PI;
+						Point ballCenter = new Point((int) sd.x, (int) sd.y);
+						// pow2 to avoid using Math.sqrt(), which is supposedly computationally expensive.
+						double ballRadiusPow2 = Math.pow(sd.radius, 2);
+						Point[] fPoints = f.getPoints();
+						boolean collision = false;
+						if (0 <= Methods.realDotProduct(fPoints[0], ballCenter, fPoints[1]) && Methods.realDotProduct(fPoints[0], ballCenter, fPoints[1]) <= f.h * f.h
+								&& 0 <= Methods.realDotProduct(fPoints[0], ballCenter, fPoints[3]) && Methods.realDotProduct(fPoints[0], ballCenter, fPoints[3]) <= f.w * f.w)
+							// circle center is within furniture
+							collision = true;
+						else
+						{
+							if (Methods.LineToPointDistancePow2(fPoints[0], fPoints[1], ballCenter) < ballRadiusPow2)
+								collision = true;
+							else if (Methods.LineToPointDistancePow2(fPoints[2], fPoints[3], ballCenter) < ballRadiusPow2)
+								collision = true;
+							if (Methods.LineToPointDistancePow2(fPoints[1], fPoints[2], ballCenter) < ballRadiusPow2)
+								collision = true;
+							else if (Methods.LineToPointDistancePow2(fPoints[3], fPoints[0], ballCenter) < ballRadiusPow2)
+								collision = true;
+						}
+						if (collision)
+						{
+							damageFurniture(f, sd.getDamage() + sd.getPushback(), EP.damageType(sd.elementNum));
+							// debris
+							sprayDropDebris(sd);
+							// ball was destroyed
+							return false;
+						}
+					}
+		}
 
 		// check collisions with people!
 
@@ -911,6 +993,81 @@ public class Environment
 					}
 				}
 
+			// Furniture
+			if (p.z < 1)
+				for (Furniture f : furniture)
+				{
+					// Copy of the FF collision code
+					boolean collidedWithACorner = false;
+					Point[] fPoints = f.getPoints();
+					for (Point p1 : fPoints)
+						if (p1.x > p.x - p.radius && p1.x < p.x + p.radius && p1.y > p.y - p.radius && p1.y < p.y + p.radius)
+						{
+							// THIS IS NOT GOOD CODE, THIS IS BAD CODE, BUT I CAN'T MAKE THIS PHYSICS THING WORK LIKE I WANT IT TO
+							collidedWithACorner = true;
+							// hitting corners just reverses the person's movement
+							p.x -= moveQuantumX;
+							p.y -= moveQuantumY;
+							double angleToPerson = Math.atan2(p.y - f.y, p.x - f.x);
+							double velocity = 0.6 * p.velocity();
+							p.xVel = Math.cos(angleToPerson) * velocity;
+							p.yVel = Math.sin(angleToPerson) * velocity;
+							p.x += 3 * deltaTime * p.xVel;
+							p.y += 3 * deltaTime * p.yVel;
+							if (p instanceof NPC)
+								((NPC) p).justCollided = true;
+						}
+					if (!collidedWithACorner)
+					{
+						Line2D l1 = new Line2D.Double(fPoints[0].x, fPoints[0].y, fPoints[3].x, fPoints[3].y);
+						Line2D l2 = new Line2D.Double(fPoints[0].x, fPoints[0].y, fPoints[1].x, fPoints[1].y);
+						Line2D l3 = new Line2D.Double(fPoints[2].x, fPoints[2].y, fPoints[1].x, fPoints[1].y);
+						Line2D l4 = new Line2D.Double(fPoints[2].x, fPoints[2].y, fPoints[3].x, fPoints[3].y);
+						boolean collided = false;
+						double lineAngle = 0;
+						if (personRect.intersectsLine(l1))
+						{
+							collided = true;
+							lineAngle = f.rotation + 0.5 * Math.PI;
+						}
+						if (personRect.intersectsLine(l2))
+						{
+							collided = true;
+							lineAngle = f.rotation;
+						}
+						if (personRect.intersectsLine(l3))
+						{
+							collided = true;
+							lineAngle = f.rotation + 0.5 * Math.PI;
+						}
+						if (personRect.intersectsLine(l4))
+						{
+							collided = true;
+							lineAngle = f.rotation;
+						}
+						if (collided)
+						{
+							// BUGGY
+							// SRSLY
+							// TODO
+							p.x -= moveQuantumX;
+							p.y -= moveQuantumY;
+							// attempt at physics
+							double personAngle = Math.atan2(moveQuantumY, moveQuantumX); // can also use yVel, xVel
+							personAngle = 2 * lineAngle - personAngle + Math.PI;
+							double velocity = Math.sqrt(p.xVel * p.xVel + p.yVel * p.yVel);
+							p.xVel = velocity * Math.cos(personAngle);
+							p.yVel = velocity * Math.sin(personAngle);
+							moveQuantumX = Math.cos(personAngle) * deltaTime;
+							moveQuantumY = Math.sin(personAngle) * deltaTime;
+							p.x += 80 * moveQuantumX;
+							p.y += 80 * moveQuantumY;
+							if (p instanceof NPC)
+								((NPC) p).justCollided = true;
+						}
+					}
+				}
+
 			// People-people collisions
 			for (Person p2 : people)
 				if (!p.equals(p2))
@@ -1190,8 +1347,7 @@ public class Environment
 		int wallElement = wallTypes[x][y];
 		// returns whether or not this collision changes the person's speed
 		// TODO add stuff concerning bounce powers, or breaking through walls, or damaging walls, or damaging characters flung into walls
-		final double bounceEfficiency = 0.4; // should depend on element
-		// assumes objects have no angle
+		final double bounceEfficiency = 0.4; // should depend on element? TODO ?
 		Rectangle intersectRect = new Rectangle(x * squareSize, y * squareSize, squareSize, squareSize)
 				.intersection(new Rectangle((int) (p.x - 0.5 * p.radius), (int) (p.y - 0.5 * p.radius), (int) (p.radius), (int) (p.radius)));
 		// Damage to walls is mass of person * velocity * 0.00005; (kg * cm/s)
@@ -2502,6 +2658,14 @@ public class Environment
 			damageConnectedWalls(i, j, damage);
 		}
 		connectWall(i, j); // update cracks
+	}
+
+	public void damageFurniture(Furniture f, double damage, @SuppressWarnings("unused") int damageType)
+	{
+		if (damage - f.armor < 1)
+			return;
+		f.life -= (int) (damage - f.armor);
+		// TODO debris for furniture
 	}
 
 	boolean[][] connectedWalls;

@@ -1,6 +1,7 @@
 package mainClasses;
 
 import java.awt.Graphics2D;
+import java.awt.Point;
 
 public class Furniture extends Drawable
 {
@@ -15,6 +16,8 @@ public class Furniture extends Drawable
 	Type type;
 	int state;
 	boolean clickable;
+	int life = 100;
+	int armor = 3; // TODO maybe uh not
 
 	public Furniture(double x1, double y1, String typeString, double rotation1)
 	{
@@ -41,20 +44,34 @@ public class Furniture extends Drawable
 		case DOOR:
 			image = Resources.furniture.get("door");
 			clickable = true;
-			w = 179;
-			h = 83;
+			w = 96;
+			h = 18;
+			state = 0; // 0 = closed, 1 = open, 2 = locked?
 			break;
 		case DESK:
 			state = (int) (Math.random() * 3);
 			image = Resources.furniture.get("desk_" + state);
 			clickable = false;
-			w = 96;
-			h = 18;
+			w = 179;
+			h = 83;
 			break;
 		default:
 			MAIN.errorMessage("No excuses!");
 			break;
 		}
+	}
+
+	public Point[] getPoints()
+	{
+		Point[] p = new Point[4];
+		double halfDiagonal = 0.5 * Math.sqrt(Math.pow(w, 2) + Math.pow(h, 2));
+		// angle between length and width of force field
+		double alpha = Math.atan2(h, w);
+		p[0] = new Point((int) (x + halfDiagonal * Math.cos(rotation - alpha)), (int) (y + halfDiagonal * Math.sin(rotation - alpha)));
+		p[1] = new Point((int) (x + halfDiagonal * Math.cos(rotation + alpha)), (int) (y + halfDiagonal * Math.sin(rotation + alpha)));
+		p[2] = new Point((int) (x + halfDiagonal * Math.cos(rotation + Math.PI - alpha)), (int) (y + halfDiagonal * Math.sin(rotation + Math.PI - alpha)));
+		p[3] = new Point((int) (x + halfDiagonal * Math.cos(rotation + Math.PI + alpha)), (int) (y + halfDiagonal * Math.sin(rotation + Math.PI + alpha)));
+		return p;
 	}
 
 	public void trueDraw(Graphics2D buffer, double cameraZed)

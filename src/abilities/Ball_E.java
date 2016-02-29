@@ -5,8 +5,6 @@ import java.awt.Point;
 import mainClasses.Ability;
 import mainClasses.Ball;
 import mainClasses.Environment;
-import mainClasses.ForceField;
-import mainClasses.Methods;
 import mainClasses.Person;
 import mainClasses.Player;
 import mainResourcesPackage.SoundEffect;
@@ -72,33 +70,8 @@ public class Ball_E extends Ability
 				// critical chance
 				if (Math.random() < user.criticalChance)
 					b.critical = true;
-
-				// TODO move this to a new method in Environment?
-				boolean ballCreationSuccess = true;
-
-				Point ballCenter = new Point((int) b.x, (int) b.y);
-				// pow2 to avoid using Math.sqrt(), which is supposedly computationally expensive.
-				double ballRadiusPow2 = Math.pow(b.radius, 2);
-				// test force field collision
-				for (ForceField ff : env.FFs)
-					if (ff.x - 0.5 * ff.length <= b.x + b.radius && ff.x + 0.5 * ff.length >= b.x - b.radius && ff.y - 0.5 * ff.length <= b.y + b.radius && ff.y + 0.5 * ff.length >= b.y - b.radius)
-						if ((0 <= Methods.realDotProduct(ff.p[0], ballCenter, ff.p[1]) && Methods.realDotProduct(ff.p[0], ballCenter, ff.p[1]) <= ff.width * ff.width
-								&& 0 <= Methods.realDotProduct(ff.p[0], ballCenter, ff.p[3]) && Methods.realDotProduct(ff.p[0], ballCenter, ff.p[3]) <= ff.length * ff.length)
-								|| Methods.LineToPointDistancePow2(ff.p[0], ff.p[1], ballCenter) < ballRadiusPow2 || Methods.LineToPointDistancePow2(ff.p[2], ff.p[3], ballCenter) < ballRadiusPow2
-								|| Methods.LineToPointDistancePow2(ff.p[1], ff.p[2], ballCenter) < ballRadiusPow2 || Methods.LineToPointDistancePow2(ff.p[3], ff.p[0], ballCenter) < ballRadiusPow2)
-						{
-							ballCreationSuccess = false;
-							// damage FF
-							double damage = (b.getDamage() + b.getPushback()) * 0.5; // half damage, because the ball "bounces"
-							env.damageForceField(ff, damage, ballCenter);
-						}
-				if (ballCreationSuccess)
-				{
-					env.balls.add(b);
-					sounds.get((int) (Math.random() * 5)).play();
-				}
-				else
-					env.ballDebris(b, "shatter", b.angle());
+				env.balls.add(b);
+				sounds.get((int) (Math.random() * 5)).play();
 				user.mana -= cost;
 				user.rotate(angle, deltaTime);
 			}
@@ -108,7 +81,7 @@ public class Ball_E extends Ability
 	{
 		disabled = true;
 	}
-	
+
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
 	{
 		double angle = Math.atan2(target.y - player.y, target.x - player.x);
