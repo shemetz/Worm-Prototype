@@ -521,15 +521,15 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 						break;
 					case 8: // lava
 						env.hitPerson(p, 20, 0, 0, 8, deltaTime); // burn damage
-						if (frameNum % 50 == 0 && random.nextDouble() < 0.7) // burn chance is 70% in lava
+						if (frameNum % 50 == 0 && random.nextDouble() < 0.4) // burn chance is +40% in lava
 							p.affect(new Burning(0, null), true);
 						break;
 					case 10: // earth spikes
 						env.hitPerson(p, 25, 0, 0, 10, deltaTime);
 						break;
 					case 11: // plant vines/spikes
-						env.hitPerson(p, 5, 0, 0, -1, deltaTime);
-						if (frameNum % 50 == 0 && random.nextDouble() < 0.7) // tangle chance is 70% in lava
+						env.hitPerson(p, 5, 0, 0, 11, deltaTime);
+						if (frameNum % 50 == 0 && random.nextDouble() < 0.4) // tangle chance is +40% in lava
 							p.affect(new Tangled(0, null), true);
 						break;
 					default:
@@ -547,7 +547,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 					// once per second, damage for burn and test for extinguishing fire
 					if (e instanceof Burning)
 					{
-						env.hitPerson(p, e.strength, 0, 0, 2);
+						env.hitPerson(p, e.strength, 0, 0, 0);
 						if (random.nextDouble() < 0.25) // 25% chance to stop burning, per second
 							p.affect(e, false);
 					}

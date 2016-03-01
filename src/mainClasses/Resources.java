@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import abilities.Elemental_Resistance_E;
 import mainResourcesPackage.ResourceLoader;
 
 public class Resources
@@ -438,25 +439,38 @@ public class Resources
 
 		// Icons
 		for (int i = 0; i < Ability.descriptions.size(); i++)
-			switch (Ability.getName(Ability.descriptions.get(i))) // all non-default cases are for abilities with extra elements drawn on them
+		{
+			String name = Ability.getName(Ability.descriptions.get(i));
+			switch (name) // all non-default cases are for abilities with extra elements drawn on them
 			{
 			case "Sense Element":
-				BufferedImage senseElement = ResourceLoader.getBufferedImage("icons/abilities/Sense Element.png");
-				icons.put("Sense Element", senseElement);
+			case "Elemental Resistance":
+				BufferedImage senseElement = ResourceLoader.getBufferedImage("icons/abilities/" + name + ".png");
+				icons.put(name, senseElement);
 				for (int j = 0; j < numOfElements; j++)
 				{
+					if (name.equals("Elemental Resistance")) //only some apply:
+					{
+						boolean applicable = false;
+						for (int k = 0; k < Elemental_Resistance_E.applicable.length; k++)
+							if (Elemental_Resistance_E.applicable[k].equals(EP.elementList[j]))
+								applicable = true;
+						if (!applicable)
+							continue;
+					}
 					BufferedImage senseImage = new BufferedImage(60, 60, BufferedImage.TYPE_INT_ARGB);
 					Graphics2D buffy = senseImage.createGraphics();
 					buffy.drawImage(senseElement, 0, 0, null);
 					buffy.drawImage(ResourceLoader.getBufferedImage("icons/elements/" + EP.elementList[j] + ".png"), 0, 0, null);
 					buffy.dispose();
-					icons.put("Sense Element" + " <" + EP.elementList[j] + ">", senseImage);
+					icons.put(name + " <" + EP.elementList[j] + ">", senseImage);
 				}
 				break;
 			default: // will add unecessary empty icons for stuff that must include an element. That stuff gets its icons somewhere else in the code (above this part I think)
-				icons.put(Ability.getName(Ability.descriptions.get(i)), ResourceLoader.getBufferedImage("icons/abilities/" + Ability.getName(Ability.descriptions.get(i)) + ".png"));
+				icons.put(name, ResourceLoader.getBufferedImage("icons/abilities/" + name + ".png"));
 				break;
 			}
+		}
 
 		// Effect icons:
 		List<String> effectNames = Arrays.asList("Healed", "Burning", "Tangled", "Time Slowed", "Time Stretched", "Time Stopped", "Nullified"); // all effect names should be written here! TODO make sure it happens

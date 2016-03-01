@@ -19,8 +19,10 @@ import abilities.Elemental_Void;
 import abilities.Punch;
 import abilities.Sprint;
 import effects.Burning;
+import effects.E_Resistant;
 import effects.Healed;
 import effects.Nullified;
+import effects.Stunned;
 import effects.Tangled;
 import mainResourcesPackage.SoundEffect;
 import pathfinding.Mover;
@@ -258,6 +260,7 @@ public class Person extends RndPhysObj implements Mover
 
 	public void affect(Effect e, boolean add)
 	{
+
 		// Can't get additional effects while dead. TODO look at this again one day and reconsider
 		if (dead && add)
 			return;
@@ -286,6 +289,20 @@ public class Person extends RndPhysObj implements Mover
 			}
 		if (add)
 		{
+			// test for immunities:
+			for (Effect e2 : effects)
+				if (e2 instanceof E_Resistant)
+					switch (EP.damageType(((E_Resistant) e2).element))
+					{
+					case 2:
+						if (e instanceof Burning)
+							return;
+					case 4:
+						if (e instanceof Stunned)
+							return;
+					default:
+						break;
+					}
 			e.apply(this);
 			effects.add(e);
 		}

@@ -18,6 +18,7 @@ import abilities.Clone_II;
 import abilities.Clone_III;
 import abilities.Elemental_Combat_II_E;
 import abilities.Elemental_Combat_I_E;
+import abilities.Elemental_Resistance_E;
 import abilities.Elemental_Void;
 import abilities.Flight_I;
 import abilities.Flight_II;
@@ -73,7 +74,7 @@ import mainResourcesPackage.SoundEffect;
 
 public class Ability
 {
-	final static List<String> implementedAbilities = Arrays.asList("Elemental Combat I", "Beam", "Ball", "Shield", "Pool", "Wall", "Spray", "Sense Element", "Portals", "Elemental Void", "Precision I",
+	final static List<String> implementedAbilities = Arrays.asList("Elemental Combat I", "Beam", "Ball", "Shield", "Pool", "Wall", "Spray", "Sense Element", "Elemental Resistance", "Portals", "Elemental Void", "Precision I",
 			"Precision II", "Precision III", "Protective Bubble I", "Sprint", "Strength I", "Strength II", "Strength III", "Punch", "Heal I", "Heal II", "Force Shield", "Ranged Explosion", "Flight I",
 			"Flight II", "Telekinetic Flight", "Blink", "Ghost Mode I", "Strong Force Field", "Toughness I", "Toughness II", "Toughness III", "Sense Life", "Sense Mana and Stamina", "Sense Powers",
 			"Slow Target", "Chronobiology", "Retrace I", "Retrace II", "Retrace III", "Undo I", "Undo II", "Undo III", "Repeat I", "Repeat II", "Repeat III", "Time Freeze Target I",
@@ -83,7 +84,7 @@ public class Ability
 	protected static int[][] elementalAttackNumbers = new int[12][3];
 	protected static String[] elementalAttacks = new String[]
 	{ "Ball", "Beam", "Shield", "Wall", "Spray", "Strike", "Pool" };
-	final static List<String> elementalPowers = Arrays.asList("Elemental Combat I", "Elemental Combat II", "Ball", "Beam", "Shield", "Wall", "Spray", "Strike", "Pool", "Sense Element");
+	final static List<String> elementalPowers = Arrays.asList("Elemental Combat I", "Elemental Combat II", "Ball", "Beam", "Shield", "Wall", "Spray", "Strike", "Pool", "Sense Element", "Elemental Resistance");
 
 	public enum CostType
 	{
@@ -691,6 +692,9 @@ public class Ability
 			break;
 		case "Strike": // NOT DONE
 			ab = new Strike_E(element, pnts);
+			break;
+		case "Elemental Resistance": 
+			ab = new Elemental_Resistance_E(element, pnts);
 			break;
 		case "Toughness I":
 			ab = new Toughness_I(pnts);
