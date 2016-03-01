@@ -6,6 +6,7 @@ import effects.Healed;
 import mainClasses.Effect;
 import mainClasses.Environment;
 import mainClasses.Person;
+import mainClasses.Resources;
 import mainClasses.UIText;
 import mainClasses.VisualEffect;
 
@@ -17,7 +18,7 @@ public class Heal_II extends _ApplyEffect
 
 	public Heal_II(int p)
 	{
-		super("Heal II", p, _ApplyEffect.targetTypes.AREA, VisualEffect.Type.HEAL);
+		super("Heal II", p, _ApplyEffect.targetTypes.AREA, VisualEffect.Type.CONNECTING_BEAM);
 		cost = 0;
 		costPerSecond = 3;
 		costType = CostType.MANA;
@@ -30,6 +31,7 @@ public class Heal_II extends _ApplyEffect
 
 		healTextTimer = 0;
 		lifeRegenBuff = 4 * level;
+		beamImage = Resources.healingBeam;
 	}
 
 	public boolean viableTarget(Person p, Person user)

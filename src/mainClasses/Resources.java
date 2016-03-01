@@ -33,10 +33,11 @@ public class Resources
 	public static List<BufferedImage> clouds;
 	public static List<BufferedImage> cloudShadows;
 	public static List<List<BufferedImage>> effects;
-	public static BufferedImage[] healingBeam; // frame
 	public static List<List<BufferedImage>> explosions; // type, frame
 	public static BufferedImage disabled;
 	public static Map<String, BufferedImage> furniture; // name, image
+	public static BufferedImage healingBeam;
+	public static BufferedImage stealPowerBeam;
 
 	public static void initialize()
 	{
@@ -60,7 +61,6 @@ public class Resources
 		cloudShadows = new ArrayList<BufferedImage>();
 		effects = new ArrayList<List<BufferedImage>>();
 		beams = new BufferedImage[numOfElements][16];
-		healingBeam = new BufferedImage[4];
 		explosions = new ArrayList<List<BufferedImage>>();
 		furniture = new HashMap<String, BufferedImage>();
 
@@ -479,8 +479,8 @@ public class Resources
 		effects.get(0).add(ResourceLoader.getBufferedImage("people/burning_2.png"));
 		effects.get(0).add(ResourceLoader.getBufferedImage("people/burning_3.png"));
 
-		for (int i = 0; i < 4; i++)
-			healingBeam[i] = ResourceLoader.getBufferedImage("heal/heal" + "_" + i + ".png");
+		healingBeam = ResourceLoader.getBufferedImage("other abilities/heal.png");
+		stealPowerBeam = ResourceLoader.getBufferedImage("other abilities/steal.png");
 
 		explosions.add(new ArrayList<BufferedImage>());
 		for (int i = 0; i < 8; i++)

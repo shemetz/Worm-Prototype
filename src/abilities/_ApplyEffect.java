@@ -1,6 +1,7 @@
 package abilities;
 
 import java.awt.Point;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,6 +30,7 @@ public class _ApplyEffect extends Ability
 	List<Person> targets;
 	targetTypes targetingType;
 	VisualEffect.Type type;
+	BufferedImage beamImage;
 
 	public _ApplyEffect(String name, int p, targetTypes targetType1, VisualEffect.Type type1)
 	{
@@ -110,11 +112,12 @@ public class _ApplyEffect extends Ability
 		{
 			VisualEffect visual = new VisualEffect();
 			visual.timeLeft = deltaTime * 2;
-			visual.frame = 99 - (frameNum % 100);
+			visual.frame = 99 - ((frameNum + (int) Math.sqrt(Methods.DistancePow2(effectTarget.Point(), user.Point()))) % 100);
 			visual.p1 = new Point((int) user.x, (int) user.y);
 			visual.p2 = new Point((int) effectTarget.x, (int) effectTarget.y);
 			visual.type = type;
 			visual.angle = Math.atan2(effectTarget.y - user.y, effectTarget.x - user.x);
+			visual.image = beamImage;
 
 			env.visualEffects.add(visual);
 		}

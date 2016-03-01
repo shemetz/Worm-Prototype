@@ -25,7 +25,7 @@ public class VisualEffect
 
 	public enum Type
 	{
-		BLINK_SUCCESS, BLINK_FAIL, HEAL, EXPLOSION, NO, TELEPORT, STATE_LOOP, WILD_POWER
+		BLINK_SUCCESS, BLINK_FAIL, CONNECTING_BEAM, EXPLOSION, NO, TELEPORT, STATE_LOOP, WILD_POWER
 	};
 
 	public Type type;
@@ -35,7 +35,7 @@ public class VisualEffect
 	 * 
 	 * BLINK_FAIL = unsuccessful blink. Random red lines between entry and exit.
 	 * 
-	 * HEAL = healing beam. Green.
+	 * CONNECTING_BEAM = Beam, depends in the image variable.
 	 * 
 	 * TELEPORT = rotating inwards, fading, image of person at entry point of teleport
 	 * 
@@ -88,7 +88,7 @@ public class VisualEffect
 				color = new Color(255 - (int) (Math.random() * 100), 70, 60, (int) (255 * timeLeft / duration));
 			}
 			break;
-		case HEAL: // heal
+		case CONNECTING_BEAM:
 			break;
 		case EXPLOSION: // explosion
 			// explosions don't loop - they just stay invisible
@@ -216,28 +216,27 @@ public class VisualEffect
 			for (int i = 0; i < points.size() - 2; i++)
 				buffer.drawLine(points.get(i).x, points.get(i).y, points.get(i + 1).x, points.get(i + 1).y);
 			break;
-		case HEAL:
+		case CONNECTING_BEAM:
 			int beamDistance = (int) Math.sqrt(Methods.DistancePow2(p1.x, p1.y, p2.x, p2.y));
 			int numOfBeamImages = beamDistance / 100;
 			int leftoverImageWidth = beamDistance % 100;
 			buffer.rotate(angle, p1.x, p1.y);
 
-			int imageHeight = Resources.healingBeam[0].getHeight();
+			int imageHeight = image.getHeight();
 			for (int i = 0; i < numOfBeamImages; i++)
 			{
-				buffer.drawImage(Resources.healingBeam[0].getSubimage(frame, 0, 100 - frame, imageHeight), (int) (p1.x + i * 100), (int) (p1.y - 0.5 * 100), null);
+				buffer.drawImage(image.getSubimage(frame, 0, 100 - frame, imageHeight), (int) (p1.x + i * 100), (int) (p1.y - 0.5 * 100), null);
 				if (frame != 0)
-					buffer.drawImage(Resources.healingBeam[0].getSubimage(0, 0, frame, imageHeight), (int) (p1.x + i * 100 + 100 - frame), (int) (p1.y - 0.5 * 100), null);
+					buffer.drawImage(image.getSubimage(0, 0, frame, imageHeight), (int) (p1.x + i * 100 + 100 - frame), (int) (p1.y - 0.5 * 100), null);
 			}
 			if (leftoverImageWidth > 0)
 			{
 				if (frame + leftoverImageWidth <= 100)
-					buffer.drawImage(Resources.healingBeam[0].getSubimage(frame, 0, leftoverImageWidth, imageHeight), (int) (p1.x + numOfBeamImages * 100), (int) (p1.y - 0.5 * 100), null);
+					buffer.drawImage(image.getSubimage(frame, 0, leftoverImageWidth, imageHeight), (int) (p1.x + numOfBeamImages * 100), (int) (p1.y - 0.5 * 100), null);
 				else
 				{
-					buffer.drawImage(Resources.healingBeam[0].getSubimage(frame, 0, 100 - frame, imageHeight), (int) (p1.x + numOfBeamImages * 100), (int) (p1.y - 0.5 * 100), null);
-					buffer.drawImage(Resources.healingBeam[0].getSubimage(0, 0, leftoverImageWidth + frame - 100, imageHeight), (int) (p1.x + numOfBeamImages * 100 + 100 - frame),
-							(int) (p1.y - 0.5 * 100), null);
+					buffer.drawImage(image.getSubimage(frame, 0, 100 - frame, imageHeight), (int) (p1.x + numOfBeamImages * 100), (int) (p1.y - 0.5 * 100), null);
+					buffer.drawImage(image.getSubimage(0, 0, leftoverImageWidth + frame - 100, imageHeight), (int) (p1.x + numOfBeamImages * 100 + 100 - frame), (int) (p1.y - 0.5 * 100), null);
 				}
 			}
 

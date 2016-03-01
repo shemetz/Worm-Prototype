@@ -56,7 +56,10 @@ import abilities.Protective_Bubble_I;
 import abilities.Sense_Powers;
 import abilities.Shield_E;
 import abilities.Sprint;
+import abilities.Steal_Power;
 import abilities.TeleportAbility;
+import abilities.Time_Freeze_Target_I;
+import abilities.Time_Freeze_Target_II;
 import abilities.Wild_Power;
 import abilities._LoopAbility;
 import effects.Burning;
@@ -439,10 +442,13 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 
 				// maintaining person abilities
 				if (p.timeEffect != 0)
-					for (Ability a : p.abilities)
+					for (int i = 0; i < p.abilities.size(); i++)
+					{
+						Ability a = p.abilities.get(i);
 						if (a.on)
 							if (!a.disabled)
 								a.maintain(env, p, p.target, deltaTime); // not affected by timeEffect. TODO double check this! (try using abilities like Beam with it)
+					}
 				// If trying to maintain after slipping
 				if (p.maintaining && p.prone)
 					p.abilities.get(p.abilityMaintaining).use(env, p, p.target);
@@ -739,6 +745,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				}
 			}
 		}
+
 		// FORCE FIELDS
 		for (int i = 0; i < env.FFs.size(); i++)
 		{
@@ -752,6 +759,18 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				i--;
 			}
 		}
+
+		// FURNITURE
+		for (int i = 0; i < env.furniture.size(); i++)
+		{
+			Furniture f = env.furniture.get(i);
+			if (f.life <= 0)
+			{
+				env.furniture.remove(i);
+				i--;
+			}
+		}
+
 		// WALLS & POOLS
 		for (int x = 0; x < env.width; x++)
 			for (int y = 0; y < env.height; y++)
@@ -1152,23 +1171,20 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			}
 			break;
 		case TARGET_IN_RANGE:
-			Point targetPerson = null;
-			double closest = 100 * 100; // max distance of 100 pixels to target, from cursor
-			for (Person possibleTarget : env.people)
-			{
-				double distancePow2 = Methods.DistancePow2(player.target.x, player.target.y, possibleTarget.x, possibleTarget.y);
-				if (distancePow2 < closest)
-				{
-					closest = distancePow2;
-					targetPerson = possibleTarget.Point();
-				}
-			}
+			Person targetPerson = null;
+			// Bad code incoming
+			if (ability instanceof Time_Freeze_Target_I)
+				targetPerson = ((Time_Freeze_Target_I) ability).getTarget(env, player.target);
+			if (ability instanceof Time_Freeze_Target_II)
+				targetPerson = ((Time_Freeze_Target_II) ability).getTarget(env, player.target);
+			if (ability instanceof Steal_Power)
+				targetPerson = ((Steal_Power) ability).getTarget(env, player);
 			if (targetPerson != null)
 			{
 				buffer.setStroke(new BasicStroke(3));
 				buffer.setColor(Color.green);
 				int haloRadius = 60;
-				buffer.drawOval(targetPerson.x - haloRadius, targetPerson.y - haloRadius, haloRadius * 2, haloRadius * 2);
+				buffer.drawOval((int) targetPerson.x - haloRadius, (int) targetPerson.y - haloRadius, haloRadius * 2, haloRadius * 2);
 			}
 			else
 			{
@@ -1401,6 +1417,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		{
 			Person person = new NPC((int) (100 + Math.random() * (env.widthPixels - 200)), (int) (100 + Math.random() * (env.heightPixels - 200)), Strategy.PASSIVE);
 			env.people.add(person);
+			person.abilities.add(Ability.ability("Toughness II", 5));
 		}
 
 		// Fix walls spawning on people

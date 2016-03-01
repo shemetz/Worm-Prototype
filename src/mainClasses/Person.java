@@ -1473,4 +1473,9 @@ public class Person extends RndPhysObj implements Mover
 
 		return false;
 	}
+
+	public boolean equals(Person other)
+	{
+		return this.id == other.id;
+	}
 }

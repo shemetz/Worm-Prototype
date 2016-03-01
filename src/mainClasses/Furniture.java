@@ -6,7 +6,7 @@ import java.awt.Point;
 public class Furniture extends Drawable
 {
 
-	int w, h; // for collision purposes
+	public int w, h; // for collision purposes
 
 	enum Type
 	{
@@ -16,8 +16,8 @@ public class Furniture extends Drawable
 	Type type;
 	int state;
 	boolean clickable;
-	int life = 100;
-	int armor = 3; // TODO maybe uh not
+	public int life = 100;
+	public int armor = 3; // TODO maybe uh not
 
 	public Furniture(double x1, double y1, String typeString, double rotation1)
 	{
@@ -25,6 +25,7 @@ public class Furniture extends Drawable
 		x = x1;
 		y = y1;
 		z = 0;
+		height = 0.9;
 		rotation = rotation1;
 		type = Type.valueOf(typeString.toUpperCase());
 		switch (type)

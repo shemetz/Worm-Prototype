@@ -52,6 +52,7 @@ import abilities.Shield_E;
 import abilities.Slow_Target;
 import abilities.Spray_E;
 import abilities.Sprint;
+import abilities.Steal_Power;
 import abilities.Strength_I;
 import abilities.Strength_II;
 import abilities.Strength_III;
@@ -76,7 +77,7 @@ public class Ability
 			"Precision II", "Precision III", "Protective Bubble I", "Sprint", "Strength I", "Strength II", "Strength III", "Punch", "Heal I", "Heal II", "Force Shield", "Ranged Explosion", "Flight I",
 			"Flight II", "Telekinetic Flight", "Blink", "Ghost Mode I", "Strong Force Field", "Toughness I", "Toughness II", "Toughness III", "Sense Life", "Sense Mana and Stamina", "Sense Powers",
 			"Slow Target", "Chronobiology", "Retrace I", "Retrace II", "Retrace III", "Undo I", "Undo II", "Undo III", "Repeat I", "Repeat II", "Repeat III", "Time Freeze Target I",
-			"Nullification Aura I", "Nullification Aura II", "Wild Power", "Clone I", "Clone II", "Clone III", "Twitch", "Sense Structure", "Sense Parahumans");
+			"Nullification Aura I", "Nullification Aura II", "Wild Power", "Clone I", "Clone II", "Clone III", "Twitch", "Sense Structure", "Sense Parahumans", "Steal Power");
 	protected static List<String> descriptions = new ArrayList<String>();
 	protected static boolean[][] elementalAttacksPossible = new boolean[12][7]; // [element][ability]
 	protected static int[][] elementalAttackNumbers = new int[12][3];
@@ -279,6 +280,8 @@ public class Ability
 	public static String getName(String text)
 	{
 		// no element, no description or fluff
+		if (text.indexOf("(") == -1)
+			MAIN.errorMessage("PR-O-BLEM   no name for " + text);
 		return text.substring(0, text.indexOf("(") - 1);
 		// Will give an error message if there is no "(" in the ability's name (or text), so when that happens insert a printing function here to see where you forgot a newline or something
 	}
@@ -452,7 +455,6 @@ public class Ability
 					s += currLine + "\n";
 					currLine = in.readLine();
 				}
-				currLine = in.readLine(); // extra paragraph break
 				s = s.substring(0, s.length() - 1); // remove final paragraph break
 				descriptions.add(s);
 			}
@@ -549,6 +551,9 @@ public class Ability
 		}
 		switch (trimmedAbilityName)
 		{
+		case "Steal Power":
+			ab = new Steal_Power(pnts);
+			break;
 		case "Twitch":
 			ab = new Twitch(pnts);
 			break;

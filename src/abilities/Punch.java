@@ -10,6 +10,7 @@ import mainClasses.ArcForceField;
 import mainClasses.Ball;
 import mainClasses.Environment;
 import mainClasses.ForceField;
+import mainClasses.Furniture;
 import mainClasses.MAIN;
 import mainClasses.Methods;
 import mainClasses.Person;
@@ -184,6 +185,28 @@ public class Punch extends Ability
 							user.punchedSomething = true;
 							break collisionCheck;
 						}
+						if (user.z < 1)
+							for (Furniture f : env.furniture)
+							{
+								Rectangle2D fBoundingBox = new Rectangle2D.Double(f.x - f.w / 2, f.y - f.w / 2, f.w, f.w);
+								if (fBoundingBox.contains(user.target))
+								{
+									// Note: this uses f.h + 20 because the regular h is sometimes too thin and the punch is on the other side so it isn't recognized
+									Area fArea = new Area(new Rectangle2D.Double(f.x - f.w / 2, f.y - f.h / 2 - 20 / 2, f.w, f.h + 20));
+									AffineTransform aft = new AffineTransform();
+									aft.rotate(f.rotation, f.x, f.y);
+									fArea.transform(aft);
+									if (fArea.contains(user.target))
+									{
+										// make sure life > 0
+										double leftoverPushback = (f.life > damage + pushback) ? pushback : Math.min(f.life, pushback);
+										env.damageFurniture(f, damage + pushback, punchElement);
+										env.hitPerson(user, f.armor, leftoverPushback, user.rotation - Math.PI, -1); // blunt damage, equal to the armor of the force field.
+										user.punchedSomething = true;
+										break collisionCheck;
+									}
+								}
+							}
 						for (ForceField ff : env.FFs)
 							if (ff.z + ff.height > user.z && ff.z < user.z + user.height)
 							{
