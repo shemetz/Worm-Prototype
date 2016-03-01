@@ -43,7 +43,7 @@ public class NPC extends Person
 	int targetID = -1;
 	boolean rightOrLeft = false; // true = right or CW. false = left or CCW.
 	boolean justCollided = false;
-	double instinctDelayTime;
+	public double instinctDelayTime;
 	double timeSinceLastInstinct;
 	double angleOfLastInstinct;
 	double timeSinceLastDistCheck;

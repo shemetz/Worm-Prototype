@@ -16,6 +16,7 @@ import abilities.Chronobiology;
 import abilities.Clone_I;
 import abilities.Clone_II;
 import abilities.Clone_III;
+import abilities.Danger_Sense;
 import abilities.Elemental_Combat_II_E;
 import abilities.Elemental_Combat_I_E;
 import abilities.Elemental_Resistance_E;
@@ -78,7 +79,7 @@ public class Ability
 			"Precision II", "Precision III", "Protective Bubble I", "Sprint", "Strength I", "Strength II", "Strength III", "Punch", "Heal I", "Heal II", "Force Shield", "Ranged Explosion", "Flight I",
 			"Flight II", "Telekinetic Flight", "Blink", "Ghost Mode I", "Strong Force Field", "Toughness I", "Toughness II", "Toughness III", "Sense Life", "Sense Mana and Stamina", "Sense Powers",
 			"Slow Target", "Chronobiology", "Retrace I", "Retrace II", "Retrace III", "Undo I", "Undo II", "Undo III", "Repeat I", "Repeat II", "Repeat III", "Time Freeze Target I",
-			"Nullification Aura I", "Nullification Aura II", "Wild Power", "Clone I", "Clone II", "Clone III", "Twitch", "Sense Structure", "Sense Parahumans", "Steal Power");
+			"Nullification Aura I", "Nullification Aura II", "Wild Power", "Clone I", "Clone II", "Clone III", "Twitch", "Sense Structure", "Sense Parahumans", "Steal Power", "Danger Sense");
 	protected static List<String> descriptions = new ArrayList<String>();
 	protected static boolean[][] elementalAttacksPossible = new boolean[12][7]; // [element][ability]
 	protected static int[][] elementalAttackNumbers = new int[12][3];
@@ -713,6 +714,9 @@ public class Ability
 			break;
 		case "Sense Movement": // NOT DONE
 			ab = new Sense_Movement(pnts);
+			break;
+		case "Danger Sense":
+			ab = new Danger_Sense(pnts);
 			break;
 		case "Sense Structure":
 			ab = new Sense_Structure(pnts);

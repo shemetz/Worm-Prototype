@@ -75,8 +75,8 @@ public class UIText
 			fontSize = Math.min(30, fontSize);
 			break;
 		case 6: // evasion text
-			color = new Color(255, 255, 255); // dark gray
-			altColor = Color.white;
+			color = Color.white;
+			altColor = new Color(50, 50, 50); // dark gray
 			fontSize = 22;
 			break;
 		default:
