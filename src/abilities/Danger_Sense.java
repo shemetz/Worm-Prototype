@@ -21,9 +21,15 @@ public class Danger_Sense extends _PassiveAbility
 		if (user instanceof NPC)
 		{
 			if (on)
+			{
 				((NPC) user).instinctDelayTime *= 0.7 * level;
+				((NPC) user).maximumDistanceICareAboutPow2 *= Math.pow(level, 3);
+			}
 			else
+			{
 				((NPC) user).instinctDelayTime /= 0.7 * level;
+				((NPC) user).maximumDistanceICareAboutPow2 /= Math.pow(level, 3);
+			}
 		}
 		if (user instanceof Player)
 		{

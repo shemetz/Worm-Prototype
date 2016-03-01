@@ -47,6 +47,7 @@ public class NPC extends Person
 	double timeSinceLastInstinct;
 	double angleOfLastInstinct;
 	double timeSinceLastDistCheck;
+	public double maximumDistanceICareAboutPow2;
 	double lastDistPow2 = Double.MAX_VALUE;
 	List<WayPoint> path;
 	EnvMap envMap = null;
@@ -74,6 +75,7 @@ public class NPC extends Person
 	{
 		basicUpdateSubStats();
 		instinctDelayTime = Math.max(0.15 - 0.015 * WITS, 0); // average is 0.35 secs
+		maximumDistanceICareAboutPow2 = Math.pow(WITS * 70, 2);
 	}
 
 	public void setCommander(int comID)
@@ -525,7 +527,6 @@ public class NPC extends Person
 		 * 
 		 * Functionally, a person's reactions to danger are delayed by IDT (but not while reacting - not that it matters much).
 		 */
-		final double maximumDistanceICareAboutPow2 = Math.pow(WITS * 70, 2); // TODO
 
 		double xElement = 0;
 		double yElement = 0;

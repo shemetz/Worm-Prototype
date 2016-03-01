@@ -2971,6 +2971,19 @@ public class Environment
 		}
 	}
 
+	public int getWallElement(int wallType)
+	{
+		switch (wallType)
+		{
+		case -2: // edges
+			return 10;
+		case 12: // cement
+			return 10;
+		default:
+			return wallType;
+		}
+	}
+
 	public int getPoolDebrisType(int poolType)
 	{
 		switch (poolType)

@@ -160,7 +160,7 @@ public class Wild_Power extends Ability
 							{
 								if (rand == 0) // Melt/Destroy
 								{
-									int element = env.wallTypes[x][y];
+									int element = env.getWallElement(env.wallTypes[x][y]);
 									env.otherDebris(x, y, element, "destroy", 0);
 									if (Ability.elementalAttacksPossible[element][6])
 									{

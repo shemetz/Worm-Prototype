@@ -174,8 +174,8 @@ public class Punch extends Ability
 					user.target = new Point((int) (user.x + range * Math.cos(user.rotation + extraAimingAngle * m)), (int) (user.y + range * Math.sin(user.rotation + extraAimingAngle * m)));
 					if (!onlyOrganics)
 					{
-						int i = user.target.x / squareSize;
-						int j = user.target.y / squareSize;
+						int i = Math.min(Math.max(user.target.x / squareSize, 0), env.widthPixels);
+						int j = Math.min(Math.max(user.target.y / squareSize, 0), env.heightPixels);
 						if (user.z < 1 && env.wallTypes[i][j] > 0)
 						{
 							int wallHealth = env.wallHealths[i][j];

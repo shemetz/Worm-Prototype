@@ -1418,8 +1418,9 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		{
 			Person person = new NPC((int) (100 + Math.random() * (env.widthPixels - 200)), (int) (100 + Math.random() * (env.heightPixels - 200)), Strategy.PASSIVE);
 			env.people.add(person);
-			person.abilities.add(Ability.ability("Toughness II", 5));
 		}
+		env.people.get(2).name = "DANGER SENSE";
+		env.people.get(2).abilities.add(Ability.ability("Danger Sense", 10));
 
 		// Fix walls spawning on people
 		for (Person p : env.people)
