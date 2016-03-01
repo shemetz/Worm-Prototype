@@ -53,6 +53,7 @@ import abilities.ForceFieldAbility;
 import abilities.GridTargetingAbility;
 import abilities.Portals;
 import abilities.Protective_Bubble_I;
+import abilities.Punch;
 import abilities.Sense_Powers;
 import abilities.Shield_E;
 import abilities.Sprint;
@@ -2485,11 +2486,13 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			player.flyDirection = 0;
 			player.portalMovementRotation = 0; // If you stop, portal sickness cancels
 			if (player.leftMousePressed && !player.maintaining && !player.dead)
-			{
-				// rotate to where mouse point is
-				double angle = Math.atan2(my - player.y, mx - player.x);
-				player.rotate(angle, globalDeltaTime);
-			}
+				if (player.abilityTryingToRepetitivelyUse == -1 || !(player.abilities.get(player.abilityTryingToRepetitivelyUse) instanceof Punch)
+						|| player.abilities.get(player.abilityTryingToRepetitivelyUse).cooldownLeft <= 0)
+				{
+					// rotate to where mouse point is
+					double angle = Math.atan2(my - player.y, mx - player.x);
+					player.rotate(angle, globalDeltaTime);
+				}
 		}
 		else
 		{
@@ -2542,12 +2545,6 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				{
 					if (!p.notAnimating)
 						p.switchAnimation(0);
-					if (p.abilityTryingToRepetitivelyUse != -1 && p.abilities.get(p.abilityTryingToRepetitivelyUse).justName().equals("Punch")
-							&& p.abilities.get(p.abilityTryingToRepetitivelyUse).cooldownLeft == 0 && p.abilities.get(p.abilityTryingToRepetitivelyUse).cost > p.stamina)
-					{
-						p.switchAnimation(1);
-						p.switchAnimation(0);
-					}
 					return;
 				}
 				else

@@ -655,11 +655,6 @@ public class Person extends RndPhysObj implements Mover
 				break;
 			case 5:
 			case 6:
-				if (!inCombat)
-				{
-					animState = 0;
-					animFrame = 0;
-				}
 				break;
 			case 13: // = dead
 				break;
