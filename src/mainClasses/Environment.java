@@ -2655,7 +2655,7 @@ public class Environment
 			destroyWall(i, j);
 		if (damage > 30 && damageType == 0) // hits additional walls if high and blunt damage
 		{
-			damageConnectedWalls(i, j, damage);
+			damageConnectedWalls(i, j, damage, damageType);
 		}
 		connectWall(i, j); // update cracks
 	}
@@ -2670,7 +2670,7 @@ public class Environment
 
 	boolean[][] connectedWalls;
 
-	void damageConnectedWalls(int x, int y, double damage)
+	void damageConnectedWalls(int x, int y, double damage, int damageType)
 	{
 		connectedWalls = new boolean[width][height];
 
@@ -2712,7 +2712,7 @@ public class Environment
 			for (int yy = Math.max(y - extra, 0); yy < y + extra && yy < height; yy++)
 				if (connectedWalls[xx][yy])
 					if (wallHealths[xx][yy] > 0 && (xx != x || yy != y))
-						nonRecursiveDamageWall(xx, yy, damage / Math.sqrt(Methods.DistancePow2(x, y, xx, yy)));
+						nonRecursiveDamageWall(xx, yy, damage / Math.sqrt(Methods.DistancePow2(x, y, xx, yy)), damageType);
 	}
 
 	/**
@@ -2734,9 +2734,11 @@ public class Environment
 			destroyWall(i, j);
 	}
 
-	public void nonRecursiveDamageWall(int i, int j, double damage)
+	public void nonRecursiveDamageWall(int i, int j, double damage, int damageType)
 	{
 		if (wallTypes[i][j] == -2)
+			return;
+		if (damageType > 1 && EP.damageType(wallTypes[i][j]) == damageType)
 			return;
 		final int wallArmor = 10;
 		if (damage - wallArmor < 1)
@@ -3055,61 +3057,9 @@ public class Environment
 			// Elemental effects!
 			if (percentageOfTheDamage <= 0.02) // as it does whenever it is not 1, most likely. still, TODO make this good code
 				randomNumber *= 4.1; // This is roughly the right amount to keep it a 15% chance per second
-			switch (elementNum)
-			{
-			case 0: // fire
-			case 8: // lava
-				// Burn
-				if (randomNumber < 0.15) // 15% chance
-					p.affect(new Burning(5, null), true);
-				break;
-			case 1: // water
-				// Slip
-				if (randomNumber < 0.15) // 15% chance
-					p.slip(true);
-				break;
-			case 3: // electricity
-				// Stun
-				if (randomNumber < 0.15) // 15% chance
-					;// TODO
-				break;
-			case 5: // ice
-				// Freeze
-				if (randomNumber < 0.15) // 15% chance
-					;// TODO
-				break;
-			case 11: // plant
-				// Tangle
-				if (randomNumber < 0.50) // 50% chance
-					p.affect(new Tangled(1, null), true);
-				break;
-			case 2: // wind
-			case 4: // metal
-				// +50% pushback
-				if (randomNumber < 0.15) // 15% chance
-					pushback *= 1.5;
-				break;
-			case 6: // energy
-			case 7: // acid
-			case 9: // flesh
-				// +25% damage
-				if (randomNumber < 0.15) // 15% chance
-					damage *= 1.25;
-				break;
-			case 10: // earth
-				// +25% damage or +50% pushback
-				if (randomNumber < 0.15) // 15% chance
-					if (randomNumber < 0.075)
-						damage *= 1.25;
-					else
-						pushback *= 1.5;
-				break;
-			case -1: // blunt/"normal" damage
-				break;
-			default:
-				MAIN.errorMessage("It's elementary! " + elementNum + "...?");
-				break;
-			}
+			double[] dmgpush = trySpecialEffectReturnDamageAndPushback(p, elementNum, damage, pushback, randomNumber);
+			damage = dmgpush[0];
+			pushback = dmgpush[1];
 
 			// Grunt sound, if damage is bad enough
 			if (!p.dead)
@@ -3148,6 +3098,67 @@ public class Environment
 		p.xVel += velocityPush * Math.cos(angle);
 		p.yVel += velocityPush * Math.sin(angle);
 
+	}
+
+	public double[] trySpecialEffectReturnDamageAndPushback(Person p, int elementNum, double damage, double pushback, double randomNumber)
+	{
+		switch (elementNum)
+		{
+		case 0: // fire
+		case 8: // lava
+			// Burn
+			if (randomNumber < 0.15) // 15% chance
+				p.affect(new Burning(5, null), true);
+			break;
+		case 1: // water
+			// Slip
+			if (randomNumber < 0.15) // 15% chance
+				p.slip(true);
+			break;
+		case 3: // electricity
+			// Stun
+			if (randomNumber < 0.15) // 15% chance
+				;// TODO
+			break;
+		case 5: // ice
+			// Freeze
+			if (randomNumber < 0.15) // 15% chance
+				;// TODO
+			break;
+		case 11: // plant
+			// Tangle
+			if (randomNumber < 0.50) // 50% chance
+				p.affect(new Tangled(1, null), true);
+			break;
+		case 2: // wind
+		case 4: // metal
+			// +50% pushback
+			if (randomNumber < 0.15) // 15% chance
+				pushback *= 1.5;
+			break;
+		case 6: // energy
+		case 7: // acid
+		case 9: // flesh
+			// +25% damage
+			if (randomNumber < 0.15) // 15% chance
+				damage *= 1.25;
+			break;
+		case 10: // earth
+			// +25% damage or +50% pushback
+			if (randomNumber < 0.15) // 15% chance
+				if (randomNumber < 0.075)
+					damage *= 1.25;
+				else
+					pushback *= 1.5;
+			break;
+		case -1: // blunt/"normal" damage
+			break;
+		default:
+			MAIN.errorMessage("It's elementary! " + elementNum + "...?");
+			break;
+		}
+		return new double[]
+		{ damage, pushback };
 	}
 
 	/**

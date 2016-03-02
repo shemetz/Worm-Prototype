@@ -1491,7 +1491,7 @@ public class Person extends RndPhysObj implements Mover
 		// check if this person has any powers of that element
 		// (TODO reconsider - maybe check DNA instead of abilities, which would not detect given abilities and minor "random" power generation abilities)
 		for (Ability a : abilities)
-			if (a.getElementNum() == elementNum)
+			if (a.elementNum == elementNum)
 				return true;
 
 		// check if any effect

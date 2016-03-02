@@ -7,29 +7,30 @@ import java.util.List;
 public class Ball extends RndPhysObj
 {
 	public int elementNum;
-	public int points;
 	final int ballMass = 10; // TODO different per element, maybe depends on radius
 	public Person creator;
 	public List<Evasion> evasions;
 	public boolean critical = false;
 	public double timer;
+	public double damage, pushback;
 
 	final static public double smokeEffectRate = 0.03;
 
-	public Ball(double x1, double y1, double z1, int en, int p1, double angle, Person creator1)
+	public Ball(double x1, double y1, double z1, int en, double damage1, double pushback1, double angle, Person creator1)
 	{
-		this(en, p1, angle, creator1);
+		this(en, damage1, pushback1, angle, creator1);
 		x = x1;
 		y = y1;
 		z = z1;
 	}
 
-	public Ball(int en, int p1, double angle, Person creator1)
+	public Ball(int en, double damage1, double pushback1, double angle, Person creator1)
 	{
 		super(-1, -1, 1, 1);
 		rotation = 0;
 		elementNum = en;
-		points = p1;
+		damage = damage1;
+		pushback = pushback1;
 		creator = creator1;
 		timer = 0;
 		changeImage(Resources.balls[elementNum]); // Not all the same size!!!
@@ -71,7 +72,7 @@ public class Ball extends RndPhysObj
 		}
 		height = 1;
 		mass = ballMass;
-		double velocity = Ball.giveVelocity(p1); // pixels per second. Below 330 and the character would probably accidentally touch them while running
+		double velocity = Ball.giveVelocity(); // pixels per second. Below 330 and the character would probably accidentally touch them while running
 		xVel = Math.cos(angle) * velocity;
 		yVel = Math.sin(angle) * velocity;
 		angularVelocity = 1.8 * Math.PI;
@@ -83,20 +84,20 @@ public class Ball extends RndPhysObj
 		evasions.add(new Evasion(p.id));
 	}
 
-	public static double giveVelocity(int pnts)
+	public static double giveVelocity()
 	{
 		// TODO perhaps give different speeds to different elements.
-		return 400 + 20 * pnts;
+		return 500;
 	}
 
 	public double getDamage()
 	{
-		return 0.6 * points * Ability.elementalAttackNumbers[elementNum][0] * mass / ballMass;
+		return damage * mass / ballMass;
 	}
 
 	public double getPushback()
 	{
-		return 0.6 * points * Ability.elementalAttackNumbers[elementNum][1] * mass / ballMass + 1; // balls deal an extra 1 pushback
+		return pushback * mass / ballMass; // balls deal an extra 1 pushback
 	}
 
 	public void trueDrawShadow(Graphics2D buffer, double shadowX, double shadowY)

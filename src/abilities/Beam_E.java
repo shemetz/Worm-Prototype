@@ -25,7 +25,7 @@ public class Beam_E extends Ability
 	{
 		super("Beam <" + elementName + ">", p);
 		cost = 0;
-		costPerSecond = 5 / elementalAttackNumbers[getElementNum()][2] * 1.5;
+		costPerSecond = 5 / elementalAttackNumbers[elementNum][2] * 1.5;
 		costType = CostType.MANA;
 		rangeType = RangeType.EXACT_RANGE;
 		cooldown = 0.5; // after stopping a beam attack, this is the cooldown to start a new one
@@ -162,7 +162,7 @@ public class Beam_E extends Ability
 					Point3D start = new Point3D((int) (user.x + beamExitDistance * Math.cos(angle)), (int) (user.y + beamExitDistance * Math.sin(angle)), user.z + user.height / 2); // starts beamExitDistance pixels in front of the user
 					// TODO piercing beams, or electric lightning bolts
 					Point3D end = new Point3D((int) (user.x + range * Math.cos(angle)), (int) (user.y + range * Math.sin(angle)), user.z + user.height / 2);
-					Beam b = new Beam(user, this, start, end, getElementNum(), level, range);
+					Beam b = new Beam(user, this, start, end, elementNum, level, range);
 					frameNum++;
 					b.frameNum = beamFrameNum;
 					// critical chance

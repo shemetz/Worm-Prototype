@@ -28,14 +28,14 @@ public class Pool_E extends GridTargetingAbility
 		boolean lesserCost = false;
 		for (int i = gridX - 1; i <= gridX + 1; i++)
 			for (int j = gridY - 1; j <= gridY + 1; j++)
-				if (env.poolTypes[i][j] == getElementNum())
+				if (env.poolTypes[i][j] == elementNum)
 					lesserCost = true;
 		if (!on && !user.maintaining && (cost <= user.mana || (lesserCost && Math.max(cost - 2, 0) < user.mana)))
 		{
 			boolean canCreate = true;
 			// stop creating pool if there already is a different pool there
 			if (env.poolTypes[gridX][gridY] != -1)
-				if (env.poolTypes[gridX][gridY] != getElementNum() || (env.poolTypes[gridX][gridY] == getElementNum() && env.poolHealths[gridX][gridY] >= 100) || env.wallTypes[gridX][gridY] != -1)
+				if (env.poolTypes[gridX][gridY] != elementNum || (env.poolTypes[gridX][gridY] == elementNum && env.poolHealths[gridX][gridY] >= 100) || env.wallTypes[gridX][gridY] != -1)
 					canCreate = false;
 			// stop creating pool if it collides with someone
 			for (Person p : env.people)
@@ -59,7 +59,7 @@ public class Pool_E extends GridTargetingAbility
 				targetGridX = gridX;
 				targetGridY = gridY;
 				canBuildInTarget = true; // able
-				env.addPool(gridX, gridY, getElementNum(), false);
+				env.addPool(gridX, gridY, elementNum, false);
 				env.poolHealths[gridX][gridY] = Math.max(env.poolHealths[gridX][gridY], 1);
 				user.maintaining = true;
 				user.notAnimating = true;
@@ -90,7 +90,7 @@ public class Pool_E extends GridTargetingAbility
 		else
 		{
 			// effects
-			int element = getElementNum();
+			int element = elementNum;
 			if (element == EP.toInt("Flesh"))
 			{
 				env.otherDebris((targetGridX + 0.5) * squareSize, (targetGridY + 0.5) * squareSize, 14, "pool heal blood", frameNum);
@@ -115,7 +115,7 @@ public class Pool_E extends GridTargetingAbility
 		{
 			int gridX = player.target.x / squareSize, gridY = player.target.y / squareSize;
 			if (env.poolTypes[gridX][gridY] != -1)
-				if (env.poolTypes[gridX][gridY] != getElementNum() || (env.poolTypes[gridX][gridY] == getElementNum() && env.poolHealths[gridX][gridY] >= 100) || env.wallTypes[gridX][gridY] != -1)
+				if (env.poolTypes[gridX][gridY] != elementNum || (env.poolTypes[gridX][gridY] == elementNum && env.poolHealths[gridX][gridY] >= 100) || env.wallTypes[gridX][gridY] != -1)
 					canBuildInTarget = false;
 		}
 	}

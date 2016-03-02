@@ -81,12 +81,12 @@ import mainResourcesPackage.SoundEffect;
 
 public class Ability
 {
-	final static List<String> implementedAbilities = Arrays.asList("Elemental Combat I", "Beam", "Ball", "Shield", "Pool", "Wall", "Spray", "Sense Element", "Elemental Resistance", "Elemental Fists",
+	final static List<String> implementedAbilities = Arrays.asList("Elemental Combat I", "Beam", "Ball", "Shield", "Pool", "Wall", "Spray", "Sense Element", "Elemental Resistance", "Strike",
 			"Portals", "Elemental Void", "Precision I", "Precision II", "Precision III", "Protective Bubble I", "Sprint", "Strength I", "Strength II", "Strength III", "Punch", "Heal I", "Heal II",
 			"Force Shield", "Ranged Explosion", "Flight I", "Flight II", "Telekinetic Flight", "Blink", "Ghost Mode I", "Strong Force Field", "Toughness I", "Toughness II", "Toughness III",
 			"Sense Life", "Sense Mana and Stamina", "Sense Powers", "Slow Target", "Chronobiology", "Retrace I", "Retrace II", "Retrace III", "Undo I", "Undo II", "Undo III", "Repeat I", "Repeat II",
 			"Repeat III", "Time Freeze Target I", "Nullification Aura I", "Nullification Aura II", "Wild Power", "Clone I", "Clone II", "Clone III", "Twitch", "Sense Structure", "Sense Parahumans",
-			"Steal Power", "Danger Sense", "Sapping Fists", "Pushy Fists", "Exploding Fists", "Vampiric Fists", "Shattering Fists");
+			"Steal Power", "Danger Sense", "Sapping Fists", "Pushy Fists", "Exploding Fists", "Vampiric Fists", "Shattering Fists", "Elemental Fists");
 	protected static List<String> descriptions = new ArrayList<String>();
 	protected static boolean[][] elementalAttacksPossible = new boolean[12][7]; // [element][ability]
 	protected static int[][] elementalAttackNumbers = new int[12][3];
@@ -127,8 +127,8 @@ public class Ability
 	// changing variables of the ability
 	protected double timeLeft; // how much time the ability has been on.
 	protected double cooldownLeft; // if cooldown is -1 (passive), then a cooldownLeft of 0 means the ability hasn't been initialized yet
-	protected boolean on; // For maintained and on/off abilities - whether or not the power is active.
-	protected int elementNum;
+	public boolean on; // For maintained and on/off abilities - whether or not the power is active.
+	public int elementNum;
 	public boolean disabled;
 	public boolean prepareToDisable;
 	public boolean prepareToEnable;
@@ -306,7 +306,7 @@ public class Ability
 		return "NONE";
 	}
 
-	public int getElementNum()
+	private int getElementNum()
 	{
 		if (name.contains("<"))
 			return EP.toInt(getElement());
@@ -718,7 +718,7 @@ public class Ability
 		case "Spray":
 			ab = new Spray_E(element, pnts);
 			break;
-		case "Strike": // NOT DONE
+		case "Strike":
 			ab = new Strike_E(element, pnts);
 			break;
 		case "Elemental Resistance":

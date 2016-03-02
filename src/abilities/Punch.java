@@ -71,6 +71,12 @@ public class Punch extends Ability
 					user.switchAnimation(0); // before punching the user simply rotates to the target direction
 					if (cooldownLeft <= 0)
 					{
+						for (int i = 0; i < user.punchAffectingAbilities.size(); i++)
+							if (user.punchAffectingAbilities.get(i) instanceof Strike_E && !user.punchAffectingAbilities.get(i).on)
+							{
+								user.punchAffectingAbilities.remove(i);
+								i--;
+							}
 						if (angleDifference < 0.2)
 						{
 							user.punchedSomething = false;
@@ -148,7 +154,7 @@ public class Punch extends Ability
 		damage = user.STRENGTH * 1;
 		pushback = user.STRENGTH * 1.5;
 		pushback += Math.sqrt(user.xVel * user.xVel + user.yVel * user.yVel) * 100 / 3000; // TODO uhhh
-
+		double originalPushback = 0 + pushback;
 		for (Ability a : user.punchAffectingAbilities)
 		{
 			if (a instanceof Pushy_Fists)
@@ -158,13 +164,11 @@ public class Punch extends Ability
 		// Notice:
 		damage += 0.2 * pushback;
 		pushback -= 0.2 * pushback;
-		if (user.timeEffect > 1)
-		{
-			// I would have made it work even if timeEfect < 1, but that's OP with the fact that fists are instantaneous (unlike in the real world).
-			// TODO maybe later, add a delay to the punch, and the delay will depend on timeEffect, so this will be better.
-			damage /= user.timeEffect;
-			pushback /= user.timeEffect;
-		}
+		double timeEffect = Math.min(user.timeEffect, 1);
+		// I would have made it work even if timeEfect < 1, but that's OP with the fact that fists are instantaneous (unlike in the real world).
+		// TODO maybe later, add a delay to the punch, and the delay will depend on timeEffect, so this will be better.
+		damage /= timeEffect;
+		pushback /= timeEffect;
 
 		int punchElement = -1; // TODO other punch types that aren't blunt?
 		int punchDamageType = 0;
@@ -185,10 +189,17 @@ public class Punch extends Ability
 						int j = Math.min(Math.max(user.target.y / squareSize, 0), env.heightPixels);
 						if (user.z < 1 && env.wallTypes[i][j] > 0)
 						{
-							int wallHealth = env.wallHealths[i][j];
-							double leftoverPushback = wallHealth > damage + pushback ? pushback : Math.min(wallHealth, pushback);
+							for (Ability a : user.punchAffectingAbilities)
+							{
+								if (a instanceof Shattering_Fists)
+									if (Math.random() < 0.25 * a.level)
+										env.nonRecursiveDamageWall(i, j, (damage + pushback) / timeEffect * 10, punchDamageType);
+								if (a instanceof Strike_E)
+									env.damageWall(i, j, (a.damage + a.pushback) / timeEffect, a.elementNum);
+							}
 							env.damageWall(i, j, damage + pushback, punchDamageType);
-							env.personPunchWall(user, leftoverPushback, env.wallTypes[i][j]);
+							if (env.wallHealths[i][j] > 0)
+								env.personPunchWall(user, 5, env.wallTypes[i][j]); // 5 damage? TODO
 							user.punchedSomething = true;
 							break collisionCheck;
 						}
@@ -205,6 +216,14 @@ public class Punch extends Ability
 									fArea.transform(aft);
 									if (fArea.contains(user.target))
 									{
+										for (Ability a : user.punchAffectingAbilities)
+										{
+											if (a instanceof Shattering_Fists)
+												if (Math.random() < 0.25 * a.level)
+													damage *= 10;
+											if (a instanceof Strike_E)
+												damage += (a.damage + a.pushback) / timeEffect; // together why not
+										}
 										// make sure life > 0
 										double leftoverPushback = (f.life > damage + pushback) ? pushback : Math.min(f.life, pushback);
 										env.damageFurniture(f, damage + pushback, punchElement);
@@ -228,9 +247,13 @@ public class Punch extends Ability
 									if (forcefieldArea.contains(user.target))
 									{
 										for (Ability a : user.punchAffectingAbilities)
+										{
 											if (a instanceof Shattering_Fists)
 												if (Math.random() < 0.25 * a.level)
 													damage *= 10;
+											if (a instanceof Strike_E)
+												damage += (a.damage + a.pushback) / timeEffect; // together why not
+										}
 										double leftoverPushback = ff.life > damage + pushback ? pushback : Math.min(ff.life, pushback);
 										env.damageForceField(ff, damage + pushback, user.target);
 										env.hitPerson(user, ff.armor, leftoverPushback, user.rotation - Math.PI, 6); // Energy damage, equal to the armor of the force field.
@@ -286,9 +309,13 @@ public class Punch extends Ability
 							if (withinAngles) // check angles
 							{
 								for (Ability a : user.punchAffectingAbilities)
+								{
 									if (a instanceof Shattering_Fists)
 										if (Math.random() < 0.25 * a.level)
 											damage *= 10;
+									if (a instanceof Strike_E)
+										damage += (a.damage + a.pushback) / timeEffect; // together why not
+								}
 								double leftoverPushback = aff.life > damage + pushback ? pushback : Math.min(aff.life, pushback);
 								env.damageArcForceField(aff, damage + pushback, user.target, 0);
 								int AFFelement = aff.elementNum;
@@ -315,9 +342,16 @@ public class Punch extends Ability
 												if (Math.random() < 0.1 * a.level) // 10% * level
 													p.affect(new Nullified(1, true, a), true);
 											if (a instanceof Elemental_Fists_E)
-												env.hitPerson(p, a.damage, a.pushback, user.rotation, a.getElementNum());
+												env.hitPerson(p, a.damage / timeEffect, a.pushback / timeEffect, user.rotation, a.elementNum);
 											if (a instanceof Strike_E)
-												env.hitPerson(p, a.damage, a.pushback, user.rotation, a.getElementNum());
+											{
+												// apply effect
+												double[] dmgpush = env.trySpecialEffectReturnDamageAndPushback(p, a.elementNum, a.damage, a.pushback, 1); // 1 = certain
+												double damage2 = dmgpush[0];
+												double pushback2 = dmgpush[1];
+												// might apply effect twice in some cases - I don't want to try to solve this, I'm lazy
+												env.hitPerson(p, damage2 / timeEffect, pushback2 / timeEffect, user.rotation, a.elementNum);
+											}
 											if (a instanceof Vampiric_Fists)
 												user.heal(0.2 * a.level * damage);
 										}
@@ -333,17 +367,24 @@ public class Punch extends Ability
 		if (user.punchedSomething)
 		{
 			// backwards pushback
-			env.hitPerson(user, 0, pushback * 0.6, user.rotation + Math.PI, -1);
+			env.hitPerson(user, 0, originalPushback * 0.6, user.rotation + Math.PI, -1);
 			// Sound effect of hit
 			sounds.get((int) (Math.random() * 3)).play();
 
 			for (Ability a : user.punchAffectingAbilities)
+			{
 				if (a instanceof Exploding_Fists)
 					env.createExplosion(user.target.x, user.target.y, user.z, 100, a.damage, a.pushback, -1);
+				if (a instanceof Strike_E)
+					((Strike_E) a).turnOff();
+			}
 			return true;
 		}
 		else
 		{
+			for (Ability a : user.punchAffectingAbilities)
+				if (a instanceof Strike_E)
+					((Strike_E) a).turnOff();
 			if (missSound) // sound effect of miss
 				sounds.get((int) (Math.random() * 3) + 3).play();
 			return false;

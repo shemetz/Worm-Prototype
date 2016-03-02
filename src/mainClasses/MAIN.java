@@ -1867,7 +1867,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 					drawStructureDistancePow2 = Math.pow(a.range, 2);
 					break;
 				case "Sense Element":
-					elementSenses[a.getElementNum()] = Math.pow(a.range, 2);
+					elementSenses[a.elementNum] = Math.pow(a.range, 2);
 					break;
 				default:
 					break;
@@ -1927,7 +1927,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 					drawStaminaDistancePow2 = Math.pow(a.range, 2);
 					break;
 				case "Sense Element":
-					elementSenses[a.getElementNum()] = Math.pow(a.range, 2);
+					elementSenses[a.elementNum] = Math.pow(a.range, 2);
 					break;
 				case "Sense Powers":
 					Sense_Powers spAbility = (Sense_Powers) a;

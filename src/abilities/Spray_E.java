@@ -76,7 +76,7 @@ public class Spray_E extends Ability
 				double z = (user.z + 0.35) * (Math.random() * 0.95 + 0.05); // anywhere between 100% and 5% range
 				double randomAngle = (Math.random() - 0.5) * arc + angle; // random angle within spray arc
 				Point2D start = new Point2D.Double(user.x + sprayExitDistance * Math.cos(randomAngle), user.y + sprayExitDistance * Math.sin(randomAngle));
-				SprayDrop sd = new SprayDrop(start.getX(), start.getY(), z, getElementNum(), level, randomAngle, velocity, user);
+				SprayDrop sd = new SprayDrop(start.getX(), start.getY(), z, elementNum, level, randomAngle, velocity, user);
 				sd.timeEffect = user.timeEffect;
 				env.sprayDrops.add(sd);
 				user.mana -= costPerSecond * deltaTime;

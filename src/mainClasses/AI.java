@@ -82,7 +82,7 @@ public class AI
 				if (a instanceof Ball_E)
 				{
 					// aim the ball the right direction, taking into account the velocity addition caused by the person moving
-					double v = Ball.giveVelocity(a.level);
+					double v = Ball.giveVelocity();
 					double xv = v * Math.cos(angleToTarget);
 					double yv = v * Math.sin(angleToTarget);
 					xv -= npc.xVel;
@@ -156,11 +156,11 @@ public class AI
 			int attempts = 0;
 			double[] angleAttempts =
 			{ 0.0, 0.3, -0.3, 0.6, -0.6 };
-			//test multiple angles ahead
+			// test multiple angles ahead
 			while (path == null && attempts < angleAttempts.length)
 			{
 				double angle = angleToTarget + angleAttempts[attempts];
-				//test multiple distances
+				// test multiple distances
 				for (int i = 1000; i >= 300 && path == null; i--) // 1000 to 300
 				{
 					targetPoint = new Point((int) (targetPerson.x + i * Math.cos(angle)), (int) (targetPerson.y + i * Math.sin(angle)));

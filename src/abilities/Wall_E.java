@@ -28,7 +28,7 @@ public class Wall_E extends GridTargetingAbility
 		 * Create a wall. Destroys any pools in that area.
 		 */
 		int gridX = target.x / squareSize, gridY = target.y / squareSize;
-		boolean repairingWall = env.wallTypes[gridX][gridY] == getElementNum() && env.wallHealths[gridX][gridY] < 100 && 0.3 <= user.mana;
+		boolean repairingWall = env.wallTypes[gridX][gridY] == elementNum && env.wallHealths[gridX][gridY] < 100 && 0.3 <= user.mana;
 		if (!on && !user.maintaining && (cost <= user.mana || repairingWall))
 		{
 			boolean canCreate = true;
@@ -36,7 +36,7 @@ public class Wall_E extends GridTargetingAbility
 			{
 				// stop creating wall if there already is a different wall there
 				if (env.wallTypes[gridX][gridY] != -1)
-					if (env.wallTypes[gridX][gridY] != getElementNum() || (env.wallTypes[gridX][gridY] == getElementNum() && env.wallHealths[gridX][gridY] >= 100))
+					if (env.wallTypes[gridX][gridY] != elementNum || (env.wallTypes[gridX][gridY] == elementNum && env.wallHealths[gridX][gridY] >= 100))
 						canCreate = false;
 				// stop creating wall if it collides with someone
 				for (Person p : env.people)
@@ -57,7 +57,7 @@ public class Wall_E extends GridTargetingAbility
 				targetGridX = gridX;
 				targetGridY = gridY;
 				canBuildInTarget = true; // able
-				env.addWall(gridX, gridY, getElementNum(), false);
+				env.addWall(gridX, gridY, elementNum, false);
 				env.wallHealths[gridX][gridY] = Math.max(env.wallHealths[gridX][gridY], 1);
 				if (repairingWall)
 					user.mana -= 0.3;
@@ -90,7 +90,7 @@ public class Wall_E extends GridTargetingAbility
 		else
 		{
 			// effects
-			env.otherDebris((targetGridX + 0.5) * squareSize, (targetGridY + 0.5) * squareSize, getElementNum(), "wall heal", frameNum);
+			env.otherDebris((targetGridX + 0.5) * squareSize, (targetGridY + 0.5) * squareSize, elementNum, "wall heal", frameNum);
 			env.wallHealths[(int) targetGridX][(int) targetGridY] = (int) Math.max(Math.max((1 - cooldownLeft / cooldown) * 100, 1), env.wallHealths[(int) targetGridX][(int) targetGridY]); // make sure you aren't decreasing current health
 			user.mana -= costPerSecond * deltaTime;
 		}
@@ -104,7 +104,7 @@ public class Wall_E extends GridTargetingAbility
 		{
 			int gridX = player.target.x / squareSize, gridY = player.target.y / squareSize;
 			if (env.wallTypes[gridX][gridY] != -1)
-				if (env.wallTypes[gridX][gridY] != getElementNum() || (env.wallTypes[gridX][gridY] == getElementNum() && env.wallHealths[gridX][gridY] >= 100))
+				if (env.wallTypes[gridX][gridY] != elementNum || (env.wallTypes[gridX][gridY] == elementNum && env.wallHealths[gridX][gridY] >= 100))
 					canBuildInTarget = false;
 		}
 	}

@@ -241,7 +241,7 @@ public class Resources
 		disabled = ResourceLoader.getBufferedImage("icons/effects/disabled.png");
 
 		String[] punchStrings = new String[]
-		{ "Sapping Fists", "Pushy Fists", "Vampiric Fists", "Exploding Fists", "Shattering Fists"};
+		{ "Sapping Fists", "Pushy Fists", "Vampiric Fists", "Exploding Fists", "Shattering Fists" };
 		for (int i = 0; i < punchStrings.length; i++)
 		{
 			specialPunches.put(punchStrings[i], new ArrayList<BufferedImage>());
@@ -250,10 +250,15 @@ public class Resources
 		}
 		for (int i = 0; i < numOfElements; i++)
 		{
-			String str = EP.elementList[i] + " Elemental Fists";
-			specialPunches.put(str, new ArrayList<BufferedImage>());
+			String str1 = EP.elementList[i] + " Elemental Fists";
+			String str2 = EP.elementList[i] + " Strike";
+			specialPunches.put(str1, new ArrayList<BufferedImage>());
+			specialPunches.put(str2, new ArrayList<BufferedImage>());
 			for (int j = 1; j <= 3; j++)
-				specialPunches.get(str).add(ResourceLoader.getBufferedImage("punches/" + str + "_" + j + ".png"));
+			{
+				specialPunches.get(str1).add(ResourceLoader.getBufferedImage("punches/" + str1 + "_" + j + ".png"));
+				specialPunches.get(str2).add(ResourceLoader.getBufferedImage("punches/" + str1 + "_" + j + ".png")); // str1 on purpose
+			}
 		}
 
 		bodyPart.add(new ArrayList<List<List<BufferedImage>>>()); // legs
