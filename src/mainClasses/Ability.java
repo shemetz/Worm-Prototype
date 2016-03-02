@@ -19,6 +19,7 @@ import abilities.Clone_III;
 import abilities.Danger_Sense;
 import abilities.Elemental_Combat_II_E;
 import abilities.Elemental_Combat_I_E;
+import abilities.Elemental_Fists_E;
 import abilities.Elemental_Resistance_E;
 import abilities.Elemental_Void;
 import abilities.Flight_I;
@@ -36,6 +37,7 @@ import abilities.Precision_II;
 import abilities.Precision_III;
 import abilities.Protective_Bubble_I;
 import abilities.Punch;
+import abilities.Pushy_Fists;
 import abilities.Ranged_Explosion;
 import abilities.Repeat_I;
 import abilities.Repeat_II;
@@ -43,6 +45,7 @@ import abilities.Repeat_III;
 import abilities.Retrace_I;
 import abilities.Retrace_II;
 import abilities.Retrace_III;
+import abilities.Sapping_Fists;
 import abilities.Sense_Element_E;
 import abilities.Sense_Life;
 import abilities.Sense_Mana_and_Stamina;
@@ -75,17 +78,19 @@ import mainResourcesPackage.SoundEffect;
 
 public class Ability
 {
-	final static List<String> implementedAbilities = Arrays.asList("Elemental Combat I", "Beam", "Ball", "Shield", "Pool", "Wall", "Spray", "Sense Element", "Elemental Resistance", "Portals", "Elemental Void", "Precision I",
-			"Precision II", "Precision III", "Protective Bubble I", "Sprint", "Strength I", "Strength II", "Strength III", "Punch", "Heal I", "Heal II", "Force Shield", "Ranged Explosion", "Flight I",
-			"Flight II", "Telekinetic Flight", "Blink", "Ghost Mode I", "Strong Force Field", "Toughness I", "Toughness II", "Toughness III", "Sense Life", "Sense Mana and Stamina", "Sense Powers",
-			"Slow Target", "Chronobiology", "Retrace I", "Retrace II", "Retrace III", "Undo I", "Undo II", "Undo III", "Repeat I", "Repeat II", "Repeat III", "Time Freeze Target I",
-			"Nullification Aura I", "Nullification Aura II", "Wild Power", "Clone I", "Clone II", "Clone III", "Twitch", "Sense Structure", "Sense Parahumans", "Steal Power", "Danger Sense");
+	final static List<String> implementedAbilities = Arrays.asList("Elemental Combat I", "Beam", "Ball", "Shield", "Pool", "Wall", "Spray", "Sense Element", "Elemental Resistance", "Elemental Fists",
+			"Portals", "Elemental Void", "Precision I", "Precision II", "Precision III", "Protective Bubble I", "Sprint", "Strength I", "Strength II", "Strength III", "Punch", "Heal I", "Heal II",
+			"Force Shield", "Ranged Explosion", "Flight I", "Flight II", "Telekinetic Flight", "Blink", "Ghost Mode I", "Strong Force Field", "Toughness I", "Toughness II", "Toughness III",
+			"Sense Life", "Sense Mana and Stamina", "Sense Powers", "Slow Target", "Chronobiology", "Retrace I", "Retrace II", "Retrace III", "Undo I", "Undo II", "Undo III", "Repeat I", "Repeat II",
+			"Repeat III", "Time Freeze Target I", "Nullification Aura I", "Nullification Aura II", "Wild Power", "Clone I", "Clone II", "Clone III", "Twitch", "Sense Structure", "Sense Parahumans",
+			"Steal Power", "Danger Sense", "Sapping Fists", "Pushy Fists");
 	protected static List<String> descriptions = new ArrayList<String>();
 	protected static boolean[][] elementalAttacksPossible = new boolean[12][7]; // [element][ability]
 	protected static int[][] elementalAttackNumbers = new int[12][3];
 	protected static String[] elementalAttacks = new String[]
 	{ "Ball", "Beam", "Shield", "Wall", "Spray", "Strike", "Pool" };
-	final static List<String> elementalPowers = Arrays.asList("Elemental Combat I", "Elemental Combat II", "Ball", "Beam", "Shield", "Wall", "Spray", "Strike", "Pool", "Sense Element", "Elemental Resistance");
+	final static List<String> elementalPowers = Arrays.asList("Elemental Combat I", "Elemental Combat II", "Ball", "Beam", "Shield", "Wall", "Spray", "Strike", "Pool", "Sense Element",
+			"Elemental Resistance", "Elemental Fists");
 
 	public enum CostType
 	{
@@ -112,6 +117,8 @@ public class Ability
 	protected CostType costType;
 	public double arc; // used for abilities with an arc - the Spray ability
 	public boolean natural;
+	public double damage;
+	public double pushback;
 
 	// changing variables of the ability
 	protected double timeLeft; // how much time the ability has been on.
@@ -553,6 +560,15 @@ public class Ability
 		}
 		switch (trimmedAbilityName)
 		{
+		case "Pushy Fists":
+			ab = new Pushy_Fists(pnts);
+			break;
+		case "Sapping Fists":
+			ab = new Sapping_Fists(pnts);
+			break;
+		case "Elemental Fists":
+			ab = new Elemental_Fists_E(element, pnts);
+			break;
 		case "Steal Power":
 			ab = new Steal_Power(pnts);
 			break;
@@ -694,7 +710,7 @@ public class Ability
 		case "Strike": // NOT DONE
 			ab = new Strike_E(element, pnts);
 			break;
-		case "Elemental Resistance": 
+		case "Elemental Resistance":
 			ab = new Elemental_Resistance_E(element, pnts);
 			break;
 		case "Toughness I":

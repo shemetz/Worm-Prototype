@@ -41,7 +41,7 @@ public class Elemental_Void extends Ability
 	{
 		deltaTime *= user.timeEffect;
 		timer += deltaTime;
-		int damage = (int) (50000000 * deltaTime);
+		damage = (int) (50000000 * deltaTime);
 		if (timer > 0.25) // every quarter second
 		{
 			timer -= 0.25;

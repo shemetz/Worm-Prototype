@@ -102,6 +102,7 @@ public class Person extends RndPhysObj implements Mover
 	public boolean holdingVine = false; // true if the person is using a Plant Beam (vine) and grabbling an enemy.
 	public double flySpeed = -1;
 	public double timeSincePortal = 0;
+	public List<Ability> punchAffectingAbilities;
 
 	// for continuous inaccuracy stuff like beams
 	public double inaccuracyAngle = 0;
@@ -164,6 +165,7 @@ public class Person extends RndPhysObj implements Mover
 		abilities = new ArrayList<Ability>();
 		effects = new ArrayList<Effect>();
 		uitexts = new ArrayList<UIText>();
+		punchAffectingAbilities = new ArrayList<Ability>();
 		ghostMode = false;
 		insideWall = false;
 		timeSinceLastHit = 0;
@@ -1151,6 +1153,39 @@ public class Person extends RndPhysObj implements Mover
 				if (a.on)
 					if (a instanceof Elemental_Void)
 						drawColoredShadow(buffer, a.level * 10, Color.gray);
+			
+			//Punch drawings
+			if (animState == 5 || animState == 6 || animState == 10 || animState == 11 || animState == 12)
+			{
+				int index = -1;
+				switch (animState)
+				{
+				case 5:
+					if (animFrame == 2)
+						index = 2;
+					else
+						index = 0;
+					break;
+				case 6:
+					if (animFrame == 2)
+						index = 2;
+					else
+						index = 1;
+					break;
+				case 10:
+					index = 2;
+					break;
+				case 11:
+				case 12:
+					index = animState - 11;
+					break;
+				default:
+					MAIN.errorMessage("NNNNNNNNNNNNNNNNOOOOOOO");
+					break;
+				}
+				for (Ability a : punchAffectingAbilities)
+					buffer.drawImage(Resources.specialPunches.get(Ability.niceName(a.name)).get(index), (int) (x - 0.5 * imgW), (int) (y - 0.5 * imgH), null);
+			}
 
 			if (timeEffect != 1 && timeEffect != 0)
 			{

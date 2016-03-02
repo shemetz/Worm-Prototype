@@ -37,6 +37,7 @@ public class Resources
 	public static List<List<BufferedImage>> explosions; // type, frame
 	public static BufferedImage disabled;
 	public static Map<String, BufferedImage> furniture; // name, image
+	public static Map<String, List<BufferedImage>> specialPunches; // name, list of 3 pictures (left, right, inbetween)
 	public static BufferedImage healingBeam;
 	public static BufferedImage stealPowerBeam;
 
@@ -64,6 +65,7 @@ public class Resources
 		beams = new BufferedImage[numOfElements][16];
 		explosions = new ArrayList<List<BufferedImage>>();
 		furniture = new HashMap<String, BufferedImage>();
+		specialPunches = new HashMap<String, List<BufferedImage>>();
 
 		for (int i = 0; i < numOfElements; i++) // all things that occur per element are in this loop
 		{
@@ -237,6 +239,15 @@ public class Resources
 		floor[6] = ResourceLoader.getBufferedImage("environment/floor_sidewalk.png");
 
 		disabled = ResourceLoader.getBufferedImage("icons/effects/disabled.png");
+
+		String[] punchStrings = new String[]
+		{ "Sapping Fists", "Pushy Fists" };
+		for (int i = 0; i < punchStrings.length; i++)
+		{
+			specialPunches.put(punchStrings[i], new ArrayList<BufferedImage>());
+			for (int j = 1; j <= 3; j++)
+				specialPunches.get(punchStrings[i]).add(ResourceLoader.getBufferedImage("punches/" + punchStrings[i] + "_" + j + ".png"));
+		}
 
 		bodyPart.add(new ArrayList<List<List<BufferedImage>>>()); // legs
 		bodyPart.add(new ArrayList<List<List<BufferedImage>>>()); // chest
@@ -449,7 +460,7 @@ public class Resources
 				icons.put(name, senseElement);
 				for (int j = 0; j < numOfElements; j++)
 				{
-					if (name.equals("Elemental Resistance")) //only some apply:
+					if (name.equals("Elemental Resistance")) // only some apply:
 					{
 						boolean applicable = false;
 						for (int k = 0; k < Elemental_Resistance_E.applicable.length; k++)

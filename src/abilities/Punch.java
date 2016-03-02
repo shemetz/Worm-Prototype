@@ -5,6 +5,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
 
+import effects.Nullified;
 import mainClasses.Ability;
 import mainClasses.ArcForceField;
 import mainClasses.Ball;
@@ -144,10 +145,16 @@ public class Punch extends Ability
 		range = (int) (2.3 * user.radius);
 		if (user.flySpeed != -1)
 			range = range + 65; // eh
-		double damage = user.STRENGTH * 1;
-		double pushback = user.STRENGTH * 1.5; // TODO have some cool power that greatly increases the pushback, thus making the user bounce off of walls!
+		damage = user.STRENGTH * 1;
+		pushback = user.STRENGTH * 1.5; 
 		pushback += Math.sqrt(user.xVel * user.xVel + user.yVel * user.yVel) * 100 / 3000; // TODO uhhh
 
+		for (Ability a : user.punchAffectingAbilities)
+		{
+			if (a instanceof Pushy_Fists)
+				pushback *= 2;
+		}
+		
 		// Notice:
 		damage += 0.2 * pushback;
 		pushback -= 0.2 * pushback;
@@ -293,6 +300,18 @@ public class Punch extends Ability
 									if (p.x - p.radius < user.target.x && p.y - p.radius < user.target.y && p.x + p.radius > user.target.x && p.y + p.radius > user.target.y)
 									{
 										env.hitPerson(p, damage, pushback, user.rotation, punchElement); // This is such an elegant line of code :3
+
+										for (Ability a : user.punchAffectingAbilities)
+										{
+											if (a instanceof Sapping_Fists)
+												if (Math.random() < 0.1 * a.level) // 10% * level
+													p.affect(new Nullified(1, true, a), true);
+											if (a instanceof Elemental_Fists_E)
+												env.hitPerson(p, a.damage, a.pushback, user.rotation, a.getElementNum());
+											if (a instanceof Strike_E)
+												env.hitPerson(p, a.damage, a.pushback, user.rotation, a.getElementNum());
+										}
+
 										user.punchedSomething = true;
 										break collisionCheck;
 									}
