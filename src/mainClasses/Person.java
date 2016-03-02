@@ -847,6 +847,39 @@ public class Person extends RndPhysObj implements Mover
 		if (vines)
 			buffy.drawImage(animationVine.get(animState).get(animFrame), 0, 0, null);
 
+		// Punch drawings
+		if (animState == 5 || animState == 6 || animState == 10 || animState == 11 || animState == 12)
+		{
+			int index = -1;
+			switch (animState)
+			{
+			case 5:
+				if (animFrame >= 2)
+					index = 2;
+				else
+					index = 0;
+				break;
+			case 6:
+				if (animFrame == 2)
+					index = 2;
+				else
+					index = 1;
+				break;
+			case 10:
+				index = 2;
+				break;
+			case 11:
+			case 12:
+				index = animState - 11;
+				break;
+			default:
+				MAIN.errorMessage("NNNNNNNNNNNNNNNNOOOOOOO");
+				break;
+			}
+			for (Ability a : punchAffectingAbilities)
+				buffy.drawImage(Resources.specialPunches.get(Ability.niceName(a.name)).get(index), 0, 0, null);
+		}
+
 		// Top
 		buffy.drawImage(animationTop.get(animState).get(animFrame), 0, 0, null);
 
@@ -1153,39 +1186,6 @@ public class Person extends RndPhysObj implements Mover
 				if (a.on)
 					if (a instanceof Elemental_Void)
 						drawColoredShadow(buffer, a.level * 10, Color.gray);
-			
-			//Punch drawings
-			if (animState == 5 || animState == 6 || animState == 10 || animState == 11 || animState == 12)
-			{
-				int index = -1;
-				switch (animState)
-				{
-				case 5:
-					if (animFrame == 2)
-						index = 2;
-					else
-						index = 0;
-					break;
-				case 6:
-					if (animFrame == 2)
-						index = 2;
-					else
-						index = 1;
-					break;
-				case 10:
-					index = 2;
-					break;
-				case 11:
-				case 12:
-					index = animState - 11;
-					break;
-				default:
-					MAIN.errorMessage("NNNNNNNNNNNNNNNNOOOOOOO");
-					break;
-				}
-				for (Ability a : punchAffectingAbilities)
-					buffer.drawImage(Resources.specialPunches.get(Ability.niceName(a.name)).get(index), (int) (x - 0.5 * imgW), (int) (y - 0.5 * imgH), null);
-			}
 
 			if (timeEffect != 1 && timeEffect != 0)
 			{
@@ -1524,5 +1524,13 @@ public class Person extends RndPhysObj implements Mover
 	public boolean equals(Person other)
 	{
 		return this.id == other.id;
+	}
+
+	public void heal(double d)
+	{
+		// TODO make sure it's alright
+		d = Math.min(d, maxLife - life);
+		life += d;
+		uitexts.add(new UIText(0, -60, "" + (int) d, 2));
 	}
 }

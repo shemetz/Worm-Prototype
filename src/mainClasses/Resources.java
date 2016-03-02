@@ -241,12 +241,19 @@ public class Resources
 		disabled = ResourceLoader.getBufferedImage("icons/effects/disabled.png");
 
 		String[] punchStrings = new String[]
-		{ "Sapping Fists", "Pushy Fists" };
+		{ "Sapping Fists", "Pushy Fists", "Vampiric Fists", "Exploding Fists", "Shattering Fists"};
 		for (int i = 0; i < punchStrings.length; i++)
 		{
 			specialPunches.put(punchStrings[i], new ArrayList<BufferedImage>());
 			for (int j = 1; j <= 3; j++)
 				specialPunches.get(punchStrings[i]).add(ResourceLoader.getBufferedImage("punches/" + punchStrings[i] + "_" + j + ".png"));
+		}
+		for (int i = 0; i < numOfElements; i++)
+		{
+			String str = EP.elementList[i] + " Elemental Fists";
+			specialPunches.put(str, new ArrayList<BufferedImage>());
+			for (int j = 1; j <= 3; j++)
+				specialPunches.get(str).add(ResourceLoader.getBufferedImage("punches/" + str + "_" + j + ".png"));
 		}
 
 		bodyPart.add(new ArrayList<List<List<BufferedImage>>>()); // legs
@@ -456,6 +463,8 @@ public class Resources
 			{
 			case "Sense Element":
 			case "Elemental Resistance":
+			case "Elemental Fists":
+			case "Strike":
 				BufferedImage senseElement = ResourceLoader.getBufferedImage("icons/abilities/" + name + ".png");
 				icons.put(name, senseElement);
 				for (int j = 0; j < numOfElements; j++)

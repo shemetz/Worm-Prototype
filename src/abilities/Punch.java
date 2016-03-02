@@ -146,7 +146,7 @@ public class Punch extends Ability
 		if (user.flySpeed != -1)
 			range = range + 65; // eh
 		damage = user.STRENGTH * 1;
-		pushback = user.STRENGTH * 1.5; 
+		pushback = user.STRENGTH * 1.5;
 		pushback += Math.sqrt(user.xVel * user.xVel + user.yVel * user.yVel) * 100 / 3000; // TODO uhhh
 
 		for (Ability a : user.punchAffectingAbilities)
@@ -154,7 +154,7 @@ public class Punch extends Ability
 			if (a instanceof Pushy_Fists)
 				pushback *= 2;
 		}
-		
+
 		// Notice:
 		damage += 0.2 * pushback;
 		pushback -= 0.2 * pushback;
@@ -227,6 +227,10 @@ public class Punch extends Ability
 									forcefieldArea.transform(aft);
 									if (forcefieldArea.contains(user.target))
 									{
+										for (Ability a : user.punchAffectingAbilities)
+											if (a instanceof Shattering_Fists)
+												if (Math.random() < 0.25 * a.level)
+													damage *= 10;
 										double leftoverPushback = ff.life > damage + pushback ? pushback : Math.min(ff.life, pushback);
 										env.damageForceField(ff, damage + pushback, user.target);
 										env.hitPerson(user, ff.armor, leftoverPushback, user.rotation - Math.PI, 6); // Energy damage, equal to the armor of the force field.
@@ -281,6 +285,10 @@ public class Punch extends Ability
 							}
 							if (withinAngles) // check angles
 							{
+								for (Ability a : user.punchAffectingAbilities)
+									if (a instanceof Shattering_Fists)
+										if (Math.random() < 0.25 * a.level)
+											damage *= 10;
 								double leftoverPushback = aff.life > damage + pushback ? pushback : Math.min(aff.life, pushback);
 								env.damageArcForceField(aff, damage + pushback, user.target, 0);
 								int AFFelement = aff.elementNum;
@@ -310,6 +318,8 @@ public class Punch extends Ability
 												env.hitPerson(p, a.damage, a.pushback, user.rotation, a.getElementNum());
 											if (a instanceof Strike_E)
 												env.hitPerson(p, a.damage, a.pushback, user.rotation, a.getElementNum());
+											if (a instanceof Vampiric_Fists)
+												user.heal(0.2 * a.level * damage);
 										}
 
 										user.punchedSomething = true;
@@ -326,6 +336,10 @@ public class Punch extends Ability
 			env.hitPerson(user, 0, pushback * 0.6, user.rotation + Math.PI, -1);
 			// Sound effect of hit
 			sounds.get((int) (Math.random() * 3)).play();
+
+			for (Ability a : user.punchAffectingAbilities)
+				if (a instanceof Exploding_Fists)
+					env.createExplosion(user.target.x, user.target.y, user.z, 100, a.damage, a.pushback, -1);
 			return true;
 		}
 		else

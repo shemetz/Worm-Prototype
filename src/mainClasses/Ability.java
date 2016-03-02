@@ -22,6 +22,7 @@ import abilities.Elemental_Combat_I_E;
 import abilities.Elemental_Fists_E;
 import abilities.Elemental_Resistance_E;
 import abilities.Elemental_Void;
+import abilities.Exploding_Fists;
 import abilities.Flight_I;
 import abilities.Flight_II;
 import abilities.Force_Shield;
@@ -53,6 +54,7 @@ import abilities.Sense_Movement;
 import abilities.Sense_Parahumans;
 import abilities.Sense_Powers;
 import abilities.Sense_Structure;
+import abilities.Shattering_Fists;
 import abilities.Shield_E;
 import abilities.Slow_Target;
 import abilities.Spray_E;
@@ -72,6 +74,7 @@ import abilities.Twitch;
 import abilities.Undo_I;
 import abilities.Undo_II;
 import abilities.Undo_III;
+import abilities.Vampiric_Fists;
 import abilities.Wall_E;
 import abilities.Wild_Power;
 import mainResourcesPackage.SoundEffect;
@@ -83,7 +86,7 @@ public class Ability
 			"Force Shield", "Ranged Explosion", "Flight I", "Flight II", "Telekinetic Flight", "Blink", "Ghost Mode I", "Strong Force Field", "Toughness I", "Toughness II", "Toughness III",
 			"Sense Life", "Sense Mana and Stamina", "Sense Powers", "Slow Target", "Chronobiology", "Retrace I", "Retrace II", "Retrace III", "Undo I", "Undo II", "Undo III", "Repeat I", "Repeat II",
 			"Repeat III", "Time Freeze Target I", "Nullification Aura I", "Nullification Aura II", "Wild Power", "Clone I", "Clone II", "Clone III", "Twitch", "Sense Structure", "Sense Parahumans",
-			"Steal Power", "Danger Sense", "Sapping Fists", "Pushy Fists");
+			"Steal Power", "Danger Sense", "Sapping Fists", "Pushy Fists", "Exploding Fists", "Vampiric Fists", "Shattering Fists");
 	protected static List<String> descriptions = new ArrayList<String>();
 	protected static boolean[][] elementalAttacksPossible = new boolean[12][7]; // [element][ability]
 	protected static int[][] elementalAttackNumbers = new int[12][3];
@@ -119,6 +122,7 @@ public class Ability
 	public boolean natural;
 	public double damage;
 	public double pushback;
+	public double steal;
 
 	// changing variables of the ability
 	protected double timeLeft; // how much time the ability has been on.
@@ -379,8 +383,6 @@ public class Ability
 				element = "meat";
 			else if (realName.contains("Spray"))
 				element = "bones";
-			else if (realName.contains("Strike"))
-				element = "skeletally-enhanced";
 			else if (realName.contains("Sense"))
 				text = "Sense Element (Passive) <Flesh>\nSense blood pools, bone walls, meat shields, and people with Flesh powers.\ntags\nSee silhouettes of capes with your elemental power, walls/pools of your element or creatures under your element’s effect, and know how hurt they are. The range is 3^Level. Sense Element <Earth> allows you to also have Sense Structure! Yup!";
 			else if (realName.contains("Strike"))
@@ -560,6 +562,15 @@ public class Ability
 		}
 		switch (trimmedAbilityName)
 		{
+		case "Exploding Fists":
+			ab = new Exploding_Fists(pnts);
+			break;
+		case "Vampiric Fists":
+			ab = new Vampiric_Fists(pnts);
+			break;
+		case "Shattering Fists":
+			ab = new Shattering_Fists(pnts);
+			break;
 		case "Pushy Fists":
 			ab = new Pushy_Fists(pnts);
 			break;
