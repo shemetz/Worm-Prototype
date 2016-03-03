@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import abilities.Charge;
+import abilities.Elastic;
 import abilities.Elemental_Void;
 import abilities.Punch;
 import abilities.Sprint;
@@ -1251,12 +1253,33 @@ public class Person extends RndPhysObj implements Mover
 					buffer.drawImage(flames, (int) (x - 0.5 * imgW), (int) (y - 0.5 * imgH), null);
 				}
 			}
+			for (Ability a : abilities)
+				if (a.on)
+				{
+					if (a instanceof Charge)
+						if (velocityPow2() >= Charge.minimumVelocityPow2)
+						{
+							buffer.setColor(Color.yellow);
+							buffer.fillOval((int) x - 10, (int) y - 10, 20, 20);
+						}
+					if (a instanceof Elastic)
+						if (velocityPow2() >= Elastic.minimumVelocityPow2)
+						{
+							buffer.setColor(Color.yellow);
+							buffer.fillOval((int) x - 10, (int) y - 10, 20, 20);
+						}
+				}
 			buffer.rotate(-rotation + 0.5 * Math.PI, (int) (x), (int) (y));
 			buffer.translate(x, y);
 			buffer.scale(1 / (z * MAIN.heightZoomRatio + 1), 1 / (z * MAIN.heightZoomRatio + 1));
 			buffer.translate(-x, -y);
 		}
 
+	}
+
+	public double velocityPow2()
+	{
+		return Math.pow(xVel, 2) + Math.pow(yVel, 2);
 	}
 
 	public void drawName(Graphics2D buffer, Color nameColor, double cameraRotation)

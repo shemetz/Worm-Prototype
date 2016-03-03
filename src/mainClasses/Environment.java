@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.function.Predicate;
 
+import abilities.Charge;
+import abilities.Elastic;
 import abilities.Explosion_Resistance;
 import abilities.Portals;
 import effects.Burning;
@@ -912,6 +914,16 @@ public class Environment
 			moveQuantumY = 0; // was NaN
 		}
 		Rectangle2D personRect = new Rectangle2D.Double((int) p.x - p.radius, (int) p.y - p.radius, p.radius * 2, p.radius * 2); // for FF collisions
+		Ability charge = null, elastic = null;
+		for (Ability a : p.abilities)
+			if (a.on)
+			{
+				if (a instanceof Charge)
+					charge = a;
+				if (a instanceof Elastic)
+					elastic = a;
+			}
+
 		while (velocityLeft > 0)
 		{
 			if (velocityLeft < 1)
@@ -927,72 +939,66 @@ public class Environment
 			p.y += moveQuantumY;
 
 			// check collisions with walls in the environment, locked to a grid
+			List<Point> intersectingWalls = new ArrayList<Point>();
 			int minGridX = Math.min(Math.max((int) (p.x - p.radius) / squareSize, 0), width - 1);
 			int minGridY = Math.min(Math.max((int) (p.y - p.radius) / squareSize, 0), height - 1);
 			int maxGridX = Math.min(Math.max((int) (p.x + p.radius) / squareSize, 0), width - 1);
 			int maxGridY = Math.min(Math.max((int) (p.y + p.radius) / squareSize, 0), height - 1);
 			for (int i = minGridX; i <= maxGridX; i++)
 				for (int j = minGridY; j <= maxGridY; j++)
-				{
 					if (p.z <= 1 && wallTypes[i][j] != -1)
+						intersectingWalls.add(new Point(i, j));
+			if (!intersectingWalls.isEmpty())
+				if (!p.ghostMode) // ghosts pass through stuff
+				{
+					if (p.z > 0.1 && p.z <= 1 && p.zVel < 0) // if falling into a wall
 					{
-						if (!p.ghostMode) // ghosts pass through stuff
-						{
-							if (p.z > 0.1 && p.z <= 1 && p.zVel < 0) // if falling into a wall
-							{
-								p.z = 1; // standing on a wall
-								p.zVel = 0;
-								if (p instanceof NPC)
-									((NPC) p).justCollided = true;
-							}
-							else if (p.z < 1)
-							{
-								double prevVelocity = velocityLeft;
-								if (collideWithWall(p, i, j))
-								{
-									p.x -= moveQuantumX;
-									p.y -= moveQuantumY;
-									if (p instanceof NPC)
-										((NPC) p).justCollided = true;
-									if (p.z > 0 && p.zVel < 0)
-									{
-										p.z -= p.zVel * deltaTime;
-										p.zVel = 0;
-									}
-									velocityLeft *= Math.sqrt(p.xVel * p.xVel + p.yVel * p.yVel) * deltaTime / prevVelocity;
-									// "velocity" decreases as the thing moves. If speed is decreased, velocity is multiplied by the ratio of the previous speed and the current one.
-									if (velocityLeft != 0)
-									{
-										moveQuantumX = p.xVel / velocityLeft * deltaTime;
-										moveQuantumY = p.yVel / velocityLeft * deltaTime;
-										p.x += moveQuantumX;
-										p.y += moveQuantumY;
-									}
-								}
-							}
-						}
-						else // to avoid ghosts reappearing inside walls
-							p.insideWall = true;
-					}
-					else if (wallTypes[i][j] == -2) // Edge walls
-					{
-						p.x -= moveQuantumX;
-						p.y -= moveQuantumY;
+						p.z = 1; // standing on a wall
+						p.zVel = 0;
 						if (p instanceof NPC)
 							((NPC) p).justCollided = true;
-						double prevVelocity = velocityLeft;
-						collideWithWall(p, i, j);
-						velocityLeft *= Math.sqrt(p.xVel * p.xVel + p.yVel * p.yVel) * deltaTime / prevVelocity;
-						// "velocity" decreases as the thing moves. If speed is decreased, velocity is multiplied by the ratio of the previous speed and the current one.
-						if (velocityLeft != 0)
+					}
+					else if (p.z < 1)
+					{
+						Point closestWall = null;
+						double closestWallDistancePow2 = Double.MAX_VALUE;
+						for (int i = 0; i < intersectingWalls.size(); i++)
 						{
-							moveQuantumX = p.xVel / velocityLeft * deltaTime;
-							moveQuantumY = p.yVel / velocityLeft * deltaTime;
-							p.x += moveQuantumX;
-							p.y += moveQuantumY;
+							double distancePow2 = Methods.DistancePow2(p.x, p.y, intersectingWalls.get(i).x * squareSize + squareSize / 2, intersectingWalls.get(i).y * squareSize + squareSize / 2);
+							if (distancePow2 < closestWallDistancePow2)
+							{
+								closestWallDistancePow2 = distancePow2;
+								closestWall = intersectingWalls.get(i);
+							}
+						}
+						int x = closestWall.x;
+						int y = closestWall.y;
+						double prevVelocity = velocityLeft;
+						if (collideWithWall(p, x, y))
+						{
+							p.x -= moveQuantumX;
+							p.y -= moveQuantumY;
+							if (p instanceof NPC)
+								((NPC) p).justCollided = true;
+							if (p.z > 0 && p.zVel < 0)
+							{
+								p.z -= p.zVel * deltaTime;
+								p.zVel = 0;
+							}
+							velocityLeft *= Math.sqrt(p.xVel * p.xVel + p.yVel * p.yVel) * deltaTime / prevVelocity;
+							// "velocity" decreases as the thing moves. If speed is decreased, velocity is multiplied by the ratio of the previous speed and the current one.
+							if (velocityLeft != 0)
+							{
+								moveQuantumX = p.xVel / velocityLeft * deltaTime;
+								moveQuantumY = p.yVel / velocityLeft * deltaTime;
+								p.x += moveQuantumX;
+								p.y += moveQuantumY;
+							}
 						}
 					}
 				}
+				else // to avoid ghosts reappearing inside walls
+					p.insideWall = true;
 
 			// Furniture
 			if (p.z < 1)
@@ -1007,16 +1013,25 @@ public class Environment
 							// THIS IS NOT GOOD CODE, THIS IS BAD CODE, BUT I CAN'T MAKE THIS PHYSICS THING WORK LIKE I WANT IT TO
 							collidedWithACorner = true;
 							// hitting corners just reverses the person's movement
-							p.x -= moveQuantumX;
-							p.y -= moveQuantumY;
-							double angleToPerson = Math.atan2(p.y - f.y, p.x - f.x);
-							double velocity = 0.6 * p.velocity();
-							p.xVel = Math.cos(angleToPerson) * velocity;
-							p.yVel = Math.sin(angleToPerson) * velocity;
-							p.x += 3 * deltaTime * p.xVel;
-							p.y += 3 * deltaTime * p.yVel;
-							if (p instanceof NPC)
-								((NPC) p).justCollided = true;
+							if (charge != null && p.velocityPow2() >= Charge.minimumVelocityPow2)
+								damageFurniture(f, (charge.damage + charge.pushback) * 4, 0); // blunt damage. deals x4 because Charge deals more to inorganics
+							if (f.life > 0)
+							{
+								p.x -= moveQuantumX;
+								p.y -= moveQuantumY;
+								double bounceEfficiency = 0.6;
+								if (elastic != null && p.velocityPow2() >= Elastic.minimumVelocityPow2)
+									bounceEfficiency = 1;
+								double velocity = bounceEfficiency * p.velocity();
+								double angleToPerson = Math.atan2(p.y - f.y, p.x - f.x);
+								p.xVel = Math.cos(angleToPerson) * velocity;
+								p.yVel = Math.sin(angleToPerson) * velocity;
+								p.x += 3 * deltaTime * p.xVel;
+								p.y += 3 * deltaTime * p.yVel;
+								if (p instanceof NPC)
+									((NPC) p).justCollided = true;
+							}
+							// TODO add else: reduce speed by a bit
 						}
 					if (!collidedWithACorner)
 					{
@@ -1048,23 +1063,29 @@ public class Environment
 						}
 						if (collided)
 						{
-							// BUGGY
-							// SRSLY
-							// TODO
-							p.x -= moveQuantumX;
-							p.y -= moveQuantumY;
-							// attempt at physics
-							double personAngle = Math.atan2(moveQuantumY, moveQuantumX); // can also use yVel, xVel
-							personAngle = 2 * lineAngle - personAngle + Math.PI;
-							double velocity = Math.sqrt(p.xVel * p.xVel + p.yVel * p.yVel);
-							p.xVel = velocity * Math.cos(personAngle);
-							p.yVel = velocity * Math.sin(personAngle);
-							moveQuantumX = Math.cos(personAngle) * deltaTime;
-							moveQuantumY = Math.sin(personAngle) * deltaTime;
-							p.x += 80 * moveQuantumX;
-							p.y += 80 * moveQuantumY;
-							if (p instanceof NPC)
-								((NPC) p).justCollided = true;
+							if (charge != null && p.velocityPow2() >= Charge.minimumVelocityPow2)
+								damageFurniture(f, (charge.damage + charge.pushback) * 4, 0); // blunt damage, x4 because charge deals more to inorganics
+							if (f.life > 0)
+							{
+								// BUGGY
+								// SRSLY
+								// TODO
+								p.x -= moveQuantumX;
+								p.y -= moveQuantumY;
+								// attempt at physics
+								double personAngle = Math.atan2(moveQuantumY, moveQuantumX); // can also use yVel, xVel
+								personAngle = 2 * lineAngle - personAngle + Math.PI;
+								double velocity = Math.sqrt(p.xVel * p.xVel + p.yVel * p.yVel);
+								p.xVel = velocity * Math.cos(personAngle);
+								p.yVel = velocity * Math.sin(personAngle);
+								moveQuantumX = Math.cos(personAngle) * deltaTime;
+								moveQuantumY = Math.sin(personAngle) * deltaTime;
+								p.x += 80 * moveQuantumX;
+								p.y += 80 * moveQuantumY;
+								if (p instanceof NPC)
+									((NPC) p).justCollided = true;
+							}
+							// TODO add else: reduce speed by a bit
 						}
 					}
 				}
@@ -1076,36 +1097,56 @@ public class Environment
 					{
 						if (p2.highestPoint() > p.z && p2.z < p.highestPoint())
 						{
-							if (!p2.dead) // No colliding with dead people! //TODO make it slow you down a bit maybe
-							{
-								// physics. Assumes the two people are circles.
-								// The following code is translated from a StackExchange answer.
-								double xVelocity = p2.xVel - p.xVel;
-								double yVelocity = p2.yVel - p.yVel;
-								double dotProduct = (p2.x - p.x) * xVelocity + (p2.y - p.y) * yVelocity;
-								// Neat vector maths, used for checking if the objects moves towards one another.
-								if (dotProduct < 0)
+							if (!p2.prone)
+
+								if (!p2.dead) // No colliding with dead people! //TODO make it slow you down a bit maybe
 								{
-									double collisionScale = dotProduct / Methods.DistancePow2(p.x, p.y, p2.x, p2.y);
-									double xCollision = (p2.x - p.x) * collisionScale;
-									double yCollision = (p2.y - p.y) * collisionScale;
-									// The Collision vector is the speed difference projected on the Dist vector,
-									// thus it is the component of the speed difference needed for the collision.
-									double combinedMass = p.mass + p2.mass;
-									double collisionWeightA = 2 * p2.mass / combinedMass;
-									double collisionWeightB = 2 * p.mass / combinedMass;
-									p.xVel += collisionWeightA * xCollision;
-									p.yVel += collisionWeightA * yCollision;
-									p2.xVel -= collisionWeightB * xCollision;
-									p2.yVel -= collisionWeightB * yCollision;
-									p.x -= 2 * moveQuantumX; // good enough for most purposes right now
-									p.y -= 2 * moveQuantumY;//
-									if (p instanceof NPC)
-										((NPC) p).justCollided = true;
-									if (p2 instanceof NPC)
-										((NPC) p2).justCollided = true;
+									// physics. Assumes the two people are circles.
+									// The following code is translated from a StackExchange answer.
+									double xVelocity = p2.xVel - p.xVel;
+									double yVelocity = p2.yVel - p.yVel;
+									double dotProduct = (p2.x - p.x) * xVelocity + (p2.y - p.y) * yVelocity;
+									// Neat vector maths, used for checking if the objects moves towards one another.
+									if (dotProduct < 0)
+									{
+										double collisionScale = dotProduct / Methods.DistancePow2(p.x, p.y, p2.x, p2.y);
+										double xCollision = (p2.x - p.x) * collisionScale;
+										double yCollision = (p2.y - p.y) * collisionScale;
+										// The Collision vector is the speed difference projected on the Dist vector,
+										// thus it is the component of the speed difference needed for the collision.
+										double combinedMass = p.mass + p2.mass;
+										double collisionWeightA = 2 * p2.mass / combinedMass;
+										double collisionWeightB = 2 * p.mass / combinedMass;
+										if (charge != null && p.velocityPow2() >= Charge.minimumVelocityPow2)
+										{
+											if (p.STRENGTH >= p2.STRENGTH)
+											{
+												collisionWeightA *= 0.20; // 20%
+												hitPerson(p2, charge.damage, charge.pushback, p.angle() + TAU / 4 - (int) (Math.random() * 2) * TAU / 2, -1); // angle is 90 degrees to either side of p's angle
+												p2.slip(true);
+											}
+										}
+										if (elastic != null && p.velocityPow2() >= Elastic.minimumVelocityPow2)
+										{
+											if (p.STRENGTH >= p2.STRENGTH)
+											{
+												collisionWeightA = 1;
+												hitPerson(p2, elastic.damage, elastic.pushback, p.angle(), -1); // angle is p's movement angle
+												p2.slip(true);
+											}
+										}
+										p.xVel += collisionWeightA * xCollision;
+										p.yVel += collisionWeightA * yCollision;
+										p2.xVel -= collisionWeightB * xCollision;
+										p2.yVel -= collisionWeightB * yCollision;
+										p.x -= 2 * moveQuantumX; // good enough for most purposes right now
+										p.y -= 2 * moveQuantumY;//
+										if (p instanceof NPC)
+											((NPC) p).justCollided = true;
+										if (p2 instanceof NPC)
+											((NPC) p2).justCollided = true;
+									}
 								}
-							}
 						}
 					}
 			for (ForceField ff : FFs)
@@ -1347,25 +1388,74 @@ public class Environment
 	{
 		int wallElement = wallTypes[x][y];
 		// returns whether or not this collision changes the person's speed
-		// TODO add stuff concerning bounce powers, or breaking through walls, or damaging walls, or damaging characters flung into walls
-		final double bounceEfficiency = 0.4; // should depend on element? TODO ?
+		double bounceEfficiency = 0.4; // should depend on element? TODO ?
 		Rectangle intersectRect = new Rectangle(x * squareSize, y * squareSize, squareSize, squareSize)
 				.intersection(new Rectangle((int) (p.x - 0.5 * p.radius), (int) (p.y - 0.5 * p.radius), (int) (p.radius), (int) (p.radius)));
-		// Damage to walls is mass of person * velocity * 0.00005; (kg * cm/s)
-		// Damage to people is velocity * wall health * 0.00001;
-		hitPerson(p, wallHealths[x][y] * p.velocity() * 0.00004, 0, p.angle() + TAU / 2, -1); // blunt damage
+
+		double damageToWall = p.mass * p.velocity() * 0.000005;
+		double damageToPerson = wallHealths[x][y] * p.velocity() * 0.00004;
+
+		Ability charge = null, elastic = null;
+		for (Ability a : p.abilities)
+			if (a.on)
+			{
+				if (a instanceof Charge)
+					charge = a;
+				if (a instanceof Elastic)
+					elastic = a;
+			}
+		if (charge != null && p.velocityPow2() >= Charge.minimumVelocityPow2)
+		{
+			// damage is Charge's damage and pushback, multiplied by how much direct the hit is.
+			double angleToWall = Math.atan2(intersectRect.getCenterY() - p.y, intersectRect.getCenterX() - p.x);
+			double personAngle = p.angle();
+			double directness = Math.abs(Math.cos(angleToWall)) * Math.abs(Math.cos(personAngle)) + Math.abs(Math.sin(angleToWall)) * Math.abs(Math.sin(personAngle));
+			damageToWall += (charge.damage + charge.pushback) * directness;
+			damageToWall *= 4; // Charge inherently deals more damage to walls
+		}
+		if (elastic != null && p.velocityPow2() >= Elastic.minimumVelocityPow2)
+		{
+			damageToPerson = 0;
+			bounceEfficiency = 1;
+		}
 		if (wallElement != -2)
-			damageWall(x, y, p.mass * p.velocity() * 0.0005, 0); // blunt damage
+			damageWall(x, y, damageToWall, 0); // blunt damage
 		if (wallHealths[x][y] > 0) // if wall survives the collision, it deflects the person
 		{
-			if (p.x > intersectRect.x + 0.5 * intersectRect.width)
+			Rectangle2D personRect = new Rectangle2D.Double(p.x - p.radius, p.y - p.radius, p.radius * 2, p.radius * 2);
+			double wy = (personRect.getWidth() + intersectRect.getWidth()) * (personRect.getCenterY() - intersectRect.getCenterY());
+			double hx = (personRect.getHeight() + intersectRect.getHeight()) * (personRect.getCenterX() - intersectRect.getCenterX());
+
+			double friction = 0.5; // how much speed is wasted on friction (for the dimension that isn't directly colliding with the wall)
+
+			if (wy > hx)
+				if (wy > -hx)
+				/* top */
+				{
+					p.yVel = Math.abs(p.yVel) * bounceEfficiency;
+					p.xVel -= p.xVel * friction;
+				}
+				else
+				/* left */
+				{
+					p.xVel = -Math.abs(p.xVel) * bounceEfficiency;
+					p.yVel -= p.yVel * friction;
+				}
+			else if (wy > -hx)
+			/* right */
+			{
 				p.xVel = Math.abs(p.xVel) * bounceEfficiency;
-			if (p.x < intersectRect.x + 0.5 * intersectRect.width)
-				p.xVel = -Math.abs(p.xVel) * bounceEfficiency;
-			if (p.y > intersectRect.y + 0.5 * intersectRect.height)
-				p.yVel = Math.abs(p.yVel) * bounceEfficiency;
-			if (p.y < intersectRect.y + 0.5 * intersectRect.height)
+				p.yVel -= p.yVel * friction;
+			}
+			else
+			/* bottom */
+			{
 				p.yVel = -Math.abs(p.yVel) * bounceEfficiency;
+				p.xVel -= p.xVel * friction;
+			}
+
+			hitPerson(p, damageToPerson, 0, p.angle() + TAU / 2, -1); // blunt damage
+
 			return true;
 		}
 		else
@@ -1375,10 +1465,20 @@ public class Environment
 				debris.add(new Debris(x * squareSize + 0.5 * squareSize, y * squareSize + 0.5 * squareSize, 0, Math.PI * 2 / 5 * i, wallElement, 200));
 			// slow down the person
 			double energyLost = 10000;
+
+			if (charge != null && p.velocityPow2() >= Charge.minimumVelocityPow2)
+			{
+				damageToPerson *= 0.20; // 20%
+				energyLost *= 0.20; // 20%
+			}
+
 			double newVelocity = p.velocity() - energyLost / Math.sqrt(p.mass);
 			double ratio = newVelocity / p.velocity();
 			p.xVel *= ratio;
 			p.yVel *= ratio;
+
+			hitPerson(p, damageToPerson, 0, p.angle() + TAU / 2, -1); // blunt damage
+
 			return false;
 		}
 

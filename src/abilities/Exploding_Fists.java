@@ -13,6 +13,7 @@ public class Exploding_Fists extends _PunchAbility
 	{
 		super("Exploding Fists", p);
 
+		radius = 200;
 		damage = level * 4;
 		pushback = level * 8;
 	}

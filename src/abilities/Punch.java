@@ -185,8 +185,8 @@ public class Punch extends Ability
 					user.target = new Point((int) (user.x + range * Math.cos(user.rotation + extraAimingAngle * m)), (int) (user.y + range * Math.sin(user.rotation + extraAimingAngle * m)));
 					if (!onlyOrganics)
 					{
-						int i = Math.min(Math.max(user.target.x / squareSize, 0), env.widthPixels);
-						int j = Math.min(Math.max(user.target.y / squareSize, 0), env.heightPixels);
+						int i = Math.min(Math.max(user.target.x / squareSize, 0), env.width-1);
+						int j = Math.min(Math.max(user.target.y / squareSize, 0), env.height-1);
 						if (user.z < 1 && env.wallTypes[i][j] > 0)
 						{
 							for (Ability a : user.punchAffectingAbilities)
@@ -374,7 +374,7 @@ public class Punch extends Ability
 			for (Ability a : user.punchAffectingAbilities)
 			{
 				if (a instanceof Exploding_Fists)
-					env.createExplosion(user.target.x, user.target.y, user.z, 100, a.damage, a.pushback, -1);
+					env.createExplosion(user.target.x, user.target.y, user.z, a.radius, a.damage, a.pushback, -1);
 				if (a instanceof Strike_E)
 					((Strike_E) a).turnOff();
 			}

@@ -49,6 +49,7 @@ import javax.swing.JFrame;
 import javax.swing.Timer;
 
 import abilities.Chronobiology;
+import abilities.Elastic;
 import abilities.ForceFieldAbility;
 import abilities.GridTargetingAbility;
 import abilities.Portals;
@@ -1636,6 +1637,8 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 					p.sounds.get(2).play(); // fall hit
 			}
 		}
+
+		// Friction
 		int gridX = Math.min(Math.max((int) (p.x) / squareSize, 0), env.width - 1);
 		int gridY = Math.min(Math.max((int) (p.y) / squareSize, 0), env.height - 1);
 		if (p.z < 0.1 || (p.z == 1 && !p.ghostMode && env.wallTypes[gridX][gridY] != -1)) // on ground or on a wall
@@ -1654,6 +1657,10 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				friction *= standingFrictionBenefit;
 			if (p.ghostMode)
 				friction *= ghostFrictionMultiplier;
+			for (Ability a : p.abilities)
+				if (a.on)
+					if (a instanceof Elastic)
+						friction *= 0.10; // 10%
 
 			// temp fix for meter-centimeter-pixel mistakes
 			friction *= 96;

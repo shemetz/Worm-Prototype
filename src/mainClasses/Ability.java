@@ -12,11 +12,13 @@ import java.util.List;
 import abilities.Ball_E;
 import abilities.Beam_E;
 import abilities.Blink;
+import abilities.Charge;
 import abilities.Chronobiology;
 import abilities.Clone_I;
 import abilities.Clone_II;
 import abilities.Clone_III;
 import abilities.Danger_Sense;
+import abilities.Elastic;
 import abilities.Elemental_Combat_II_E;
 import abilities.Elemental_Combat_I_E;
 import abilities.Elemental_Fists_E;
@@ -30,6 +32,7 @@ import abilities.Force_Shield;
 import abilities.Ghost_Mode_I;
 import abilities.Heal_I;
 import abilities.Heal_II;
+import abilities.Leg_Muscles;
 import abilities.Nullification_Aura_I;
 import abilities.Nullification_Aura_II;
 import abilities.Pool_E;
@@ -58,6 +61,7 @@ import abilities.Sense_Structure;
 import abilities.Shattering_Fists;
 import abilities.Shield_E;
 import abilities.Slow_Target;
+import abilities.Speedrun;
 import abilities.Spray_E;
 import abilities.Sprint;
 import abilities.Steal_Power;
@@ -87,7 +91,8 @@ public class Ability
 			"Force Shield", "Ranged Explosion", "Flight I", "Flight II", "Telekinetic Flight", "Blink", "Ghost Mode I", "Strong Force Field", "Toughness I", "Toughness II", "Toughness III",
 			"Sense Life", "Sense Mana and Stamina", "Sense Powers", "Slow Target", "Chronobiology", "Retrace I", "Retrace II", "Retrace III", "Undo I", "Undo II", "Undo III", "Repeat I", "Repeat II",
 			"Repeat III", "Time Freeze Target I", "Nullification Aura I", "Nullification Aura II", "Wild Power", "Clone I", "Clone II", "Clone III", "Twitch", "Sense Structure", "Sense Parahumans",
-			"Steal Power", "Danger Sense", "Sapping Fists", "Pushy Fists", "Exploding Fists", "Vampiric Fists", "Shattering Fists", "Elemental Fists", "Explosion Resistance");
+			"Steal Power", "Danger Sense", "Sapping Fists", "Pushy Fists", "Exploding Fists", "Vampiric Fists", "Shattering Fists", "Elemental Fists", "Explosion Resistance", "Leg Muscles",
+			"Speedrun", "Charge", "Elastic");
 	protected static List<String> descriptions = new ArrayList<String>();
 	protected static boolean[][] elementalAttacksPossible = new boolean[12][7]; // [element][ability]
 	protected static int[][] elementalAttackNumbers = new int[12][3];
@@ -121,6 +126,7 @@ public class Ability
 	protected CostType costType;
 	public double arc; // used for abilities with an arc - the Spray ability
 	public boolean natural;
+	public double radius;
 	public double damage;
 	public double pushback;
 	public double steal;
@@ -563,6 +569,18 @@ public class Ability
 		}
 		switch (trimmedAbilityName)
 		{
+		case "Leg Muscles":
+			ab = new Leg_Muscles(pnts);
+			break;
+		case "Speedrun":
+			ab = new Speedrun(pnts);
+			break;
+		case "Charge":
+			ab = new Charge(pnts);
+			break;
+		case "Elastic":
+			ab = new Elastic(pnts);
+			break;
 		case "Explosion Resistance":
 			ab = new Explosion_Resistance(pnts);
 			break;
