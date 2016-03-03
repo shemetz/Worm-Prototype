@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.function.Predicate;
 
+import abilities.Explosion_Resistance;
 import abilities.Portals;
 import effects.Burning;
 import effects.E_Resistant;
@@ -2830,8 +2831,14 @@ public class Environment
 				if (Methods.DistancePow2(p.x, p.y, x, y) < radius * radius)
 				{
 					double distance = Math.sqrt(Methods.DistancePow2(p.x, p.y, x, y));
-					if (!checkForEvasion(p))
-						hitPerson(p, damage * (radius - distance) / radius, pushback * (radius - distance) / radius, Math.atan2(p.y - y, p.x - x), type == -1 ? 0 : type);
+					double damage2 = damage * (radius - distance) / radius;
+					if (checkForEvasion(p))
+						damage2 = 0;
+					for (Ability a : p.abilities)
+						if (a instanceof Explosion_Resistance && a.on)
+							damage2 = 0;
+					// still apply pushback
+					hitPerson(p, damage2, pushback * (radius - distance) / radius, Math.atan2(p.y - y, p.x - x), type == -1 ? 0 : type);
 				}
 		for (ForceField ff : FFs)
 			if (ff.z < z + explosionHeight / 2 && ff.z + ff.height > z - explosionHeight / 2)

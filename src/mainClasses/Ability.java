@@ -23,6 +23,7 @@ import abilities.Elemental_Fists_E;
 import abilities.Elemental_Resistance_E;
 import abilities.Elemental_Void;
 import abilities.Exploding_Fists;
+import abilities.Explosion_Resistance;
 import abilities.Flight_I;
 import abilities.Flight_II;
 import abilities.Force_Shield;
@@ -86,7 +87,7 @@ public class Ability
 			"Force Shield", "Ranged Explosion", "Flight I", "Flight II", "Telekinetic Flight", "Blink", "Ghost Mode I", "Strong Force Field", "Toughness I", "Toughness II", "Toughness III",
 			"Sense Life", "Sense Mana and Stamina", "Sense Powers", "Slow Target", "Chronobiology", "Retrace I", "Retrace II", "Retrace III", "Undo I", "Undo II", "Undo III", "Repeat I", "Repeat II",
 			"Repeat III", "Time Freeze Target I", "Nullification Aura I", "Nullification Aura II", "Wild Power", "Clone I", "Clone II", "Clone III", "Twitch", "Sense Structure", "Sense Parahumans",
-			"Steal Power", "Danger Sense", "Sapping Fists", "Pushy Fists", "Exploding Fists", "Vampiric Fists", "Shattering Fists", "Elemental Fists");
+			"Steal Power", "Danger Sense", "Sapping Fists", "Pushy Fists", "Exploding Fists", "Vampiric Fists", "Shattering Fists", "Elemental Fists", "Explosion Resistance");
 	protected static List<String> descriptions = new ArrayList<String>();
 	protected static boolean[][] elementalAttacksPossible = new boolean[12][7]; // [element][ability]
 	protected static int[][] elementalAttackNumbers = new int[12][3];
@@ -562,6 +563,9 @@ public class Ability
 		}
 		switch (trimmedAbilityName)
 		{
+		case "Explosion Resistance":
+			ab = new Explosion_Resistance(pnts);
+			break;
 		case "Exploding Fists":
 			ab = new Exploding_Fists(pnts);
 			break;
