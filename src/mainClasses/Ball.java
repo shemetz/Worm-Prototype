@@ -35,6 +35,14 @@ public class Ball extends RndPhysObj
 		timer = 0;
 		changeImage(Resources.balls[elementNum]); // Not all the same size!!!
 
+		angularVelocity = 1.8 * Math.PI;
+		height = 1;
+		mass = ballMass;
+		double velocity = Ball.giveVelocity(); // pixels per second. Below 330 and the character would probably accidentally touch them while running
+		xVel = Math.cos(angle) * velocity;
+		yVel = Math.sin(angle) * velocity;
+		evasions = new ArrayList<Evasion>();
+		
 		switch (elementNum)
 		{
 		case 0: // fire
@@ -43,6 +51,8 @@ public class Ball extends RndPhysObj
 		case 1: // water
 			break;
 		case 2: // wind
+			radius = 30;
+			angularVelocity = 20;
 			break;
 		case 3: // electricity
 			break;
@@ -70,13 +80,6 @@ public class Ball extends RndPhysObj
 		default:
 			MAIN.errorMessage("Oh why did I force myself to have default cases for every switch case ;-;");
 		}
-		height = 1;
-		mass = ballMass;
-		double velocity = Ball.giveVelocity(); // pixels per second. Below 330 and the character would probably accidentally touch them while running
-		xVel = Math.cos(angle) * velocity;
-		yVel = Math.sin(angle) * velocity;
-		angularVelocity = 1.8 * Math.PI;
-		evasions = new ArrayList<Evasion>();
 	}
 
 	public void evadedBy(Person p)
