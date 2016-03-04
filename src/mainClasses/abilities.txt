@@ -361,9 +361,9 @@ Gain a permanent +Level Strength. While trying to move (holding movement buttons
 You also bounce when hitting walls, again gaining an extra 2.5*Level% speed.
 
 Trail (On/Off)
-cost
+cost on-off
 Leave <an e> trail behind you.
-While running, leave an elemental trail behind you every time you leave a grid square (maximum 1 per frame). The trail is made of 1x1 pools if the element is Water, Acid, Lava, Blood; made of 1x1 walls if the element is Metal, Ice, Earth; or made of level 1 elemental balls thrown backwards if the element is Fire, Wind, Electricity, Energy.
+While running, leave an elemental trail behind you every time you leave a grid square (maximum 1 per frame). The trail is made of 1x1 pools if the element is Water, Acid, Lava, Flesh; made of 1x1 walls if the element is Metal, Ice, Earth, Plant; or made of level 1 elemental balls thrown backwards if the element is Fire, Wind, Electricity, Energy.
 While this is active, it costs 0.7-0.1*Level mana per wall/pool/ball.
 
 Blink (Activated)

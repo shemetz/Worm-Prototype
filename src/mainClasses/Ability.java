@@ -75,6 +75,7 @@ import abilities.Time_Freeze_Target_I;
 import abilities.Toughness_I;
 import abilities.Toughness_II;
 import abilities.Toughness_III;
+import abilities.Trail_E;
 import abilities.Twitch;
 import abilities.Undo_I;
 import abilities.Undo_II;
@@ -92,14 +93,16 @@ public class Ability
 			"Sense Life", "Sense Mana and Stamina", "Sense Powers", "Slow Target", "Chronobiology", "Retrace I", "Retrace II", "Retrace III", "Undo I", "Undo II", "Undo III", "Repeat I", "Repeat II",
 			"Repeat III", "Time Freeze Target I", "Nullification Aura I", "Nullification Aura II", "Wild Power", "Clone I", "Clone II", "Clone III", "Twitch", "Sense Structure", "Sense Parahumans",
 			"Steal Power", "Danger Sense", "Sapping Fists", "Pushy Fists", "Exploding Fists", "Vampiric Fists", "Shattering Fists", "Elemental Fists", "Explosion Resistance", "Leg Muscles",
-			"Speedrun", "Charge", "Elastic");
+			"Speedrun", "Charge", "Elastic", "Trail");
 	protected static List<String> descriptions = new ArrayList<String>();
 	protected static boolean[][] elementalAttacksPossible = new boolean[12][7]; // [element][ability]
 	protected static int[][] elementalAttackNumbers = new int[12][3];
 	protected static String[] elementalAttacks = new String[]
 	{ "Ball", "Beam", "Shield", "Wall", "Spray", "Strike", "Pool" };
 	final static List<String> elementalPowers = Arrays.asList("Elemental Combat I", "Elemental Combat II", "Ball", "Beam", "Shield", "Wall", "Spray", "Strike", "Pool", "Sense Element",
-			"Elemental Resistance", "Elemental Fists");
+			"Elemental Resistance", "Elemental Fists", "Trail");
+	final static String[] elementalPowersWithTheirOwnImages = new String[]
+	{ "Elemental Combat I", "Elemental Combat II", "Trail" };
 
 	public enum CostType
 	{
@@ -745,6 +748,9 @@ public class Ability
 			break;
 		case "Elemental Resistance":
 			ab = new Elemental_Resistance_E(element, pnts);
+			break;
+		case "Trail":
+			ab = new Trail_E(element, pnts);
 			break;
 		case "Toughness I":
 			ab = new Toughness_I(pnts);

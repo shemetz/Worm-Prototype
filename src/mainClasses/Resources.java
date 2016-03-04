@@ -90,8 +90,10 @@ public class Resources
 			for (int j = 0; j < Ability.elementalAttacks.length; j++)
 				icons.put(Ability.elementalAttacks[j] + " <" + EP.elementList[i] + ">",
 						ResourceLoader.getBufferedImage("icons/abilities/" + EP.elementList[i] + "_" + Ability.elementalAttacks[j] + ".png"));
+			for (int j = 0; j < Ability.elementalPowersWithTheirOwnImages.length; j++)
+				icons.put(Ability.elementalPowersWithTheirOwnImages[j] + " <" + EP.elementList[i] + ">",
+						ResourceLoader.getBufferedImage("icons/abilities/" + EP.elementList[i] + "_" + Ability.elementalPowersWithTheirOwnImages[j] + ".png"));
 			icons.put("Elemental Combat I" + " <" + EP.elementList[i] + ">", ResourceLoader.getBufferedImage("icons/abilities/" + EP.elementList[i] + "_" + "Elemental Combat I" + ".png"));
-			icons.put("Elemental Combat II" + " <" + EP.elementList[i] + ">", ResourceLoader.getBufferedImage("icons/abilities/" + EP.elementList[i] + "_" + "Elemental Combat II" + ".png"));
 			// TODO icons for Charged Ball and Charge Beam
 			balls[i] = ResourceLoader.getBufferedImage("elementalAbilities/" + EP.elementList[i] + "_Ball.png");
 			for (int j = 0; j < 3; j++)
@@ -470,8 +472,8 @@ public class Resources
 			case "Elemental Resistance":
 			case "Elemental Fists":
 			case "Strike":
-				BufferedImage senseElement = ResourceLoader.getBufferedImage("icons/abilities/" + name + ".png");
-				icons.put(name, senseElement);
+				BufferedImage ability = ResourceLoader.getBufferedImage("icons/abilities/" + name + ".png");
+				icons.put(name, ability);
 				for (int j = 0; j < numOfElements; j++)
 				{
 					if (name.equals("Elemental Resistance")) // only some apply:
@@ -485,7 +487,7 @@ public class Resources
 					}
 					BufferedImage senseImage = new BufferedImage(60, 60, BufferedImage.TYPE_INT_ARGB);
 					Graphics2D buffy = senseImage.createGraphics();
-					buffy.drawImage(senseElement, 0, 0, null);
+					buffy.drawImage(ability, 0, 0, null);
 					buffy.drawImage(ResourceLoader.getBufferedImage("icons/elements/" + EP.elementList[j] + ".png"), 0, 0, null);
 					buffy.dispose();
 					icons.put(name + " <" + EP.elementList[j] + ">", senseImage);
@@ -501,6 +503,33 @@ public class Resources
 		List<String> effectNames = Arrays.asList("Healed", "Burning", "Tangled", "Time Slowed", "Time Stretched", "Time Stopped", "Nullified"); // all effect names should be written here! TODO make sure it happens
 		for (String s : effectNames)
 			icons.put(s, ResourceLoader.getBufferedImage("icons/effects/" + s + ".png"));
+
+		// Elemental effect icons:
+		List<String> elementalEffectNames = Arrays.asList("Resistant");
+		for (String name : elementalEffectNames)
+		{
+			BufferedImage ability = ResourceLoader.getBufferedImage("icons/effects/" + name + ".png");
+			icons.put(name, ability);
+			for (int j = 0; j < numOfElements; j++)
+			{
+				if (name.equals("Resistant")) // only some apply:
+				{
+					boolean applicable = false;
+					for (int k = 0; k < Elemental_Resistance_E.applicable.length; k++)
+						if (Elemental_Resistance_E.applicable[k].equals(EP.elementList[j]))
+							applicable = true;
+					if (!applicable)
+						continue;
+				}
+				BufferedImage senseImage = new BufferedImage(60, 60, BufferedImage.TYPE_INT_ARGB);
+				Graphics2D buffy = senseImage.createGraphics();
+				buffy.drawImage(ability, 0, 0, null);
+				buffy.drawImage(ResourceLoader.getBufferedImage("icons/elements/" + EP.elementList[j] + ".png"), 0, 0, null);
+				buffy.dispose();
+				icons.put(EP.elementList[j] + " " + name, senseImage);
+			}
+		}
+
 		// Element icons:
 		for (int i = 0; i < numOfElements; i++)
 			icons.put(EP.elementList[i], ResourceLoader.getBufferedImage("icons/elements/" + EP.elementList[i] + ".png"));

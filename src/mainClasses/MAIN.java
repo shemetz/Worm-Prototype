@@ -1829,17 +1829,25 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		// Tooltip
 		if (tooltipPoint.x != -1) // can also check y but that's silly
 		{
-			buffer.setColor(Color.black);
-			buffer.setFont(new Font("Serif", Font.PLAIN, (int) (20 * UIzoomLevel)));
-			int i = tooltip.indexOf("\n");
-			if (i != -1) // if extended tooltip
+			Point[] p = new Point[]
+			{ new Point(-1, 0), new Point(1, 0), new Point(0, 1), new Point(0, -1), new Point(0, 0) };
+			for (int j = 0; j < 5; j++)
 			{
-				buffer.drawString(tooltip.substring(0, i), tooltipPoint.x, tooltipPoint.y);
-				buffer.setFont(new Font("Serif", Font.ITALIC, 20));
-				buffer.drawString(tooltip.substring(i + 1), tooltipPoint.x - 8, tooltipPoint.y + 25);
+				if (j < 4)
+					buffer.setColor(Color.black);
+				else
+					buffer.setColor(Color.white);
+				buffer.setFont(new Font("Serif", Font.PLAIN, (int) (20 * UIzoomLevel)));
+				int i = tooltip.indexOf("\n");
+				if (i != -1) // if extended tooltip
+				{
+					buffer.drawString(tooltip.substring(0, i), tooltipPoint.x + p[j].x, tooltipPoint.y + p[j].y);
+					buffer.setFont(new Font("Serif", Font.ITALIC, 20));
+					buffer.drawString(tooltip.substring(i + 1), tooltipPoint.x + p[j].x - 8, tooltipPoint.y + p[j].y + 25);
+				}
+				else
+					buffer.drawString(tooltip, tooltipPoint.x + p[j].x, tooltipPoint.y + p[j].y);
 			}
-			else
-				buffer.drawString(tooltip, tooltipPoint.x, tooltipPoint.y);
 		}
 
 		if (timeSinceLastScreenshot < 2)
@@ -2248,18 +2256,18 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 					buffer.drawRect(x, y, (int) (60 * UIzoomLevel), (int) (60 * UIzoomLevel));
 					// rectangle fill
 					buffer.setColor(new Color(255, 255, 255, 89));
-					buffer.fillRect(x, y, (int) (60 * UIzoomLevel), (int) (60 * UIzoomLevel));
+					buffer.fillRect(x, y, (int) (61 * UIzoomLevel), (int) (61 * UIzoomLevel));
 					// ability icon
 					Ability ability = player.abilities.get(player.hotkeys[i]);
 					scaleBuffer(buffer, x, y, UIzoomLevel);
-					buffer.drawImage(Resources.icons.get(ability.name), x, y, this);
+					buffer.drawImage(Resources.icons.get(ability.name), x+1, y+1, this);
 					scaleBuffer(buffer, x, y, 1 / UIzoomLevel);
 
 					// Cooldown and mana notifications
 					if (ability.cooldownLeft != 0)
 					{// note that when the cooldown is over it will "jump" from low transparency to full transparency
 						buffer.setColor(new Color(0, 0, 0, (int) (130 + 100 * ability.cooldownLeft / ability.cooldown)));
-						buffer.fillRect(x + (int) (UIzoomLevel), y + (int) (1 * UIzoomLevel), (int) (59 * UIzoomLevel), (int) (59 * UIzoomLevel));
+						buffer.fillRect(x + (int) (UIzoomLevel), y + (int) (UIzoomLevel), (int) (59 * UIzoomLevel), (int) (59 * UIzoomLevel));
 					}
 					if (ability.cost > player.mana)
 					{
@@ -2281,17 +2289,17 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 							{
 								buffer.setColor(Color.green);
 								buffer.setStroke(new BasicStroke(2));
-								buffer.drawLine(x + (int) (1 * UIzoomLevel), y + (int) (1 * UIzoomLevel), x + (int) (1 * UIzoomLevel + 59 * UIzoomLevel), y + (int) (1 * UIzoomLevel));
-								buffer.drawLine(x + (int) (1 * UIzoomLevel), y + (int) (1 * UIzoomLevel), x + (int) (1 * UIzoomLevel), y + (int) (1 * UIzoomLevel + 59 * UIzoomLevel));
+								buffer.drawLine(x + (int) (1 * UIzoomLevel), y + (int) (1 * UIzoomLevel), x + (int) (60 * UIzoomLevel), y + (int) (1 * UIzoomLevel));
+								buffer.drawLine(x + (int) (1 * UIzoomLevel), y + (int) (1 * UIzoomLevel), x + (int) (1 * UIzoomLevel), y + (int) (60 * UIzoomLevel));
 							}
 							else
 							{
 								buffer.setColor(Color.magenta);
 								buffer.setStroke(new BasicStroke(2));
-								buffer.drawLine(x + (int) (1 * UIzoomLevel + 59 * UIzoomLevel), y + (int) (1 * UIzoomLevel + 59 * UIzoomLevel), x + (int) (1 * UIzoomLevel + 59 * UIzoomLevel),
+								buffer.drawLine(x + (int) (60 * UIzoomLevel), y + (int) (60 * UIzoomLevel), x + (int) (60 * UIzoomLevel),
 										y + (int) (1 * UIzoomLevel));
-								buffer.drawLine(x + (int) (1 * UIzoomLevel + 59 * UIzoomLevel), y + (int) (1 * UIzoomLevel + 59 * UIzoomLevel), x + (int) (1 * UIzoomLevel),
-										y + (int) (1 * UIzoomLevel + 59 * UIzoomLevel));
+								buffer.drawLine(x + (int) (60 * UIzoomLevel), y + (int) (60 * UIzoomLevel), x + (int) (1 * UIzoomLevel),
+										y + (int) (60 * UIzoomLevel));
 
 							}
 						}
