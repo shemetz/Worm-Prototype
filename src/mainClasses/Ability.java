@@ -42,6 +42,7 @@ import abilities.Precision_I;
 import abilities.Precision_II;
 import abilities.Precision_III;
 import abilities.Protective_Bubble_I;
+import abilities.Protective_Bubble_II;
 import abilities.Punch;
 import abilities.Pushy_Fists;
 import abilities.Ranged_Explosion;
@@ -89,7 +90,7 @@ import mainResourcesPackage.SoundEffect;
 public class Ability
 {
 	final static List<String> implementedAbilities = Arrays.asList("Elemental Combat I", "Beam", "Ball", "Shield", "Pool", "Wall", "Spray", "Sense Element", "Elemental Resistance", "Strike",
-			"Portals", "Elemental Void", "Precision I", "Precision II", "Precision III", "Protective Bubble I", "Sprint", "Strength I", "Strength II", "Strength III", "Punch", "Heal I", "Heal II",
+			"Portals", "Elemental Void", "Precision I", "Precision II", "Precision III", "Protective Bubble I", "Protective Bubble II", "Sprint", "Strength I", "Strength II", "Strength III", "Punch", "Heal I", "Heal II",
 			"Force Shield", "Ranged Explosion", "Flight I", "Flight II", "Telekinetic Flight", "Blink", "Ghost Mode I", "Strong Force Field", "Toughness I", "Toughness II", "Toughness III",
 			"Sense Life", "Sense Mana and Stamina", "Sense Powers", "Slow Target", "Chronobiology", "Retrace I", "Retrace II", "Retrace III", "Undo I", "Undo II", "Undo III", "Repeat I", "Repeat II",
 			"Repeat III", "Time Freeze Target I", "Nullification Aura I", "Nullification Aura II", "Wild Power", "Clone I", "Clone II", "Clone III", "Twitch", "Sense Structure", "Sense Parahumans",
@@ -683,6 +684,9 @@ public class Ability
 			break;
 		case "Protective Bubble I":
 			ab = new Protective_Bubble_I(pnts);
+			break;
+		case "Protective Bubble II":
+			ab = new Protective_Bubble_II(pnts);
 			break;
 		case "Sprint":
 			ab = new Sprint(pnts);

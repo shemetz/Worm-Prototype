@@ -10,21 +10,17 @@ import mainClasses.Person;
 import mainClasses.Player;
 import mainResourcesPackage.SoundEffect;
 
-public class Bubble_Target extends Ability
+public class Protective_Bubble_II extends Ability
 {
 	public ArcForceField bubble;
 
-	public double maxDistFromTargetedPoint = 100;
-
-	public Bubble_Target(int p)
+	public Protective_Bubble_II(int p)
 	{
-		super("Bubble Target", p);
-		cooldown = Math.min(6-level, 0.3);
+		super("Protective Bubble II", p);
+		cooldown = 1;
 		costType = CostType.MANA;
-		cost = 3;
-		range = 500;
-		rangeType = Ability.RangeType.CIRCLE_AREA;
-		instant = false;
+		cost = 4;
+		instant = true;
 
 		bubble = null;
 
@@ -32,36 +28,40 @@ public class Bubble_Target extends Ability
 		sounds.add(new SoundEffect("Bubble_pop.wav"));
 	}
 
-	public Person getTarget(Environment env, Point targetPoint)
-	{
-		Person target = null;
-		double shortestDistPow2 = maxDistFromTargetedPoint * maxDistFromTargetedPoint;
-		for (Person p : env.people)
-		{
-			double distPow2 = Methods.DistancePow2(p.Point(), targetPoint);
-			if (distPow2 < shortestDistPow2)
-			{
-				shortestDistPow2 = distPow2;
-				target = p;
-			}
-		}
-		return target;
-	}
-
 	public void use(Environment env, Person user, Point target)
 	{
 		setSounds(user.Point());
-		if (!user.maintaining && !user.prone) // activating bubble
+		// deactivating the bubble
+		if (on && cooldownLeft == 0)
+		{
+			for (int i = 0; i < env.AFFs.size(); i++)
+				if (env.AFFs.get(i).equals(bubble))
+				{
+					env.shieldDebris(bubble, "bubble");
+					cooldownLeft = 0.5;
+					on = false;
+					env.AFFs.remove(i);
+					i--;
+					sounds.get(1).play();
+				}
+		}
+		else if (!user.maintaining && !user.prone) // activating bubble
 		{
 			if (cost > user.mana || cooldownLeft > 0)
 				return;
-			Person targetPerson = getTarget(env, target);
-			if (targetPerson == null)
-				return;
+
+			// Remove any current protective bubble
+			for (int i = 0; i < env.AFFs.size(); i++)
+				if (env.AFFs.get(i).target.equals(user) && env.AFFs.get(i).type.equals("Protective Bubble"))
+				{
+					env.shieldDebris(env.AFFs.get(i), "bubble");
+					env.AFFs.remove(i);
+					i--;
+				}
 
 			// Add a new protective bubble
-			bubble = new ArcForceField(targetPerson, 0, 2 * Math.PI, 60, 107, 10 * level, 12, ArcForceField.Type.IMMOBILE_BUBBLE);
-			bubble.armor = level * 2;
+			bubble = new ArcForceField(user, 0, 2 * Math.PI, 60, 107, 20 * level, 12, ArcForceField.Type.MOBILE_BUBBLE);
+			bubble.armor = level;
 			env.AFFs.add(bubble);
 			user.mana -= this.cost;
 			this.cooldownLeft = this.cooldown;
@@ -73,16 +73,17 @@ public class Bubble_Target extends Ability
 	public void maintain(Environment env, Person user, Point target, double deltaTime)
 	{
 		bubble.life -= bubble.life * 0.1 * deltaTime;
+		bubble.rotation = Methods.lerpAngle(bubble.rotation, user.rotation, deltaTime);
 	}
 
 	public void disable(Environment env, Person user)
 	{
 		disabled = true;
+		if (on)
+			use(env, user, null);
 	}
 
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
 	{
-		player.target = target;
-		player.aimType = Player.AimType.TARGET_IN_RANGE;
 	}
 }
