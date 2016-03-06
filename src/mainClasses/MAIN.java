@@ -668,8 +668,17 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			for (Person p : env.people)
 				if (env.personAFFCollision(p, aff))
 				{
-					double angleToPerson = Math.atan2(p.y - aff.target.y, p.x - aff.target.x);
+					double angleToPerson = Math.atan2(p.y - aff.y, p.x - aff.x);
 					double pushStrength = 10000;
+					double distFromCenterPow2 = Methods.DistancePow2(aff.x, aff.y, p.x, p.y);
+					if (distFromCenterPow2 < Math.pow(aff.maxRadius / 2 + aff.minRadius / 2, 2))
+					{
+						if (distFromCenterPow2 < Math.pow(aff.minRadius - p.radius, 2))
+							continue;
+						else
+							pushStrength *= -3; // pull people inwards if they're inside
+
+					}
 					double xMax = 0.03 * pushStrength * Math.cos(angleToPerson);
 					double yMax = 0.03 * pushStrength * Math.sin(angleToPerson);
 					if ((xMax > 0 && p.xVel < xMax) || (xMax < 0 && p.xVel > xMax))
@@ -688,10 +697,10 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 							for (int x2 = x; x2 < x + 2; x2++)
 								for (int y2 = y; y2 < y + 2; y2++)
 								{
-									double distanceToWallPow2 = Math.pow(squareSize * (y2) - aff.target.y, 2) + Math.pow(squareSize * (x2) - aff.target.x, 2);
+									double distanceToWallPow2 = Math.pow(squareSize * (y2) - aff.y, 2) + Math.pow(squareSize * (x2) - aff.x, 2);
 									if (distanceToWallPow2 < aff.maxRadius * aff.maxRadius)
 									{
-										double angleToWall = Math.atan2(squareSize * (y2) - aff.target.y, squareSize * (x2) - aff.target.x);
+										double angleToWall = Math.atan2(squareSize * (y2) - aff.y, squareSize * (x2) - aff.x);
 										double pushStrength = 10000;
 										double xMax = 10.03 * pushStrength * Math.cos(angleToWall);
 										double yMax = 10.03 * pushStrength * Math.sin(angleToWall);
@@ -745,6 +754,12 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 						}
 					}
 				}
+				// was a bubble created by someone else
+				env.shieldDebris(aff, "bubble");
+				env.AFFs.remove(i);
+				i--;
+				continue affloop;
+
 			}
 		}
 
@@ -969,8 +984,8 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				// clamp target to range:
 				if (Methods.DistancePow2(p.x, p.y, p.target.x, p.target.y) > ability.range * ability.range)
 				{
-					p.target.x = (int) (p.x + Math.cos(angle) * ability.range);
-					p.target.y = (int) (p.y + Math.sin(angle) * ability.range);
+				p.target.x = (int) (p.x + Math.cos(angle) * ability.range);
+				p.target.y = (int) (p.y + Math.sin(angle) * ability.range);
 				}
 	}
 
@@ -2260,7 +2275,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 					// ability icon
 					Ability ability = player.abilities.get(player.hotkeys[i]);
 					scaleBuffer(buffer, x, y, UIzoomLevel);
-					buffer.drawImage(Resources.icons.get(ability.name), x+1, y+1, this);
+					buffer.drawImage(Resources.icons.get(ability.name), x + 1, y + 1, this);
 					scaleBuffer(buffer, x, y, 1 / UIzoomLevel);
 
 					// Cooldown and mana notifications
@@ -2296,10 +2311,8 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 							{
 								buffer.setColor(Color.magenta);
 								buffer.setStroke(new BasicStroke(2));
-								buffer.drawLine(x + (int) (60 * UIzoomLevel), y + (int) (60 * UIzoomLevel), x + (int) (60 * UIzoomLevel),
-										y + (int) (1 * UIzoomLevel));
-								buffer.drawLine(x + (int) (60 * UIzoomLevel), y + (int) (60 * UIzoomLevel), x + (int) (1 * UIzoomLevel),
-										y + (int) (60 * UIzoomLevel));
+								buffer.drawLine(x + (int) (60 * UIzoomLevel), y + (int) (60 * UIzoomLevel), x + (int) (60 * UIzoomLevel), y + (int) (1 * UIzoomLevel));
+								buffer.drawLine(x + (int) (60 * UIzoomLevel), y + (int) (60 * UIzoomLevel), x + (int) (1 * UIzoomLevel), y + (int) (60 * UIzoomLevel));
 
 							}
 						}

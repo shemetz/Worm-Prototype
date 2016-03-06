@@ -258,38 +258,37 @@ public class Environment
 						// to avoid needless computation, This line tests basic hitbox collisions first
 						if (f.x - 0.5 * f.w <= b.x + b.radius && f.x + 0.5 * f.w >= b.x - b.radius && f.y - 0.5 * f.w <= b.y + b.radius && f.y + 0.5 * f.w >= b.y - b.radius)
 						{
-							while (f.rotation < 0)
-								f.rotation += 2 * Math.PI;
-							while (f.rotation >= 2 * Math.PI)
-								f.rotation -= 2 * Math.PI;
-							Point ballCenter = new Point((int) b.x, (int) b.y);
-							// pow2 to avoid using Math.sqrt(), which is supposedly computationally expensive.
-							double ballRadiusPow2 = Math.pow(b.radius, 2);
-							Point[] fPoints = f.getPoints();
-							boolean collision = false;
-							if (0 <= Methods.realDotProduct(fPoints[0], ballCenter, fPoints[1]) && Methods.realDotProduct(fPoints[0], ballCenter, fPoints[1]) <= f.h * f.h
-									&& 0 <= Methods.realDotProduct(fPoints[0], ballCenter, fPoints[3]) && Methods.realDotProduct(fPoints[0], ballCenter, fPoints[3]) <= f.w * f.w)
-								// circle center is within furniture
-								collision = true;
-							else
-							{
-								if (Methods.LineToPointDistancePow2(fPoints[0], fPoints[1], ballCenter) < ballRadiusPow2)
-									collision = true;
-								else if (Methods.LineToPointDistancePow2(fPoints[2], fPoints[3], ballCenter) < ballRadiusPow2)
-									collision = true;
-								if (Methods.LineToPointDistancePow2(fPoints[1], fPoints[2], ballCenter) < ballRadiusPow2)
-									collision = true;
-								else if (Methods.LineToPointDistancePow2(fPoints[3], fPoints[0], ballCenter) < ballRadiusPow2)
-									collision = true;
-							}
-							if (collision)
-							{
-								damageFurniture(f, b.getDamage() + b.getPushback(), EP.damageType(b.elementNum));
-								// debris
-								ballDebris(b, "wall", b.angle());
-								// ball was destroyed
-								return false;
-							}
+						while (f.rotation < 0)
+						f.rotation += 2 * Math.PI;
+						while (f.rotation >= 2 * Math.PI)
+						f.rotation -= 2 * Math.PI;
+						Point ballCenter = new Point((int) b.x, (int) b.y);
+						// pow2 to avoid using Math.sqrt(), which is supposedly computationally expensive.
+						double ballRadiusPow2 = Math.pow(b.radius, 2);
+						Point[] fPoints = f.getPoints();
+						boolean collision = false;
+						if (0 <= Methods.realDotProduct(fPoints[0], ballCenter, fPoints[1]) && Methods.realDotProduct(fPoints[0], ballCenter, fPoints[1]) <= f.h * f.h && 0 <= Methods.realDotProduct(fPoints[0], ballCenter, fPoints[3]) && Methods.realDotProduct(fPoints[0], ballCenter, fPoints[3]) <= f.w * f.w)
+							// circle center is within furniture
+							collision = true;
+						else
+						{
+						if (Methods.LineToPointDistancePow2(fPoints[0], fPoints[1], ballCenter) < ballRadiusPow2)
+						collision = true;
+						else if (Methods.LineToPointDistancePow2(fPoints[2], fPoints[3], ballCenter) < ballRadiusPow2)
+						collision = true;
+						if (Methods.LineToPointDistancePow2(fPoints[1], fPoints[2], ballCenter) < ballRadiusPow2)
+						collision = true;
+						else if (Methods.LineToPointDistancePow2(fPoints[3], fPoints[0], ballCenter) < ballRadiusPow2)
+						collision = true;
+						}
+						if (collision)
+						{
+						damageFurniture(f, b.getDamage() + b.getPushback(), EP.damageType(b.elementNum));
+						// debris
+						ballDebris(b, "wall", b.angle());
+						// ball was destroyed
+						return false;
+						}
 						}
 			}
 
@@ -341,7 +340,7 @@ public class Environment
 				if (!(b.creator.equals(aff.target) && aff.type.equals("Protective Bubble"))) // balls phase through protective bubbles of their owners
 					if (aff.z + aff.height > b.z && aff.z < b.z + b.height)
 					{
-						double angleToBall = Math.atan2(b.y - aff.target.y, b.x - aff.target.x);
+						double angleToBall = Math.atan2(b.y - aff.y, b.x - aff.x);
 						while (angleToBall < 0)
 							angleToBall += 2 * Math.PI;
 						boolean withinAngles = false;
@@ -370,7 +369,7 @@ public class Environment
 						}
 						if (withinAngles)
 						{
-							double distancePow2 = Math.pow(aff.target.y - b.y, 2) + Math.pow(aff.target.x - b.x, 2);
+							double distancePow2 = Math.pow(aff.y - b.y, 2) + Math.pow(aff.x - b.x, 2);
 							if (distancePow2 > Math.pow(aff.minRadius - b.radius, 2) && distancePow2 < Math.pow(aff.maxRadius + b.radius, 2))
 							// That's totally not a legit collision check, but honestly? it's pretty darn close, according to my intuition.
 							{
@@ -378,7 +377,7 @@ public class Environment
 								{
 									double damage = (b.getDamage() + b.getPushback()) * 0.5; // half damage, because the ball bounces
 									damageArcForceField(aff, damage,
-											new Point((int) (aff.target.x + aff.maxRadius * Math.cos(angleToBall)), (int) (aff.target.y + aff.maxRadius * Math.sin(angleToBall))),
+											new Point((int) (aff.x + aff.maxRadius * Math.cos(angleToBall)), (int) (aff.y + aff.maxRadius * Math.sin(angleToBall))),
 											EP.damageType(b.elementNum));
 									hitPerson(aff.target, 0, 0.5 * b.getPushback(), b.angle(), b.elementNum); // push, not harm
 									// TODO cool sparks
@@ -421,7 +420,7 @@ public class Environment
 									// TODO water strong against fire, electricity unblockable by some and entirely blockable by others, , bouncing from metal, etc.
 									double damage = b.getDamage() + b.getPushback();
 									damageArcForceField(aff, damage,
-											new Point((int) (aff.target.x + aff.maxRadius * Math.cos(angleToBall)), (int) (aff.target.y + aff.maxRadius * Math.sin(angleToBall))),
+											new Point((int) (aff.x + aff.maxRadius * Math.cos(angleToBall)), (int) (aff.y + aff.maxRadius * Math.sin(angleToBall))),
 											EP.damageType(b.elementNum));
 									hitPerson(aff.target, 0, 0.5 * b.getPushback(), b.angle(), b.elementNum); // push, nor harm
 
@@ -441,106 +440,105 @@ public class Environment
 					// to avoid needless computation, This line tests basic hitbox collisions first
 					if (ff.x - 0.5 * ff.length <= b.x + b.radius && ff.x + 0.5 * ff.length >= b.x - b.radius && ff.y - 0.5 * ff.length <= b.y + b.radius && ff.y + 0.5 * ff.length >= b.y - b.radius)
 					{
-						boolean bounce = true;
-						// TODO move it to once per frame in the FF's code area in frame()
-						while (ff.rotation < 0)
-							ff.rotation += 2 * Math.PI;
-						while (ff.rotation >= 2 * Math.PI)
-							ff.rotation -= 2 * Math.PI;
-						Point ballCenter = new Point((int) b.x, (int) b.y);
-						// pow2 to avoid using Math.sqrt(), which is supposedly computationally expensive.
-						double ballRadiusPow2 = Math.pow(b.radius, 2);
-						// TODO also test if circle is entirely within the forcefield's rectangle
-						/*
-						 * four cases because four vertices, and each has its own visual effect In cases 01 and 23, the bounce angle is -Math.PI. but in cases 12 and 30 it's -0. Because rectangle. I can split them to two if-else-ifs because a circle
-						 * can't collide with more than 2 of the vertices at once, obviously
-						 */
-						if (0 <= Methods.realDotProduct(ff.p[0], ballCenter, ff.p[1]) && Methods.realDotProduct(ff.p[0], ballCenter, ff.p[1]) <= ff.width * ff.width
-								&& 0 <= Methods.realDotProduct(ff.p[0], ballCenter, ff.p[3]) && Methods.realDotProduct(ff.p[0], ballCenter, ff.p[3]) <= ff.length * ff.length)
-						// circle center is within FF. This basically never ever should happen.
-						{
-							damageForceField(ff, b.getDamage() + b.getPushback(), ballCenter);
+					boolean bounce = true;
+					// TODO move it to once per frame in the FF's code area in frame()
+					while (ff.rotation < 0)
+					ff.rotation += 2 * Math.PI;
+					while (ff.rotation >= 2 * Math.PI)
+					ff.rotation -= 2 * Math.PI;
+					Point ballCenter = new Point((int) b.x, (int) b.y);
+					// pow2 to avoid using Math.sqrt(), which is supposedly computationally expensive.
+					double ballRadiusPow2 = Math.pow(b.radius, 2);
+					// TODO also test if circle is entirely within the forcefield's rectangle
+					/*
+					 * four cases because four vertices, and each has its own visual effect In cases 01 and 23, the bounce angle is -Math.PI. but in cases 12 and 30 it's -0. Because rectangle. I can split them to two if-else-ifs because a circle
+					 * can't collide with more than 2 of the vertices at once, obviously
+					 */
+					if (0 <= Methods.realDotProduct(ff.p[0], ballCenter, ff.p[1]) && Methods.realDotProduct(ff.p[0], ballCenter, ff.p[1]) <= ff.width * ff.width && 0 <= Methods.realDotProduct(ff.p[0], ballCenter, ff.p[3]) && Methods.realDotProduct(ff.p[0], ballCenter, ff.p[3]) <= ff.length * ff.length)
+					// circle center is within FF. This basically never ever should happen.
+					{
+					damageForceField(ff, b.getDamage() + b.getPushback(), ballCenter);
 
-							// FX
-							for (int i = 0; i < 7; i++)
-								debris.add(new Debris(b.x, b.y, b.z, b.angle() + 4 + i * (4) / 6, b.elementNum, 500));
-							return false;
-						}
-						else
-						{
-							if (Methods.LineToPointDistancePow2(ff.p[0], ff.p[1], ballCenter) < ballRadiusPow2)
-							{
-								// TODO cool sparks
-								if (bounce)
-								{
-									// PHYSICS
-									double angle = 2 * ff.rotation - b.angle() + Math.PI; // 2*rotation - angle + 180
-									// avoiding repeat-bounce immediately afterwards
-									moveQuantumX = Math.cos(angle);
-									moveQuantumY = Math.sin(angle);
-									double velocity = b.velocity();
-									b.xVel = velocity * moveQuantumX;
-									b.yVel = velocity * moveQuantumY;
-									// avoiding it some more
-									b.x += moveQuantumX;
-									b.y += moveQuantumY;
-								}
-							}
-							else if (Methods.LineToPointDistancePow2(ff.p[2], ff.p[3], ballCenter) < ballRadiusPow2)
-							{
-								// TODO cool sparks
-								if (bounce)
-								{
-									// PHYSICS
-									double angle = 2 * ff.rotation - b.angle() + Math.PI;// 2*rotation - angle + 180
-									// avoiding repeat-bounce immediately afterwards
-									moveQuantumX = Math.cos(angle);
-									moveQuantumY = Math.sin(angle);
-									double velocity = b.velocity();
-									b.xVel = velocity * moveQuantumX;
-									b.yVel = velocity * moveQuantumY;
-									// avoiding it some more
-									b.x += moveQuantumX;
-									b.y += moveQuantumY;
-								}
-							}
-							if (Methods.LineToPointDistancePow2(ff.p[1], ff.p[2], ballCenter) < ballRadiusPow2)
-							{
-								// TODO cool sparks
-								if (bounce)
-								{
-									// PHYSICS
-									double angle = 2 * ff.rotation - b.angle();// 2*rotation - angle
-									// avoiding repeat-bounce immediately afterwards
-									moveQuantumX = Math.cos(angle);
-									moveQuantumY = Math.sin(angle);
-									double velocity = b.velocity();
-									b.xVel = velocity * moveQuantumX;
-									b.yVel = velocity * moveQuantumY;
-									// avoiding it some more
-									b.x += moveQuantumX;
-									b.y += moveQuantumY;
-								}
-							}
-							else if (Methods.LineToPointDistancePow2(ff.p[3], ff.p[0], ballCenter) < ballRadiusPow2)
-							{
-								// TODO cool sparks
-								if (bounce)
-								{
-									// PHYSICS
-									double angle = 2 * ff.rotation - b.angle(); // 2*rotation - angle
-									// avoiding repeat-bounce immediately afterwards
-									moveQuantumX = Math.cos(angle);
-									moveQuantumY = Math.sin(angle);
-									double velocity = b.velocity();
-									b.xVel = velocity * moveQuantumX;
-									b.yVel = velocity * moveQuantumY;
-									// avoiding it some more
-									b.x += moveQuantumX;
-									b.y += moveQuantumY;
-								}
-							}
-						}
+					// FX
+					for (int i = 0; i < 7; i++)
+					debris.add(new Debris(b.x, b.y, b.z, b.angle() + 4 + i * (4) / 6, b.elementNum, 500));
+					return false;
+					}
+					else
+					{
+					if (Methods.LineToPointDistancePow2(ff.p[0], ff.p[1], ballCenter) < ballRadiusPow2)
+					{
+					// TODO cool sparks
+					if (bounce)
+					{
+					// PHYSICS
+					double angle = 2 * ff.rotation - b.angle() + Math.PI; // 2*rotation - angle + 180
+					// avoiding repeat-bounce immediately afterwards
+					moveQuantumX = Math.cos(angle);
+					moveQuantumY = Math.sin(angle);
+					double velocity = b.velocity();
+					b.xVel = velocity * moveQuantumX;
+					b.yVel = velocity * moveQuantumY;
+					// avoiding it some more
+					b.x += moveQuantumX;
+					b.y += moveQuantumY;
+					}
+					}
+					else if (Methods.LineToPointDistancePow2(ff.p[2], ff.p[3], ballCenter) < ballRadiusPow2)
+					{
+					// TODO cool sparks
+					if (bounce)
+					{
+					// PHYSICS
+					double angle = 2 * ff.rotation - b.angle() + Math.PI;// 2*rotation - angle + 180
+					// avoiding repeat-bounce immediately afterwards
+					moveQuantumX = Math.cos(angle);
+					moveQuantumY = Math.sin(angle);
+					double velocity = b.velocity();
+					b.xVel = velocity * moveQuantumX;
+					b.yVel = velocity * moveQuantumY;
+					// avoiding it some more
+					b.x += moveQuantumX;
+					b.y += moveQuantumY;
+					}
+					}
+					if (Methods.LineToPointDistancePow2(ff.p[1], ff.p[2], ballCenter) < ballRadiusPow2)
+					{
+					// TODO cool sparks
+					if (bounce)
+					{
+					// PHYSICS
+					double angle = 2 * ff.rotation - b.angle();// 2*rotation - angle
+					// avoiding repeat-bounce immediately afterwards
+					moveQuantumX = Math.cos(angle);
+					moveQuantumY = Math.sin(angle);
+					double velocity = b.velocity();
+					b.xVel = velocity * moveQuantumX;
+					b.yVel = velocity * moveQuantumY;
+					// avoiding it some more
+					b.x += moveQuantumX;
+					b.y += moveQuantumY;
+					}
+					}
+					else if (Methods.LineToPointDistancePow2(ff.p[3], ff.p[0], ballCenter) < ballRadiusPow2)
+					{
+					// TODO cool sparks
+					if (bounce)
+					{
+					// PHYSICS
+					double angle = 2 * ff.rotation - b.angle(); // 2*rotation - angle
+					// avoiding repeat-bounce immediately afterwards
+					moveQuantumX = Math.cos(angle);
+					moveQuantumY = Math.sin(angle);
+					double velocity = b.velocity();
+					b.xVel = velocity * moveQuantumX;
+					b.yVel = velocity * moveQuantumY;
+					// avoiding it some more
+					b.x += moveQuantumX;
+					b.y += moveQuantumY;
+					}
+					}
+					}
 					}
 			}
 			for (Ball b2 : balls)
@@ -674,38 +672,37 @@ public class Environment
 					// to avoid needless computation, This line tests basic hitbox collisions first
 					if (f.x - 0.5 * f.w <= sd.x + sd.radius && f.x + 0.5 * f.w >= sd.x - sd.radius && f.y - 0.5 * f.w <= sd.y + sd.radius && f.y + 0.5 * f.w >= sd.y - sd.radius)
 					{
-						while (f.rotation < 0)
-							f.rotation += 2 * Math.PI;
-						while (f.rotation >= 2 * Math.PI)
-							f.rotation -= 2 * Math.PI;
-						Point ballCenter = new Point((int) sd.x, (int) sd.y);
-						// pow2 to avoid using Math.sqrt(), which is supposedly computationally expensive.
-						double ballRadiusPow2 = Math.pow(sd.radius, 2);
-						Point[] fPoints = f.getPoints();
-						boolean collision = false;
-						if (0 <= Methods.realDotProduct(fPoints[0], ballCenter, fPoints[1]) && Methods.realDotProduct(fPoints[0], ballCenter, fPoints[1]) <= f.h * f.h
-								&& 0 <= Methods.realDotProduct(fPoints[0], ballCenter, fPoints[3]) && Methods.realDotProduct(fPoints[0], ballCenter, fPoints[3]) <= f.w * f.w)
-							// circle center is within furniture
-							collision = true;
-						else
-						{
-							if (Methods.LineToPointDistancePow2(fPoints[0], fPoints[1], ballCenter) < ballRadiusPow2)
-								collision = true;
-							else if (Methods.LineToPointDistancePow2(fPoints[2], fPoints[3], ballCenter) < ballRadiusPow2)
-								collision = true;
-							if (Methods.LineToPointDistancePow2(fPoints[1], fPoints[2], ballCenter) < ballRadiusPow2)
-								collision = true;
-							else if (Methods.LineToPointDistancePow2(fPoints[3], fPoints[0], ballCenter) < ballRadiusPow2)
-								collision = true;
-						}
-						if (collision)
-						{
-							damageFurniture(f, sd.getDamage() + sd.getPushback(), EP.damageType(sd.elementNum));
-							// debris
-							sprayDropDebris(sd);
-							// ball was destroyed
-							return false;
-						}
+					while (f.rotation < 0)
+					f.rotation += 2 * Math.PI;
+					while (f.rotation >= 2 * Math.PI)
+					f.rotation -= 2 * Math.PI;
+					Point ballCenter = new Point((int) sd.x, (int) sd.y);
+					// pow2 to avoid using Math.sqrt(), which is supposedly computationally expensive.
+					double ballRadiusPow2 = Math.pow(sd.radius, 2);
+					Point[] fPoints = f.getPoints();
+					boolean collision = false;
+					if (0 <= Methods.realDotProduct(fPoints[0], ballCenter, fPoints[1]) && Methods.realDotProduct(fPoints[0], ballCenter, fPoints[1]) <= f.h * f.h && 0 <= Methods.realDotProduct(fPoints[0], ballCenter, fPoints[3]) && Methods.realDotProduct(fPoints[0], ballCenter, fPoints[3]) <= f.w * f.w)
+						// circle center is within furniture
+						collision = true;
+					else
+					{
+					if (Methods.LineToPointDistancePow2(fPoints[0], fPoints[1], ballCenter) < ballRadiusPow2)
+					collision = true;
+					else if (Methods.LineToPointDistancePow2(fPoints[2], fPoints[3], ballCenter) < ballRadiusPow2)
+					collision = true;
+					if (Methods.LineToPointDistancePow2(fPoints[1], fPoints[2], ballCenter) < ballRadiusPow2)
+					collision = true;
+					else if (Methods.LineToPointDistancePow2(fPoints[3], fPoints[0], ballCenter) < ballRadiusPow2)
+					collision = true;
+					}
+					if (collision)
+					{
+					damageFurniture(f, sd.getDamage() + sd.getPushback(), EP.damageType(sd.elementNum));
+					// debris
+					sprayDropDebris(sd);
+					// ball was destroyed
+					return false;
+					}
 					}
 		}
 
@@ -741,10 +738,10 @@ public class Environment
 			if (!(sd.creator.equals(aff.target) && aff.type.equals("Protective Bubble"))) // phase through protective bubbles of owners
 				if (aff.z + aff.height > sd.z && aff.z < sd.z + sd.height)
 				{
-					double distancePow2 = Math.pow(aff.target.y - sd.y, 2) + Math.pow(aff.target.x - sd.x, 2);
+					double distancePow2 = Math.pow(aff.y - sd.y, 2) + Math.pow(aff.x - sd.x, 2);
 					if (distancePow2 > Math.pow(aff.minRadius - sd.radius, 2) && distancePow2 < Math.pow(aff.maxRadius + sd.radius, 2))
 					{
-						double angleToDrop = Math.atan2(sd.y - aff.target.y, sd.x - aff.target.x);
+						double angleToDrop = Math.atan2(sd.y - aff.y, sd.x - aff.x);
 						while (angleToDrop < 0)
 							angleToDrop += 2 * Math.PI;
 						boolean withinAngles = false;
@@ -774,7 +771,7 @@ public class Environment
 						if (withinAngles)
 						{
 							damageArcForceField(aff, sd.getDamage(),
-									new Point((int) (aff.target.x + aff.maxRadius * Math.cos(angleToDrop)), (int) (aff.target.y + aff.maxRadius * Math.sin(angleToDrop))),
+									new Point((int) (aff.x + aff.maxRadius * Math.cos(angleToDrop)), (int) (aff.y + aff.maxRadius * Math.sin(angleToDrop))),
 									EP.damageType(sd.elementNum));
 							hitPerson(aff.target, 0, 0.5 * sd.getPushback(), sd.angle(), sd.elementNum);
 
@@ -792,42 +789,41 @@ public class Environment
 				if (ff.x - 0.5 * ff.length <= sd.x + sd.radius && ff.x + 0.5 * ff.length >= sd.x - sd.radius && ff.y - 0.5 * ff.length <= sd.y + sd.radius
 						&& ff.y + 0.5 * ff.length >= sd.y - sd.radius)
 				{
-					// TODO move it to once per frame in the FF's code area in frame()
-					while (ff.rotation < 0)
-						ff.rotation += 2 * Math.PI;
-					while (ff.rotation >= 2 * Math.PI)
-						ff.rotation -= 2 * Math.PI;
-					Point dropCenter = new Point((int) sd.x, (int) sd.y);
-					// pow2 to avoid using Math.sqrt(), which is supposedly computationally expensive.
-					double ballRadiusPow2 = Math.pow(sd.radius, 2);
-					// TODO instead, test if center is within the forcefield's rectangle!!!!!!!!!!!!!!!!!!!!!!!!!
-					if (0 <= Methods.realDotProduct(ff.p[0], dropCenter, ff.p[1]) && Methods.realDotProduct(ff.p[0], dropCenter, ff.p[1]) <= ff.width * ff.width
-							&& 0 <= Methods.realDotProduct(ff.p[0], dropCenter, ff.p[3]) && Methods.realDotProduct(ff.p[0], dropCenter, ff.p[3]) <= ff.length * ff.length)
-					// circle center is within FF?
-					{
-						damageForceField(ff, sd.getDamage() + sd.getPushback(), dropCenter);
+				// TODO move it to once per frame in the FF's code area in frame()
+				while (ff.rotation < 0)
+				ff.rotation += 2 * Math.PI;
+				while (ff.rotation >= 2 * Math.PI)
+				ff.rotation -= 2 * Math.PI;
+				Point dropCenter = new Point((int) sd.x, (int) sd.y);
+				// pow2 to avoid using Math.sqrt(), which is supposedly computationally expensive.
+				double ballRadiusPow2 = Math.pow(sd.radius, 2);
+				// TODO instead, test if center is within the forcefield's rectangle!!!!!!!!!!!!!!!!!!!!!!!!!
+				if (0 <= Methods.realDotProduct(ff.p[0], dropCenter, ff.p[1]) && Methods.realDotProduct(ff.p[0], dropCenter, ff.p[1]) <= ff.width * ff.width && 0 <= Methods.realDotProduct(ff.p[0], dropCenter, ff.p[3]) && Methods.realDotProduct(ff.p[0], dropCenter, ff.p[3]) <= ff.length * ff.length)
+				// circle center is within FF?
+				{
+				damageForceField(ff, sd.getDamage() + sd.getPushback(), dropCenter);
 
-						sprayDropDebris(sd);
-						return false;
-					}
-					else
-					{
-						boolean yes = false;
-						if (Methods.LineToPointDistancePow2(ff.p[0], ff.p[1], dropCenter) < ballRadiusPow2)
-							yes = true;
-						else if (Methods.LineToPointDistancePow2(ff.p[2], ff.p[3], dropCenter) < ballRadiusPow2)
-							yes = true;
-						if (Methods.LineToPointDistancePow2(ff.p[1], ff.p[2], dropCenter) < ballRadiusPow2)
-							yes = true;
-						else if (Methods.LineToPointDistancePow2(ff.p[3], ff.p[0], dropCenter) < ballRadiusPow2)
-							yes = true;
-						if (yes)
-						{
-							damageForceField(ff, sd.getDamage(), dropCenter);
-							sprayDropDebris(sd);
-							return false;
-						}
-					}
+				sprayDropDebris(sd);
+				return false;
+				}
+				else
+				{
+				boolean yes = false;
+				if (Methods.LineToPointDistancePow2(ff.p[0], ff.p[1], dropCenter) < ballRadiusPow2)
+				yes = true;
+				else if (Methods.LineToPointDistancePow2(ff.p[2], ff.p[3], dropCenter) < ballRadiusPow2)
+				yes = true;
+				if (Methods.LineToPointDistancePow2(ff.p[1], ff.p[2], dropCenter) < ballRadiusPow2)
+				yes = true;
+				else if (Methods.LineToPointDistancePow2(ff.p[3], ff.p[0], dropCenter) < ballRadiusPow2)
+				yes = true;
+				if (yes)
+				{
+				damageForceField(ff, sd.getDamage(), dropCenter);
+				sprayDropDebris(sd);
+				return false;
+				}
+				}
 				}
 
 		// check if the spray drop passed through a Portal
@@ -1333,10 +1329,10 @@ public class Environment
 
 	public boolean personAFFCollision(Person p, ArcForceField aff)
 	{
-		if (aff.target.equals(p))
+		if (aff.target.equals(p) && aff.type != ArcForceField.Type.IMMOBILE_BUBBLE)
 			return false;
 		// checks square first
-		Rectangle2D affBox = new Rectangle2D.Double(aff.target.x - aff.maxRadius, aff.target.y - aff.maxRadius, aff.maxRadius * 2, aff.maxRadius * 2);
+		Rectangle2D affBox = new Rectangle2D.Double(aff.x - aff.maxRadius, aff.y - aff.maxRadius, aff.maxRadius * 2, aff.maxRadius * 2);
 		Rectangle2D personRect = new Rectangle2D.Double((int) p.x - p.radius / 2, (int) p.y - p.radius / 2, p.radius, p.radius);
 		if (personRect.intersects(affBox))
 		{
@@ -1344,7 +1340,7 @@ public class Environment
 				if (aff.arc < TAU) // if not bubble
 				{
 					// following code is copied from ball-aff collision
-					double angleToPerson = Math.atan2(p.y - aff.target.y, p.x - aff.target.x);
+					double angleToPerson = Math.atan2(p.y - aff.y, p.x - aff.x);
 					while (angleToPerson < 0)
 						angleToPerson += 2 * Math.PI;
 					double minAngle = aff.rotation - aff.arc / 2 - Math.tan(p.radius / aff.maxRadius);
@@ -1367,7 +1363,7 @@ public class Environment
 						withinAngles = true;
 					if (withinAngles)
 					{
-						double distance = Math.sqrt(Math.pow(aff.target.y - p.y, 2) + Math.pow(aff.target.x - p.x, 2));
+						double distance = Math.sqrt(Math.pow(aff.y - p.y, 2) + Math.pow(aff.x - p.x, 2));
 						if (distance > aff.minRadius - p.radius && distance < aff.maxRadius + p.radius)
 							return true;
 						return false;
@@ -2146,7 +2142,7 @@ public class Environment
 		for (ArcForceField aff : AFFs)
 		{
 			if (b.z - b.height / 2 < aff.z + aff.height && b.z + b.height / 2 > aff.z) // height check
-				if (Methods.DistancePow2(b.start, aff.target.Point()) > aff.maxRadius * aff.maxRadius) // if beam did not originate inside arc force field.
+				if (Methods.DistancePow2(b.start, aff.Point()) > aff.maxRadius * aff.maxRadius) // if beam did not originate inside arc force field.
 				{
 					Rectangle2D generalBounds = new Rectangle2D.Double(aff.x - aff.maxRadius, aff.y - aff.maxRadius, aff.maxRadius * 2, aff.maxRadius * 2);
 					// easier intersection first
@@ -2249,7 +2245,7 @@ public class Environment
 							points.add(Methods.getSegmentIntersection(l2, beamLine));
 						}
 						else // much easier
-						if (Methods.LineToPointDistancePow2(b.start.Point(), b.end.Point(), aff.target.Point()) < aff.maxRadius * aff.maxRadius)
+						if (Methods.LineToPointDistancePow2(b.start.Point(), b.end.Point(), aff.Point()) < aff.maxRadius * aff.maxRadius)
 						{
 							Point2D closestPointToSegment = Methods.getClosestPointOnSegment(beamLine.getX1(), beamLine.getY1(), beamLine.getX2(), beamLine.getY2(), aff.x, aff.y);
 
@@ -2870,6 +2866,9 @@ public class Environment
 	{
 		if (damageType > 1 && aff.damageType() == damageType) // resistance
 			damage *= 0.5;
+		damage -= aff.armor;
+		if (damage <= 0)
+			return;
 		double prevLife = aff.life;
 		aff.life -= damage;
 
@@ -2989,16 +2988,16 @@ public class Environment
 		case "shield layer removed":
 			for (int i = 0; i < 3; i++)
 				// 86 is avg of minradius and maxradius
-				debris.add(new Debris((int) (aff.target.x + 86 * Math.cos(aff.rotation)), (int) (aff.target.y + 86 * Math.sin(aff.rotation)), aff.z, aff.rotation + 0.5 * Math.PI + 0.3 * i,
+				debris.add(new Debris((int) (aff.x + 86 * Math.cos(aff.rotation)), (int) (aff.y + 86 * Math.sin(aff.rotation)), aff.z, aff.rotation + 0.5 * Math.PI + 0.3 * i,
 						aff.elementNum, 150));
 			break;
 		case "deactivate":
 			for (int i = 0; i < 3; i++)
 			{
 				// 86 is avg of minradius and maxradius
-				debris.add(new Debris((int) (aff.target.x + 86 * Math.cos(aff.rotation)), (int) (aff.target.y + 86 * Math.sin(aff.rotation)), aff.z, aff.rotation + 0.5 * Math.PI + 0.3 * i,
+				debris.add(new Debris((int) (aff.x + 86 * Math.cos(aff.rotation)), (int) (aff.y + 86 * Math.sin(aff.rotation)), aff.z, aff.rotation + 0.5 * Math.PI + 0.3 * i,
 						aff.elementNum, 200));
-				debris.add(new Debris((int) (aff.target.x + 86 * Math.cos(aff.rotation)), (int) (aff.target.y + 86 * Math.sin(aff.rotation)), aff.z, aff.rotation + 0.5 * Math.PI + 0.3 * i,
+				debris.add(new Debris((int) (aff.x + 86 * Math.cos(aff.rotation)), (int) (aff.y + 86 * Math.sin(aff.rotation)), aff.z, aff.rotation + 0.5 * Math.PI + 0.3 * i,
 						aff.elementNum, 200));
 			}
 			break;
@@ -3006,7 +3005,7 @@ public class Environment
 			for (int i = 0; i < 7; i++)
 			{
 				double angle = aff.rotation + i * TAU / 7 + Math.random();
-				debris.add(new Debris((int) (aff.target.x + aff.maxRadius * Math.cos(angle)), (int) (aff.target.y + aff.maxRadius * Math.sin(angle)), aff.z, angle, 13, 150));
+				debris.add(new Debris((int) (aff.x + aff.maxRadius * Math.cos(angle)), (int) (aff.y + aff.maxRadius * Math.sin(angle)), aff.z, angle, 13, 150));
 			}
 			break;
 		default:
@@ -3783,28 +3782,28 @@ public class Environment
 					{
 						ArcForceField aff = (ArcForceField) d;
 						buffer.setColor(Color.green);
-						buffer.drawArc((int) (aff.target.x - aff.maxRadius), (int) (aff.target.y - aff.maxRadius), (int) (aff.maxRadius * 2), (int) (aff.maxRadius * 2),
+						buffer.drawArc((int) (aff.x - aff.maxRadius), (int) (aff.y - aff.maxRadius), (int) (aff.maxRadius * 2), (int) (aff.maxRadius * 2),
 								(int) (-aff.rotation / Math.PI * 180 - aff.arc / Math.PI * 90), (int) (aff.arc / Math.PI * 180));
-						buffer.drawArc((int) (aff.target.x - aff.minRadius), (int) (aff.target.y - aff.minRadius), (int) (aff.minRadius * 2), (int) (aff.minRadius * 2),
+						buffer.drawArc((int) (aff.x - aff.minRadius), (int) (aff.y - aff.minRadius), (int) (aff.minRadius * 2), (int) (aff.minRadius * 2),
 								(int) (-aff.rotation / Math.PI * 180 - aff.arc / Math.PI * 90), (int) (aff.arc / Math.PI * 180));
-						buffer.drawLine((int) (aff.target.x + aff.minRadius * Math.cos(aff.rotation - 0.5 * aff.arc)), (int) (aff.target.y + aff.minRadius * Math.sin(aff.rotation - 0.5 * aff.arc)),
-								(int) (aff.target.x + aff.maxRadius * Math.cos(aff.rotation - 0.5 * aff.arc)), (int) (aff.target.y + aff.maxRadius * Math.sin(aff.rotation - 0.5 * aff.arc)));
-						buffer.drawLine((int) (aff.target.x + aff.minRadius * Math.cos(aff.rotation + 0.5 * aff.arc)), (int) (aff.target.y + aff.minRadius * Math.sin(aff.rotation + 0.5 * aff.arc)),
-								(int) (aff.target.x + aff.maxRadius * Math.cos(aff.rotation + 0.5 * aff.arc)), (int) (aff.target.y + aff.maxRadius * Math.sin(aff.rotation + 0.5 * aff.arc)));
+						buffer.drawLine((int) (aff.x + aff.minRadius * Math.cos(aff.rotation - 0.5 * aff.arc)), (int) (aff.y + aff.minRadius * Math.sin(aff.rotation - 0.5 * aff.arc)),
+								(int) (aff.x + aff.maxRadius * Math.cos(aff.rotation - 0.5 * aff.arc)), (int) (aff.y + aff.maxRadius * Math.sin(aff.rotation - 0.5 * aff.arc)));
+						buffer.drawLine((int) (aff.x + aff.minRadius * Math.cos(aff.rotation + 0.5 * aff.arc)), (int) (aff.y + aff.minRadius * Math.sin(aff.rotation + 0.5 * aff.arc)),
+								(int) (aff.x + aff.maxRadius * Math.cos(aff.rotation + 0.5 * aff.arc)), (int) (aff.y + aff.maxRadius * Math.sin(aff.rotation + 0.5 * aff.arc)));
 
 						buffer.setColor(Color.red);
-						buffer.drawArc((int) (aff.target.x - (aff.maxRadius + 20)), (int) (aff.target.y - (aff.maxRadius + 20)), (int) ((aff.maxRadius + 20) * 2), (int) ((aff.maxRadius + 20) * 2),
+						buffer.drawArc((int) (aff.x - (aff.maxRadius + 20)), (int) (aff.y - (aff.maxRadius + 20)), (int) ((aff.maxRadius + 20) * 2), (int) ((aff.maxRadius + 20) * 2),
 								(int) (-aff.rotation / Math.PI * 180 - (aff.arc + 2 * 20 / aff.maxRadius) / Math.PI * 90), (int) ((aff.arc + 2 * 20 / aff.maxRadius) / Math.PI * 180));
-						buffer.drawArc((int) (aff.target.x - (aff.minRadius - 20)), (int) (aff.target.y - (aff.minRadius - 20)), (int) ((aff.minRadius - 20) * 2), (int) ((aff.minRadius - 20) * 2),
+						buffer.drawArc((int) (aff.x - (aff.minRadius - 20)), (int) (aff.y - (aff.minRadius - 20)), (int) ((aff.minRadius - 20) * 2), (int) ((aff.minRadius - 20) * 2),
 								(int) (-aff.rotation / Math.PI * 180 - (aff.arc + 2 * 20 / aff.maxRadius) / Math.PI * 90), (int) ((aff.arc + 2 * 20 / aff.maxRadius) / Math.PI * 180));
-						buffer.drawLine((int) (aff.target.x + (aff.minRadius - 20) * Math.cos(aff.rotation - 0.5 * (aff.arc + 2 * 20 / aff.maxRadius))),
-								(int) (aff.target.y + (aff.minRadius - 20) * Math.sin(aff.rotation - 0.5 * (aff.arc + 2 * 20 / aff.maxRadius))),
-								(int) (aff.target.x + (aff.maxRadius + 20) * Math.cos(aff.rotation - 0.5 * (aff.arc + 2 * 20 / aff.maxRadius))),
-								(int) (aff.target.y + (aff.maxRadius + 20) * Math.sin(aff.rotation - 0.5 * (aff.arc + 2 * 20 / aff.maxRadius))));
-						buffer.drawLine((int) (aff.target.x + (aff.minRadius - 20) * Math.cos(aff.rotation + 0.5 * (aff.arc + 2 * 20 / aff.maxRadius))),
-								(int) (aff.target.y + (aff.minRadius - 20) * Math.sin(aff.rotation + 0.5 * (aff.arc + 2 * 20 / aff.maxRadius))),
-								(int) (aff.target.x + (aff.maxRadius + 20) * Math.cos(aff.rotation + 0.5 * (aff.arc + 2 * 20 / aff.maxRadius))),
-								(int) (aff.target.y + (aff.maxRadius + 20) * Math.sin(aff.rotation + 0.5 * (aff.arc + 2 * 20 / aff.maxRadius))));
+						buffer.drawLine((int) (aff.x + (aff.minRadius - 20) * Math.cos(aff.rotation - 0.5 * (aff.arc + 2 * 20 / aff.maxRadius))),
+								(int) (aff.y + (aff.minRadius - 20) * Math.sin(aff.rotation - 0.5 * (aff.arc + 2 * 20 / aff.maxRadius))),
+								(int) (aff.x + (aff.maxRadius + 20) * Math.cos(aff.rotation - 0.5 * (aff.arc + 2 * 20 / aff.maxRadius))),
+								(int) (aff.y + (aff.maxRadius + 20) * Math.sin(aff.rotation - 0.5 * (aff.arc + 2 * 20 / aff.maxRadius))));
+						buffer.drawLine((int) (aff.x + (aff.minRadius - 20) * Math.cos(aff.rotation + 0.5 * (aff.arc + 2 * 20 / aff.maxRadius))),
+								(int) (aff.y + (aff.minRadius - 20) * Math.sin(aff.rotation + 0.5 * (aff.arc + 2 * 20 / aff.maxRadius))),
+								(int) (aff.x + (aff.maxRadius + 20) * Math.cos(aff.rotation + 0.5 * (aff.arc + 2 * 20 / aff.maxRadius))),
+								(int) (aff.y + (aff.maxRadius + 20) * Math.sin(aff.rotation + 0.5 * (aff.arc + 2 * 20 / aff.maxRadius))));
 					}
 				}
 			}

@@ -185,8 +185,8 @@ public class Punch extends Ability
 					user.target = new Point((int) (user.x + range * Math.cos(user.rotation + extraAimingAngle * m)), (int) (user.y + range * Math.sin(user.rotation + extraAimingAngle * m)));
 					if (!onlyOrganics)
 					{
-						int i = Math.min(Math.max(user.target.x / squareSize, 0), env.width-1);
-						int j = Math.min(Math.max(user.target.y / squareSize, 0), env.height-1);
+						int i = Math.min(Math.max(user.target.x / squareSize, 0), env.width - 1);
+						int j = Math.min(Math.max(user.target.y / squareSize, 0), env.height - 1);
 						if (user.z < 1 && env.wallTypes[i][j] > 0)
 						{
 							for (Ability a : user.punchAffectingAbilities)
@@ -282,14 +282,14 @@ public class Punch extends Ability
 					for (ArcForceField aff : env.AFFs)
 						if (!user.ghostMode || aff.type.equals("bubble"))
 						{
-							if (aff.target.equals(user) && aff.type != "Bubble")
+							if (aff.target.equals(user) && aff.type != ArcForceField.Type.IMMOBILE_BUBBLE)
 								continue;
 							if (aff.highestPoint() < user.z || aff.z > user.highestPoint())
 								continue;
-							if (Methods.DistancePow2(user.target, aff.target.Point()) > aff.maxRadius * aff.maxRadius) // outer arc
+							if (Methods.DistancePow2(user.target, aff.Point()) > aff.maxRadius * aff.maxRadius) // outer arc
 								continue;
 							double extra = 30; // extra "inwards" distance
-							if (Methods.DistancePow2(user.target, aff.target.Point()) < Math.pow(aff.minRadius - extra, 2)) // inner arc
+							if (Methods.DistancePow2(user.target, aff.Point()) < Math.pow(aff.minRadius - extra, 2)) // inner arc
 								continue;
 							boolean withinAngles = false;
 							if (aff.arc == 2 * Math.PI)
@@ -332,33 +332,33 @@ public class Punch extends Ability
 							if (p.highestPoint() > user.z - extraVerticalHeight && p.z < user.highestPoint() + extraVerticalHeight)
 								// This is actually the purpose of the punches, by the way
 								if (!p.equals(user))
-									if (p.x - p.radius < user.target.x && p.y - p.radius < user.target.y && p.x + p.radius > user.target.x && p.y + p.radius > user.target.y)
-									{
-										env.hitPerson(p, damage, pushback, user.rotation, punchElement); // This is such an elegant line of code :3
+								if (p.x - p.radius < user.target.x && p.y - p.radius < user.target.y && p.x + p.radius > user.target.x && p.y + p.radius > user.target.y)
+								{
+								env.hitPerson(p, damage, pushback, user.rotation, punchElement); // This is such an elegant line of code :3
 
-										for (Ability a : user.punchAffectingAbilities)
-										{
-											if (a instanceof Sapping_Fists)
-												if (Math.random() < 0.1 * a.level) // 10% * level
-													p.affect(new Nullified(1, true, a), true);
-											if (a instanceof Elemental_Fists_E)
-												env.hitPerson(p, a.damage / timeEffect, a.pushback / timeEffect, user.rotation, a.elementNum);
-											if (a instanceof Strike_E)
-											{
-												// apply effect
-												double[] dmgpush = env.trySpecialEffectReturnDamageAndPushback(p, a.elementNum, a.damage, a.pushback, 1); // 1 = certain
-												double damage2 = dmgpush[0];
-												double pushback2 = dmgpush[1];
-												// might apply effect twice in some cases - I don't want to try to solve this, I'm lazy
-												env.hitPerson(p, damage2 / timeEffect, pushback2 / timeEffect, user.rotation, a.elementNum);
-											}
-											if (a instanceof Vampiric_Fists)
-												user.heal(0.2 * a.level * damage);
-										}
+								for (Ability a : user.punchAffectingAbilities)
+								{
+								if (a instanceof Sapping_Fists)
+								if (Math.random() < 0.1 * a.level) // 10% * level
+								p.affect(new Nullified(1, true, a), true);
+								if (a instanceof Elemental_Fists_E)
+								env.hitPerson(p, a.damage / timeEffect, a.pushback / timeEffect, user.rotation, a.elementNum);
+								if (a instanceof Strike_E)
+								{
+								// apply effect
+								double[] dmgpush = env.trySpecialEffectReturnDamageAndPushback(p, a.elementNum, a.damage, a.pushback, 1); // 1 = certain
+								double damage2 = dmgpush[0];
+								double pushback2 = dmgpush[1];
+								// might apply effect twice in some cases - I don't want to try to solve this, I'm lazy
+								env.hitPerson(p, damage2 / timeEffect, pushback2 / timeEffect, user.rotation, a.elementNum);
+								}
+								if (a instanceof Vampiric_Fists)
+								user.heal(0.2 * a.level * damage);
+								}
 
-										user.punchedSomething = true;
-										break collisionCheck;
-									}
+								user.punchedSomething = true;
+								break collisionCheck;
+								}
 				}
 			}
 		}

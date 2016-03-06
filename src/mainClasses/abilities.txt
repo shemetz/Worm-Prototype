@@ -528,7 +528,7 @@ You can telekinetically move force fields.
 You can move force fields.
 Cost: 0.5 M/s while moving a force field?
 
-Bubble (Activated) Needs a rename, because of Protective Bubble
+Bubble Target (Activated)
 defensive force-field cost cooldown range
 Create a spherical force field that surrounds somebody.
 Create a spherical force field around a targeted creature. The FF’s radius is 1 meter, and its width is 0.05 + 0.05*Level meters. The FF’s life is 10*Level. Has Level*2 armor.

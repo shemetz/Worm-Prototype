@@ -1,23 +1,31 @@
 package mainClasses;
 
 import java.awt.Graphics2D;
+import java.awt.Point;
 
 public class ArcForceField extends Drawable
 {
-	public Person	target;
-	public double	arc;
-	public double	minRadius;
-	public double	maxRadius;
-	public double	life;
-	public double	extraLife;				// the extralife is for force fields that are not immediately created with full health, but instead gain the health during the first 1.5 seconds of their creation. Alternatively, for
+	public Person target;
+	public double arc;
+	public double minRadius;
+	public double maxRadius;
+	public double life;
+	public double extraLife; // the extralife is for force fields that are not immediately created with full health, but instead gain the health during the first 1.5 seconds of their creation. Alternatively, for
 	// force fields that are created with full health but slowly lose it every second.
-	public double	maxLife;
-	public int		elementNum;				// 12+ = not an element but a type of forcefield-matter (Protective Bubble, for example)
-	public double	waitingDamage;			// to not spam UITexts
-	public double	timeBetweenDamageTexts;
-	public String	type;//Shield <Element>, Protective Bubble, Bubble, Mobile Force Field?
+	public double maxLife;
+	public int armor;
+	public int elementNum; // 12+ = not an element but a type of forcefield-matter (Protective Bubble, for example)
+	public double waitingDamage; // to not spam UITexts
+	public double timeBetweenDamageTexts;
 
-	public ArcForceField(Person target1, double angle1, double arc1, double minRadius1, double maxRadius1, double life1, int elementNum1, String type1)
+	public static enum Type
+	{
+		IMMOBILE_BUBBLE, MOBILE_BUBBLE, SHIELD, MOBILE_FORCE_FIELD
+	};
+
+	public Type type;
+
+	public ArcForceField(Person target1, double angle1, double arc1, double minRadius1, double maxRadius1, double life1, int elementNum1, Type type1)
 	{
 		maxLife = life1;
 		target = target1;
@@ -31,13 +39,15 @@ public class ArcForceField extends Drawable
 		elementNum = elementNum1;
 		height = 1.5;
 		waitingDamage = 0;
+		armor = 0;
 		timeBetweenDamageTexts = 0;
 		type = type1;
 		if (elementNum < 12) // normal elemental shields
 		{
 			life = 1;
 			extraLife = life1;
-		} else // forcefield bubbles
+		}
+		else // forcefield bubbles
 		{
 			life = maxLife;
 			extraLife = 0;
@@ -61,9 +71,12 @@ public class ArcForceField extends Drawable
 
 		if (life < 1)
 			life = 0;
-		x = target.x;
-		y = target.y;
-		z = target.z;
+		if (type != Type.IMMOBILE_BUBBLE)
+		{
+			x = target.x;
+			y = target.y;
+			z = target.z;
+		}
 	}
 
 	public void updateImage()
@@ -80,7 +93,8 @@ public class ArcForceField extends Drawable
 				frame = 2;
 			else
 				frame = 3;
-		} else // percentage-based
+		}
+		else // percentage-based
 		{
 			if (life >= 0.75 * maxLife)
 				frame = 0;
@@ -100,6 +114,11 @@ public class ArcForceField extends Drawable
 			return EP.damageType(elementNum);
 		else // force field
 			return EP.damageType("Energy");
+	}
+
+	public Point Point()
+	{
+		return new Point((int) x, (int) y);
 	}
 
 	public void drawShadow(Graphics2D buffer, double shadowX, double shadowY)
