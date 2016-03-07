@@ -53,6 +53,7 @@ import abilities.Retrace_I;
 import abilities.Retrace_II;
 import abilities.Retrace_III;
 import abilities.Sapping_Fists;
+import abilities.Self_Bomb;
 import abilities.Sense_Element_E;
 import abilities.Sense_Life;
 import abilities.Sense_Mana_and_Stamina;
@@ -95,7 +96,7 @@ public class Ability
 			"Toughness III", "Sense Life", "Sense Mana and Stamina", "Sense Powers", "Slow Target", "Chronobiology", "Retrace I", "Retrace II", "Retrace III", "Undo I", "Undo II", "Undo III",
 			"Repeat I", "Repeat II", "Repeat III", "Time Freeze Target I", "Nullification Aura I", "Nullification Aura II", "Wild Power", "Clone I", "Clone II", "Clone III", "Twitch",
 			"Sense Structure", "Sense Parahumans", "Steal Power", "Danger Sense", "Sapping Fists", "Pushy Fists", "Explosive Fists", "Vampiric Fists", "Shattering Fists", "Elemental Fists",
-			"Explosion Resistance", "Leg Muscles", "Speedrun", "Charge", "Elastic", "Trail", "Bubble Target");
+			"Explosion Resistance", "Leg Muscles", "Speedrun", "Charge", "Elastic", "Trail", "Bubble Target", "Self-Bomb");
 	protected static List<String> descriptions = new ArrayList<String>();
 	protected static boolean[][] elementalAttacksPossible = new boolean[12][7]; // [element][ability]
 	protected static int[][] elementalAttackNumbers = new int[12][3];
@@ -575,6 +576,9 @@ public class Ability
 		}
 		switch (trimmedAbilityName)
 		{
+		case "Self-Bomb":
+			ab = new Self_Bomb(pnts);
+			break;
 		case "Bubble Target":
 			ab = new Bubble_Target(pnts);
 			break;

@@ -320,7 +320,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		for (int i = 0; i < env.explosions.size(); i++)
 		{
 			Explosion e = env.explosions.get(i);
-			e.update(env,deltaTime);
+			e.update(env, deltaTime);
 			if (e.timeLeft <= 0)
 			{
 				env.explosions.remove(i);
@@ -430,9 +430,16 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			if (p.dead)
 			{
 				// Deactivate all abilities
-				for (Ability a : p.abilities) // TODO make sure this is resistant to ConcurrentModificationException and doesn't bug out when dying with extra ability giving abilities
-					if (a.on)
-						a.use(env, p, null);
+				int numOfAbilities = p.abilities.size();
+				for (int i = 0; i < numOfAbilities; i++)
+				{
+					p.abilities.get(i).disable(env, p);
+					while (numOfAbilities != p.abilities.size())
+					{
+						numOfAbilities--;
+						i--;
+					}
+				}
 				// Remove all effects
 				for (int i = 0; i < p.effects.size(); i++)
 					if (p.effects.get(i).removeOnDeath)
@@ -1078,6 +1085,27 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 
 		switch (player.aimType)
 		{
+		case AIMLESS:
+			// draws triangle around player
+			double triangleRadius = 200;
+
+			buffer.setStroke(new BasicStroke(5));
+			buffer.setColor(Color.black);
+			for (int i = 0; i < 3; i++)
+			{
+				double angle = TAU / 12 + TAU / 3 * i;
+				buffer.drawLine((int) (player.x + triangleRadius * Math.cos(angle)), (int) (player.y + triangleRadius * Math.sin(angle)), (int) (player.x + triangleRadius * Math.cos(angle + TAU / 3)),
+						(int) (player.y + triangleRadius * Math.sin(angle + TAU / 3)));
+			}
+			buffer.setStroke(new BasicStroke(3));
+			buffer.setColor(Color.orange);
+			for (int i = 0; i < 3; i++)
+			{
+				double angle = TAU / 12 + TAU / 3 * i;
+				buffer.drawLine((int) (player.x + triangleRadius * Math.cos(angle)), (int) (player.y + triangleRadius * Math.sin(angle)), (int) (player.x + triangleRadius * Math.cos(angle + TAU / 3)),
+						(int) (player.y + triangleRadius * Math.sin(angle + TAU / 3)));
+			}
+			break;
 		case CLONE:
 			double angle1 = Math.atan2(player.target.y - player.y, player.target.x - player.x);
 			buffer.setStroke(new BasicStroke(2));

@@ -2808,7 +2808,7 @@ public class Environment
 			return;
 		f.life -= (int) (damage - f.armor);
 		if (showDamageNumbers)
-			uitexts.add(new UIText((int) f.x - 10, (int) f.y - 10, "" + (int) damage, 3));
+			uitexts.add(new UIText((int) f.x - 10, (int) f.y - 10, "" + (int) damage, 5));
 		// TODO debris for furniture
 	}
 
@@ -2946,7 +2946,7 @@ public class Environment
 		}
 	}
 
-	public void createExplosion(double x, double y, double z, double radius, double damage, double pushback, int type)
+	public void createExplosion(double x, double y, double z, double radius, double damage, double pushback, int element)
 	{
 		// NOTE!!!!!!!
 		// The damage and pushback of explosions is calculated like this:
@@ -2957,7 +2957,7 @@ public class Environment
 		// type -1 = regular explosion
 		double explosionHeight = radius * 2 / 100;
 		double timeLeft = 0.8;
-		Explosion explosion = new Explosion(x, y, z, timeLeft, type);
+		Explosion explosion = new Explosion(x, y, z, timeLeft, element);
 		explosion.createSubExplosion(this, (int) x, (int) y, 2);
 		playSound("Explosion_" + (int) (1 + Math.random() * 5) + ".wav", new Point((int) x, (int) y));
 		explosions.add(explosion);
@@ -2972,9 +2972,11 @@ public class Environment
 						damage2 = 0;
 					for (Ability a : p.abilities)
 						if (a instanceof Explosion_Resistance && a.on)
-							damage2 = 0;
-					// still apply pushback
-					hitPerson(p, damage2, pushback * (radius - distance) / radius, Math.atan2(p.y - y, p.x - x), type == -1 ? 0 : type);
+							damage2 = 0; // still apply pushback
+					double pushbackDealt = pushback;
+					if ((int) p.x == (int) x && (int) p.y == (int) y) // explosions don't push people in the center
+						pushbackDealt = 0;
+					hitPerson(p, damage2, pushbackDealt * (radius - distance) / radius, Math.atan2(p.y - y, p.x - x), element == -1 ? 0 : element);
 				}
 		for (ForceField ff : FFs)
 			if (ff.z < z + explosionHeight / 2 && ff.z + ff.height > z - explosionHeight / 2)
@@ -2984,7 +2986,17 @@ public class Environment
 					if (Methods.DistancePow2(p.x, p.y, x, y) < radius * radius)
 						withinRange = true;
 				if (withinRange)
-					damageForceField(ff, (damage + pushback) * (radius - Math.sqrt(Methods.DistancePow2(ff.x, ff.y, x, y))), new Point((int) ff.x, (int) ff.y));
+					damageForceField(ff, damage * (radius - Math.sqrt(Methods.DistancePow2(ff.x, ff.y, x, y))) / radius, new Point((int) ff.x, (int) ff.y));
+			}
+		for (Furniture f : furniture)
+			if (f.z < z + explosionHeight / 2 && f.z + f.height > z - explosionHeight / 2)
+			{
+				boolean withinRange = false;
+				for (Point p : f.getPoints())
+					if (Methods.DistancePow2(p.x, p.y, x, y) < radius * radius)
+						withinRange = true;
+				if (withinRange)
+					damageFurniture(f, damage * (radius - Math.sqrt(Methods.DistancePow2(f.x, f.y, x, y))) / radius, element == -1 ? 0 : EP.damageType(element));
 			}
 		for (ArcForceField aff : AFFs)
 			if (aff.z < z + explosionHeight / 2 && aff.z + aff.height > z - explosionHeight / 2)
@@ -3002,8 +3014,7 @@ public class Environment
 				{
 					Point affMiddle = new Point((int) (aff.x + (aff.minRadius + aff.maxRadius) / 2 * Math.cos(aff.rotation)),
 							(int) (aff.y + (aff.minRadius + aff.maxRadius) / 2 * Math.sin(aff.rotation)));
-					damageArcForceField(aff, (damage + pushback) * (radius - Math.sqrt(Methods.DistancePow2(affMiddle.x, affMiddle.y, x, y))) / radius, affMiddle,
-							type == -1 ? 0 : EP.damageType(type));
+					damageArcForceField(aff, damage * (radius - Math.sqrt(Methods.DistancePow2(affMiddle.x, affMiddle.y, x, y))) / radius, affMiddle, element == -1 ? 0 : EP.damageType(element));
 				}
 			}
 		if (z - explosionHeight / 2 < 1)
@@ -3012,9 +3023,8 @@ public class Environment
 					if (gridX > 0 && gridY > 0 && gridX < width && gridY < height) // to avoid checking beyond array size
 						if (wallHealths[gridX][gridY] > 0
 								&& Methods.DistancePow2(x, y, gridX * squareSize + squareSize / 2, gridY * squareSize + squareSize / 2) < Math.pow(radius - squareSize / 2, 2))
-							damageWall(gridX, gridY,
-									(damage + pushback) * (radius - Math.sqrt(Methods.DistancePow2(gridX * squareSize + squareSize / 2, gridY * squareSize + squareSize / 2, x, y))) / radius,
-									type == -1 ? 0 : EP.damageType(type));
+							damageWall(gridX, gridY, damage * (radius - Math.sqrt(Methods.DistancePow2(gridX * squareSize + squareSize / 2, gridY * squareSize + squareSize / 2, x, y))) / radius,
+									element == -1 ? 0 : EP.damageType(element));
 
 	}
 

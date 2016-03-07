@@ -8,7 +8,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import abilities.Elemental_Fists_E;
 import abilities.Elemental_Resistance_E;
+import abilities.Sense_Element_E;
 import mainResourcesPackage.ResourceLoader;
 
 public class Resources
@@ -250,8 +252,9 @@ public class Resources
 			for (int j = 1; j <= 3; j++)
 				specialPunches.get(punchStrings[i]).add(ResourceLoader.getBufferedImage("punches/" + punchStrings[i] + "_" + j + ".png"));
 		}
-		for (int i = 0; i < numOfElements; i++)
+		for (String s : Elemental_Fists_E.applicable)
 		{
+			int i = EP.toInt(s);
 			String str1 = EP.elementList[i] + " Elemental Fists";
 			String str2 = EP.elementList[i] + " Strike";
 			specialPunches.put(str1, new ArrayList<BufferedImage>());
@@ -476,15 +479,21 @@ public class Resources
 				icons.put(name, ability);
 				for (int j = 0; j < numOfElements; j++)
 				{
-					if (name.equals("Elemental Resistance")) // only some apply:
-					{
-						boolean applicable = false;
+					boolean applicable = false;
+					if (name.equals("Sense Elemente"))
+						for (int k = 0; k < Sense_Element_E.applicable.length; k++)
+							if (Sense_Element_E.applicable[k].equals(EP.elementList[j]))
+								applicable = true;
+					if (name.equals("Elemental Resistance"))
 						for (int k = 0; k < Elemental_Resistance_E.applicable.length; k++)
 							if (Elemental_Resistance_E.applicable[k].equals(EP.elementList[j]))
 								applicable = true;
-						if (!applicable)
-							continue;
-					}
+					if (name.equals("Elemental Fists") || name.equals("Strike"))
+						for (int k = 0; k < Elemental_Fists_E.applicable.length; k++)
+							if (Elemental_Fists_E.applicable[k].equals(EP.elementList[j]))
+								applicable = true;
+					if (!applicable)
+						continue;
 					BufferedImage senseImage = new BufferedImage(60, 60, BufferedImage.TYPE_INT_ARGB);
 					Graphics2D buffy = senseImage.createGraphics();
 					buffy.drawImage(ability, 0, 0, null);
