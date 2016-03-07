@@ -243,7 +243,7 @@ public class Resources
 		disabled = ResourceLoader.getBufferedImage("icons/effects/disabled.png");
 
 		String[] punchStrings = new String[]
-		{ "Sapping Fists", "Pushy Fists", "Vampiric Fists", "Exploding Fists", "Shattering Fists" };
+		{ "Sapping Fists", "Pushy Fists", "Vampiric Fists", "Explosive Fists", "Shattering Fists" };
 		for (int i = 0; i < punchStrings.length; i++)
 		{
 			specialPunches.put(punchStrings[i], new ArrayList<BufferedImage>());
@@ -551,14 +551,14 @@ public class Resources
 		stealPowerBeam = ResourceLoader.getBufferedImage("other abilities/steal.png");
 
 		explosions.add(new ArrayList<BufferedImage>());
-		for (int i = 0; i < 8; i++)
-			explosions.get(0).add(ResourceLoader.getBufferedImage("explosions/kexplosion" + "_0_" + i + ".png"));
-		explosions.add(new ArrayList<BufferedImage>());
 		for (int i = 0; i < 6; i++)
-			explosions.get(1).add(ResourceLoader.getBufferedImage("explosions/explosion" + "_0_" + i + ".png"));
+			explosions.get(0).add(ResourceLoader.getBufferedImage("explosions/explosion" + "_0_" + i + ".png"));
 		explosions.add(new ArrayList<BufferedImage>());
-		for (int i = 0; i < 19; i++)
-			explosions.get(2).add(ResourceLoader.getBufferedImage("explosions/kexplosion" + "_1_" + i + ".png"));
+		for (int i = 0; i < 8; i++)
+			explosions.get(1).add(ResourceLoader.getBufferedImage("explosions/explosion" + "_1_" + i + ".png"));
+		explosions.add(new ArrayList<BufferedImage>());
+		for (int i = 0; i < 15; i++)
+			explosions.get(2).add(ResourceLoader.getBufferedImage("explosions/explosion" + "_2_" + i + ".png"));
 
 		// SOUNDS ARE NOT HERE UNLESS THEY CAN'T BE PLAYED MULTIPLE TIMES SIMULTANEOUSLY
 	}

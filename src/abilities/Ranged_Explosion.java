@@ -17,8 +17,10 @@ public class Ranged_Explosion extends Ability
 		costType = CostType.MANA;
 		cooldown = 1;
 		range = 600;
-		rangeType = RangeType.EXACT_RANGE;
-		areaRadius = level * 50;
+		rangeType = RangeType.CIRCLE_AREA;
+		radius = level * 100;
+		damage = level * 3;
+		pushback = level * 8;
 	}
 
 	public void use(Environment env, Person user, Point target)
@@ -26,7 +28,7 @@ public class Ranged_Explosion extends Ability
 		if (user.mana >= cost && !user.maintaining && cooldownLeft == 0 && !user.prone)
 		{
 			// TODO make it not only in the user'z Z but in the one the user tried to do (most likely 0, unless cursor is above another object)
-			env.createExplosion(target.x, target.y, user.z, areaRadius, level * 3, level * 3, -1);
+			env.createExplosion(target.x, target.y, user.z, radius, damage, pushback, -1);
 			user.mana -= cost;
 			cooldownLeft = cooldown;
 		}

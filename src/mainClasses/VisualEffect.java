@@ -92,7 +92,7 @@ public class VisualEffect
 			break;
 		case EXPLOSION: // explosion
 			// explosions don't loop - they just stay invisible
-			if (frame != -1 && frameNum % 4 == 0)
+			if (frame != -1 && frameNum % 3 == 0)
 				frame++;
 			if (frame >= Resources.explosions.get(subtype).size())
 				frame = -1;

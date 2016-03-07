@@ -78,6 +78,7 @@ public class Environment
 	public List<SprayDrop> sprayDrops;
 	public List<Portal> portals;
 	public List<Furniture> furniture;
+	public List<Explosion> explosions;
 
 	Area visibleRememberArea = null;
 
@@ -126,6 +127,7 @@ public class Environment
 		sprayDrops = new ArrayList<SprayDrop>();
 		portals = new ArrayList<Portal>();
 		furniture = new ArrayList<Furniture>();
+		explosions = new ArrayList<Explosion>();
 
 		for (int x = 0; x < width; x++)
 			for (int y = 0; y < height; y++)
@@ -2719,10 +2721,10 @@ public class Environment
 				randomAngle = Math.random() * TAU;
 				randomDistance = distanceModifier * Math.random() * (1 - velocityModifier);
 				// 3 pieces of debris on every side, spread angle is 20*3 degrees (180/9) on every side
-				debris.add(new Debris(b.x + randomDistance * Math.cos(randomAngle), b.y + randomDistance * Math.sin(randomAngle), b.z,
-						angle - 0.5 * Math.PI + k * Math.PI / 9, b.elementNum, b.velocity() * 0.9 * velocityModifier, b.timeEffect));
-				debris.add(new Debris(b.x + randomDistance * Math.cos(randomAngle), b.y + randomDistance * Math.sin(randomAngle), b.z,
-						angle + 0.5 * Math.PI - k * Math.PI / 9, b.elementNum, b.velocity() * 0.9 * velocityModifier, b.timeEffect));
+				debris.add(new Debris(b.x + randomDistance * Math.cos(randomAngle), b.y + randomDistance * Math.sin(randomAngle), b.z, angle - 0.5 * Math.PI + k * Math.PI / 9, b.elementNum,
+						b.velocity() * 0.9 * velocityModifier, b.timeEffect));
+				debris.add(new Debris(b.x + randomDistance * Math.cos(randomAngle), b.y + randomDistance * Math.sin(randomAngle), b.z, angle + 0.5 * Math.PI - k * Math.PI / 9, b.elementNum,
+						b.velocity() * 0.9 * velocityModifier, b.timeEffect));
 			}
 			playSound(EP.elementList[b.elementNum] + " Smash.wav", b.Point());
 			break;
@@ -2732,8 +2734,8 @@ public class Environment
 				randomAngle = Math.random() * TAU;
 				randomDistance = distanceModifier * Math.random() * (1 - velocityModifier);
 				// I'm not sure what I did here with the angles but it looks OK
-				debris.add(new Debris(b.x + randomDistance * Math.cos(randomAngle), b.y + randomDistance * Math.sin(randomAngle), b.z, angle + 4 + i * (4) / 6,
-						b.elementNum, 500 * velocityModifier, b.timeEffect));
+				debris.add(new Debris(b.x + randomDistance * Math.cos(randomAngle), b.y + randomDistance * Math.sin(randomAngle), b.z, angle + 4 + i * (4) / 6, b.elementNum, 500 * velocityModifier,
+						b.timeEffect));
 			}
 			playSound(EP.elementList[b.elementNum] + " Smash.wav", b.Point());
 			break;
@@ -2743,10 +2745,10 @@ public class Environment
 				randomAngle = Math.random() * TAU;
 				randomDistance = distanceModifier * Math.random() * (1 - velocityModifier);
 				// 3 pieces of debris on every side, spread angle is 20*3 degrees (180/9) on every side
-				debris.add(new Debris(b.x + randomDistance * Math.cos(randomAngle), b.y + randomDistance * Math.sin(randomAngle), b.z,
-						angle + 0.5 * Math.PI + i * Math.PI / 9, b.elementNum, b.velocity() * 0.9 * velocityModifier, b.timeEffect));
-				debris.add(new Debris(b.x + randomDistance * Math.cos(randomAngle), b.y + randomDistance * Math.sin(randomAngle), b.z,
-						angle - 0.5 * Math.PI - i * Math.PI / 9, b.elementNum, b.velocity() * 0.9 * velocityModifier, b.timeEffect));
+				debris.add(new Debris(b.x + randomDistance * Math.cos(randomAngle), b.y + randomDistance * Math.sin(randomAngle), b.z, angle + 0.5 * Math.PI + i * Math.PI / 9, b.elementNum,
+						b.velocity() * 0.9 * velocityModifier, b.timeEffect));
+				debris.add(new Debris(b.x + randomDistance * Math.cos(randomAngle), b.y + randomDistance * Math.sin(randomAngle), b.z, angle - 0.5 * Math.PI - i * Math.PI / 9, b.elementNum,
+						b.velocity() * 0.9 * velocityModifier, b.timeEffect));
 			}
 			playSound(EP.elementList[b.elementNum] + " Smash.wav", b.Point());
 			break;
@@ -2756,16 +2758,16 @@ public class Environment
 			{
 				randomAngle = Math.random() * TAU;
 				randomDistance = distanceModifier * Math.random() * (1 - velocityModifier);
-				debris.add(new Debris(b.x + randomDistance * Math.cos(randomAngle), b.y + randomDistance * Math.sin(randomAngle), b.z, angle - 3 * 0.3 + k * 0.3,
-						b.elementNum, 600 * velocityModifier, b.timeEffect));
+				debris.add(new Debris(b.x + randomDistance * Math.cos(randomAngle), b.y + randomDistance * Math.sin(randomAngle), b.z, angle - 3 * 0.3 + k * 0.3, b.elementNum, 600 * velocityModifier,
+						b.timeEffect));
 			}
 			playSound(EP.elementList[b.elementNum] + " Smash.wav", b.Point());
 			break;
 		case "beam hit":
 			randomAngle = Math.random() * TAU;
 			randomDistance = distanceModifier * Math.random() * (1 - velocityModifier);
-			debris.add(new Debris(b.x + randomDistance * Math.cos(randomAngle), b.y + randomDistance * Math.sin(randomAngle), b.z, Math.random() * 2 * Math.PI,
-					b.elementNum, 500 * velocityModifier, b.timeEffect));
+			debris.add(new Debris(b.x + randomDistance * Math.cos(randomAngle), b.y + randomDistance * Math.sin(randomAngle), b.z, Math.random() * 2 * Math.PI, b.elementNum, 500 * velocityModifier,
+					b.timeEffect));
 			break;
 		default:
 			MAIN.errorMessage("I'm sorry, I couldn't find any results for \"debris\". Perhaps you meant \"Deborah Peters\"?");
@@ -2805,6 +2807,8 @@ public class Environment
 		if (damage - f.armor < 1)
 			return;
 		f.life -= (int) (damage - f.armor);
+		if (showDamageNumbers)
+			uitexts.add(new UIText((int) f.x - 10, (int) f.y - 10, "" + (int) damage, 3));
 		// TODO debris for furniture
 	}
 
@@ -2952,22 +2956,12 @@ public class Environment
 
 		// type -1 = regular explosion
 		double explosionHeight = radius * 2 / 100;
+		double timeLeft = 0.8;
+		Explosion explosion = new Explosion(x, y, z, timeLeft, type);
+		explosion.createSubExplosion(this, (int) x, (int) y, 2);
+		playSound("Explosion_" + (int) (1 + Math.random() * 5) + ".wav", new Point((int) x, (int) y));
+		explosions.add(explosion);
 		// Adding the visual effect
-		VisualEffect explosionEffect = new VisualEffect();
-		explosionEffect.p1.x = (int) x;
-		explosionEffect.p1.y = (int) y;
-		explosionEffect.z = z;
-		explosionEffect.type = VisualEffect.Type.EXPLOSION;
-		if (type == -1)
-			explosionEffect.subtype = 2;
-		else
-			explosionEffect.subtype = type; // TODO uh, you know, fix this
-		explosionEffect.angle = Math.random() * 2 * Math.PI;
-		explosionEffect.timeLeft = Resources.explosions.get(explosionEffect.subtype).size() * 0.02 * 4; // deltaTime = 0.02 right?
-		explosionEffect.p2.x = (int) (0.5 * Resources.explosions.get(explosionEffect.subtype).get(0).getWidth());
-		explosionEffect.p2.y = (int) (0.5 * Resources.explosions.get(explosionEffect.subtype).get(0).getHeight());
-		explosionEffect.size = radius * 2;
-		visualEffects.add(explosionEffect);
 		for (Person p : people)
 			if (p.z < z + explosionHeight / 2 && p.highestPoint() > z - explosionHeight / 2)
 				if (Methods.DistancePow2(p.x, p.y, x, y) < radius * radius)

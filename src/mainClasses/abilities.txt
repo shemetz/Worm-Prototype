@@ -162,7 +162,7 @@ passive sub-stat-boost
 You can see the enemy’s weak spots and target them for increased damage.
 Multiply your (1-critical chance) by 0.9^(Level).
 
-Exploding Fists (Passive)
+Explosive Fists (Passive)
 passive explosion extra-abilities
 Each of your punches creates an explosion, to which you are immune.
 You have Explosion Resistance. Melee hits with your punches create an explosion that deals 4*Level damage and 4*Level pushback force to the target and anything in a 1 meter radius from you.

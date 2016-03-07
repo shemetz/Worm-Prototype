@@ -373,7 +373,7 @@ public class Punch extends Ability
 
 			for (Ability a : user.punchAffectingAbilities)
 			{
-				if (a instanceof Exploding_Fists)
+				if (a instanceof Explosive_Fists)
 					env.createExplosion(user.target.x, user.target.y, user.z, a.radius, a.damage, a.pushback, -1);
 				if (a instanceof Strike_E)
 					((Strike_E) a).turnOff();

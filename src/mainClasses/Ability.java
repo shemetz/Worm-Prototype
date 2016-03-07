@@ -25,8 +25,8 @@ import abilities.Elemental_Combat_I_E;
 import abilities.Elemental_Fists_E;
 import abilities.Elemental_Resistance_E;
 import abilities.Elemental_Void;
-import abilities.Exploding_Fists;
 import abilities.Explosion_Resistance;
+import abilities.Explosive_Fists;
 import abilities.Flight_I;
 import abilities.Flight_II;
 import abilities.Force_Shield;
@@ -90,12 +90,12 @@ import mainResourcesPackage.SoundEffect;
 public class Ability
 {
 	final static List<String> implementedAbilities = Arrays.asList("Elemental Combat I", "Beam", "Ball", "Shield", "Pool", "Wall", "Spray", "Sense Element", "Elemental Resistance", "Strike",
-			"Portals", "Elemental Void", "Precision I", "Precision II", "Precision III", "Protective Bubble I", "Protective Bubble II", "Sprint", "Strength I", "Strength II", "Strength III", "Punch", "Heal I", "Heal II",
-			"Force Shield", "Ranged Explosion", "Flight I", "Flight II", "Telekinetic Flight", "Blink", "Ghost Mode I", "Strong Force Field", "Toughness I", "Toughness II", "Toughness III",
-			"Sense Life", "Sense Mana and Stamina", "Sense Powers", "Slow Target", "Chronobiology", "Retrace I", "Retrace II", "Retrace III", "Undo I", "Undo II", "Undo III", "Repeat I", "Repeat II",
-			"Repeat III", "Time Freeze Target I", "Nullification Aura I", "Nullification Aura II", "Wild Power", "Clone I", "Clone II", "Clone III", "Twitch", "Sense Structure", "Sense Parahumans",
-			"Steal Power", "Danger Sense", "Sapping Fists", "Pushy Fists", "Exploding Fists", "Vampiric Fists", "Shattering Fists", "Elemental Fists", "Explosion Resistance", "Leg Muscles",
-			"Speedrun", "Charge", "Elastic", "Trail", "Bubble Target");
+			"Portals", "Elemental Void", "Precision I", "Precision II", "Precision III", "Protective Bubble I", "Protective Bubble II", "Sprint", "Strength I", "Strength II", "Strength III", "Punch",
+			"Heal I", "Heal II", "Force Shield", "Ranged Explosion", "Flight I", "Flight II", "Telekinetic Flight", "Blink", "Ghost Mode I", "Strong Force Field", "Toughness I", "Toughness II",
+			"Toughness III", "Sense Life", "Sense Mana and Stamina", "Sense Powers", "Slow Target", "Chronobiology", "Retrace I", "Retrace II", "Retrace III", "Undo I", "Undo II", "Undo III",
+			"Repeat I", "Repeat II", "Repeat III", "Time Freeze Target I", "Nullification Aura I", "Nullification Aura II", "Wild Power", "Clone I", "Clone II", "Clone III", "Twitch",
+			"Sense Structure", "Sense Parahumans", "Steal Power", "Danger Sense", "Sapping Fists", "Pushy Fists", "Explosive Fists", "Vampiric Fists", "Shattering Fists", "Elemental Fists",
+			"Explosion Resistance", "Leg Muscles", "Speedrun", "Charge", "Elastic", "Trail", "Bubble Target");
 	protected static List<String> descriptions = new ArrayList<String>();
 	protected static boolean[][] elementalAttacksPossible = new boolean[12][7]; // [element][ability]
 	protected static int[][] elementalAttackNumbers = new int[12][3];
@@ -123,7 +123,6 @@ public class Ability
 	protected double cost; // -1 = passive. Is a cost in mana, stamina or charge...depending on the power.
 	protected double costPerSecond; // applies to some abilities. Is a cost in mana, stamina or charge...depending on the power.
 	protected int range; // distance from user in which ability can be used. For some abilities - how far they go before stopping. -1 = not ranged, or only direction-aiming.
-	protected double areaRadius; // radius of area of effect of ability.
 	protected boolean instant; // Instant abilities don't aim, they immediately activate after a single click. Maintained abilities are always instant.
 	public boolean toggleable;
 	protected boolean maintainable; // Maintained abilities are instant, and require you to continue holding the button to use them (they're continuous abilities).
@@ -131,7 +130,7 @@ public class Ability
 	protected CostType costType;
 	public double arc; // used for abilities with an arc - the Spray ability
 	public boolean natural;
-	public double radius;
+	public double radius; // radius of area of effect of ability.
 	public double damage;
 	public double pushback;
 	public double steal;
@@ -209,7 +208,9 @@ public class Ability
 		cost = -1;
 		costPerSecond = -1;
 		range = -1;
-		areaRadius = -1;
+		damage = -1;
+		pushback = -1;
+		radius = -1;
 		instant = false;
 		maintainable = false;
 		stopsMovement = false;
@@ -552,7 +553,7 @@ public class Ability
 		cost = Math.max(0, cost);
 		costPerSecond = Math.max(0, costPerSecond);
 		range = Math.max(0, range);
-		areaRadius = Math.max(0, areaRadius);
+		radius = Math.max(0, radius);
 		arc = Math.max(0, arc);
 	}
 
@@ -592,8 +593,8 @@ public class Ability
 		case "Explosion Resistance":
 			ab = new Explosion_Resistance(pnts);
 			break;
-		case "Exploding Fists":
-			ab = new Exploding_Fists(pnts);
+		case "Explosive Fists":
+			ab = new Explosive_Fists(pnts);
 			break;
 		case "Vampiric Fists":
 			ab = new Vampiric_Fists(pnts);

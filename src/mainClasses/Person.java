@@ -409,7 +409,7 @@ public class Person extends RndPhysObj implements Mover
 		flightVisionDistance = 100 * WITS;
 		accuracy = 1 - 0.6 / ((double) DEXTERITY + 1);
 		updateAccuracy();
-		runningStaminaCost = 0.6;
+		runningStaminaCost = 0.45;
 		sprintingStaminaCost = 1.8;
 		evasion = 1 - Math.pow(0.99431695501, (DEXTERITY * WITS)); // average is EXACTLY 5%!
 		criticalChance = 1 - Math.pow(0.99431695501, (DEXTERITY * WITS)); //

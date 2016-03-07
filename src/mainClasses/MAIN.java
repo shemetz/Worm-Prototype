@@ -316,6 +316,17 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				i--;
 			}
 		}
+		// EXPLOSIONS
+		for (int i = 0; i < env.explosions.size(); i++)
+		{
+			Explosion e = env.explosions.get(i);
+			e.update(env,deltaTime);
+			if (e.timeLeft <= 0)
+			{
+				env.explosions.remove(i);
+				i--;
+			}
+		}
 		// CLOUDS
 		for (Cloud c : env.clouds)
 		{
@@ -1175,15 +1186,15 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			buffer.setStroke(dashedStroke3);
 			buffer.setColor(Color.orange);
 			// explosion "plus"
-			buffer.drawLine(player.target.x - (int) (0.1 * ability.areaRadius), player.target.y, player.target.x + (int) (0.1 * ability.areaRadius), player.target.y);
-			buffer.drawLine(player.target.x, player.target.y - (int) (0.1 * ability.areaRadius), player.target.x, player.target.y + (int) (0.1 * ability.areaRadius));
+			buffer.drawLine(player.target.x - (int) (0.1 * ability.radius), player.target.y, player.target.x + (int) (0.1 * ability.radius), player.target.y);
+			buffer.drawLine(player.target.x, player.target.y - (int) (0.1 * ability.radius), player.target.x, player.target.y + (int) (0.1 * ability.radius));
 			// explosion circles
-			int circleRadius = (int) (ability.areaRadius);
+			int circleRadius = (int) (ability.radius);
 			while (circleRadius >= 4)
 			{
-				buffer.setColor(new Color(255, 192, 0, (int) (64 + 191 * circleRadius / ability.areaRadius)));
-				buffer.drawOval(player.target.x - (int) (ability.areaRadius - circleRadius), player.target.y - (int) (ability.areaRadius - circleRadius), (int) (ability.areaRadius - circleRadius) * 2,
-						(int) (ability.areaRadius - circleRadius) * 2);
+				buffer.setColor(new Color(255, 192, 0, (int) (64 + 191 * circleRadius / ability.radius)));
+				buffer.drawOval(player.target.x - (int) (ability.radius - circleRadius), player.target.y - (int) (ability.radius - circleRadius), (int) (ability.radius - circleRadius) * 2,
+						(int) (ability.radius - circleRadius) * 2);
 				circleRadius /= 2;
 			}
 			break;
