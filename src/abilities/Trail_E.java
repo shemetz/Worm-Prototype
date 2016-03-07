@@ -23,7 +23,7 @@ public class Trail_E extends Ability
 	public Trail_E(String element, int p)
 	{
 		super("Trail <" + element + ">", p);
-		cost = Math.min(0, 0.7 - 0.1 * level);
+		cost = Math.max(0, 0.7 - 0.1 * level);
 		costType = CostType.MANA;
 		cooldown = 0; // once per frame
 		instant = true;
@@ -65,31 +65,35 @@ public class Trail_E extends Ability
 
 	public void maintain(Environment env, Person user, Point target, double deltaTime)
 	{
-		if (user.x + user.radius < lastPlace.x * squareSize || user.y + user.radius < lastPlace.y * squareSize || user.x - user.radius > (lastPlace.x + 1) * squareSize
-				|| user.y - user.radius > (lastPlace.y + 1) * squareSize)
+		if (user.mana >= cost)
 		{
-			switch (type)
+			if (user.x + user.radius < lastPlace.x * squareSize || user.y + user.radius < lastPlace.y * squareSize || user.x - user.radius > (lastPlace.x + 1) * squareSize
+					|| user.y - user.radius > (lastPlace.y + 1) * squareSize)
 			{
-			case POOL:
-				// if user no longer intersects last place
-				env.addPool(lastPlace.x, lastPlace.y, elementNum, true);
-				break;
-			case WALL:
-				// if user no longer intersects last place
-				env.addWall(lastPlace.x, lastPlace.y, elementNum, true);
-				break;
-			case BALL:
-				// if user no longer intersects last place
-				Ball b = new Ball((lastPlace.x + 0.5) * squareSize, (lastPlace.y + 0.5) * squareSize, user.z + 0.9, elementNum, damage, pushback, user.angle() + Math.PI, user);
-				b.xVel *= 0.2;
-				b.yVel *= 0.2;
-				env.balls.add(b);
-				break;
-			default:
-				MAIN.errorMessage("WERTDFGHJNBVCXSWQAZ");
-				break;
+				switch (type)
+				{
+				case POOL:
+					// if user no longer intersects last place
+					env.addPool(lastPlace.x, lastPlace.y, elementNum, true);
+					break;
+				case WALL:
+					// if user no longer intersects last place
+					env.addWall(lastPlace.x, lastPlace.y, elementNum, true);
+					break;
+				case BALL:
+					// if user no longer intersects last place
+					Ball b = new Ball((lastPlace.x + 0.5) * squareSize, (lastPlace.y + 0.5) * squareSize, user.z + 0.9, elementNum, damage, pushback, user.angle() + Math.PI, user);
+					b.xVel *= 0.2;
+					b.yVel *= 0.2;
+					env.balls.add(b);
+					break;
+				default:
+					MAIN.errorMessage("WERTDFGHJNBVCXSWQAZ");
+					break;
+				}
+				lastPlace = new Point((int) (user.x / squareSize), (int) (user.y / squareSize));
+				user.mana -= cost;
 			}
-			lastPlace = new Point((int) (user.x / squareSize), (int) (user.y / squareSize));
 		}
 	}
 

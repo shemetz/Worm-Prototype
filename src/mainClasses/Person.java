@@ -1186,8 +1186,16 @@ public class Person extends RndPhysObj implements Mover
 			}
 			for (Ability a : abilities)
 				if (a.on)
+				{
 					if (a instanceof Elemental_Void)
 						drawColoredShadow(buffer, a.level * 10, Color.gray);
+					if (a instanceof Elastic)
+					if (velocityPow2() >= ((Elastic)a).minimumVelocityPow2)
+						drawColoredShadow(buffer, 10, Color.yellow);
+					if (a instanceof Charge)
+					if (velocityPow2() >= ((Charge)a).minimumVelocityPow2)
+						drawColoredShadow(buffer, 10, Color.yellow);
+				}
 
 			if (timeEffect != 1 && timeEffect != 0)
 			{
@@ -1253,22 +1261,6 @@ public class Person extends RndPhysObj implements Mover
 					buffer.drawImage(flames, (int) (x - 0.5 * imgW), (int) (y - 0.5 * imgH), null);
 				}
 			}
-			for (Ability a : abilities)
-				if (a.on)
-				{
-					if (a instanceof Charge)
-						if (velocityPow2() >= Charge.minimumVelocityPow2)
-						{
-							buffer.setColor(Color.yellow);
-							buffer.fillOval((int) x - 10, (int) y - 10, 20, 20);
-						}
-					if (a instanceof Elastic)
-						if (velocityPow2() >= Elastic.minimumVelocityPow2)
-						{
-							buffer.setColor(Color.yellow);
-							buffer.fillOval((int) x - 10, (int) y - 10, 20, 20);
-						}
-				}
 			buffer.rotate(-rotation + 0.5 * Math.PI, (int) (x), (int) (y));
 			buffer.translate(x, y);
 			buffer.scale(1 / (z * MAIN.heightZoomRatio + 1), 1 / (z * MAIN.heightZoomRatio + 1));

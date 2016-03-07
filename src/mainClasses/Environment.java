@@ -376,8 +376,7 @@ public class Environment
 								if (aff.elementNum == 6 && EP.damageType(b.elementNum) == 4) // electricity and energy balls bounce off of energy
 								{
 									double damage = (b.getDamage() + b.getPushback()) * 0.5; // half damage, because the ball bounces
-									damageArcForceField(aff, damage,
-											new Point((int) (aff.x + aff.maxRadius * Math.cos(angleToBall)), (int) (aff.y + aff.maxRadius * Math.sin(angleToBall))),
+									damageArcForceField(aff, damage, new Point((int) (aff.x + aff.maxRadius * Math.cos(angleToBall)), (int) (aff.y + aff.maxRadius * Math.sin(angleToBall))),
 											EP.damageType(b.elementNum));
 									hitPerson(aff.target, 0, 0.5 * b.getPushback(), b.angle(), b.elementNum); // push, not harm
 									// TODO cool sparks
@@ -419,8 +418,7 @@ public class Environment
 									// TODO damage depends on ball speed maybe?a
 									// TODO water strong against fire, electricity unblockable by some and entirely blockable by others, , bouncing from metal, etc.
 									double damage = b.getDamage() + b.getPushback();
-									damageArcForceField(aff, damage,
-											new Point((int) (aff.x + aff.maxRadius * Math.cos(angleToBall)), (int) (aff.y + aff.maxRadius * Math.sin(angleToBall))),
+									damageArcForceField(aff, damage, new Point((int) (aff.x + aff.maxRadius * Math.cos(angleToBall)), (int) (aff.y + aff.maxRadius * Math.sin(angleToBall))),
 											EP.damageType(b.elementNum));
 									hitPerson(aff.target, 0, 0.5 * b.getPushback(), b.angle(), b.elementNum); // push, nor harm
 
@@ -770,8 +768,7 @@ public class Environment
 						}
 						if (withinAngles)
 						{
-							damageArcForceField(aff, sd.getDamage(),
-									new Point((int) (aff.x + aff.maxRadius * Math.cos(angleToDrop)), (int) (aff.y + aff.maxRadius * Math.sin(angleToDrop))),
+							damageArcForceField(aff, sd.getDamage(), new Point((int) (aff.x + aff.maxRadius * Math.cos(angleToDrop)), (int) (aff.y + aff.maxRadius * Math.sin(angleToDrop))),
 									EP.damageType(sd.elementNum));
 							hitPerson(aff.target, 0, 0.5 * sd.getPushback(), sd.angle(), sd.elementNum);
 
@@ -910,14 +907,16 @@ public class Environment
 			moveQuantumY = 0; // was NaN
 		}
 		Rectangle2D personRect = new Rectangle2D.Double((int) p.x - p.radius, (int) p.y - p.radius, p.radius * 2, p.radius * 2); // for FF collisions
-		Ability charge = null, elastic = null;
+
+		Charge charge = null;
+		Elastic elastic = null;
 		for (Ability a : p.abilities)
 			if (a.on)
 			{
 				if (a instanceof Charge)
-					charge = a;
+					charge = (Charge) a;
 				if (a instanceof Elastic)
-					elastic = a;
+					elastic = (Elastic) a;
 			}
 
 		while (velocityLeft > 0)
@@ -1009,14 +1008,14 @@ public class Environment
 							// THIS IS NOT GOOD CODE, THIS IS BAD CODE, BUT I CAN'T MAKE THIS PHYSICS THING WORK LIKE I WANT IT TO
 							collidedWithACorner = true;
 							// hitting corners just reverses the person's movement
-							if (charge != null && p.velocityPow2() >= Charge.minimumVelocityPow2)
+							if (charge != null && p.velocityPow2() >= charge.minimumVelocityPow2)
 								damageFurniture(f, (charge.damage + charge.pushback) * 4, 0); // blunt damage. deals x4 because Charge deals more to inorganics
 							if (f.life > 0)
 							{
 								p.x -= moveQuantumX;
 								p.y -= moveQuantumY;
 								double bounceEfficiency = 0.6;
-								if (elastic != null && p.velocityPow2() >= Elastic.minimumVelocityPow2)
+								if (elastic != null && p.velocityPow2() >= elastic.minimumVelocityPow2)
 									bounceEfficiency = 1;
 								double velocity = bounceEfficiency * p.velocity();
 								double angleToPerson = Math.atan2(p.y - f.y, p.x - f.x);
@@ -1059,7 +1058,7 @@ public class Environment
 						}
 						if (collided)
 						{
-							if (charge != null && p.velocityPow2() >= Charge.minimumVelocityPow2)
+							if (charge != null && p.velocityPow2() >= charge.minimumVelocityPow2)
 								damageFurniture(f, (charge.damage + charge.pushback) * 4, 0); // blunt damage, x4 because charge deals more to inorganics
 							if (f.life > 0)
 							{
@@ -1113,7 +1112,7 @@ public class Environment
 										double combinedMass = p.mass + p2.mass;
 										double collisionWeightA = 2 * p2.mass / combinedMass;
 										double collisionWeightB = 2 * p.mass / combinedMass;
-										if (charge != null && p.velocityPow2() >= Charge.minimumVelocityPow2)
+										if (charge != null && p.velocityPow2() >= charge.minimumVelocityPow2)
 										{
 											if (p.STRENGTH >= p2.STRENGTH)
 											{
@@ -1122,7 +1121,7 @@ public class Environment
 												p2.slip(true);
 											}
 										}
-										if (elastic != null && p.velocityPow2() >= Elastic.minimumVelocityPow2)
+										if (elastic != null && p.velocityPow2() >= elastic.minimumVelocityPow2)
 										{
 											if (p.STRENGTH >= p2.STRENGTH)
 											{
@@ -1391,16 +1390,17 @@ public class Environment
 		double damageToWall = p.mass * p.velocity() * 0.000005;
 		double damageToPerson = wallHealths[x][y] * p.velocity() * 0.00004;
 
-		Ability charge = null, elastic = null;
+		Charge charge = null;
+		Elastic elastic = null;
 		for (Ability a : p.abilities)
 			if (a.on)
 			{
 				if (a instanceof Charge)
-					charge = a;
+					charge = (Charge) a;
 				if (a instanceof Elastic)
-					elastic = a;
+					elastic = (Elastic) a;
 			}
-		if (charge != null && p.velocityPow2() >= Charge.minimumVelocityPow2)
+		if (charge != null && p.velocityPow2() >= charge.minimumVelocityPow2)
 		{
 			// damage is Charge's damage and pushback, multiplied by how much direct the hit is.
 			double angleToWall = Math.atan2(intersectRect.getCenterY() - p.y, intersectRect.getCenterX() - p.x);
@@ -1409,7 +1409,7 @@ public class Environment
 			damageToWall += (charge.damage + charge.pushback) * directness;
 			damageToWall *= 4; // Charge inherently deals more damage to walls
 		}
-		if (elastic != null && p.velocityPow2() >= Elastic.minimumVelocityPow2)
+		if (elastic != null && p.velocityPow2() >= elastic.minimumVelocityPow2)
 		{
 			damageToPerson = 0;
 			bounceEfficiency = 1;
@@ -1462,7 +1462,7 @@ public class Environment
 			// slow down the person
 			double energyLost = 10000;
 
-			if (charge != null && p.velocityPow2() >= Charge.minimumVelocityPow2)
+			if (charge != null && p.velocityPow2() >= charge.minimumVelocityPow2)
 			{
 				damageToPerson *= 0.20; // 20%
 				energyLost *= 0.20; // 20%
@@ -2635,7 +2635,7 @@ public class Environment
 				{
 					double d = Math.random() * distance;
 					debris.add(new Debris(b.start.x + d * Math.cos(angle) + d / 10 * Math.sin(angle) * (Math.random() * 2 - 1),
-							b.start.y + d * Math.sin(angle) + d / 10 * Math.cos(angle) * (Math.random() * 2 - 1), b.z, Math.random() * Math.PI * 2, b.elementNum, true, 3 * Math.random()));
+							b.start.y + d * Math.sin(angle) + d / 10 * Math.cos(angle) * (Math.random() * 2 - 1), b.z, Math.random() * Math.PI * 2, b.elementNum, 0));
 				}
 				break;
 			default:
@@ -2686,43 +2686,86 @@ public class Environment
 
 	public void ballDebris(Ball b, String type, double angle)
 	{
+		double velocityModifier = 1;
+		switch (b.elementNum)
+		{
+		case 0: // fire
+		case 1: // water
+		case 5: // ice
+		case 7: // acid
+		case 8: // lava
+		case 9: // flesh
+		case 3: // electricity
+			velocityModifier = 0;
+			break;
+		case 2: // wind
+		case 4: // metal
+		case 6: // energy
+		case 10: // earth
+		case 11: // plant
+		default:
+			velocityModifier = 1;
+			break;
+		}
+		double randomAngle = -1;
+		double randomDistance = 0;
+		double distanceModifier = 200;
 		// "angle" is not always necessary
 		switch (type)
 		{
 		case "wall":
 			for (int k = 0; k < 3; k++)
 			{
+				randomAngle = Math.random() * TAU;
+				randomDistance = distanceModifier * Math.random() * (1 - velocityModifier);
 				// 3 pieces of debris on every side, spread angle is 20*3 degrees (180/9) on every side
-				debris.add(new Debris(b.x, b.y, b.z, angle - 0.5 * Math.PI + k * Math.PI / 9, b.elementNum, b.velocity() * 0.9, b.timeEffect));
-				debris.add(new Debris(b.x, b.y, b.z, angle + 0.5 * Math.PI - k * Math.PI / 9, b.elementNum, b.velocity() * 0.9, b.timeEffect));
+				debris.add(new Debris(b.x + randomDistance * Math.cos(randomAngle), b.y + randomDistance * Math.sin(randomAngle), b.z,
+						angle - 0.5 * Math.PI + k * Math.PI / 9, b.elementNum, b.velocity() * 0.9 * velocityModifier, b.timeEffect));
+				debris.add(new Debris(b.x + randomDistance * Math.cos(randomAngle), b.y + randomDistance * Math.sin(randomAngle), b.z,
+						angle + 0.5 * Math.PI - k * Math.PI / 9, b.elementNum, b.velocity() * 0.9 * velocityModifier, b.timeEffect));
 			}
 			playSound(EP.elementList[b.elementNum] + " Smash.wav", b.Point());
 			break;
 		case "shatter":
 			for (int i = 0; i < 7; i++)
 			{
+				randomAngle = Math.random() * TAU;
+				randomDistance = distanceModifier * Math.random() * (1 - velocityModifier);
 				// I'm not sure what I did here with the angles but it looks OK
-				debris.add(new Debris(b.x, b.y, b.z, angle + 4 + i * (4) / 6, b.elementNum, 500, b.timeEffect));
+				debris.add(new Debris(b.x + randomDistance * Math.cos(randomAngle), b.y + randomDistance * Math.sin(randomAngle), b.z, angle + 4 + i * (4) / 6,
+						b.elementNum, 500 * velocityModifier, b.timeEffect));
 			}
 			playSound(EP.elementList[b.elementNum] + " Smash.wav", b.Point());
 			break;
 		case "arc force field":
 			for (int i = 0; i < 3; i++)
 			{
+				randomAngle = Math.random() * TAU;
+				randomDistance = distanceModifier * Math.random() * (1 - velocityModifier);
 				// 3 pieces of debris on every side, spread angle is 20*3 degrees (180/9) on every side
-				debris.add(new Debris(b.x, b.y, b.z, angle + 0.5 * Math.PI + i * Math.PI / 9, b.elementNum, b.velocity() * 0.9, b.timeEffect));
-				debris.add(new Debris(b.x, b.y, b.z, angle - 0.5 * Math.PI - i * Math.PI / 9, b.elementNum, b.velocity() * 0.9, b.timeEffect));
+				debris.add(new Debris(b.x + randomDistance * Math.cos(randomAngle), b.y + randomDistance * Math.sin(randomAngle), b.z,
+						angle + 0.5 * Math.PI + i * Math.PI / 9, b.elementNum, b.velocity() * 0.9 * velocityModifier, b.timeEffect));
+				debris.add(new Debris(b.x + randomDistance * Math.cos(randomAngle), b.y + randomDistance * Math.sin(randomAngle), b.z,
+						angle - 0.5 * Math.PI - i * Math.PI / 9, b.elementNum, b.velocity() * 0.9 * velocityModifier, b.timeEffect));
 			}
 			playSound(EP.elementList[b.elementNum] + " Smash.wav", b.Point());
 			break;
 		case "punch":
 			// effects
 			for (int k = 0; k < 7; k++) // epicness
-				debris.add(new Debris(b.x, b.y, b.z, angle - 3 * 0.3 + k * 0.3, b.elementNum, 600, b.timeEffect));
+			{
+				randomAngle = Math.random() * TAU;
+				randomDistance = distanceModifier * Math.random() * (1 - velocityModifier);
+				debris.add(new Debris(b.x + randomDistance * Math.cos(randomAngle), b.y + randomDistance * Math.sin(randomAngle), b.z, angle - 3 * 0.3 + k * 0.3,
+						b.elementNum, 600 * velocityModifier, b.timeEffect));
+			}
 			playSound(EP.elementList[b.elementNum] + " Smash.wav", b.Point());
 			break;
 		case "beam hit":
-			debris.add(new Debris(b.x, b.y, b.z, Math.random() * 2 * Math.PI, b.elementNum, 500, b.timeEffect));
+			randomAngle = Math.random() * TAU;
+			randomDistance = distanceModifier * Math.random() * (1 - velocityModifier);
+			debris.add(new Debris(b.x + randomDistance * Math.cos(randomAngle), b.y + randomDistance * Math.sin(randomAngle), b.z, Math.random() * 2 * Math.PI,
+					b.elementNum, 500 * velocityModifier, b.timeEffect));
 			break;
 		default:
 			MAIN.errorMessage("I'm sorry, I couldn't find any results for \"debris\". Perhaps you meant \"Deborah Peters\"?");
@@ -2988,17 +3031,14 @@ public class Environment
 		case "shield layer removed":
 			for (int i = 0; i < 3; i++)
 				// 86 is avg of minradius and maxradius
-				debris.add(new Debris((int) (aff.x + 86 * Math.cos(aff.rotation)), (int) (aff.y + 86 * Math.sin(aff.rotation)), aff.z, aff.rotation + 0.5 * Math.PI + 0.3 * i,
-						aff.elementNum, 150));
+				debris.add(new Debris((int) (aff.x + 86 * Math.cos(aff.rotation)), (int) (aff.y + 86 * Math.sin(aff.rotation)), aff.z, aff.rotation + 0.5 * Math.PI + 0.3 * i, aff.elementNum, 150));
 			break;
 		case "deactivate":
 			for (int i = 0; i < 3; i++)
 			{
 				// 86 is avg of minradius and maxradius
-				debris.add(new Debris((int) (aff.x + 86 * Math.cos(aff.rotation)), (int) (aff.y + 86 * Math.sin(aff.rotation)), aff.z, aff.rotation + 0.5 * Math.PI + 0.3 * i,
-						aff.elementNum, 200));
-				debris.add(new Debris((int) (aff.x + 86 * Math.cos(aff.rotation)), (int) (aff.y + 86 * Math.sin(aff.rotation)), aff.z, aff.rotation + 0.5 * Math.PI + 0.3 * i,
-						aff.elementNum, 200));
+				debris.add(new Debris((int) (aff.x + 86 * Math.cos(aff.rotation)), (int) (aff.y + 86 * Math.sin(aff.rotation)), aff.z, aff.rotation + 0.5 * Math.PI + 0.3 * i, aff.elementNum, 200));
+				debris.add(new Debris((int) (aff.x + 86 * Math.cos(aff.rotation)), (int) (aff.y + 86 * Math.sin(aff.rotation)), aff.z, aff.rotation + 0.5 * Math.PI + 0.3 * i, aff.elementNum, 200));
 			}
 			break;
 		case "bubble":
@@ -3024,7 +3064,7 @@ public class Environment
 		case 7: // acid
 		case 8: // lava
 		case 9: // flesh
-			debris.add(new Debris(sd.x, sd.y, sd.z, sd.angle(), sd.elementNum, true, 0.8));
+			debris.add(new Debris(sd.x, sd.y, sd.z, sd.angle(), sd.elementNum, 0));
 			break;
 		case 2: // wind
 		case 3: // electricity
@@ -3047,7 +3087,7 @@ public class Environment
 			{
 				double angle = Math.random() * Math.PI * 2;
 				double distance = Math.random() * 100 + 50;
-				debris.add(new Debris(x + distance * Math.cos(angle), y + distance * Math.sin(angle), 0, angle, n, true, 1));
+				debris.add(new Debris(x + distance * Math.cos(angle), y + distance * Math.sin(angle), 0, angle, n, 0));
 			}
 			break;
 		case "pool heal":

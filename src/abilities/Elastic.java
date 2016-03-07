@@ -8,7 +8,7 @@ import mainClasses.Person;
 public class Elastic extends _PassiveAbility
 {
 
-	public final static double minimumVelocityPow2 = Math.pow(500,2);
+	public double minimumVelocityPow2 = Math.pow(500,2);
 
 	public Elastic(int p)
 	{

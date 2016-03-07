@@ -55,6 +55,7 @@ public class Ball extends RndPhysObj
 			angularVelocity = 20;
 			break;
 		case 3: // electricity
+			radius = 10;
 			break;
 		case 4: // metal
 			radius = 30;

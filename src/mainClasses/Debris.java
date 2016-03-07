@@ -27,34 +27,19 @@ public class Debris extends Drawable
 		elementNum = e1;
 		type = MAIN.random.nextInt(6);
 		velocity = v1;
-		velocity *= MAIN.random.nextDouble() * 1.4 + 0.3;
+		if (velocity == 0)
+		{
+			timeLeft = 3 * Math.random();
+			if (type >= 3)
+				timeLeft /= 2;
+			if (elementNum == 3) // electricity
+				timeLeft /= 6;
+		}
+		else
+			velocity *= MAIN.random.nextDouble() * 1.4 + 0.3;
 		image = Resources.debris[elementNum][type];
 		shadow = Resources.debrisShadows[elementNum][type];
 		radius = image.getWidth() / 2;
-	}
-
-	public Debris(double x1, double y1, double z1, double a1, int e1, boolean unMoving, double timeLeft1)
-	{
-		if (unMoving)
-		{
-			x = x1;
-			y = y1;
-			z = z1; // debris doesn't fall, by the way. I think.
-			angle = a1;
-			rotation = a1; // yes yes
-			elementNum = e1;
-			type = MAIN.random.nextInt(6);
-			if (type >= 3)
-				timeLeft1 /= 2;
-			velocity = 0;
-			image = Resources.debris[elementNum][type];
-			shadow = Resources.debrisShadows[elementNum][type];
-			radius = image.getWidth() / 2;
-
-			timeLeft = timeLeft1;
-		}
-		else
-			MAIN.errorMessage("wtf? @ Debris");
 	}
 
 	public void update(double deltaTime)
