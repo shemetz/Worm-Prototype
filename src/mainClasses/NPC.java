@@ -18,7 +18,7 @@ public class NPC extends Person
 
 	public enum Strategy
 	{
-		AGGRESSIVE, DEFENSIVE, PASSIVE, CLONE
+		AGGRESSIVE, DEFENSIVE, PASSIVE, POSSESSED, CLONE
 	}
 	// AGGRESSIVE = attack enemies if possible, then heal/buff and follow if possible.
 	// DEFENSIVE = push away enemies and block them if possible, run away if possible.
@@ -110,7 +110,7 @@ public class NPC extends Person
 		// ~React to situation~
 
 		// Use all defensive instant abilities if being hit (e.g. Protective Bubble)
-		if (this.timeSinceLastHit == 0)
+		if (this.timeSinceLastHit == 0 && this.strategy != Strategy.POSSESSED)
 			for (int aIndex = 0; aIndex < this.abilities.size(); aIndex++)
 			{
 				Ability a = this.abilities.get(aIndex);
@@ -165,6 +165,9 @@ public class NPC extends Person
 		Tactic prevTactic = this.tactic;
 		tacticSearch: switch (this.strategy)
 		{
+		case POSSESSED:
+			this.tactic = Tactic.NO_TARGET;
+			break;
 		case PASSIVE:
 			// Panic if panicking
 			if (this.panic)
@@ -293,17 +296,18 @@ public class NPC extends Person
 		// Instincts - move away from dangerous objects
 		if (this.timeSinceLastInstinct < 0)
 			this.timeSinceLastInstinct += deltaTime;
-		if (moveAwayFromDangerousObjects(env, !nothingToDo))
-			if (nothingToDo)
-				this.rotate(this.directionOfAttemptedMovement, deltaTime);
-			else if (this.timeSinceLastInstinct >= 0 && this.timeSinceLastInstinct < this.instinctDelayTime)
-			{
-				// for a period of instinctDelayTime after finishing with instincts, keep moving
+		if (this.strategy != Strategy.POSSESSED)
+			if (moveAwayFromDangerousObjects(env, !nothingToDo))
 				if (nothingToDo)
-					this.directionOfAttemptedMovement = this.angleOfLastInstinct;
-				this.strengthOfAttemptedMovement = 1;
-				this.timeSinceLastInstinct += deltaTime;
-			}
+					this.rotate(this.directionOfAttemptedMovement, deltaTime);
+				else if (this.timeSinceLastInstinct >= 0 && this.timeSinceLastInstinct < this.instinctDelayTime)
+				{
+					// for a period of instinctDelayTime after finishing with instincts, keep moving
+					if (nothingToDo)
+						this.directionOfAttemptedMovement = this.angleOfLastInstinct;
+					this.strengthOfAttemptedMovement = 1;
+					this.timeSinceLastInstinct += deltaTime;
+				}
 
 		// Group tactics - stay a bit away from any non-enemy
 		double forceX = this.strengthOfAttemptedMovement * Math.cos(this.directionOfAttemptedMovement), forceY = this.strengthOfAttemptedMovement * Math.sin(this.directionOfAttemptedMovement);

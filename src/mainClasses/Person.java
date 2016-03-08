@@ -105,6 +105,7 @@ public class Person extends RndPhysObj implements Mover
 	public double flySpeed = -1;
 	public double timeSincePortal = 0;
 	public List<Ability> punchAffectingAbilities;
+	boolean isAvatar = false;
 
 	// for continuous inaccuracy stuff like beams
 	public double inaccuracyAngle = 0;
@@ -141,6 +142,10 @@ public class Person extends RndPhysObj implements Mover
 	public int portalToOtherEnvironment = -1;
 	public double portalVariableX = 0;
 	public double portalVariableY = 0;
+	public boolean startStopPossession;
+	public double possessedTimeLeft;
+	public int possessingControllerID;
+	public int possessingVictimID;
 
 	public Person(double x1, double y1)
 	{
@@ -238,6 +243,11 @@ public class Person extends RndPhysObj implements Mover
 		this.directionOfAttemptedMovement = other.directionOfAttemptedMovement;
 		this.strengthOfAttemptedMovement = other.strengthOfAttemptedMovement;
 		this.timeEffect = other.timeEffect;
+		this.timeEffect = other.timeEffect;
+		this.startStopPossession = other.possessing;
+		this.possessedTimeLeft = other.possessedTimeLeft;
+		this.possessingControllerID = other.possessingControllerID;
+		this.possessingVictimID = other.possessingVictimID;
 
 		for (Ability a : this.abilities)
 			if (a.hasTag("on-off"))
@@ -352,6 +362,8 @@ public class Person extends RndPhysObj implements Mover
 			timeSinceLastHit = 0;
 			inCombat = true;
 		}
+		if (life < 0.20 * maxLife && !this.isAvatar) //get out of possession
+			startStopPossession = true;
 	}
 
 	public void initStats()
@@ -1190,11 +1202,11 @@ public class Person extends RndPhysObj implements Mover
 					if (a instanceof Elemental_Void)
 						drawColoredShadow(buffer, a.level * 10, Color.gray);
 					if (a instanceof Elastic)
-					if (velocityPow2() >= ((Elastic)a).minimumVelocityPow2)
-						drawColoredShadow(buffer, 10, Color.yellow);
+						if (velocityPow2() >= ((Elastic) a).minimumVelocityPow2)
+							drawColoredShadow(buffer, 10, Color.yellow);
 					if (a instanceof Charge)
-					if (velocityPow2() >= ((Charge)a).minimumVelocityPow2)
-						drawColoredShadow(buffer, 10, Color.yellow);
+						if (velocityPow2() >= ((Charge) a).minimumVelocityPow2)
+							drawColoredShadow(buffer, 10, Color.yellow);
 				}
 
 			if (timeEffect != 1 && timeEffect != 0)
@@ -1288,6 +1300,8 @@ public class Person extends RndPhysObj implements Mover
 		buffer.setColor(nameColor);
 		buffer.drawString(s, (int) (x - s.length() / 2 * 10) + 1, (int) (y - radius - 28) + 1);
 		buffer.drawString(s, (int) (x - s.length() / 2 * 10) - 1, (int) (y - radius - 28) - 1);
+		buffer.drawString(s, (int) (x - s.length() / 2 * 10) + 1, (int) (y - radius - 28) - 1);
+		buffer.drawString(s, (int) (x - s.length() / 2 * 10) - 1, (int) (y - radius - 28) + 1);
 		buffer.setColor(Color.black);
 		buffer.drawString(s, (int) (x - s.length() / 2 * 10), (int) (y - radius - 28));
 
@@ -1486,6 +1500,11 @@ public class Person extends RndPhysObj implements Mover
 		return lastIDgiven++;
 	}
 
+	public static void cancelID()
+	{
+		lastIDgiven--;
+	}
+
 	public static void resetIDs()
 	{
 		lastIDgiven = 0;
@@ -1547,5 +1566,49 @@ public class Person extends RndPhysObj implements Mover
 		d = Math.min(d, maxLife - life);
 		life += d;
 		uitexts.add(new UIText(0, -60, "" + (int) d, 2));
+	}
+
+	public void copy(Person other)
+	{
+		this.id = other.id;
+		this.setStats(other.STRENGTH, other.DEXTERITY, other.FITNESS, other.WITS, other.KNOWLEDGE, other.SOCIAL);
+		this.abilities = other.abilities;
+		this.x = other.x;
+		this.y = other.y;
+		this.z = other.z;
+		this.rotation = other.rotation;
+		this.xVel = other.xVel;
+		this.yVel = other.yVel;
+		this.zVel = other.zVel;
+		this.animState = other.animState;
+		this.animFrame = other.animFrame;
+		this.life = other.life;
+		this.stamina = other.stamina;
+		this.ghostMode = other.ghostMode;
+		this.panic = other.panic;
+		this.prone = other.prone;
+		this.dead = other.dead;
+		this.slippedTimeLeft = other.slippedTimeLeft;
+		this.directionOfAttemptedMovement = other.directionOfAttemptedMovement;
+		this.strengthOfAttemptedMovement = other.strengthOfAttemptedMovement;
+		this.timeEffect = other.timeEffect;
+		this.timeEffect = other.timeEffect;
+		this.startStopPossession = other.startStopPossession;
+		this.possessedTimeLeft = other.possessedTimeLeft;
+		this.possessingControllerID = other.possessingControllerID;
+		this.possessingVictimID = other.possessingVictimID;
+		this.isAvatar = other.isAvatar;
+		this.effects = other.effects;
+		this.mana = other.mana;
+		this.charge = other.charge;
+		this.name = other.name;
+		this.startStopPossession = false;
+		this.hair = other.hair;
+		this.head = other.head;
+		this.chest = other.chest;
+		this.nakedChest = other.nakedChest;
+		this.legs = other.legs;
+		this.nakedLegs = other.nakedLegs;
+		this.initAnimation();
 	}
 }

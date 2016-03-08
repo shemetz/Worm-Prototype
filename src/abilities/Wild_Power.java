@@ -13,7 +13,6 @@ import mainClasses.VisualEffect;
 
 public class Wild_Power extends Ability
 {
-	public double duration;
 	public double maxDistFromTargetedPoint = 100; // NOTE: USED IN DRAWAIM!
 
 	public Wild_Power(int p)
@@ -160,13 +159,14 @@ public class Wild_Power extends Ability
 							{
 								if (rand == 0) // Melt/Destroy
 								{
-									int element = env.getWallElement(env.wallTypes[x][y]);
-									env.otherDebris(x, y, element, "destroy", 0);
-									if (Ability.elementalAttacksPossible[element][6])
+									int meltElement = env.getWallElement(env.wallTypes[x][y]);
+									int element = env.wallTypes[x][y];
+									env.otherDebris(x, y, meltElement, "destroy", 0);
+									if (Ability.elementalAttacksPossible[meltElement][6])
 									{
-										env.poolTypes[x][y] = element;
+										env.poolTypes[x][y] = meltElement;
 										env.poolHealths[x][y] = 100;
-										env.updatePoolCorners(x, y, element);
+										env.updatePoolCorners(x, y, meltElement);
 									}
 									env.wallTypes[x][y] = -1;
 									env.wallHealths[x][y] = -1;

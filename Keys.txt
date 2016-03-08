@@ -22,6 +22,9 @@ Alt+<Scroll> - rescale UI
 DEV TOOLS
 
 F1 - enable dev-mode vision (See hitboxes, etc.)
+F3 = nothing
+F4 = change how the player rotates when movign through portals
+F5 = show FPS
 K - randomize all peoples' looks and names
 1 - create earth wall
 2 - create ice wall

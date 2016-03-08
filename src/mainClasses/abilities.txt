@@ -953,14 +953,14 @@ It’s easier for you to control people that can control <e>.
 When trying to use a control ability, targets that have at least one <Element> EP always get controlled, are controlled for x1.5 the time, and the mana cost (for Twitch and Mind Twitch) is reduced to 0. Also, gain +0.5*Level to maximum Mana. Needs to include level somehow!
 
 Wall (Activated) <Element>
-defensive build cost
+build cost
 Create <an e> wall.
 Create a human-high square <Element> wall. Walls take 3-Level*0.3 seconds to deploy.
 Ability can also be used to fix damaged <Element> walls.
 Cost: 6-0.5*EP Mana.
 
 Pool (Activated) <Element>
-defensive build cost
+build cost
 Create <an e> pool or pit.
 Create a 1x1 m pool of the element. When creating pools adjacent to existing pools of the same material, the mana cost is greatly decreased.
 Cost: 7-0.5*Level(minimum 1) Mana, or 3-0.5*Level Mana next to another pool.

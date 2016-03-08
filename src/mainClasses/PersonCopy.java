@@ -27,6 +27,10 @@ public class PersonCopy
 	double rotation;
 	double xVel, yVel, zVel;
 	double timeEffect;
+	public boolean possessing;
+	public double possessedTimeLeft;
+	public int possessingControllerID;
+	public int possessingVictimID;
 
 	Map<Ability, Boolean> abilities;
 	List<Effect> effects;
@@ -57,6 +61,10 @@ public class PersonCopy
 		this.yVel = other.yVel;
 		this.zVel = other.zVel;
 		this.timeEffect = other.timeEffect;
+		this.possessing = other.startStopPossession;
+		this.possessedTimeLeft = other.possessedTimeLeft;
+		this.possessingControllerID = other.possessingControllerID;
+		this.possessingVictimID = other.possessingVictimID;
 
 		abilities = new HashMap<Ability, Boolean>();
 
@@ -67,7 +75,7 @@ public class PersonCopy
 		this.effects = new ArrayList<Effect>();
 		for (Effect e : other.effects)
 		{
-			if (e.timeLeft != -1) //DOES NOT COPY PERMANENT EFFECTS
+			if (e.timeLeft != -1) // DOES NOT COPY PERMANENT EFFECTS
 				this.effects.add(e.clone());
 		}
 	}

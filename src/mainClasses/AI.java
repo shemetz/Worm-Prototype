@@ -144,50 +144,53 @@ public class AI
 
 	public void RETREAT(Person targetPerson, double deltaTime)
 	{
-		double distanceToTargetPow2 = Methods.DistancePow2(npc.x, npc.y, targetPerson.x, targetPerson.y);
-		double angleToTarget = Math.atan2(targetPerson.y - npc.y, targetPerson.x - npc.x);
-		angleToTarget += Math.PI; // because you know, away from danger
-		npc.timeSinceLastDistCheck += deltaTime;
-		// Back away from any enemy nearby when low on health
-		if (npc.timeSinceLastDistCheck >= 1) // once per second.
+		double angleToTarget = -1;
+		if (targetPerson != null)
 		{
-			Point targetPoint = null;
-			List<WayPoint> path = null;
-			int attempts = 0;
-			double[] angleAttempts =
-			{ 0.0, 0.3, -0.3, 0.6, -0.6 };
-			// test multiple angles ahead
-			while (path == null && attempts < angleAttempts.length)
+			double distanceToTargetPow2 = Methods.DistancePow2(npc.x, npc.y, targetPerson.x, targetPerson.y);
+			angleToTarget = Math.atan2(targetPerson.y - npc.y, targetPerson.x - npc.x);
+			angleToTarget += Math.PI; // because you know, away from danger
+			npc.timeSinceLastDistCheck += deltaTime;
+			// Back away from any enemy nearby when low on health
+			if (npc.timeSinceLastDistCheck >= 1) // once per second.
 			{
-				double angle = angleToTarget + angleAttempts[attempts];
-				// test multiple distances
-				for (int i = 1000; i >= 300 && path == null; i--) // 1000 to 300
+				Point targetPoint = null;
+				List<WayPoint> path = null;
+				int attempts = 0;
+				double[] angleAttempts =
+				{ 0.0, 0.3, -0.3, 0.6, -0.6 };
+				// test multiple angles ahead
+				while (path == null && attempts < angleAttempts.length)
 				{
-					targetPoint = new Point((int) (targetPerson.x + i * Math.cos(angle)), (int) (targetPerson.y + i * Math.sin(angle)));
-					path = npc.pathFind(targetPoint);
+					double angle = angleToTarget + angleAttempts[attempts];
+					// test multiple distances
+					for (int i = 1000; i >= 300 && path == null; i--) // 1000 to 300
+					{
+						targetPoint = new Point((int) (targetPerson.x + i * Math.cos(angle)), (int) (targetPerson.y + i * Math.sin(angle)));
+						path = npc.pathFind(targetPoint);
+					}
+					attempts++;
 				}
-				attempts++;
+				if (path == null) // srsly?
+					path = new ArrayList<WayPoint>(); // empty path
+				npc.path = path;
+
+				npc.lastDistPow2 = distanceToTargetPow2;
+				npc.timeSinceLastDistCheck -= 1;
 			}
-			if (path == null) // srsly?
-				path = new ArrayList<WayPoint>(); // empty path
-			npc.path = path;
+			// move according to pathfinding
+			npc.updatePath(env);
+			if (npc.path != null && !npc.path.isEmpty())
+			{
+				angleToTarget = Math.atan2(npc.path.get(0).y - npc.y, npc.path.get(0).x - npc.x);
+				npc.target = new Point(npc.path.get(0).x, npc.path.get(0).y);
+			}
 
-			npc.lastDistPow2 = distanceToTargetPow2;
-			npc.timeSinceLastDistCheck -= 1;
+			// move to the point
+			npc.rotate(angleToTarget, deltaTime);
+			npc.directionOfAttemptedMovement = angleToTarget;
+			npc.strengthOfAttemptedMovement = 1;
 		}
-
-		// move according to pathfinding
-		npc.updatePath(env);
-		if (npc.path != null && !npc.path.isEmpty())
-		{
-			angleToTarget = Math.atan2(npc.path.get(0).y - npc.y, npc.path.get(0).x - npc.x);
-			npc.target = new Point(npc.path.get(0).x, npc.path.get(0).y);
-		}
-
-		// move to the point
-		npc.rotate(angleToTarget, deltaTime);
-		npc.directionOfAttemptedMovement = angleToTarget;
-		npc.strengthOfAttemptedMovement = 1;
 
 		for (Ability a : npc.abilities)
 			// use heal if possible

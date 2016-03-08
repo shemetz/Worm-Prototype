@@ -105,7 +105,6 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 	DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
 	static Random random = new Random();
 	Point[] niceHotKeys;
-	int hotkeysLook = 0;
 
 	// CAMERA AND MOUSE STUFF
 	PointerInfo pin; // Don't use this
@@ -172,6 +171,61 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 	// METHODS
 	void frame()
 	{
+		// Possessions:
+		if (player.startStopPossession)
+		{
+			player.startStopPossession = false;
+			boolean unpossessing = player.oldBody != null;
+			Person victim = null;
+			check: for (int i = 0; i < env.people.size(); i++)
+				if (env.people.get(i).id == player.possessingVictimID)
+				{
+					victim = env.people.get(i);
+					break check;
+				}
+			Player newPlayer = new Player(victim.x, victim.y);
+			Person.cancelID();
+			newPlayer.copy(victim);
+
+			newPlayer.visibleRememberArea = player.visibleRememberArea;
+			newPlayer.defaultHotkeys();
+
+			for (int i = 0; i < env.people.size(); i++)
+				if (env.people.get(i).id == victim.id || env.people.get(i).id == player.id)
+				{
+					env.people.remove(i);
+					i--;
+				}
+			env.people.add(newPlayer);
+
+			NPC notTrulyPlayer = new NPC(player.x, player.y, unpossessing ? NPC.Strategy.AGGRESSIVE : NPC.Strategy.POSSESSED);
+			Person.cancelID();
+			notTrulyPlayer.copy(player);
+			notTrulyPlayer.strengthOfAttemptedMovement = 0;
+			notTrulyPlayer.switchAnimation(0);
+
+			env.people.add(notTrulyPlayer);
+
+			if (unpossessing)
+			{
+				newPlayer.hotkeys = new int[10];
+				for (int i = 0; i < 10; i++)
+					newPlayer.hotkeys[i] = player.oldHotkeys[i];
+				newPlayer.oldBody = null;
+				newPlayer.oldHotkeys = null;
+			}
+			else
+			{
+				newPlayer.oldBody = notTrulyPlayer;
+				newPlayer.oldHotkeys = new int[10];
+				for (int i = 0; i < 10; i++)
+					newPlayer.oldHotkeys[i] = player.hotkeys[i];
+			}
+
+			player = newPlayer;
+			updateNiceHotkeys();
+		}
+		// TODO move this!!!
 		/////////////
 		Environment newEnv = env;
 		if (player.portalToOtherEnvironment == -1)
@@ -353,8 +407,6 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				i--;
 			}
 		}
-		if (!player.dead)
-			checkPlayerMovementKeys();
 		// VINES
 		for (int i = 0; i < env.vines.size(); i++)
 		{
@@ -395,12 +447,10 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			}
 		} // BUG - Reflecting a beam will cause increased pushback due to something related to the order of stuff in a frame. Maybe friction?
 			// targeting
-		updatePlayerTargeting();
-		// PEOPLE
+			// PEOPLE
 		peopleLoop: for (int k = 0; k < env.people.size(); k++)
 		{
 			Person p = env.people.get(k);
-			double floorFriction = applyGravityAndFrictionAndReturnFriction(p, deltaTime);
 			for (Ability a : p.abilities) // TODO make sure this is resistant to ConcurrentModificationException and doesn't bug out when dying with extra ability giving abilities
 			{
 				if (a.prepareToDisable)
@@ -427,6 +477,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 					continue peopleLoop;
 				}
 			}
+			double floorFriction = applyGravityAndFrictionAndReturnFriction(p, deltaTime);
 			if (p.dead)
 			{
 				// Deactivate all abilities
@@ -456,8 +507,13 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				if (p instanceof NPC)
 				{
 					NPC npc = (NPC) p;
-					if (!p.twitching)
+					if (!p.twitching && p.possessedTimeLeft == 0)
 						npc.frameAIupdate(deltaTime, env, this);
+				}
+				else if (p instanceof Player)
+				{
+					checkPlayerMovementKeys();
+					updatePlayerTargeting();
 				}
 
 				// maintaining person abilities
@@ -711,26 +767,27 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			if (aff.arc >= 2 * Math.PI)
 				for (int x = (int) ((aff.x - aff.maxRadius) / squareSize); x < (int) ((aff.x + aff.maxRadius) / squareSize) + 1; x++)
 					for (int y = (int) ((aff.y - aff.maxRadius) / squareSize); y < (int) ((aff.y + aff.maxRadius) / squareSize) + 1; y++)
-						if (env.wallTypes[x][y] != -1)
-							for (int x2 = x; x2 < x + 2; x2++)
-								for (int y2 = y; y2 < y + 2; y2++)
-								{
-									double distanceToWallPow2 = Math.pow(squareSize * (y2) - aff.y, 2) + Math.pow(squareSize * (x2) - aff.x, 2);
-									if (distanceToWallPow2 < aff.maxRadius * aff.maxRadius)
+						if (x >= 0 && y >= 0 && x < env.width && y < env.height)
+							if (env.wallTypes[x][y] != -1)
+								for (int x2 = x; x2 < x + 2; x2++)
+									for (int y2 = y; y2 < y + 2; y2++)
 									{
-										double angleToWall = Math.atan2(squareSize * (y2) - aff.y, squareSize * (x2) - aff.x);
-										double pushStrength = 10000;
-										double xMax = 10.03 * pushStrength * Math.cos(angleToWall);
-										double yMax = 10.03 * pushStrength * Math.sin(angleToWall);
-										Person p = aff.target;
-										if ((xMax > 0 && p.xVel < xMax) || (xMax < 0 && p.xVel > xMax))
-											p.xVel -= deltaTime * pushStrength * Math.cos(angleToWall);
-										if ((yMax > 0 && p.yVel < yMax) || (yMax < 0 && p.yVel > yMax))
-											p.yVel -= deltaTime * pushStrength * Math.sin(angleToWall);
-										if (p instanceof NPC)
-											((NPC) p).justCollided = true;
+										double distanceToWallPow2 = Math.pow(squareSize * (y2) - aff.y, 2) + Math.pow(squareSize * (x2) - aff.x, 2);
+										if (distanceToWallPow2 < aff.maxRadius * aff.maxRadius)
+										{
+											double angleToWall = Math.atan2(squareSize * (y2) - aff.y, squareSize * (x2) - aff.x);
+											double pushStrength = 10000;
+											double xMax = 10.03 * pushStrength * Math.cos(angleToWall);
+											double yMax = 10.03 * pushStrength * Math.sin(angleToWall);
+											Person p = aff.target;
+											if ((xMax > 0 && p.xVel < xMax) || (xMax < 0 && p.xVel > xMax))
+												p.xVel -= deltaTime * pushStrength * Math.cos(angleToWall);
+											if ((yMax > 0 && p.yVel < yMax) || (yMax < 0 && p.yVel > yMax))
+												p.yVel -= deltaTime * pushStrength * Math.sin(angleToWall);
+											if (p instanceof NPC)
+												((NPC) p).justCollided = true;
+										}
 									}
-								}
 			Person p = null;
 			for (Person p2 : env.people)
 				if (p2.equals(aff.target))
@@ -2287,7 +2344,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 	{
 		buffer.setFont(new Font("Sans-Serif", Font.BOLD, (int) (12 * UIzoomLevel)));
 		frc = buffer.getFontRenderContext();
-		for (int i = 0; i < player.hotkeys.length; i++)
+		for (int i = 0; i < niceHotKeys.length; i++)
 			if (niceHotKeys[i] != null)
 			{
 				int x = niceHotKeys[i].x;
@@ -2524,6 +2581,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 
 	void checkPlayerMovementKeys()
 	{
+		Person probablyPlayer = player;
 		double horiAccel = 0, vertAccel = 0;
 		if (player.upPressed)
 			vertAccel--;
@@ -2548,46 +2606,46 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		}
 		if (horiAccel == 0 && vertAccel == 0)
 		{
-			player.strengthOfAttemptedMovement = 0;
-			player.flyDirection = 0;
+			probablyPlayer.strengthOfAttemptedMovement = 0;
+			probablyPlayer.flyDirection = 0;
 			player.portalMovementRotation = 0; // If you stop, portal sickness cancels
-			if (player.leftMousePressed && !player.maintaining && !player.dead)
-				if (player.abilityTryingToRepetitivelyUse == -1 || !(player.abilities.get(player.abilityTryingToRepetitivelyUse) instanceof Punch)
-						|| player.abilities.get(player.abilityTryingToRepetitivelyUse).cooldownLeft <= 0)
+			if (player.leftMousePressed && !probablyPlayer.maintaining && !probablyPlayer.dead)
+				if (probablyPlayer.abilityTryingToRepetitivelyUse == -1 || !(probablyPlayer.abilities.get(probablyPlayer.abilityTryingToRepetitivelyUse) instanceof Punch)
+						|| probablyPlayer.abilities.get(probablyPlayer.abilityTryingToRepetitivelyUse).cooldownLeft <= 0)
 				{
 					// rotate to where mouse point is
-					double angle = Math.atan2(my - player.y, mx - player.x);
-					player.rotate(angle, globalDeltaTime);
+					double angle = Math.atan2(my - probablyPlayer.y, mx - probablyPlayer.x);
+					probablyPlayer.rotate(angle, globalDeltaTime);
 				}
 		}
 		else
 		{
-			player.strengthOfAttemptedMovement = 1;
+			probablyPlayer.strengthOfAttemptedMovement = 1;
 			if (portalCameraRotation)
-				player.directionOfAttemptedMovement = Math.atan2(vertAccel, horiAccel) + cameraRotation;
+				probablyPlayer.directionOfAttemptedMovement = Math.atan2(vertAccel, horiAccel) + cameraRotation;
 			else
-				player.directionOfAttemptedMovement = Math.atan2(vertAccel, horiAccel) + cameraRotation + player.portalMovementRotation;
+				probablyPlayer.directionOfAttemptedMovement = Math.atan2(vertAccel, horiAccel) + cameraRotation + player.portalMovementRotation;
 
 			// Reduce effect of portal axis change. Commented out because "keep moving until you release keys" feels better.
 			// if (player.movementAxisRotation > 0)
 			// player.movementAxisRotation += (((((0 - player.movementAxisRotation) % (Math.PI * 2)) + (Math.PI * 3)) % (Math.PI * 2)) - Math.PI) * 3 * 0.02 * (0.5 - player.timeSincePortal);
 
 			if (player.spacePressed && !player.ctrlPressed)
-				player.flyDirection = 1;
+				probablyPlayer.flyDirection = 1;
 			else if (!player.spacePressed && player.ctrlPressed)
-				player.flyDirection = -1;
+				probablyPlayer.flyDirection = -1;
 			else
 				player.flyDirection = 0;
 
-			if (player.abilityTryingToRepetitivelyUse == -1 || !player.abilities.get(player.abilityTryingToRepetitivelyUse).justName().equals("Punch")) // if not punching
+			if (probablyPlayer.abilityTryingToRepetitivelyUse == -1 || !probablyPlayer.abilities.get(probablyPlayer.abilityTryingToRepetitivelyUse).justName().equals("Punch")) // if not punching
 			{
-				if (!player.notAnimating)
-					player.rotate(player.directionOfAttemptedMovement, globalDeltaTime);
+				if (!probablyPlayer.notAnimating)
+					probablyPlayer.rotate(probablyPlayer.directionOfAttemptedMovement, globalDeltaTime);
 			}
-			else if (player.flySpeed != -1 && player.strengthOfAttemptedMovement != 0)
+			else if (probablyPlayer.flySpeed != -1 && probablyPlayer.strengthOfAttemptedMovement != 0)
 			{
 				// rotation of fly-punchers
-				player.rotate(player.directionOfAttemptedMovement, globalDeltaTime * 1); // this 1 used to be 0.3
+				probablyPlayer.rotate(probablyPlayer.directionOfAttemptedMovement, globalDeltaTime * 1); // this 1 used to be 0.3
 			}
 		}
 	}
@@ -3250,9 +3308,6 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			env.showDamageNumbers = !env.showDamageNumbers;
 			break;
 		case KeyEvent.VK_F3:
-			hotkeysLook++;
-			if (hotkeysLook >= 3)
-				hotkeysLook = 0;
 			updateNiceHotkeys();
 			break;
 		case KeyEvent.VK_F4:
@@ -3717,7 +3772,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		for (int i = 0; i < player.hotkeys.length; i++)
 		{
 			// hotkey bar
-			if (player.hotkeys[i] != -1)
+			if (player.hotkeys[i] != -1 && niceHotKeys[i] != null) // the null check is sadly needed
 			{
 				if (screenmx > niceHotKeys[i].x && screenmy > niceHotKeys[i].y && screenmx < niceHotKeys[i].x + 60 && screenmy < niceHotKeys[i].y + 60)
 				{
@@ -3787,81 +3842,22 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 
 	void updateNiceHotkeys()
 	{
-		switch (hotkeysLook)
-		{
+		if (player == null) // what
+			return;
 
-		case 0:
-			if (player != null)
+		int numOfActiveHotkeys = 0;
+		for (int i = 0; i < player.hotkeys.length; i++)
+			if (player.hotkeys[i] != -1)
+				numOfActiveHotkeys++;
+		int k = 0;
+		for (int i = 0; i < niceHotKeys.length; i++)
+			if (player.hotkeys[i] != -1)
 			{
-				int numOfActiveHotkeys = 0;
-				for (int i = 0; i < player.hotkeys.length; i++)
-					if (player.hotkeys[i] != -1)
-						numOfActiveHotkeys++;
-				int k = 0;
-				for (int i = 0; i < niceHotKeys.length; i++)
-				{
-					niceHotKeys[i] = new Point();
-					niceHotKeys[i].x = (int) (frameWidth / 2 - numOfActiveHotkeys * 40 * UIzoomLevel + k * 80 * UIzoomLevel);
-					niceHotKeys[i].y = (int) (frameHeight - 100 * UIzoomLevel);
-					k++;
-				}
+				k++;
+				niceHotKeys[i] = new Point();
+				niceHotKeys[i].x = (int) (frameWidth / 2 - numOfActiveHotkeys * 40 * UIzoomLevel + k * 80 * UIzoomLevel);
+				niceHotKeys[i].y = (int) (frameHeight - 100 * UIzoomLevel);
 			}
-			break;
-
-		case 1:
-			for (int i = 0; i < niceHotKeys.length; i++)
-				niceHotKeys[i] = new Point((int) (frameWidth / 2 - 40 * UIzoomLevel), (int) (frameHeight - 180 * UIzoomLevel));
-			niceHotKeys[0].x += 200 * UIzoomLevel;
-			niceHotKeys[0].y += 80 * UIzoomLevel;
-			niceHotKeys[1].x -= 200 * UIzoomLevel;
-			niceHotKeys[1].y += 80 * UIzoomLevel;
-
-			niceHotKeys[2].x -= 80 * UIzoomLevel;
-			niceHotKeys[2].y -= 80 * UIzoomLevel;
-			niceHotKeys[3].x -= 0 * UIzoomLevel;
-			niceHotKeys[3].y -= 80 * UIzoomLevel;
-			niceHotKeys[4].x += 80 * UIzoomLevel;
-			niceHotKeys[4].y -= 80 * UIzoomLevel;
-			niceHotKeys[5].x += 80 * UIzoomLevel;
-			niceHotKeys[5].y -= 0 * UIzoomLevel;
-			niceHotKeys[6].x += 80 * UIzoomLevel;
-			niceHotKeys[6].y += 80 * UIzoomLevel;
-			niceHotKeys[7].x += 0 * UIzoomLevel;
-			niceHotKeys[7].y += 80 * UIzoomLevel;
-			niceHotKeys[8].x -= 80 * UIzoomLevel;
-			niceHotKeys[8].y += 80 * UIzoomLevel;
-			niceHotKeys[9].x -= 80 * UIzoomLevel;
-			niceHotKeys[9].y += 0 * UIzoomLevel;
-			break;
-		case 2:
-			for (int i = 0; i < niceHotKeys.length; i++)
-				niceHotKeys[i] = new Point((int) (frameWidth / 2 - 35 * UIzoomLevel), (int) (frameHeight - 180 * UIzoomLevel));
-
-			niceHotKeys[1].x -= 240 * UIzoomLevel;
-			niceHotKeys[1].y += 40 * UIzoomLevel;
-			niceHotKeys[2].x -= 160 * UIzoomLevel;
-			niceHotKeys[2].y += 0 * UIzoomLevel;
-			niceHotKeys[3].x -= 80 * UIzoomLevel;
-			niceHotKeys[3].y += 0 * UIzoomLevel;
-			niceHotKeys[4].x -= 0 * UIzoomLevel;
-			niceHotKeys[4].y += 0 * UIzoomLevel;
-			niceHotKeys[5].x += 80 * UIzoomLevel;
-			niceHotKeys[5].y += 0 * UIzoomLevel;
-			niceHotKeys[9].x -= 130 * UIzoomLevel;
-			niceHotKeys[9].y += 80 * UIzoomLevel;
-			niceHotKeys[8].x -= 50 * UIzoomLevel;
-			niceHotKeys[8].y += 80 * UIzoomLevel;
-			niceHotKeys[7].x += 30 * UIzoomLevel;
-			niceHotKeys[7].y += 80 * UIzoomLevel;
-			niceHotKeys[6].x += 110 * UIzoomLevel;
-			niceHotKeys[6].y += 80 * UIzoomLevel;
-			niceHotKeys[0].x += 190 * UIzoomLevel;
-			niceHotKeys[0].y += 40 * UIzoomLevel;
-			break;
-		default:
-			errorMessage("Something is clearly wrong here, don't you think?");
-			break;
-		}
 	}
 
 	void updateFrame()

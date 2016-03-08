@@ -38,6 +38,7 @@ import abilities.Nullification_Aura_I;
 import abilities.Nullification_Aura_II;
 import abilities.Pool_E;
 import abilities.Portals;
+import abilities.Possess;
 import abilities.Precision_I;
 import abilities.Precision_II;
 import abilities.Precision_III;
@@ -96,7 +97,7 @@ public class Ability
 			"Toughness III", "Sense Life", "Sense Mana and Stamina", "Sense Powers", "Slow Target", "Chronobiology", "Retrace I", "Retrace II", "Retrace III", "Undo I", "Undo II", "Undo III",
 			"Repeat I", "Repeat II", "Repeat III", "Time Freeze Target I", "Nullification Aura I", "Nullification Aura II", "Wild Power", "Clone I", "Clone II", "Clone III", "Twitch",
 			"Sense Structure", "Sense Parahumans", "Steal Power", "Danger Sense", "Sapping Fists", "Pushy Fists", "Explosive Fists", "Vampiric Fists", "Shattering Fists", "Elemental Fists",
-			"Explosion Resistance", "Leg Muscles", "Speedrun", "Charge", "Elastic", "Trail", "Bubble Target", "Self-Bomb");
+			"Explosion Resistance", "Leg Muscles", "Speedrun", "Charge", "Elastic", "Trail", "Bubble Target", "Self-Bomb", "Possess");
 	protected static List<String> descriptions = new ArrayList<String>();
 	protected static boolean[][] elementalAttacksPossible = new boolean[12][7]; // [element][ability]
 	protected static int[][] elementalAttackNumbers = new int[12][3];
@@ -135,6 +136,7 @@ public class Ability
 	public double damage;
 	public double pushback;
 	public double steal;
+	public double duration;
 
 	// changing variables of the ability
 	protected double timeLeft; // how much time the ability has been on.
@@ -576,6 +578,9 @@ public class Ability
 		}
 		switch (trimmedAbilityName)
 		{
+		case "Possess":
+			ab = new Possess(pnts);
+			break;
 		case "Self-Bomb":
 			ab = new Self_Bomb(pnts);
 			break;

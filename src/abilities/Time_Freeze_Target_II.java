@@ -11,7 +11,6 @@ import mainClasses.Player;
 
 public class Time_Freeze_Target_II extends Ability
 {
-	public double duration;
 	public double maxDistFromTargetedPoint = 100; // NOTE: USED IN DRAWAIM!
 
 	public Time_Freeze_Target_II(int p)
