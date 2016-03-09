@@ -303,8 +303,6 @@ public class NPC extends Person
 				else if (this.timeSinceLastInstinct >= 0 && this.timeSinceLastInstinct < this.instinctDelayTime)
 				{
 					// for a period of instinctDelayTime after finishing with instincts, keep moving
-					if (nothingToDo)
-						this.directionOfAttemptedMovement = this.angleOfLastInstinct;
 					this.strengthOfAttemptedMovement = 1;
 					this.timeSinceLastInstinct += deltaTime;
 				}

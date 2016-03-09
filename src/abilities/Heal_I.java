@@ -38,7 +38,7 @@ public class Heal_I extends _ApplyEffect
 	{
 		if (!defaultViableTarget(p, user))
 			return false;
-		if (p.life / p.maxLife == 1)
+		if (p.life == p.maxLife)
 			return false;
 		if (p.commanderID != user.commanderID)
 			return false;

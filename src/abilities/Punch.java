@@ -280,7 +280,7 @@ public class Punch extends Ability
 									}
 					}
 					for (ArcForceField aff : env.AFFs)
-						if (!user.ghostMode || aff.type.equals("bubble"))
+						if (!user.ghostMode || aff.type == ArcForceField.Type.MOBILE_BUBBLE || aff.type == ArcForceField.Type.IMMOBILE_BUBBLE)
 						{
 							if (aff.target.equals(user) && aff.type != ArcForceField.Type.IMMOBILE_BUBBLE)
 								continue;

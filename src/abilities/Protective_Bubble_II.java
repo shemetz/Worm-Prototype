@@ -52,7 +52,7 @@ public class Protective_Bubble_II extends Ability
 
 			// Remove any current protective bubble
 			for (int i = 0; i < env.AFFs.size(); i++)
-				if (env.AFFs.get(i).target.equals(user) && env.AFFs.get(i).type.equals("Protective Bubble"))
+				if (env.AFFs.get(i).target.equals(user) && env.AFFs.get(i).type == ArcForceField.Type.MOBILE_BUBBLE)
 				{
 					env.shieldDebris(env.AFFs.get(i), "bubble");
 					env.AFFs.remove(i);

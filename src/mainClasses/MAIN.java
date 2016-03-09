@@ -1187,7 +1187,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			}
 			else if (target1 instanceof Ball)
 			{
-				Point targetBall = ((Person) target1).Point();
+				Point targetBall = ((Ball) target1).Point();
 				buffer.setStroke(new BasicStroke(3));
 				buffer.setColor(Color.blue);
 				int haloRadius = 40;
@@ -1824,6 +1824,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			bounds = new Rectangle((int) (camera.x - halfBoundsDiagonal), (int) (camera.y - halfBoundsDiagonal), (int) (halfBoundsDiagonal * 2), (int) (halfBoundsDiagonal * 2));
 		}
 
+		double viewRangeDistance = Math.max(player.flightVisionDistance * player.z, 1350);
 		List<Environment> drawnEnvironments = new ArrayList<Environment>();
 		if (env.parent != null)
 			drawnEnvironments.add(env.parent);
@@ -1833,7 +1834,17 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			for (int i = 0; i < world.length; i++)
 				for (int j = 0; j < world[0].length; j++)
 					if (world[i][j] != null && world[i][j].id != env.id)
+					{
+						if (player.x < world[i][j].globalX - env.globalX && world[i][j].globalX - env.globalX - player.x > viewRangeDistance)
+							continue;
+						if (player.y < world[i][j].globalY - env.globalY && world[i][j].globalY - env.globalY - player.y > viewRangeDistance)
+							continue;
+						if (player.x > world[i][j].globalX - env.globalX && player.x - world[i][j].globalX - env.globalX > world[i][j].widthPixels + viewRangeDistance)
+							continue;
+						if (player.y > world[i][j].globalY - env.globalY && player.y - world[i][j].globalY - env.globalY > world[i][j].heightPixels + viewRangeDistance)
+							continue;
 						drawnEnvironments.add(world[i][j]);
+					}
 		}
 		drawnEnvironments.add(env);
 		drawnEnvironments.addAll(env.subEnvironments); // but not THEIR subEnvironments!
@@ -1856,9 +1867,8 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				}
 				if (player.visibleArea.get(e) == null || frameNum % 2 == 0)
 				{
-					player.visibleArea.put(e, e.updateVisibility(player, bounds, player.seenBefore.get(e))); // maybe this slows down the game a tiny bit
+					player.visibleArea.put(e, e.updateVisibility(player, player.seenBefore.get(e))); // maybe this slows down the game a tiny bit
 					player.rememberArea.get(e).add(player.visibleArea.get(e));
-					double viewRangeDistance = Math.max(player.flightVisionDistance * player.z, 1350);
 					Ellipse2D viewRange = new Ellipse2D.Double(player.x - viewRangeDistance, player.y - viewRangeDistance, 2 * viewRangeDistance, 2 * viewRangeDistance);
 					player.visibleRememberArea.put(e, new Area());
 					player.visibleRememberArea.get(e).add(player.rememberArea.get(e));
@@ -3133,7 +3143,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				if (player.abilities.get(i).name.equals(abilityName) && player.abilities.get(i).level == cheatedAbilityLevel)
 				{
 					if (player.abilities.get(i).on)
-						player.abilities.get(i).use(env, player, player.target);
+						player.abilities.get(i).disable(env, player);
 					player.abilities.remove(i);
 					i--;
 					removed = true;
@@ -3512,8 +3522,8 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 	// IGNORE
 	public static void main(String[] args)
 	{
-		@SuppressWarnings("unused")
 		MAIN main = new MAIN();
+		main.toFront();
 	}
 
 	public void componentResized(ComponentEvent e)

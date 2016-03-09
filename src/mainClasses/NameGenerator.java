@@ -10,11 +10,11 @@ import java.util.Random;
 
 public class NameGenerator
 {
-	public static List<String>			nouns, verbs, adjs, males, females, pretitles, posttitles;
-	public static List<List<String>>	elementRelatedNouns	= new ArrayList<List<String>>();		// 0 - 31 elements, 32 general
-	public static List<List<String>>	elementRelatedVerbs	= new ArrayList<List<String>>();		// 0 - 31 elements, 32 general
-	public static List<List<String>>	elementRelatedAdjs	= new ArrayList<List<String>>();		// 0 - 31 elements, 32 general
-	public static Random				random				= new Random();
+	public static List<String> nouns, verbs, adjs, males, females, pretitles, posttitles;
+	public static List<List<String>> elementRelatedNouns = new ArrayList<List<String>>(); // 0 - 31 elements, 32 general
+	public static List<List<String>> elementRelatedVerbs = new ArrayList<List<String>>(); // 0 - 31 elements, 32 general
+	public static List<List<String>> elementRelatedAdjs = new ArrayList<List<String>>(); // 0 - 31 elements, 32 general
+	public static Random random = new Random();
 
 	public static String generate(List<EP> DNA)
 	{
@@ -83,7 +83,8 @@ public class NameGenerator
 				name = "------------";
 				break;
 			}
-		} else
+		}
+		else
 		{
 			// Muggle names
 			String firstName = firstName();
@@ -213,7 +214,8 @@ public class NameGenerator
 					if (line.contains("general"))
 						elementRelatedNouns.get(32).add(name);
 					nouns.add(name);
-				} catch (Exception e)
+				}
+				catch (Exception e)
 				{
 					// System.out.println("missing hyphen in: " + line);
 				}
@@ -225,20 +227,24 @@ public class NameGenerator
 			while (in.ready())
 			{
 				String line = in.readLine();
-				try
-				{
-					String name = line.substring(0, line.indexOf('-'));
-					name = capitalize(name);
-					for (int i = 0; i < EP.elementList.length; i++)
-						if (line.contains(EP.elementList[i].toLowerCase()))
-							elementRelatedVerbs.get(i).add(name);
-					if (line.contains("general"))
-						elementRelatedVerbs.get(32).add(name);
-					verbs.add(name);
-				} catch (Exception e)
-				{
-					System.out.println("missing hyphen in: " + line);
-				}
+				if (line == null)
+					MAIN.errorMessage("FindBugs warned me about this! Seriously!");
+				else
+					try
+					{
+						String name = line.substring(0, line.indexOf('-'));
+						name = capitalize(name);
+						for (int i = 0; i < EP.elementList.length; i++)
+							if (line.contains(EP.elementList[i].toLowerCase()))
+								elementRelatedVerbs.get(i).add(name);
+						if (line.contains("general"))
+							elementRelatedVerbs.get(32).add(name);
+						verbs.add(name);
+					}
+					catch (Exception e)
+					{
+						System.out.println("missing hyphen in: " + line);
+					}
 			}
 			in.close();
 
@@ -257,7 +263,8 @@ public class NameGenerator
 					if (line.contains("general"))
 						elementRelatedAdjs.get(32).add(name);
 					adjs.add(name);
-				} catch (Exception e)
+				}
+				catch (Exception e)
 				{
 					// System.out.println("missing hyphen in: " + line);
 				}
@@ -281,7 +288,8 @@ public class NameGenerator
 			pretitles = Arrays.asList("Lord", "Lady", "Mr", "Doctor", "Miss", "Captain", "Admiral", "Sir");
 			posttitles = Arrays.asList("Man", "Woman", "Dude", "Mistress", "Master", "Girl", "Kid", "Boy");
 
-		} catch (IOException e)
+		}
+		catch (IOException e)
 		{
 			MAIN.errorMessage("something wrong in name generation");
 			e.printStackTrace();

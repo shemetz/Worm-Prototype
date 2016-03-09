@@ -89,7 +89,7 @@ import abilities.Wall_E;
 import abilities.Wild_Power;
 import mainResourcesPackage.SoundEffect;
 
-public class Ability
+public class Ability implements Cloneable
 {
 	final static List<String> implementedAbilities = Arrays.asList("Elemental Combat I", "Beam", "Ball", "Shield", "Pool", "Wall", "Spray", "Sense Element", "Elemental Resistance", "Strike",
 			"Portals", "Elemental Void", "Precision I", "Precision II", "Precision III", "Protective Bubble I", "Protective Bubble II", "Sprint", "Strength I", "Strength II", "Strength III", "Punch",
@@ -432,7 +432,7 @@ public class Ability
 		}
 		if (element.equals("plant"))
 			if (realName.contains("Beam")) // TODO fix this. it does not work.
-				text.replace("continuous beam of plant", "vine that can grab onto stuff");
+				text = text.replace("continuous beam of plant", "vine that can grab onto stuff");
 
 		text = text.substring(text.indexOf("\n") + 1); // skip name and type
 		text = text.substring(text.indexOf("\n") + 1, text.indexOf("\n", text.indexOf("\n") + 1)); // skip tags, delete description
@@ -500,24 +500,27 @@ public class Ability
 			{
 				line = in.readLine();
 				int j = 0;
-				for (int k = 0; k < line.length(); k++)
-					switch (line.charAt(k))
-					{
-					case 'X':
-						elementalAttacksPossible[i][j] = true;
-						j++;
-						break;
-					case 'O':
-						elementalAttacksPossible[i][j] = false;
-						j++;
-						break;
-					case ',':
-						break;
-					default: // Damage and stuff
-						elementalAttackNumbers[i][j - 7] = Integer.parseInt("" + line.charAt(k));
-						j++;
-						break;
-					}
+				if (line == null)
+					MAIN.errorMessage("FindBugs warned me about this!");
+				else
+					for (int k = 0; k < line.length(); k++)
+						switch (line.charAt(k))
+						{
+						case 'X':
+							elementalAttacksPossible[i][j] = true;
+							j++;
+							break;
+						case 'O':
+							elementalAttacksPossible[i][j] = false;
+							j++;
+							break;
+						case ',':
+							break;
+						default: // Damage and stuff
+							elementalAttackNumbers[i][j - 7] = Integer.parseInt("" + line.charAt(k));
+							j++;
+							break;
+						}
 				i++;
 			}
 			in.close();

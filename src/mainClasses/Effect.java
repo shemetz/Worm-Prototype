@@ -1,6 +1,6 @@
 package mainClasses;
 
-public class Effect
+public class Effect implements Cloneable
 {
 	public double duration; // -1 = forever
 	public double timeLeft; // -1 = forever
@@ -33,7 +33,7 @@ public class Effect
 	public Effect clone()
 	{
 		MAIN.errorMessage("Pardon me, but can you mayhaps fix this shit wanker?");
-		return null;
+		return new Effect(null, -1, -1, null);
 	}
 
 	@SuppressWarnings("unused")

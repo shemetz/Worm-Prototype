@@ -362,7 +362,7 @@ public class Person extends RndPhysObj implements Mover
 			timeSinceLastHit = 0;
 			inCombat = true;
 		}
-		if (life < 0.20 * maxLife && !this.isAvatar) //get out of possession
+		if (life < 0.20 * maxLife && !this.isAvatar) // get out of possession
 			startStopPossession = true;
 	}
 
@@ -1416,7 +1416,7 @@ public class Person extends RndPhysObj implements Mover
 
 	public void rotate(double rotationAngle, double deltaTime)
 	{
-		if (rotationAngle == Double.NaN)
+		if (Double.isNaN(rotationAngle))
 		{
 			MAIN.errorMessage("NaN, NaN NaN NaN NaN NaN NaN NaN, NaN, Katamari Damaci");
 			return;
@@ -1555,9 +1555,11 @@ public class Person extends RndPhysObj implements Mover
 		return false;
 	}
 
-	public boolean equals(Person other)
+	public boolean equals(Object other)
 	{
-		return this.id == other.id;
+		if (other instanceof Person)
+			return this.id == ((Person) other).id;
+		return false;
 	}
 
 	public void heal(double d)

@@ -109,6 +109,7 @@ public class Environment
 		wCornerStyles = new int[width][height][amountOfElements + 1]; // 12 = cement
 		pCornerStyles = new int[width][height][amountOfElements];
 		pCornerTransparencies = new int[width][height][amountOfElements];
+		checkedSquares = new boolean[width][height];
 		widthPixels = width * squareSize;
 		heightPixels = height * squareSize;
 		// default shadow position is directly below.
@@ -160,7 +161,7 @@ public class Environment
 	}
 
 	private int healthSum = 0, poolNum = 0;
-	private boolean[][] checkedSquares = new boolean[width][height];
+	private boolean[][] checkedSquares;// = new boolean[width][height];
 
 	boolean moveBall(Ball b, double deltaTime)
 	{
@@ -339,7 +340,7 @@ public class Environment
 			// check collisions with arc force fields
 			for (ArcForceField aff : AFFs)
 			{
-				if (!(b.creator.equals(aff.target) && aff.type.equals("Protective Bubble"))) // balls phase through protective bubbles of their owners
+				if (!(b.creator.equals(aff.target) && aff.type == ArcForceField.Type.MOBILE_BUBBLE)) // balls phase through protective bubbles of their owners
 					if (aff.z + aff.height > b.z && aff.z < b.z + b.height)
 					{
 						double angleToBall = Math.atan2(b.y - aff.y, b.x - aff.x);
@@ -735,7 +736,7 @@ public class Environment
 		// check collisions with arc force fields
 		for (ArcForceField aff : AFFs)
 		{
-			if (!(sd.creator.equals(aff.target) && aff.type.equals("Protective Bubble"))) // phase through protective bubbles of owners
+			if (!(sd.creator.equals(aff.target) && aff.type == ArcForceField.Type.MOBILE_BUBBLE)) // phase through protective bubbles of owners
 				if (aff.z + aff.height > sd.z && aff.z < sd.z + sd.height)
 				{
 					double distancePow2 = Math.pow(aff.y - sd.y, 2) + Math.pow(aff.x - sd.x, 2);
@@ -3854,17 +3855,18 @@ public class Environment
 		}
 	}
 
-	public Area updateVisibility(Person person, final Rectangle bounds, int[][] seenBefore)
+	public Area updateVisibility(Person person, int[][] seenBefore)
 	{
 		final int precision = 720; // honestly even 300 is fine
 		final double maxDistance = 100000000;
 		final double minDistance = 0;
 		final double extra = 70;
+		final double visibilityFromAbovePow2 = Math.pow(person.flightVisionDistance * person.z, 2);
 
-		double minX = Math.min(Math.max(bounds.getX(), 0 + 6), widthPixels - 1 - 6);
-		double maxX = Math.min(Math.max(bounds.getX() + bounds.getWidth(), 0 + 6), widthPixels - 1 - 6);
-		double minY = Math.min(Math.max(bounds.getY(), 0 + 6), heightPixels - 1 - 6);
-		double maxY = Math.min(Math.max(bounds.getY() + bounds.getHeight(), 0 + 6), heightPixels - 1 - 6);
+		double minX = 0 + 6;
+		double maxX = widthPixels - 1 - 6;
+		double minY = 0 + 6;
+		double maxY = heightPixels - 1 - 6;
 		// if (minX == maxX || minY == maxY)
 		// return new Area();
 		if (person.x < minX || person.x > maxX || person.y < minY || person.y > maxY)
@@ -3879,14 +3881,10 @@ public class Environment
 		boundsLines.add(bottom);
 		boundsLines.add(right);
 
-		double visibilityFromAbovePow2 = Math.pow(person.flightVisionDistance * person.z, 2);
-
 		Polygon visibleAreaPolygon = new Polygon();
 		for (double angle = 0; angle <= TAU; angle += TAU / precision)
 		{
 			Point2D start = new Point2D.Double(person.x + minDistance * Math.cos(angle), person.y + minDistance * Math.sin(angle));
-			if (!bounds.contains(start))
-				start = new Point2D.Double(bounds.getCenterX(), bounds.getCenterY());
 			Line2D line = new Line2D.Double(start.getX(), start.getY(), start.getX() + maxDistance * Math.cos(angle), start.getY() + maxDistance * Math.sin(angle));
 			Point2D closestPoint = null;
 			double shortestDistPow2 = Double.MAX_VALUE;
@@ -3907,9 +3905,9 @@ public class Environment
 			}
 			// walls
 			for (int x = 0; x < width; x++)
-				if (x * squareSize > bounds.getMinX() - squareSize && x * squareSize < bounds.getMaxX())
+				if (x * squareSize > minX - squareSize && x * squareSize < maxX)
 					for (int y = 0; y < height; y++)
-						if (y * squareSize > bounds.getMinY() - squareSize && y * squareSize < bounds.getMaxY())
+						if (y * squareSize > minY - squareSize && y * squareSize < maxY)
 							if (wallTypes[x][y] != -1) // TODO check for transparent walls if there exist any
 								if (wallTypes[x][y] == -2
 										|| Methods.DistancePow2(x * squareSize + squareSize / 2, y * squareSize + squareSize / 2, start.getX(), start.getY()) > visibilityFromAbovePow2)

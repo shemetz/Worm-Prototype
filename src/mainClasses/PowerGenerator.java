@@ -10,9 +10,9 @@ import java.util.Random;
 public class PowerGenerator
 {
 
-	static Random				random	= new Random();
-	public static String[][]	combos;					// [minor][MAJOR]
-	public static String[][]	standalones;			// [element][level level (1-3, 4-6, 7-10)]
+	static Random random = new Random();
+	public static String[][] combos; // [minor][MAJOR]
+	public static String[][] standalones; // [element][level level (1-3, 4-6, 7-10)]
 
 	public static List<Ability> generateAbilities(List<EP> EPs)
 	{
@@ -28,7 +28,8 @@ public class PowerGenerator
 					minors.add(ep);
 				else
 					majors.add(ep);
-			} else if (ep.points > 3)
+			}
+			else if (ep.points > 3)
 				majors.add(ep);
 			else
 				minors.add(ep);
@@ -62,7 +63,8 @@ public class PowerGenerator
 				}
 				minors.remove(i);
 				i--;
-			} else if (!combos[minplace][majplace].startsWith("#"))
+			}
+			else if (!combos[minplace][majplace].startsWith("#"))
 			{
 				for (String s : choosePossibility(convertStringToPossibilityList(combos[minplace][majplace])))
 				{
@@ -76,7 +78,8 @@ public class PowerGenerator
 				}
 				minors.remove(i);
 				i--;
-			} else
+			}
+			else
 				mmPairs.add(j);
 		}
 
@@ -390,7 +393,8 @@ public class PowerGenerator
 			Ability ability = Ability.ability(s, points);
 			if (ability != null) // function above will return null if the ability isn't implemented in the game yet
 				abilities.add(ability);
-		} else
+		}
+		else
 		{
 			addAbility(abilities, "noob", points);
 		}
@@ -410,7 +414,8 @@ public class PowerGenerator
 			{
 				posStringList.add(posString);
 				posString = "";
-			} else
+			}
+			else
 				posString += string.charAt(i);
 		}
 		posStringList.add(posString);
@@ -425,7 +430,8 @@ public class PowerGenerator
 				{
 					possibility.add(power);
 					power = "";
-				} else
+				}
+				else
 					power += posString.charAt(j);
 			}
 			possibility.add(power);
@@ -453,9 +459,12 @@ public class PowerGenerator
 			}
 			int n = 1; // n should be number of elements
 			String line = in.readLine();
-			for (int j = 0; j < line.length(); j++)
-				if (line.charAt(j) == ',')
-					n++;
+			if (line == null)
+				MAIN.errorMessage("FindBugs warned me about this! Really!");
+			else
+				for (int j = 0; j < line.length(); j++)
+					if (line.charAt(j) == ',')
+						n++;
 			combos = new String[n][n];
 			in.close();
 			in = new BufferedReader(new InputStreamReader(Ability.class.getResourceAsStream("combinations.csv"), "UTF-8"));
@@ -471,7 +480,8 @@ public class PowerGenerator
 						combos[i][j] = cell;
 						j++;
 						cell = "";
-					} else
+					}
+					else
 						cell += line.charAt(k);
 				combos[i][j] = cell;
 			}
@@ -499,13 +509,15 @@ public class PowerGenerator
 						standalones[i][j] = cell;
 						j++;
 						cell = "";
-					} else
+					}
+					else
 						cell += line.charAt(k);
 				standalones[i][j] = cell;
 				i++;
 			}
 			in.close();
-		} catch (IOException e)
+		}
+		catch (IOException e)
 		{
 			e.printStackTrace();
 			MAIN.errorMessage("(there was a bug)");
