@@ -3204,6 +3204,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			Ability ability = Ability.ability(abilityName, cheatedAbilityLevel);
 			player.abilities.add(ability);
 			player.updateAbilities();
+			updateNiceHotkeys();
 			break;
 		case ICON:
 			break;

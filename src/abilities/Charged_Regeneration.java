@@ -72,4 +72,6 @@ public class Charged_Regeneration extends _PassiveAbility
 	{
 		player.aimType = Player.AimType.NONE;
 	}
+
+	
 }
