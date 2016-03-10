@@ -524,6 +524,16 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 						if (a.on)
 							if (!a.disabled)
 								a.maintain(env, p, p.target, deltaTime); // not affected by timeEffect. TODO double check this! (try using abilities like Beam with it)
+						p.isChargingChargeAbility = false;
+						if (a.hasTag("charge"))
+						{
+							p.hasChargeAbility = true;
+							if (a.checkCharge(env, p, deltaTime))
+							{
+								p.isChargingChargeAbility = true;
+								p.charge += 5 * deltaTime; // 5 Charge per Second
+							}
+						}
 					}
 				// If trying to maintain after slipping
 				if (p.maintaining && p.prone)
@@ -2231,7 +2241,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		buffer.drawString(player.name, (int) (20 * UIzoomLevel) + 1, 25 + 1);
 		buffer.setColor(Color.black);
 		buffer.drawString(player.name, (int) (20 * UIzoomLevel), 25);
-		// Health, Mana, Stamina
+		// Health, Mana, Stamina, Charge?
 		buffer.setStroke(new BasicStroke(1));
 		// assuming neither of the following stats is too high (< x10 normal amount)
 		buffer.setColor(Color.red);
@@ -2240,7 +2250,11 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		buffer.fillRect((int) (20 * UIzoomLevel), (int) (60 * UIzoomLevel), (int) (player.mana * 20 * UIzoomLevel), (int) (15 * UIzoomLevel));
 		buffer.setColor(Color.green);
 		buffer.fillRect((int) (20 * UIzoomLevel), (int) (85 * UIzoomLevel), (int) (player.stamina * 20 * UIzoomLevel), (int) (15 * UIzoomLevel));
-		buffer.setColor(Color.red);
+		if (player.hasChargeAbility)
+		{
+			buffer.setColor(Color.orange);
+			buffer.fillRect((int) (20 * UIzoomLevel), (int) (110 * UIzoomLevel), (int) (player.charge * 2 * UIzoomLevel), (int) (15 * UIzoomLevel));
+		}
 
 		// draw costs of selected (aimed) power
 		if (hotkeySelected != -1)
@@ -2290,6 +2304,22 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 								(int) (13 * UIzoomLevel));
 					}
 					break;
+				case CHARGE:
+					for (int i = 1; i < player.charge / cost; i++)
+					{
+						// darker rectangle
+						if (i % 2 == 0)
+							buffer.setColor(new Color(220, 122, 0));
+						else
+							buffer.setColor(new Color(240, 115, 0));
+						buffer.fillRect((int) ((int) (20 * UIzoomLevel + player.charge * 2 * UIzoomLevel) - i * (int) (cost * 2 * UIzoomLevel) + 1 * UIzoomLevel), (int) (112 * UIzoomLevel),
+								(int) (cost * 2 * UIzoomLevel - 1 * UIzoomLevel), (int) (12 * UIzoomLevel));
+						// separating line
+						buffer.setColor(new Color(170, 85, 0));
+						buffer.fillRect((int) (20 * UIzoomLevel + player.charge * 2 * UIzoomLevel) - i * (int) (cost * 2 * UIzoomLevel), (int) (111 * UIzoomLevel), (int) (2 * UIzoomLevel),
+								(int) (13 * UIzoomLevel));
+					}
+					break;
 				default:
 					errorMessage("ability costs more than 0 but there's no case for its cost type - " + ability.costType);
 					break;
@@ -2301,6 +2331,12 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		buffer.drawRect((int) (20 * UIzoomLevel), (int) (35 * UIzoomLevel), (int) (player.maxLife * 2 * UIzoomLevel), (int) (15 * UIzoomLevel));
 		buffer.drawRect((int) (20 * UIzoomLevel), (int) (60 * UIzoomLevel), (int) (player.maxMana * 20 * UIzoomLevel), (int) (15 * UIzoomLevel));
 		buffer.drawRect((int) (20 * UIzoomLevel), (int) (85 * UIzoomLevel), (int) (player.maxStamina * 20 * UIzoomLevel), (int) (15 * UIzoomLevel));
+		if (player.hasChargeAbility)
+		{
+			if (player.isChargingChargeAbility)
+				buffer.setStroke(new BasicStroke((float) (5 * UIzoomLevel)));
+			buffer.drawRect((int) (20 * UIzoomLevel), (int) (110 * UIzoomLevel), (int) (100 * 2 * UIzoomLevel), (int) (15 * UIzoomLevel));
+		}
 		buffer.setStroke(new BasicStroke((float) (1 * UIzoomLevel)));
 		buffer.setColor(Color.red);
 		buffer.drawRect((int) (20 * UIzoomLevel), (int) (35 * UIzoomLevel), (int) (player.maxLife * 2 * UIzoomLevel), (int) (15 * UIzoomLevel));
@@ -2308,12 +2344,22 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		buffer.drawRect((int) (20 * UIzoomLevel), (int) (60 * UIzoomLevel), (int) (player.maxMana * 20 * UIzoomLevel), (int) (15 * UIzoomLevel));
 		buffer.setColor(Color.green);
 		buffer.drawRect((int) (20 * UIzoomLevel), (int) (85 * UIzoomLevel), (int) (player.maxStamina * 20 * UIzoomLevel), (int) (15 * UIzoomLevel));
-
+		if (player.hasChargeAbility)
+		{
+			if (player.isChargingChargeAbility)
+			{
+				buffer.setColor(Color.yellow);
+				buffer.setStroke(new BasicStroke((float) (3 * UIzoomLevel)));
+			}
+			else
+				buffer.setColor(Color.orange);
+			buffer.drawRect((int) (20 * UIzoomLevel), (int) (110 * UIzoomLevel), (int) (100 * 2 * UIzoomLevel), (int) (15 * UIzoomLevel));
+		}
 		// Fly-mode height meter
 		// not logarithmic!
 		if (player.z > 0)
 		{
-			buffer.setStroke(new BasicStroke(2));
+			buffer.setStroke(new BasicStroke((float) (2 * UIzoomLevel)));
 			buffer.setColor(new Color(0, 0, 30));
 			buffer.drawLine((int) (frameWidth - 80 * UIzoomLevel), (int) (frameHeight / 2 + 300 * UIzoomLevel), (int) (frameWidth - 80 * UIzoomLevel), (int) (frameHeight / 2 - 300 * UIzoomLevel));
 			buffer.drawLine((int) (frameWidth - 80 * UIzoomLevel - 20 * UIzoomLevel), (int) (frameHeight / 2 + 300 * UIzoomLevel), (int) (frameWidth - 60 * UIzoomLevel),

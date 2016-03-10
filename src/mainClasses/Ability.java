@@ -14,6 +14,7 @@ import abilities.Beam_E;
 import abilities.Blink;
 import abilities.Bubble_Target;
 import abilities.Charge;
+import abilities.Charged_Regeneration;
 import abilities.Chronobiology;
 import abilities.Clone_I;
 import abilities.Clone_II;
@@ -34,6 +35,7 @@ import abilities.Ghost_Mode_I;
 import abilities.Heal_I;
 import abilities.Heal_II;
 import abilities.Leg_Muscles;
+import abilities.Muscle_Charge;
 import abilities.Nullification_Aura_I;
 import abilities.Nullification_Aura_II;
 import abilities.Pool_E;
@@ -97,7 +99,7 @@ public class Ability implements Cloneable
 			"Toughness III", "Sense Life", "Sense Mana and Stamina", "Sense Powers", "Slow Target", "Chronobiology", "Retrace I", "Retrace II", "Retrace III", "Undo I", "Undo II", "Undo III",
 			"Repeat I", "Repeat II", "Repeat III", "Time Freeze Target I", "Nullification Aura I", "Nullification Aura II", "Wild Power", "Clone I", "Clone II", "Clone III", "Twitch",
 			"Sense Structure", "Sense Parahumans", "Steal Power", "Danger Sense", "Sapping Fists", "Pushy Fists", "Explosive Fists", "Vampiric Fists", "Shattering Fists", "Elemental Fists",
-			"Explosion Resistance", "Leg Muscles", "Speedrun", "Charge", "Elastic", "Trail", "Bubble Target", "Self-Bomb", "Possess");
+			"Explosion Resistance", "Leg Muscles", "Speedrun", "Charge", "Elastic", "Trail", "Bubble Target", "Self-Bomb", "Possess", "Muscle Charge", "Charged Regeneration");
 	protected static List<String> descriptions = new ArrayList<String>();
 	protected static boolean[][] elementalAttacksPossible = new boolean[12][7]; // [element][ability]
 	protected static int[][] elementalAttackNumbers = new int[12][3];
@@ -188,6 +190,14 @@ public class Ability implements Cloneable
 	{
 		// to be written in child classes
 		MAIN.errorMessage("vjhvsfasetjblckvzyuf no disable() for this method. " + name);
+	}
+
+	@SuppressWarnings("unused")
+	public boolean checkCharge(Environment env, Person p, double deltaTime)
+	{
+		// to be written in child classes
+		MAIN.errorMessage("very best and reasonable no checkCharge() for this method. " + name);
+		return false;
 	}
 
 	public Ability clone()
@@ -581,6 +591,12 @@ public class Ability implements Cloneable
 		}
 		switch (trimmedAbilityName)
 		{
+		case "Charged Regeneration":
+			ab = new Charged_Regeneration(pnts);
+			break;
+		case "Muscle Charge":
+			ab = new Muscle_Charge(pnts);
+			break;
 		case "Possess":
 			ab = new Possess(pnts);
 			break;

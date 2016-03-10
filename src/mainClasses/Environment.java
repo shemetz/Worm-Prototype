@@ -3165,8 +3165,6 @@ public class Environment
 	 */
 	public void hitPerson(Person p, double damage, double pushback, double angle, int elementNum, double percentageOfTheDamage)
 	{
-		p.inCombat = true; // TODO
-
 		// percentages are multiplied by time stretch effects
 		percentageOfTheDamage *= p.timeEffect;
 		damage *= percentageOfTheDamage;

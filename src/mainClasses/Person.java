@@ -54,6 +54,7 @@ public class Person extends RndPhysObj implements Mover
 	public int maxLife;
 	public int maxMana;
 	public int maxStamina;
+	// maxCharge is 100. Always.
 	public double lifeRegen; // per second. during combat.
 	public double manaRegen; // ^
 	public double staminaRegen; // ^
@@ -105,7 +106,9 @@ public class Person extends RndPhysObj implements Mover
 	public double flySpeed = -1;
 	public double timeSincePortal = 0;
 	public List<Ability> punchAffectingAbilities;
-	boolean isAvatar = false;
+	public boolean isAvatar = false;
+	public boolean hasChargeAbility = false;
+	public boolean isChargingChargeAbility = false;
 
 	// for continuous inaccuracy stuff like beams
 	public double inaccuracyAngle = 0;
@@ -358,10 +361,10 @@ public class Person extends RndPhysObj implements Mover
 		life -= damage;
 		if (damage >= 2.5 || Math.random() < 0.01) // so that beams and wall collisions don't always trigger this
 		{
-			// TODO - this is kinda buggy with the fact that normal wall collisions can damage, and that makes clones stay "in combat" too much
 			timeSinceLastHit = 0;
-			inCombat = true;
 		}
+		// TODO - this is kinda buggy with the fact that normal wall collisions can damage, and that makes clones stay "in combat" too much
+		inCombat = true;
 		if (life < 0.20 * maxLife && !this.isAvatar) // get out of possession
 			startStopPossession = true;
 	}
@@ -384,7 +387,7 @@ public class Person extends RndPhysObj implements Mover
 		life = maxLife;
 		mana = maxMana;
 		stamina = maxStamina;
-		charge = 0;
+		charge = 100;
 
 		// Natural abilities
 		abilities.add(Ability.ability("Punch", 0));
