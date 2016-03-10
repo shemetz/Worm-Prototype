@@ -365,7 +365,7 @@ public class Person extends RndPhysObj implements Mover
 		}
 		// TODO - this is kinda buggy with the fact that normal wall collisions can damage, and that makes clones stay "in combat" too much
 		inCombat = true;
-		if (life < 0.20 * maxLife && !this.isAvatar) // get out of possession
+		if (possessedTimeLeft > 0 && life < 0.20 * maxLife && !this.isAvatar) // get out of possession
 			startStopPossession = true;
 	}
 

@@ -602,10 +602,10 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 						}
 						break;
 					case 7: // acid
-						env.hitPerson(p, 25, 0, 0, 7, deltaTime); // acid damage
+						env.hitPerson(p, 25, 0, 0, 7, deltaTime);
 						break;
 					case 8: // lava
-						env.hitPerson(p, 20, 0, 0, 8, deltaTime); // burn damage
+						env.hitPerson(p, 20, 0, 0, 8, deltaTime);
 						if (frameNum % 50 == 0 && random.nextDouble() < 0.4) // burn chance is +40% in lava
 							p.affect(new Burning(0, null), true);
 						break;
