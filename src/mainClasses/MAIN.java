@@ -1157,24 +1157,29 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		switch (player.aimType)
 		{
 		case AIMLESS:
-			// draws triangle around player
-			double triangleRadius = 200;
+			// draws star around player
+			double starRadiusSmall = 50;
+			double starRadiusLarge = 70;
 
 			buffer.setStroke(new BasicStroke(5));
 			buffer.setColor(Color.black);
-			for (int i = 0; i < 3; i++)
+			for (int i = 0; i < 5; i++)
 			{
-				double angle = TAU / 12 + TAU / 3 * i;
-				buffer.drawLine((int) (player.x + triangleRadius * Math.cos(angle)), (int) (player.y + triangleRadius * Math.sin(angle)), (int) (player.x + triangleRadius * Math.cos(angle + TAU / 3)),
-						(int) (player.y + triangleRadius * Math.sin(angle + TAU / 3)));
+				double angle = TAU / 12 + TAU / 5 * i;
+				buffer.drawLine((int) (player.x + starRadiusSmall * Math.cos(angle)), (int) (player.y + starRadiusSmall * Math.sin(angle)),
+						(int) (player.x + starRadiusLarge * Math.cos(angle + TAU / 10)), (int) (player.y + starRadiusLarge * Math.sin(angle + TAU / 10)));
+				buffer.drawLine((int) (player.x + starRadiusSmall * Math.cos(angle + TAU / 5)), (int) (player.y + starRadiusSmall * Math.sin(angle + TAU / 5)),
+						(int) (player.x + starRadiusLarge * Math.cos(angle + TAU / 10)), (int) (player.y + starRadiusLarge * Math.sin(angle + TAU / 10)));
 			}
 			buffer.setStroke(new BasicStroke(3));
 			buffer.setColor(Color.orange);
-			for (int i = 0; i < 3; i++)
+			for (int i = 0; i < 5; i++)
 			{
-				double angle = TAU / 12 + TAU / 3 * i;
-				buffer.drawLine((int) (player.x + triangleRadius * Math.cos(angle)), (int) (player.y + triangleRadius * Math.sin(angle)), (int) (player.x + triangleRadius * Math.cos(angle + TAU / 3)),
-						(int) (player.y + triangleRadius * Math.sin(angle + TAU / 3)));
+				double angle = TAU / 12 + TAU / 5 * i;
+				buffer.drawLine((int) (player.x + starRadiusSmall * Math.cos(angle)), (int) (player.y + starRadiusSmall * Math.sin(angle)),
+						(int) (player.x + starRadiusLarge * Math.cos(angle + TAU / 10)), (int) (player.y + starRadiusLarge * Math.sin(angle + TAU / 10)));
+				buffer.drawLine((int) (player.x + starRadiusSmall * Math.cos(angle + TAU / 5)), (int) (player.y + starRadiusSmall * Math.sin(angle + TAU / 5)),
+						(int) (player.x + starRadiusLarge * Math.cos(angle + TAU / 10)), (int) (player.y + starRadiusLarge * Math.sin(angle + TAU / 10)));
 			}
 			break;
 		case CLONE:

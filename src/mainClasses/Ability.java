@@ -88,6 +88,7 @@ import abilities.Undo_II;
 import abilities.Undo_III;
 import abilities.Vampiric_Fists;
 import abilities.Wall_E;
+import abilities.Wide_Force_Field;
 import abilities.Wild_Power;
 import mainResourcesPackage.SoundEffect;
 
@@ -95,7 +96,7 @@ public class Ability implements Cloneable
 {
 	final static List<String> implementedAbilities = Arrays.asList("Elemental Combat I", "Beam", "Ball", "Shield", "Pool", "Wall", "Spray", "Sense Element", "Elemental Resistance", "Strike",
 			"Portals", "Elemental Void", "Precision I", "Precision II", "Precision III", "Protective Bubble I", "Protective Bubble II", "Sprint", "Strength I", "Strength II", "Strength III", "Punch",
-			"Heal I", "Heal II", "Force Shield", "Ranged Explosion", "Flight I", "Flight II", "Telekinetic Flight", "Blink", "Ghost Mode I", "Strong Force Field", "Toughness I", "Toughness II",
+			"Heal I", "Heal II", "Force Shield", "Strong Force Field", "Wide Force Field", "Ranged Explosion", "Flight I", "Flight II", "Telekinetic Flight", "Blink", "Ghost Mode I", "Toughness I", "Toughness II",
 			"Toughness III", "Sense Life", "Sense Mana and Stamina", "Sense Powers", "Slow Target", "Chronobiology", "Retrace I", "Retrace II", "Retrace III", "Undo I", "Undo II", "Undo III",
 			"Repeat I", "Repeat II", "Repeat III", "Time Freeze Target I", "Nullification Aura I", "Nullification Aura II", "Wild Power", "Clone I", "Clone II", "Clone III", "Twitch",
 			"Sense Structure", "Sense Parahumans", "Steal Power", "Danger Sense", "Sapping Fists", "Pushy Fists", "Explosive Fists", "Vampiric Fists", "Shattering Fists", "Elemental Fists",
@@ -761,6 +762,9 @@ public class Ability implements Cloneable
 			break;
 		case "Strong Force Field":
 			ab = new Strong_Force_Field(pnts);
+			break;
+		case "Wide Force Field":
+			ab = new Wide_Force_Field(pnts);
 			break;
 		case "Beam":
 			ab = new Beam_E(element, pnts);
