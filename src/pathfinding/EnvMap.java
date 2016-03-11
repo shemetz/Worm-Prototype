@@ -4,6 +4,7 @@ import java.awt.Point;
 
 import mainClasses.Environment;
 import mainClasses.ForceField;
+import mainClasses.Furniture;
 import mainClasses.Methods;
 import mainClasses.Person;
 import mainClasses.Portal;
@@ -11,7 +12,7 @@ import mainClasses.Portal;
 public class EnvMap implements TileBasedMap
 {
 	public final int SQUARE = 96;
-	public int[][] wallTypes;
+	public boolean[][] walls;
 	public int[][] poolTypes;
 	public boolean[][] FFs;
 	public Point[][] portals; // the coordinates that being in this tile will get you to
@@ -23,7 +24,7 @@ public class EnvMap implements TileBasedMap
 
 		width = env.width;
 		height = env.height;
-		wallTypes = new int[width][height];
+		walls = new boolean[width][height];
 		poolTypes = new int[width][height];
 		FFs = new boolean[width][height];
 		portals = new Point[width][height];
@@ -31,10 +32,23 @@ public class EnvMap implements TileBasedMap
 		for (int x = 0; x < env.width; x++)
 			for (int y = 0; y < env.height; y++)
 			{
-				wallTypes[x][y] = env.wallTypes[x][y];
+				walls[x][y] = env.wallTypes[x][y] != -1;
 				poolTypes[x][y] = env.poolTypes[x][y];
 				FFs[x][y] = false;
 				portals[x][y] = null;
+			}
+		for (Furniture f : env.furniture)
+			for (Point p : f.getPoints())
+			{
+				// uses corner points slightly pulled towards the center, in order to not accidentally mark adjacent squares
+				int x = (int) (p.x + 1 * Math.cos(f.x - p.x)) / SQUARE;
+				int y = (int) (p.y + 1 * Math.sin(f.y - p.y)) / SQUARE;
+				if (x >= 0 && y >= 0 && x < width && y < height)
+				{
+					if (f.type == Furniture.Type.DOOR && f.state != 2) // not locked door
+						continue;
+					walls[x][y] = true;
+				}
 			}
 		for (ForceField ff : env.FFs)
 		{
@@ -52,27 +66,27 @@ public class EnvMap implements TileBasedMap
 						for (int x = (int) (p.x - p.length / 2) / SQUARE; x <= (int) (p.x + p.length / 2) / SQUARE; x++)
 							for (int y = (int) (p.y - p.length / 2) / SQUARE; y <= (int) (p.y + p.length / 2) / SQUARE; y++)
 								if (x >= 0 && y >= 0 && x < width && y < height)
-								if (Methods.getSegmentPointDistancePow2(p.start.x, p.start.y, p.end.x, p.end.y, x * SQUARE + SQUARE / 2, y * SQUARE + SQUARE / 2) < SQUARE / 2 * SQUARE / 2)
-								{
-									if (Methods.DistancePow2(p.start.x, p.start.y, x * SQUARE + SQUARE / 2, y * SQUARE + SQUARE / 2) < SQUARE / 2 * SQUARE / 2)
+									if (Methods.getSegmentPointDistancePow2(p.start.x, p.start.y, p.end.x, p.end.y, x * SQUARE + SQUARE / 2, y * SQUARE + SQUARE / 2) < SQUARE / 2 * SQUARE / 2)
 									{
-										wallTypes[x][y] = -2; // portal tips are basically walls
+										if (Methods.DistancePow2(p.start.x, p.start.y, x * SQUARE + SQUARE / 2, y * SQUARE + SQUARE / 2) < SQUARE / 2 * SQUARE / 2)
+										{
+											walls[x][y] = true; // portal tips are basically walls
+										}
+										else if (Methods.DistancePow2(p.end.x, p.end.y, x * SQUARE + SQUARE / 2, y * SQUARE + SQUARE / 2) < SQUARE / 2 * SQUARE / 2)
+										{
+											walls[x][y] = true; // portal tips are basically walls
+										}
+										else
+										{
+											// the coordinates that being in this tile will get you to
+											double angleChange = p.partner.angle - p.angle;
+											double angleRelativeToPortal = Math.atan2((y + 0.5) * SQUARE - p.y, (x + 0.5) * SQUARE - p.x);
+											double distanceRelativeToPortal = Math.sqrt(Methods.DistancePow2(p.x, p.y, (x + 0.5) * SQUARE, (y + 0.5) * SQUARE));
+											double destinationX = p.partner.x + distanceRelativeToPortal * Math.cos(angleRelativeToPortal + angleChange);
+											double destinationY = p.partner.y + distanceRelativeToPortal * Math.sin(angleRelativeToPortal + angleChange);
+											portals[x][y] = new Point((int) (destinationX / SQUARE), (int) (destinationY / SQUARE));
+										}
 									}
-									else if (Methods.DistancePow2(p.end.x, p.end.y, x * SQUARE + SQUARE / 2, y * SQUARE + SQUARE / 2) < SQUARE / 2 * SQUARE / 2)
-									{
-										wallTypes[x][y] = -2; // portal tips are basically walls
-									}
-									else
-									{
-										// the coordinates that being in this tile will get you to
-										double angleChange = p.partner.angle - p.angle;
-										double angleRelativeToPortal = Math.atan2((y + 0.5) * SQUARE - p.y, (x + 0.5) * SQUARE - p.x);
-										double distanceRelativeToPortal = Math.sqrt(Methods.DistancePow2(p.x, p.y, (x + 0.5) * SQUARE, (y + 0.5) * SQUARE));
-										double destinationX = p.partner.x + distanceRelativeToPortal * Math.cos(angleRelativeToPortal + angleChange);
-										double destinationY = p.partner.y + distanceRelativeToPortal * Math.sin(angleRelativeToPortal + angleChange);
-										portals[x][y] = new Point((int) (destinationX / SQUARE), (int) (destinationY / SQUARE));
-									}
-								}
 					}
 	}
 
@@ -98,7 +112,7 @@ public class EnvMap implements TileBasedMap
 				return false;
 		if (x < 0 || y < 0 || x >= width || y >= height)
 			return true;
-		if (wallTypes[x][y] != -1)
+		if (walls[x][y])
 			return true;
 		if (FFs[x][y])
 			return true;
@@ -108,7 +122,7 @@ public class EnvMap implements TileBasedMap
 	public float getCost(Mover mover, int sx, int sy, int tx, int ty)
 	{
 		int cost = 1;
-		if (wallTypes[tx][ty] != -1)
+		if (walls[tx][ty])
 			cost += 100;
 		if (FFs[tx][ty])
 			cost += 80;

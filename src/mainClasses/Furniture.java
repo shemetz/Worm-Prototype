@@ -6,15 +6,17 @@ import java.awt.Point;
 public class Furniture extends Drawable
 {
 
+	public static double clickRangePow2 = 150 * 150;
+	public static double standRangePow2 = 400 * 400;
 	public int w, h; // for collision purposes
 
-	enum Type
+	public enum Type
 	{
 		WOOD_CHAIR, PLANT_POT, DESK, DOOR
 	};
 
-	Type type;
-	int state;
+	public Type type;
+	public int state;
 	boolean clickable;
 	public int life = 100;
 	public int armor = 3; // TODO maybe uh not
@@ -59,6 +61,27 @@ public class Furniture extends Drawable
 		default:
 			MAIN.errorMessage("No excuses!");
 			break;
+		}
+	}
+
+	public void activate()
+	{
+		if (type == Type.DOOR)
+		{
+			if (state == 0) // closed
+			{
+				x += 48 * (Math.cos(rotation) - Math.sin(rotation));
+				y += 48 * (Math.sin(rotation) - Math.cos(rotation));
+				rotation = rotation + Math.PI / 2;
+				state = 1;
+			}
+			else if (state == 1) // open
+			{
+				rotation = rotation - Math.PI / 2;
+				x -= 48 * (Math.cos(rotation) - Math.sin(rotation));
+				y -= 48 * (Math.sin(rotation) - Math.cos(rotation));
+				state = 0;
+			}
 		}
 	}
 

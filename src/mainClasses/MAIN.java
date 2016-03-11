@@ -657,7 +657,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 					notTrulyPlayer.copy(player);
 					notTrulyPlayer.strengthOfAttemptedMovement = 0;
 					notTrulyPlayer.switchAnimation(0);
-					env.people.add(k,notTrulyPlayer);
+					env.people.add(k, notTrulyPlayer);
 
 					if (unpossessing)
 					{
@@ -3769,6 +3769,11 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		{
 			player.leftMousePressed = true;
 
+			for (Furniture f : env.furniture)
+				if (f.clickable)
+					if (Methods.DistancePow2(f.x, f.y, mx, my) < Furniture.clickRangePow2) // distance to mouse is less than ~150
+						if (Methods.DistancePow2(f.x, f.y, player.x, player.y) < Furniture.standRangePow2) // distance to player is less than ~400
+							f.activate();
 			if (player.abilityAiming != -1 && player.abilities.get(player.abilityAiming).toggleable)
 				player.abilities.get(player.abilityAiming).toggle();
 			else if (hotkeySelected != -1 && player.abilities.get(player.hotkeys[hotkeySelected]).toggleable)
