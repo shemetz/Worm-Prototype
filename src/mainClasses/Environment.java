@@ -3751,6 +3751,11 @@ public class Environment
 						buffer.setColor(Color.red);
 						buffer.drawLine((int) (p.x), (int) (p.y), (int) (p.x + p.strengthOfAttemptedMovement * 100 * Math.cos(p.directionOfAttemptedMovement)),
 								(int) (p.y + p.strengthOfAttemptedMovement * 100 * Math.sin(p.directionOfAttemptedMovement)));
+						if (p.possessionVessel)
+						{
+							buffer.setColor(Color.magenta);
+							buffer.drawString("VESSEL", (int) p.x-25, (int) p.y + p.imgH / 2 + 10);
+						}
 					}
 					if (d instanceof NPC)
 					{
@@ -3769,6 +3774,11 @@ public class Environment
 						buffer.setColor(Color.red);
 						buffer.setFont(new Font(Font.MONOSPACED, Font.BOLD, 16));
 						buffer.drawString("" + p.id, (int) p.x, (int) p.y + p.imgH / 2);
+						if (p.possessionVessel)
+						{
+							buffer.setColor(Color.magenta);
+							buffer.drawString("VESSEL", (int) p.x-25, (int) p.y + p.imgH / 2 + 10);
+						}
 						// movement line
 						buffer.setStroke(new BasicStroke(2.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
 						buffer.setColor(Color.red);

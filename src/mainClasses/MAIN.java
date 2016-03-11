@@ -623,92 +623,62 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				p.portalVariableX = 0;
 				p.portalVariableY = 0;
 			}
-
 			// Possessions:
-			if (p.startStopPossession)
+			if (p.startStopPossession && p.possessionTargetID != -1)
+			{
+				// BTW, there's no chain-possessions. Too icky and I can't get them to work good.
+				p.startStopPossession = false;
+				boolean unpossessing = p.possessionTargetID == p.possessingControllerID;
+				if (unpossessing)
+				{
+					p.possessedTimeLeft = 0;
+					p.possessingControllerID = -1;
+				}
+				Person victim = null;
+				check: for (int i = 0; i < env.people.size(); i++)
+					if (env.people.get(i).id == p.possessionTargetID)
+					{
+						victim = env.people.get(i);
+						break check;
+					}
+				p.possessionTargetID = -1;
+
+				Person temp = new Person(0, 0);
+				Person.cancelID();
+				temp.copy(victim);
+				victim.copy(p);
+				p.copy(temp);
 				if (p instanceof Player)
 				{
-					player.startStopPossession = false;
-					boolean unpossessing = player.oldBody != null;
-					Person victim = null;
-					check: for (int i = 0; i < env.people.size(); i++)
-						if (env.people.get(i).id == player.possessingVictimID)
-						{
-							victim = env.people.get(i);
-							break check;
-						}
-					Player newPlayer = new Player(victim.x, victim.y);
-					Person.cancelID();
-					newPlayer.copy(victim);
-
-					newPlayer.visibleRememberArea = player.visibleRememberArea;
-					newPlayer.defaultHotkeys();
-
-					for (int i = 0; i < env.people.size(); i++)
-						if (env.people.get(i).id == victim.id || env.people.get(i).id == player.id)
-						{
-							env.people.remove(i);
-							i--;
-						}
-					env.people.add(newPlayer);
-
-					NPC notTrulyPlayer = new NPC(player.x, player.y, unpossessing ? NPC.Strategy.AGGRESSIVE : NPC.Strategy.POSSESSED);
-					Person.cancelID();
-					notTrulyPlayer.copy(player);
-					notTrulyPlayer.strengthOfAttemptedMovement = 0;
-					notTrulyPlayer.switchAnimation(0);
-					env.people.add(k, notTrulyPlayer);
-
-					if (unpossessing)
+					if (!unpossessing)
 					{
-						newPlayer.hotkeys = new int[10];
+						player.oldHotkeys = new int[10];
 						for (int i = 0; i < 10; i++)
-							newPlayer.hotkeys[i] = player.oldHotkeys[i];
-						newPlayer.oldBody = null;
-						newPlayer.oldHotkeys = null;
+							player.oldHotkeys[i] = player.hotkeys[i];
+						player.defaultHotkeys();
 					}
 					else
 					{
-						newPlayer.oldBody = notTrulyPlayer;
-						newPlayer.oldHotkeys = new int[10];
+						player.hotkeys = new int[10];
 						for (int i = 0; i < 10; i++)
-							newPlayer.oldHotkeys[i] = player.hotkeys[i];
+							player.hotkeys[i] = player.oldHotkeys[i];
 					}
-
-					player = newPlayer;
 					updateNiceHotkeys();
 				}
-				else
-				{
-					boolean unpossessing = false;
-					p.startStopPossession = false;
-					Person victim = null;
-					check: for (int i = 0; i < env.people.size(); i++)
-						if (env.people.get(i).id == p.possessingVictimID)
-						{
-							victim = env.people.get(i);
-							break check;
-						}
-					Person newBody = new Player(victim.x, victim.y);
-					Person.cancelID();
-					newBody.copy(victim);
-
-					for (int i = 0; i < env.people.size(); i++)
-						if (env.people.get(i).id == victim.id || env.people.get(i).id == p.id)
-						{
-							env.people.remove(i);
-							i--;
-						}
-					env.people.add(k, newBody);
-
-					NPC newBodyOfVictim = new NPC(p.x, p.y, unpossessing ? NPC.Strategy.AGGRESSIVE : NPC.Strategy.POSSESSED);
-					Person.cancelID();
-					newBodyOfVictim.copy(p);
-					newBodyOfVictim.strengthOfAttemptedMovement = 0;
-					newBodyOfVictim.switchAnimation(0);
-
-					env.people.add(newBodyOfVictim);
-				}
+				// make victim possessed
+				if (victim instanceof NPC)
+					if (unpossessing)
+					{
+						((NPC) victim).strategy = NPC.Strategy.AGGRESSIVE;
+						victim.possessionVessel = false;
+					}
+					else
+					{
+						victim.possessionVessel = true;
+						((NPC) victim).strategy = NPC.Strategy.POSSESSED;
+					}
+				p.possessionVessel = false;
+			}
 		}
 
 		// SPRAY DROPS
@@ -1555,7 +1525,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		player.tempTrigger();
 		// player.abilities.add(Ability.ability("Force Shield", 5));
 		// player.abilities.add(Ability.ability("Beam <Energy>", 5));
-		player.updateAbilities(); // Because we added some abilities and the hotkeys haven't been updated
+		player.defaultHotkeys();
 		env.people.add(player);
 		camera = new Point3D((int) player.x, (int) player.y, (int) player.z + 25);
 		player.rename();
@@ -1570,7 +1540,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		// env.people.add(shmulik);
 
 		// three neutral people
-		for (int i = 0; i < 3; i++)
+		for (int i = 0; i < 0; i++)
 		{
 			Person person = new NPC((int) (100 + Math.random() * (env.widthPixels - 200)), (int) (100 + Math.random() * (env.heightPixels - 200)), Strategy.PASSIVE);
 			env.people.add(person);
@@ -3234,28 +3204,41 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				abilityName = cheatedAbilityName;
 			if ("Punch".equals(abilityName) || "Sprint".equals(abilityName))
 				return;
-			boolean removed = false;
 			// remove existing ability if exists
+			int removedIndex = -1;
 			for (int i = 0; i < player.abilities.size(); i++)
 				if (player.abilities.get(i).name.equals(abilityName) && player.abilities.get(i).level == cheatedAbilityLevel)
 				{
 					if (player.abilities.get(i).on)
 						player.abilities.get(i).disable(env, player);
-					player.abilities.remove(i);
-					i--;
-					removed = true;
+					removedIndex = i;
 				}
-			if (removed)
+			if (removedIndex != -1)
 			{
-				player.updateAbilities();
+				player.abilities.remove(removedIndex);
+				for (int i = 0; i < player.hotkeys.length; i++)
+				{
+					if (player.hotkeys[i] == removedIndex)
+						player.hotkeys[i] = -1;
+					if (player.hotkeys[i] > removedIndex)
+						player.hotkeys[i]--;
+				}
 				updateNiceHotkeys();
 				break;
 			}
 			// otherwise, add new ability
 			Ability ability = Ability.ability(abilityName, cheatedAbilityLevel);
 			player.abilities.add(ability);
-			player.updateAbilities();
-			updateNiceHotkeys();
+			if (!ability.hasTag("passive"))
+				for (int i = 0; i < player.hotkeys.length; i++)
+				{
+					if (player.hotkeys[i] == -1)
+					{
+						player.hotkeys[i] = player.abilities.size() - 1;
+						updateNiceHotkeys();
+						break;
+					}
+				}
 			break;
 		case ICON:
 			break;

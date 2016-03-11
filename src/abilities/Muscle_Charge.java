@@ -20,7 +20,7 @@ public class Muscle_Charge extends Ability
 		costType = CostType.CHARGE;
 		instant = true;
 
-		extraStrength = 3 * p;
+		extraStrength = Math.pow(2, level);
 	}
 
 	public void use(Environment env, Person user, Point target)

@@ -60,7 +60,7 @@ public class Protective_Bubble_I extends Ability
 				}
 
 			// Add a new protective bubble
-			bubble = new ArcForceField(user, 0, 2 * Math.PI, 60, 107, 10 * level, 12, ArcForceField.Type.MOBILE_BUBBLE);
+			bubble = new ArcForceField(user, 0, 2 * Math.PI, 107, 10 * level, 12, ArcForceField.Type.MOBILE_BUBBLE);
 			env.AFFs.add(bubble);
 			user.mana -= this.cost;
 			this.cooldownLeft = this.cooldown;

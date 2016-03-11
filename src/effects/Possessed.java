@@ -29,11 +29,7 @@ public class Possessed extends Effect
 	public void unapply(Person target)
 	{
 		target.startStopPossession = true;
-		// this is a mistake
-		int temp;
-		temp = target.possessingVictimID;
-		target.possessingVictimID = target.possessingControllerID;
-		target.possessingControllerID = temp;
+		target.possessionTargetID = target.possessingControllerID;
 	}
 
 	public void nextFrame(int frameNum)

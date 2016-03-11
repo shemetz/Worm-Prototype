@@ -24,6 +24,7 @@ import effects.Burning;
 import effects.E_Resistant;
 import effects.Healed;
 import effects.Nullified;
+import effects.Possessed;
 import effects.Stunned;
 import effects.Tangled;
 import mainResourcesPackage.SoundEffect;
@@ -147,8 +148,9 @@ public class Person extends RndPhysObj implements Mover
 	public double portalVariableY = 0;
 	public boolean startStopPossession;
 	public double possessedTimeLeft;
-	public int possessingControllerID;
-	public int possessingVictimID;
+	public int possessingControllerID = -1;
+	public int possessionTargetID = -1;
+	public boolean possessionVessel = false;
 
 	public Person(double x1, double y1)
 	{
@@ -234,8 +236,15 @@ public class Person extends RndPhysObj implements Mover
 		// Purposefully not copied:
 		// this.mana = other.mana;
 		// this.charge = other.charge;
+
+		this.runAccel = other.runAccel;
+		this.runSpeed = other.runSpeed;
+		this.lifeRegen = other.lifeRegen;
+		this.manaRegen = other.manaRegen;
+		this.staminaRegen = other.staminaRegen;
 		this.animState = other.animState;
 		this.animFrame = other.animFrame;
+		this.punchAffectingAbilities = other.punchAffectingAbilities;
 		this.life = other.life;
 		this.stamina = other.stamina;
 		this.ghostMode = other.ghostMode;
@@ -250,7 +259,7 @@ public class Person extends RndPhysObj implements Mover
 		this.startStopPossession = other.possessing;
 		this.possessedTimeLeft = other.possessedTimeLeft;
 		this.possessingControllerID = other.possessingControllerID;
-		this.possessingVictimID = other.possessingVictimID;
+		this.possessionTargetID = other.possessingVictimID;
 
 		for (Ability a : this.abilities)
 			if (a.hasTag("on-off"))
@@ -366,7 +375,10 @@ public class Person extends RndPhysObj implements Mover
 		// TODO - this is kinda buggy with the fact that normal wall collisions can damage, and that makes clones stay "in combat" too much
 		inCombat = true;
 		if (possessedTimeLeft > 0 && life < 0.20 * maxLife && !this.isAvatar) // get out of possession
+		{
+			possessedTimeLeft = 0;
 			startStopPossession = true;
+		}
 	}
 
 	public void initStats()
@@ -408,7 +420,6 @@ public class Person extends RndPhysObj implements Mover
 	public void updateSubStats()
 	{
 		// should always be overridden.
-		MAIN.errorMessage("WHO IS THIS PERSON");
 	}
 
 	public void basicUpdateSubStats()
@@ -1086,7 +1097,9 @@ public class Person extends RndPhysObj implements Mover
 			Effect e = effects.get(eNum);
 			if (e.duration != -1)
 			{
-				if (e.timeAffecting)
+				if (e instanceof Possessed && possessionVessel)
+					e.timeLeft -= 0;
+				else if (e.timeAffecting)
 					e.timeLeft -= realDeltaTime;
 				else if (e.timeLeft > 0)
 					e.timeLeft -= deltaTime;
@@ -1268,6 +1281,8 @@ public class Person extends RndPhysObj implements Mover
 			buffer.drawImage(img, (int) (x - 0.5 * imgW), (int) (y - 0.5 * imgH), null);
 
 			// Special effects
+			if (possessionVessel)
+				buffer.drawImage(Resources.possessionEyes, (int) (x - 0.5 * imgW), (int) (y - 0.5 * imgH), null);
 			for (Effect e : effects)
 			{
 				if (e instanceof Burning)
@@ -1276,6 +1291,7 @@ public class Person extends RndPhysObj implements Mover
 					buffer.drawImage(flames, (int) (x - 0.5 * imgW), (int) (y - 0.5 * imgH), null);
 				}
 			}
+
 			buffer.rotate(-rotation + 0.5 * Math.PI, (int) (x), (int) (y));
 			buffer.translate(x, y);
 			buffer.scale(1 / (z * MAIN.heightZoomRatio + 1), 1 / (z * MAIN.heightZoomRatio + 1));
@@ -1577,7 +1593,20 @@ public class Person extends RndPhysObj implements Mover
 	{
 		this.id = other.id;
 		this.setStats(other.STRENGTH, other.DEXTERITY, other.FITNESS, other.WITS, other.KNOWLEDGE, other.SOCIAL);
+		this.maintaining = other.maintaining;
+		this.abilityAiming = other.abilityAiming;
+		this.abilityMaintaining = other.abilityMaintaining;
+		this.abilityTryingToRepetitivelyUse = -1;
+		this.hasChargeAbility = other.hasChargeAbility;
+		this.isChargingChargeAbility = other.isChargingChargeAbility;
+		this.lifeRegen = other.lifeRegen;
+		this.manaRegen = other.manaRegen;
+		this.staminaRegen = other.staminaRegen;
+		this.punchAffectingAbilities = other.punchAffectingAbilities;
+		this.runAccel = other.runAccel;
+		this.runSpeed = other.runSpeed;
 		this.abilities = other.abilities;
+		this.inventory = other.inventory;
 		this.x = other.x;
 		this.y = other.y;
 		this.z = other.z;
@@ -1589,6 +1618,11 @@ public class Person extends RndPhysObj implements Mover
 		this.animFrame = other.animFrame;
 		this.life = other.life;
 		this.stamina = other.stamina;
+		this.mana = other.mana;
+		this.charge = other.charge;
+		this.maxLife = other.maxLife;
+		this.maxMana = other.maxMana;
+		this.maxStamina = other.maxStamina;
 		this.ghostMode = other.ghostMode;
 		this.panic = other.panic;
 		this.prone = other.prone;
@@ -1601,13 +1635,11 @@ public class Person extends RndPhysObj implements Mover
 		this.startStopPossession = other.startStopPossession;
 		this.possessedTimeLeft = other.possessedTimeLeft;
 		this.possessingControllerID = other.possessingControllerID;
-		this.possessingVictimID = other.possessingVictimID;
+		this.possessionTargetID = other.possessionTargetID;
+		this.possessionVessel = other.possessionVessel;
 		this.isAvatar = other.isAvatar;
 		this.effects = other.effects;
-		this.mana = other.mana;
-		this.charge = other.charge;
 		this.name = other.name;
-		this.startStopPossession = false;
 		this.hair = other.hair;
 		this.head = other.head;
 		this.chest = other.chest;

@@ -19,7 +19,7 @@ public class Bubble_Target extends Ability
 	public Bubble_Target(int p)
 	{
 		super("Bubble Target", p);
-		cooldown = Math.min(6-level, 0.3);
+		cooldown = Math.min(6 - level, 0.3);
 		costType = CostType.MANA;
 		cost = 3;
 		range = 500;
@@ -60,7 +60,7 @@ public class Bubble_Target extends Ability
 				return;
 
 			// Add a new protective bubble
-			bubble = new ArcForceField(targetPerson, 0, 2 * Math.PI, 60, 107, 10 * level, 12, ArcForceField.Type.IMMOBILE_BUBBLE);
+			bubble = new ArcForceField(targetPerson, 0, 2 * Math.PI, 107, 10 * level, 12, ArcForceField.Type.IMMOBILE_BUBBLE);
 			bubble.armor = level * 2;
 			env.AFFs.add(bubble);
 			user.mana -= this.cost;
@@ -73,6 +73,8 @@ public class Bubble_Target extends Ability
 	public void maintain(Environment env, Person user, Point target, double deltaTime)
 	{
 		bubble.life -= bubble.life * 0.1 * deltaTime;
+		if (Methods.DistancePow2(bubble.target.Point(), bubble.Point()) > bubble.maxRadius*bubble.maxRadius) // if target got out
+			bubble.life = 0;
 	}
 
 	public void disable(Environment env, Person user)

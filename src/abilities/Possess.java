@@ -34,44 +34,49 @@ public class Possess extends Ability
 		Person target = null;
 		double shortestDistPow2 = maxDistFromTargetedPoint * maxDistFromTargetedPoint;
 		for (Person p : env.people)
-		{
-			double distPow2 = Methods.DistancePow2(p.Point(), targetPoint);
-			if (distPow2 < shortestDistPow2)
+			if (!p.possessionVessel)
 			{
-				shortestDistPow2 = distPow2;
-				target = p;
+				double distPow2 = Methods.DistancePow2(p.Point(), targetPoint);
+				if (distPow2 < shortestDistPow2)
+				{
+					shortestDistPow2 = distPow2;
+					target = p;
+				}
 			}
-		}
 		return target;
 	}
 
 	public void use(Environment env, Person user, Point target)
 	{
-		if (!on && user.mana >= cost && cooldownLeft == 0 && !user.prone && !user.maintaining)
-		{
-			victim = getTarget(env, target);
-			if (victim == null || victim.equals(user))
-				return;
-
-			on = true;
-			original = user;
-			if (user instanceof Player)
+		if (user.possessingControllerID == -1) // no chain-possessions!
+			if (!on && user.mana >= cost && cooldownLeft == 0 && !user.prone && !user.maintaining)
 			{
-				original.startStopPossession = true;
-				original.possessingVictimID = victim.id;
-				victim.possessedTimeLeft = duration;
-				victim.possessingControllerID = user.id;
-				victim.effects.add(new Possessed(duration, this));
-				original.strengthOfAttemptedMovement = 0;
+				victim = getTarget(env, target);
+				if (victim == null || victim.equals(user))
+					return;
+
+				on = true;
+				original = user;
+				if (user instanceof Player)
+				{
+					original.startStopPossession = true;
+					original.possessionTargetID = victim.id;
+					victim.possessionVessel = true;
+					victim.possessedTimeLeft = duration;
+					victim.possessingControllerID = user.id;
+					victim.effects.add(new Possessed(duration, this));
+					original.strengthOfAttemptedMovement = 0;
+				}
+				else
+					MAIN.errorMessage("Don't forget to program the part in Possess for NPC-on-NPC possessions!");
 			}
-			else
-				MAIN.errorMessage("Don't forget to program the part in Possess for NPC-on-NPC possessions!");
-		}
 	}
 
 	public void maintain(Environment env, Person user, Point target, double deltaTime)
 	{
-		victim.possessedTimeLeft -= deltaTime;
+		// not sure if this code is even needed
+		if (!victim.possessionVessel)
+			victim.possessedTimeLeft -= deltaTime;
 		if (victim.possessedTimeLeft <= 0)
 			deactivate();
 	}
@@ -80,10 +85,10 @@ public class Possess extends Ability
 	{
 		on = false;
 		cooldownLeft = cooldown;
+		// probably a mistake, I'm going to regret this
 		for (Effect e : victim.effects)
 			if (e instanceof Possessed)
 				e.timeLeft = 0;
-		// probably a mistake, I'm going to regret this
 	}
 
 	public void disable(Environment env, Person user)

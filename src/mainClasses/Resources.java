@@ -42,6 +42,7 @@ public class Resources
 	public static Map<String, List<BufferedImage>> specialPunches; // name, list of 3 pictures (left, right, inbetween)
 	public static BufferedImage healingBeam;
 	public static BufferedImage stealPowerBeam;
+	public static BufferedImage possessionEyes;
 
 	public static void initialize()
 	{
@@ -558,6 +559,7 @@ public class Resources
 
 		healingBeam = ResourceLoader.getBufferedImage("other abilities/heal.png");
 		stealPowerBeam = ResourceLoader.getBufferedImage("other abilities/steal.png");
+		possessionEyes = ResourceLoader.getBufferedImage("other abilities/possession_eyes.png");
 
 		explosions.add(new ArrayList<BufferedImage>());
 		for (int i = 0; i < 6; i++)

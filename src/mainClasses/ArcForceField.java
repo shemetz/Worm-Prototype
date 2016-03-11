@@ -5,6 +5,7 @@ import java.awt.Point;
 
 public class ArcForceField extends Drawable
 {
+	static double Width = 12;
 	public Person target;
 	public double arc;
 	public double minRadius;
@@ -25,7 +26,7 @@ public class ArcForceField extends Drawable
 
 	public Type type;
 
-	public ArcForceField(Person target1, double angle1, double arc1, double minRadius1, double maxRadius1, double life1, int elementNum1, Type type1)
+	public ArcForceField(Person target1, double angle1, double arc1, double maxRadius1, double life1, int elementNum1, Type type1)
 	{
 		maxLife = life1;
 		target = target1;
@@ -34,7 +35,7 @@ public class ArcForceField extends Drawable
 		z = target.z;
 		rotation = angle1;
 		arc = arc1;
-		minRadius = minRadius1;
+		minRadius = maxRadius1 - ArcForceField.Width;
 		maxRadius = maxRadius1;
 		elementNum = elementNum1;
 		height = 1.5;

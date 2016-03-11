@@ -7,7 +7,6 @@ import java.util.Map;
 public class Player extends Person
 {
 	public int[] hotkeys; // Mid-Click, Shift, Q, E, R, F, V, C, X, Z
-	public Person oldBody = null; // for possession stuff
 	public int[] oldHotkeys = null; // ditto
 
 	public enum AimType
@@ -49,12 +48,6 @@ public class Player extends Person
 	{
 		basicUpdateSubStats();
 		// TODO evasion
-	}
-
-	public void updateAbilities()
-	{
-		selfFrame(0);
-		defaultHotkeys();
 	}
 
 	public void defaultHotkeys()

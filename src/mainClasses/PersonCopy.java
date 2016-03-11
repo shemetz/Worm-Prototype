@@ -31,9 +31,15 @@ public class PersonCopy
 	public double possessedTimeLeft;
 	public int possessingControllerID;
 	public int possessingVictimID;
+	public double runAccel;
+	public double runSpeed;
+	public double lifeRegen;
+	public double manaRegen;
+	public double staminaRegen;
 
 	Map<Ability, Boolean> abilities;
 	List<Effect> effects;
+	List<Ability> punchAffectingAbilities;
 
 	public PersonCopy(Person other)
 	{
@@ -42,6 +48,12 @@ public class PersonCopy
 		// Purposefully not copied:
 		// this.mana = other.mana;
 		// this.charge = other.charge;
+		this.runAccel = other.runAccel;
+		this.runSpeed = other.runSpeed;
+		this.lifeRegen = other.lifeRegen;
+		this.manaRegen = other.manaRegen;
+		this.staminaRegen = other.staminaRegen;
+		this.punchAffectingAbilities = other.punchAffectingAbilities;
 		this.animState = other.animState;
 		this.animFrame = other.animFrame;
 		this.life = other.life;
@@ -64,7 +76,7 @@ public class PersonCopy
 		this.possessing = other.startStopPossession;
 		this.possessedTimeLeft = other.possessedTimeLeft;
 		this.possessingControllerID = other.possessingControllerID;
-		this.possessingVictimID = other.possessingVictimID;
+		this.possessingVictimID = other.possessionTargetID;
 
 		abilities = new HashMap<Ability, Boolean>();
 
