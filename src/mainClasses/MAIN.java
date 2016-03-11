@@ -1392,7 +1392,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			buffer.setColor(new Color(53, 218, 255));
 			buffer.setStroke(dashedStroke3);
 			buffer.rotate(angleToFF + Math.PI / 2, player.target.x, player.target.y);
-			buffer.drawRect((int) (player.target.x - ffAbility.width / 2), (int) (player.target.y - ffAbility.height / 2), (int) (ffAbility.width), (int) (ffAbility.height));
+			buffer.drawRect((int) (player.target.x - ffAbility.length / 2), (int) (player.target.y - ffAbility.width / 2), (int) (ffAbility.length), (int) (ffAbility.width));
 			buffer.rotate(-angleToFF - Math.PI / 2, player.target.x, player.target.y);
 			break;
 		case LOOP:
