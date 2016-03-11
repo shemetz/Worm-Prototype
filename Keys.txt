@@ -18,6 +18,7 @@ CAMERA CONTROL
 Ctrl+<Scroll> - zoom in/out
 O+<Scroll> - rotate clockwise/anti-clockwise
 Alt+<Scroll> - rescale UI
+Ctrl/O/Alt + Mid-click - return zoom/rotation/UI to default
 
 DEV TOOLS
 

@@ -37,7 +37,7 @@ public class Tangled extends Effect
 				e.timeLeft = e.duration;
 				numOfTangles++;
 			}
-		if (Math.random() < numOfTangles * 0.10) // chance is 10% * number of existing tangles
+		if (Math.random() < numOfTangles * 0.25) // chance is 25% * number of existing tangles
 			target.affect(this, false); // don't add this
 	}
 

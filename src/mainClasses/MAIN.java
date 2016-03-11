@@ -78,6 +78,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 	final double TAU = 2 * Math.PI;
 
 	// CONSTANTS
+	boolean playerRememberPreviouslySeenPlaces = false;
 	final boolean movementVariation = true; // if true = player is slower when walking sideways and backwards
 	boolean portalCameraRotation = false;
 	int frameWidth = 1280, frameHeight = 800;
@@ -171,60 +172,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 	// METHODS
 	void frame()
 	{
-		// Possessions:
-		if (player.startStopPossession)
-		{
-			player.startStopPossession = false;
-			boolean unpossessing = player.oldBody != null;
-			Person victim = null;
-			check: for (int i = 0; i < env.people.size(); i++)
-				if (env.people.get(i).id == player.possessingVictimID)
-				{
-					victim = env.people.get(i);
-					break check;
-				}
-			Player newPlayer = new Player(victim.x, victim.y);
-			Person.cancelID();
-			newPlayer.copy(victim);
 
-			newPlayer.visibleRememberArea = player.visibleRememberArea;
-			newPlayer.defaultHotkeys();
-
-			for (int i = 0; i < env.people.size(); i++)
-				if (env.people.get(i).id == victim.id || env.people.get(i).id == player.id)
-				{
-					env.people.remove(i);
-					i--;
-				}
-			env.people.add(newPlayer);
-
-			NPC notTrulyPlayer = new NPC(player.x, player.y, unpossessing ? NPC.Strategy.AGGRESSIVE : NPC.Strategy.POSSESSED);
-			Person.cancelID();
-			notTrulyPlayer.copy(player);
-			notTrulyPlayer.strengthOfAttemptedMovement = 0;
-			notTrulyPlayer.switchAnimation(0);
-
-			env.people.add(notTrulyPlayer);
-
-			if (unpossessing)
-			{
-				newPlayer.hotkeys = new int[10];
-				for (int i = 0; i < 10; i++)
-					newPlayer.hotkeys[i] = player.oldHotkeys[i];
-				newPlayer.oldBody = null;
-				newPlayer.oldHotkeys = null;
-			}
-			else
-			{
-				newPlayer.oldBody = notTrulyPlayer;
-				newPlayer.oldHotkeys = new int[10];
-				for (int i = 0; i < 10; i++)
-					newPlayer.oldHotkeys[i] = player.hotkeys[i];
-			}
-
-			player = newPlayer;
-			updateNiceHotkeys();
-		}
 		// TODO move this!!!
 		/////////////
 		Environment newEnv = env;
@@ -507,7 +455,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				if (p instanceof NPC)
 				{
 					NPC npc = (NPC) p;
-					if (!p.twitching && p.possessedTimeLeft == 0)
+					if (!p.twitching)
 						npc.frameAIupdate(deltaTime, env, this);
 				}
 				else if (p instanceof Player)
@@ -614,7 +562,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 						break;
 					case 11: // plant vines/spikes
 						env.hitPerson(p, 5, 0, 0, 11, deltaTime);
-						if (frameNum % 50 == 0 && random.nextDouble() < 0.4) // tangle chance is +40% in lava
+						if (frameNum % 50 == 0 && random.nextDouble() < 0.2) // tangle chance is +20% in vines
 							p.affect(new Tangled(0, null), true);
 						break;
 					default:
@@ -675,6 +623,92 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				p.portalVariableX = 0;
 				p.portalVariableY = 0;
 			}
+
+			// Possessions:
+			if (p.startStopPossession)
+				if (p instanceof Player)
+				{
+					player.startStopPossession = false;
+					boolean unpossessing = player.oldBody != null;
+					Person victim = null;
+					check: for (int i = 0; i < env.people.size(); i++)
+						if (env.people.get(i).id == player.possessingVictimID)
+						{
+							victim = env.people.get(i);
+							break check;
+						}
+					Player newPlayer = new Player(victim.x, victim.y);
+					Person.cancelID();
+					newPlayer.copy(victim);
+
+					newPlayer.visibleRememberArea = player.visibleRememberArea;
+					newPlayer.defaultHotkeys();
+
+					for (int i = 0; i < env.people.size(); i++)
+						if (env.people.get(i).id == victim.id || env.people.get(i).id == player.id)
+						{
+							env.people.remove(i);
+							i--;
+						}
+					env.people.add(newPlayer);
+
+					NPC notTrulyPlayer = new NPC(player.x, player.y, unpossessing ? NPC.Strategy.AGGRESSIVE : NPC.Strategy.POSSESSED);
+					Person.cancelID();
+					notTrulyPlayer.copy(player);
+					notTrulyPlayer.strengthOfAttemptedMovement = 0;
+					notTrulyPlayer.switchAnimation(0);
+					env.people.add(k,notTrulyPlayer);
+
+					if (unpossessing)
+					{
+						newPlayer.hotkeys = new int[10];
+						for (int i = 0; i < 10; i++)
+							newPlayer.hotkeys[i] = player.oldHotkeys[i];
+						newPlayer.oldBody = null;
+						newPlayer.oldHotkeys = null;
+					}
+					else
+					{
+						newPlayer.oldBody = notTrulyPlayer;
+						newPlayer.oldHotkeys = new int[10];
+						for (int i = 0; i < 10; i++)
+							newPlayer.oldHotkeys[i] = player.hotkeys[i];
+					}
+
+					player = newPlayer;
+					updateNiceHotkeys();
+				}
+				else
+				{
+					boolean unpossessing = false;
+					p.startStopPossession = false;
+					Person victim = null;
+					check: for (int i = 0; i < env.people.size(); i++)
+						if (env.people.get(i).id == p.possessingVictimID)
+						{
+							victim = env.people.get(i);
+							break check;
+						}
+					Person newBody = new Player(victim.x, victim.y);
+					Person.cancelID();
+					newBody.copy(victim);
+
+					for (int i = 0; i < env.people.size(); i++)
+						if (env.people.get(i).id == victim.id || env.people.get(i).id == p.id)
+						{
+							env.people.remove(i);
+							i--;
+						}
+					env.people.add(k, newBody);
+
+					NPC newBodyOfVictim = new NPC(p.x, p.y, unpossessing ? NPC.Strategy.AGGRESSIVE : NPC.Strategy.POSSESSED);
+					Person.cancelID();
+					newBodyOfVictim.copy(p);
+					newBodyOfVictim.strengthOfAttemptedMovement = 0;
+					newBodyOfVictim.switchAnimation(0);
+
+					env.people.add(newBodyOfVictim);
+				}
 		}
 
 		// SPRAY DROPS
@@ -1877,19 +1911,35 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				}
 				if (player.visibleArea.get(e) == null || frameNum % 2 == 0)
 				{
-					player.visibleArea.put(e, e.updateVisibility(player, player.seenBefore.get(e))); // maybe this slows down the game a tiny bit
-					player.rememberArea.get(e).add(player.visibleArea.get(e));
+					// ~7 ms
+					Area visibleArea = e.updateVisibility(player, player.seenBefore.get(e));
 					Ellipse2D viewRange = new Ellipse2D.Double(player.x - viewRangeDistance, player.y - viewRangeDistance, 2 * viewRangeDistance, 2 * viewRangeDistance);
-					player.visibleRememberArea.put(e, new Area());
-					player.visibleRememberArea.get(e).add(player.rememberArea.get(e));
-					player.visibleRememberArea.get(e).intersect(new Area(viewRange));
+					visibleArea.intersect(new Area(viewRange));
+					player.visibleArea.put(e, visibleArea); // maybe this slows down the game a tiny bit
+					if (playerRememberPreviouslySeenPlaces)
+					{
+						// ~4 ms
+						player.rememberArea.get(e).add(player.visibleArea.get(e));
+						player.visibleRememberArea.put(e, new Area());
+						// ~4 ms
+						player.visibleRememberArea.get(e).add(player.rememberArea.get(e));
+						// ~5 ms
+						player.visibleRememberArea.get(e).intersect(new Area(viewRange));
+					}
+					else
+					{
+						player.visibleRememberArea.put(e, visibleArea);
+					}
 				}
 				// fill with black
 				buffer.setClip(new Area(new Rectangle2D.Double(0, 0, e.widthPixels, e.heightPixels)));
 				buffer.setColor(Color.black);
 				buffer.fillRect(0, 0, e.widthPixels, e.heightPixels);
 				// Draws everything within the player's view range that is inside the rememberArea.
-				buffer.setClip(player.visibleRememberArea.get(e));
+				if (playerRememberPreviouslySeenPlaces)
+					buffer.setClip(player.visibleRememberArea.get(e));
+				else
+					buffer.setClip(player.visibleArea.get(e));
 				e.drawFloor(buffer, bounds);
 				drawBottomEffects(buffer, e);
 				e.draw(buffer, (int) camera.z, bounds, cameraRotation);
@@ -3175,10 +3225,11 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			break;
 		case CHEATS_RESULT_ABILITY:
 			String abilityName = "";
-			if (cheatedAbilityElement != null)
-				abilityName = cheatedAbilityName + " <" + cheatedAbilityElement + ">";
-			else if (Ability.elementalPowers.contains(cheatedAbilityName))
-				abilityName = null;
+			if (Ability.elementalPowers.contains(cheatedAbilityName))
+				if (cheatedAbilityElement != null)
+					abilityName = cheatedAbilityName + " <" + cheatedAbilityElement + ">";
+				else
+					return;
 			else // normal non-elemental ability
 				abilityName = cheatedAbilityName;
 			if ("Punch".equals(abilityName) || "Sprint".equals(abilityName))
@@ -3296,17 +3347,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			env.people.add(new NPC(mx, my, NPC.Strategy.AGGRESSIVE));
 			break;
 		case KeyEvent.VK_0:
-			if (player.ctrlPressed)
-				zoomLevel = 1;
-			else if (player.rotateButtonPressed)
-				cameraRotation = 0;
-			else if (player.resizeUIButtonPressed)
-			{
-				UIzoomLevel = 1;
-				updateNiceHotkeys();
-			}
-			else
-				env.remove((mx) / 96, (my) / 96);
+			env.remove((mx) / 96, (my) / 96);
 			break;
 		case KeyEvent.VK_K:
 			for (Person p : env.people)
@@ -3527,7 +3568,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			// bufferImage.flush();
 			bufferImage = null;
 		}
-		// System.gc(); // Garbage cleaner. useless line?
+		System.gc(); // Garbage cleaner. useless line?
 
 		// create the new image with the size of the panel
 		bufferImage = createImage(bufferWidth, bufferHeight);
@@ -3769,7 +3810,17 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		}
 		if (me.getButton() == MouseEvent.BUTTON2) // Mid Click
 		{
-			playerPressHotkey(1, true);
+			if (player.ctrlPressed)
+				zoomLevel = 1;
+			else if (player.rotateButtonPressed)
+				cameraRotation = 0;
+			else if (player.resizeUIButtonPressed)
+			{
+				UIzoomLevel = 1;
+				updateNiceHotkeys();
+			}
+			else
+				playerPressHotkey(1, true);
 		}
 		if (me.getButton() == MouseEvent.BUTTON3) // Right Click
 		{

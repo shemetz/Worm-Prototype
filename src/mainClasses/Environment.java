@@ -1319,8 +1319,9 @@ public class Environment
 		if (p.ghostMode && p.z < 1)
 			for (int i = (int) (p.x - 0.5 * p.radius); i / squareSize <= (int) (p.x + 0.5 * p.radius) / squareSize; i += squareSize)
 				for (int j = (int) (p.y - 0.5 * p.radius); j / squareSize <= (int) (p.y + 0.5 * p.radius) / squareSize; j += squareSize)
-					if (wallTypes[i / squareSize][j / squareSize] != -1)
-						p.insideWall = true;
+					if (i / squareSize >= 0 && j / squareSize >= 0 && i / squareSize <= width && j / squareSize <= height)
+						if (wallTypes[i / squareSize][j / squareSize] != -1)
+							p.insideWall = true;
 
 		// rotate if corpse
 		double someConstant = 0.1623542545; // whatever
@@ -3276,7 +3277,7 @@ public class Environment
 			break;
 		case 11: // plant
 			// Tangle
-			if (randomNumber < 0.50) // 50% chance
+			if (randomNumber < 0.40) // 40% chance
 				p.affect(new Tangled(1, null), true);
 			break;
 		case 2: // wind

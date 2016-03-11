@@ -6,6 +6,7 @@ import java.awt.Graphics2D;
 import java.awt.Polygon;
 import java.awt.Shape;
 import java.awt.image.BufferedImage;
+import java.awt.image.ConvolveOp;
 
 public class Drawable
 {
@@ -35,7 +36,9 @@ public class Drawable
 
 	static int shadowFuzziness = 6;
 	static float shadowOpacity = 0.6f; // between 0f (transparent shadow) and 1f (opaque shadow)
-
+	static ConvolveOp trueFilter = Methods.getGaussianBlurFilter(shadowFuzziness, true);
+	static ConvolveOp falseFilter = Methods.getGaussianBlurFilter(shadowFuzziness, false);
+	
 	public void changeImage(BufferedImage image1)
 	{
 		// changes image to image1, and also creates a shadow effect of image1 in "shadow"
@@ -47,8 +50,8 @@ public class Drawable
 		shadowG.setColor(Color.black);
 		shadowG.fillRect(0, 0, image.getWidth(), image.getHeight());
 		shadowG.dispose();
-		shadow = Methods.getGaussianBlurFilter(shadowFuzziness, true).filter(shadow, null);
-		shadow = Methods.getGaussianBlurFilter(shadowFuzziness, false).filter(shadow, null);
+		shadow = trueFilter.filter(shadow, null);
+		shadow = falseFilter.filter(shadow, null);
 		shadow = Methods.optimizeImage(shadow);
 	}
 
@@ -62,8 +65,8 @@ public class Drawable
 		shadowG.setColor(Color.black);
 		shadowG.fillRect(0, 0, image1.getWidth(), image1.getHeight());
 		shadowG.dispose();
-		shadow = Methods.getGaussianBlurFilter(shadowFuzziness, true).filter(shadow, null);
-		shadow = Methods.getGaussianBlurFilter(shadowFuzziness, false).filter(shadow, null);
+		shadow = trueFilter.filter(shadow, null);
+		shadow = falseFilter.filter(shadow, null);
 		shadow = Methods.optimizeImage(shadow);
 		return shadow;
 	}
