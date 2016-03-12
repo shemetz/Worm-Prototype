@@ -23,6 +23,7 @@ import java.util.function.Predicate;
 import abilities.Charge;
 import abilities.Elastic;
 import abilities.Explosion_Resistance;
+import abilities.FurnitureDebris;
 import abilities.Portals;
 import effects.Burning;
 import effects.E_Resistant;
@@ -2810,7 +2811,12 @@ public class Environment
 		f.damage((int) (damage - f.armor));
 		if (showDamageNumbers)
 			uitexts.add(new UIText((int) f.x - 10, (int) f.y - 10, "" + (int) damage, 5));
-		// TODO debris for furniture
+		for (int k = 0; k < f.debrisToCreate; k++)
+		{
+			for (int i = 0; i < 2; i++)
+				debris.add(new FurnitureDebris(f.x, f.y, f.z, Math.PI * 2 * Math.random(), f.originalImage, 150 + (int) (Math.random() * 150)));
+		}
+		f.debrisToCreate = 0;
 	}
 
 	boolean[][] connectedWalls;
@@ -2954,7 +2960,7 @@ public class Environment
 		// dmg = damage*(radius - distance)/radius
 		// where "distance" = distance between explosion origin point (x, y) and victim's center.
 		// This type of damage calculation makes it LINEAR.
-		double damageToBuildings = (damage + pushback)*0.8;
+		double damageToBuildings = (damage + pushback) * 0.8;
 
 		// type -1 = regular explosion
 		double explosionHeight = radius * 2 / 100;
@@ -3016,7 +3022,8 @@ public class Environment
 				{
 					Point affMiddle = new Point((int) (aff.x + (aff.minRadius + aff.maxRadius) / 2 * Math.cos(aff.rotation)),
 							(int) (aff.y + (aff.minRadius + aff.maxRadius) / 2 * Math.sin(aff.rotation)));
-					damageArcForceField(aff, damageToBuildings * (radius - Math.sqrt(Methods.DistancePow2(affMiddle.x, affMiddle.y, x, y))) / radius, affMiddle, element == -1 ? 0 : EP.damageType(element));
+					damageArcForceField(aff, damageToBuildings * (radius - Math.sqrt(Methods.DistancePow2(affMiddle.x, affMiddle.y, x, y))) / radius, affMiddle,
+							element == -1 ? 0 : EP.damageType(element));
 				}
 			}
 		if (z - explosionHeight / 2 < 1)
@@ -3025,7 +3032,8 @@ public class Environment
 					if (gridX > 0 && gridY > 0 && gridX < width && gridY < height) // to avoid checking beyond array size
 						if (wallHealths[gridX][gridY] > 0
 								&& Methods.DistancePow2(x, y, gridX * squareSize + squareSize / 2, gridY * squareSize + squareSize / 2) < Math.pow(radius - squareSize / 2, 2))
-							damageWall(gridX, gridY, damageToBuildings * (radius - Math.sqrt(Methods.DistancePow2(gridX * squareSize + squareSize / 2, gridY * squareSize + squareSize / 2, x, y))) / radius,
+							damageWall(gridX, gridY,
+									damageToBuildings * (radius - Math.sqrt(Methods.DistancePow2(gridX * squareSize + squareSize / 2, gridY * squareSize + squareSize / 2, x, y))) / radius,
 									element == -1 ? 0 : EP.damageType(element));
 
 	}

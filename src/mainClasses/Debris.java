@@ -37,9 +37,12 @@ public class Debris extends Drawable
 		}
 		else
 			velocity *= MAIN.random.nextDouble() * 1.4 + 0.3;
-		image = Resources.debris[elementNum][type];
-		shadow = Resources.debrisShadows[elementNum][type];
-		radius = image.getWidth() / 2;
+		if (elementNum != -1)
+		{
+			image = Resources.debris[elementNum][type];
+			shadow = Resources.debrisShadows[elementNum][type];
+			radius = image.getWidth() / 2;
+		}
 	}
 
 	public void update(double deltaTime)
@@ -48,12 +51,13 @@ public class Debris extends Drawable
 		if (timeLeft > 0)
 		{
 			timeLeft -= deltaTime;
-			if (type < 3 && timeLeft < 0.25)
-			{
-				type += 3;
-				image = Resources.debris[elementNum][type];
-				shadow = Resources.debrisShadows[elementNum][type];
-			}
+			if (elementNum != -1)
+				if (type < 3 && timeLeft < 0.25)
+				{
+					type += 3;
+					image = Resources.debris[elementNum][type];
+					shadow = Resources.debrisShadows[elementNum][type];
+				}
 		}
 		else
 		{

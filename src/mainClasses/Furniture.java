@@ -1,5 +1,6 @@
 package mainClasses;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
@@ -21,7 +22,9 @@ public class Furniture extends Drawable
 	boolean clickable;
 	public int life = 100;
 	public int lifeDamageThingie = 100;
+	public int debrisToCreate = 0;
 	public int armor = 3; // TODO maybe uh not
+	public BufferedImage originalImage;
 
 	public Furniture(double x1, double y1, String typeString, double rotation1)
 	{
@@ -64,6 +67,8 @@ public class Furniture extends Drawable
 			MAIN.errorMessage("No excuses!");
 			break;
 		}
+		originalImage = new BufferedImage(image.getWidth(), image.getHeight(), image.getType());
+		originalImage.createGraphics().drawImage(image, 0, 0, null);
 	}
 
 	public void activate()
@@ -124,27 +129,42 @@ public class Furniture extends Drawable
 	{
 	}
 
-	final double percentageOfDamage = 0.1;
+	final double percentageOfDamage = 0.01;
 
 	public void damage(int damage)
 	{
 		life -= damage;
+		if (life < 0)
+		{
+			life = 0;
+			debrisToCreate += 2;
+		}
 		while (life < lifeDamageThingie)
 		{
 			lifeDamageThingie -= 10;
+			debrisToCreate++;
 			int width1 = image.getWidth();
 			int height1 = image.getHeight();
 			BufferedImage newImage = new BufferedImage(width1, height1, image.getType());
 			Graphics2D g = newImage.createGraphics();
 			g.drawImage(image, 0, 0, null);
-			for (int i = 0; i < width1; i++)
-				for (int j = 0; j < height1; j++)
+			for (int i = 0; i < width1 - 1; i++)
+				for (int j = 0; j < height1 - 1; j++)
 					if (newImage.getRGB(i, j) != 0x00000000)
 						if (Math.random() < percentageOfDamage)
-							newImage.setRGB(i, j, 0xFF000000);
+						{
+							int RGB = newImage.getRGB(i, j);
+							int R = (RGB >> 16) & 0xff;
+							int G = (RGB >> 8) & 0xff;
+							int B = (RGB >> 0) & 0xff;
+							int white = (int) (Math.random() * 200) + 20;
+							for (int ii = i; ii <= i + 1; ii++)
+								for (int jj = j; jj <= j + 1; jj++)
+									if (newImage.getRGB(ii, jj) != 0x00000000)
+										newImage.setRGB(ii, jj, (new Color((R + white) / 2, ((G + white) / 2), (B + white) / 2)).getRGB());
+						}
 			image = newImage;
 			g.dispose();
-
 		}
 	}
 }
