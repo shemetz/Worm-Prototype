@@ -437,6 +437,8 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 					{
 						numOfAbilities--;
 						i--;
+						if (p instanceof Player)
+							updateNiceHotkeys();
 					}
 				}
 				// Remove all effects
@@ -1082,6 +1084,23 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 	{
 		switch (ability.rangeType)
 		{
+		case EXPLOSION:
+			buffer.setStroke(dashedStroke3);
+			buffer.setColor(Color.orange);
+			player.target = player.Point(); // I hope this isn't a mistake
+			// explosion "plus"
+			buffer.drawLine(player.target.x - (int) (0.1 * ability.radius), player.target.y, player.target.x + (int) (0.1 * ability.radius), player.target.y);
+			buffer.drawLine(player.target.x, player.target.y - (int) (0.1 * ability.radius), player.target.x, player.target.y + (int) (0.1 * ability.radius));
+			// explosion circles
+			int circleRadius = (int) (ability.radius);
+			while (circleRadius >= 4)
+			{
+				buffer.setColor(new Color(255, 192, 0, (int) (64 + 191 * circleRadius / ability.radius)));
+				buffer.drawOval(player.target.x - (int) (ability.radius - circleRadius), player.target.y - (int) (ability.radius - circleRadius), (int) (ability.radius - circleRadius) * 2,
+						(int) (ability.radius - circleRadius) * 2);
+				circleRadius /= 2;
+			}
+			break;
 		case CREATE_IN_GRID:
 			buffer.setStroke(dashedStroke3);
 			GridTargetingAbility gAbility = (GridTargetingAbility) ability;

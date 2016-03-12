@@ -913,7 +913,7 @@ Target an enemy with the power. That enemy immediately uses a random Activated o
 Cost: 4-Level (minimum 1).
 
 Possess (Activated)
-offensive cost cooldown duration
+offensive cost cooldown duration range
 Take control of a creature for a short while.
 Target an enemy. You have a 10%*Level chance of succeeding in possessing them. If you do, you become their controller for the next 15 seconds or until they are reduced to less than 20% of their maximum health. Your original body remains inactive.
 Cooldown: 18-Level seconds, whether or not you succeeded in Possessing.

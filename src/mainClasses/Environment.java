@@ -2807,7 +2807,7 @@ public class Environment
 	{
 		if (damage - f.armor < 1)
 			return;
-		f.life -= (int) (damage - f.armor);
+		f.damage((int) (damage - f.armor));
 		if (showDamageNumbers)
 			uitexts.add(new UIText((int) f.x - 10, (int) f.y - 10, "" + (int) damage, 5));
 		// TODO debris for furniture
@@ -2954,6 +2954,7 @@ public class Environment
 		// dmg = damage*(radius - distance)/radius
 		// where "distance" = distance between explosion origin point (x, y) and victim's center.
 		// This type of damage calculation makes it LINEAR.
+		double damageToBuildings = (damage + pushback)*0.8;
 
 		// type -1 = regular explosion
 		double explosionHeight = radius * 2 / 100;
@@ -2987,7 +2988,7 @@ public class Environment
 					if (Methods.DistancePow2(p.x, p.y, x, y) < radius * radius)
 						withinRange = true;
 				if (withinRange)
-					damageForceField(ff, damage * (radius - Math.sqrt(Methods.DistancePow2(ff.x, ff.y, x, y))) / radius, new Point((int) ff.x, (int) ff.y));
+					damageForceField(ff, damageToBuildings * (radius - Math.sqrt(Methods.DistancePow2(ff.x, ff.y, x, y))) / radius, new Point((int) ff.x, (int) ff.y));
 			}
 		for (Furniture f : furniture)
 			if (f.z < z + explosionHeight / 2 && f.z + f.height > z - explosionHeight / 2)
@@ -2997,7 +2998,7 @@ public class Environment
 					if (Methods.DistancePow2(p.x, p.y, x, y) < radius * radius)
 						withinRange = true;
 				if (withinRange)
-					damageFurniture(f, damage * (radius - Math.sqrt(Methods.DistancePow2(f.x, f.y, x, y))) / radius, element == -1 ? 0 : EP.damageType(element));
+					damageFurniture(f, damageToBuildings * (radius - Math.sqrt(Methods.DistancePow2(f.x, f.y, x, y))) / radius, element == -1 ? 0 : EP.damageType(element));
 			}
 		for (ArcForceField aff : AFFs)
 			if (aff.z < z + explosionHeight / 2 && aff.z + aff.height > z - explosionHeight / 2)
@@ -3015,7 +3016,7 @@ public class Environment
 				{
 					Point affMiddle = new Point((int) (aff.x + (aff.minRadius + aff.maxRadius) / 2 * Math.cos(aff.rotation)),
 							(int) (aff.y + (aff.minRadius + aff.maxRadius) / 2 * Math.sin(aff.rotation)));
-					damageArcForceField(aff, damage * (radius - Math.sqrt(Methods.DistancePow2(affMiddle.x, affMiddle.y, x, y))) / radius, affMiddle, element == -1 ? 0 : EP.damageType(element));
+					damageArcForceField(aff, damageToBuildings * (radius - Math.sqrt(Methods.DistancePow2(affMiddle.x, affMiddle.y, x, y))) / radius, affMiddle, element == -1 ? 0 : EP.damageType(element));
 				}
 			}
 		if (z - explosionHeight / 2 < 1)
@@ -3024,7 +3025,7 @@ public class Environment
 					if (gridX > 0 && gridY > 0 && gridX < width && gridY < height) // to avoid checking beyond array size
 						if (wallHealths[gridX][gridY] > 0
 								&& Methods.DistancePow2(x, y, gridX * squareSize + squareSize / 2, gridY * squareSize + squareSize / 2) < Math.pow(radius - squareSize / 2, 2))
-							damageWall(gridX, gridY, damage * (radius - Math.sqrt(Methods.DistancePow2(gridX * squareSize + squareSize / 2, gridY * squareSize + squareSize / 2, x, y))) / radius,
+							damageWall(gridX, gridY, damageToBuildings * (radius - Math.sqrt(Methods.DistancePow2(gridX * squareSize + squareSize / 2, gridY * squareSize + squareSize / 2, x, y))) / radius,
 									element == -1 ? 0 : EP.damageType(element));
 
 	}
@@ -3754,7 +3755,7 @@ public class Environment
 						if (p.possessionVessel)
 						{
 							buffer.setColor(Color.magenta);
-							buffer.drawString("VESSEL", (int) p.x-25, (int) p.y + p.imgH / 2 + 10);
+							buffer.drawString("VESSEL", (int) p.x - 25, (int) p.y + p.imgH / 2 + 10);
 						}
 					}
 					if (d instanceof NPC)
@@ -3777,7 +3778,7 @@ public class Environment
 						if (p.possessionVessel)
 						{
 							buffer.setColor(Color.magenta);
-							buffer.drawString("VESSEL", (int) p.x-25, (int) p.y + p.imgH / 2 + 10);
+							buffer.drawString("VESSEL", (int) p.x - 25, (int) p.y + p.imgH / 2 + 10);
 						}
 						// movement line
 						buffer.setStroke(new BasicStroke(2.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));

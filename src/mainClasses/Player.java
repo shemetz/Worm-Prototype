@@ -42,6 +42,14 @@ public class Player extends Person
 		for (int i = 0; i < 4; i++)
 			wasdPortalArray[i] = false;
 		visibleRememberArea = new HashMap<Environment, Area>();
+
+	}
+
+	public void die()
+	{
+		super.die();
+		for (int i = 0; i < 10; i++)
+			hotkeys[i] = -1;
 	}
 
 	public void updateSubStats()

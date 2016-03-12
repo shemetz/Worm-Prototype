@@ -18,7 +18,9 @@ public class Self_Bomb extends Ability
 		cost = 3;
 		costType = CostType.MANA;
 		cooldown = 1;
-		radius = level * 400;
+		range = 0;
+		rangeType = Ability.RangeType.EXPLOSION;
+		radius = 400;
 		damage = level * 4;
 		pushback = level * 10;
 
@@ -53,5 +55,6 @@ public class Self_Bomb extends Ability
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
 	{
 		player.aimType = Player.AimType.AIMLESS;
+		player.target = player.Point();
 	}
 }

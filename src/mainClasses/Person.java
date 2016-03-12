@@ -1605,6 +1605,8 @@ public class Person extends RndPhysObj implements Mover
 		this.punchAffectingAbilities = other.punchAffectingAbilities;
 		this.runAccel = other.runAccel;
 		this.runSpeed = other.runSpeed;
+		this.flyDirection = other.flyDirection;
+		this.flySpeed = other.flySpeed;
 		this.abilities = other.abilities;
 		this.inventory = other.inventory;
 		this.x = other.x;

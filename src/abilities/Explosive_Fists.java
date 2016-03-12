@@ -15,6 +15,7 @@ public class Explosive_Fists extends _PunchAbility
 	{
 		super("Explosive Fists", p);
 
+		rangeType = Ability.RangeType.EXPLOSION;
 		radius = 200;
 		damage = level;
 		pushback = level * 8;

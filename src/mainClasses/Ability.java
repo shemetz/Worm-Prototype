@@ -118,7 +118,7 @@ public class Ability implements Cloneable
 
 	public enum RangeType
 	{
-		CREATE_IN_GRID, EXACT_RANGE, CIRCLE_AREA, CONE, NONE
+		CREATE_IN_GRID, EXACT_RANGE, CIRCLE_AREA, CONE, NONE, EXPLOSION
 	};
 
 	// permanent variables of the ability

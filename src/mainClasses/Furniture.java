@@ -2,6 +2,7 @@ package mainClasses;
 
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.image.BufferedImage;
 
 public class Furniture extends Drawable
 {
@@ -19,6 +20,7 @@ public class Furniture extends Drawable
 	public int state;
 	boolean clickable;
 	public int life = 100;
+	public int lifeDamageThingie = 100;
 	public int armor = 3; // TODO maybe uh not
 
 	public Furniture(double x1, double y1, String typeString, double rotation1)
@@ -120,5 +122,29 @@ public class Furniture extends Drawable
 
 	public void trueDrawShadow(Graphics2D buffer, double shadowX, double shadowY)
 	{
+	}
+
+	final double percentageOfDamage = 0.1;
+
+	public void damage(int damage)
+	{
+		life -= damage;
+		while (life < lifeDamageThingie)
+		{
+			lifeDamageThingie -= 10;
+			int width1 = image.getWidth();
+			int height1 = image.getHeight();
+			BufferedImage newImage = new BufferedImage(width1, height1, image.getType());
+			Graphics2D g = newImage.createGraphics();
+			g.drawImage(image, 0, 0, null);
+			for (int i = 0; i < width1; i++)
+				for (int j = 0; j < height1; j++)
+					if (newImage.getRGB(i, j) != 0x00000000)
+						if (Math.random() < percentageOfDamage)
+							newImage.setRGB(i, j, 0xFF000000);
+			image = newImage;
+			g.dispose();
+
+		}
 	}
 }
