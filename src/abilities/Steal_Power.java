@@ -113,7 +113,7 @@ public class Steal_Power extends Ability
 				visual.p2 = new Point((int) stolee.x, (int) stolee.y);
 				visual.type = VisualEffect.Type.CONNECTING_BEAM;
 				visual.angle = Math.atan2(stolee.y - user.y, stolee.x - user.x);
-				visual.image = Resources.stealPowerBeam;
+				visual.image = Resources.abilities.get("steal");
 				env.visualEffects.add(visual);
 			}
 		}

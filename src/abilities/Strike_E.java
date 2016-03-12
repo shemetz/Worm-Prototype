@@ -6,6 +6,7 @@ import mainClasses.Ability;
 import mainClasses.Environment;
 import mainClasses.Person;
 import mainClasses.Player;
+import mainResourcesPackage.SoundEffect;
 
 public class Strike_E extends Ability
 {
@@ -17,6 +18,7 @@ public class Strike_E extends Ability
 		costType = Ability.CostType.MANA;
 		instant = true;
 
+		sounds.add(new SoundEffect(elementName + " Smash.wav"));
 		damage = 0.6 * level * Ability.elementalAttackNumbers[elementNum][0];
 		pushback = 0.6 * level * Ability.elementalAttackNumbers[elementNum][1] + 1;
 	}

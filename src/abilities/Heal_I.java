@@ -31,7 +31,7 @@ public class Heal_I extends _ApplyEffect
 
 		healTextTimer = 0;
 		lifeRegenBuff = 2 * level;
-		beamImage = Resources.healingBeam;
+		beamImage = Resources.abilities.get("heal");
 	}
 
 	public boolean viableTarget(Person p, Person user)

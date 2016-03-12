@@ -163,7 +163,7 @@ public class Ability implements Cloneable
 	protected RangeType rangeType;
 	protected int frameNum = 0; // used in child classes
 
-	protected List<SoundEffect> sounds = new ArrayList<SoundEffect>();
+	public List<SoundEffect> sounds = new ArrayList<SoundEffect>();
 
 	@SuppressWarnings("unused")
 	public void use(Environment env, Person user, Point target)

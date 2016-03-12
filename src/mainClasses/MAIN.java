@@ -130,7 +130,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 	// Variables, lists
 	List<Environment> environmentList;
 	Environment[][] world;
-	int worldCoordsX = 2, worldCoordsY = 2;
+	int worldCoordsX, worldCoordsY;
 	Environment env;
 	Player player;
 	int frameNum = 0;
@@ -244,10 +244,10 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				xChange += env.globalX;
 				yChange += env.globalY;
 
-				pauseAllSounds(true);
+				doSomethingToAllSounds("pause");
 				env.people.remove(player);
 				env = newEnv;
-				pauseAllSounds(false);
+				doSomethingToAllSounds("unpause");
 				env.people.add(player);
 
 				xChange -= env.globalX;
@@ -277,16 +277,19 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		List<SoundEffect> allSounds = new ArrayList<SoundEffect>();
 		for (Person p : env.people)
 		{
-			for (SoundEffect s : p.sounds)
-				allSounds.add(s);
+			allSounds.addAll(p.sounds);
 			for (Ability a : p.abilities)
-				for (SoundEffect s : a.sounds)
-					allSounds.add(s);
+			{
+				a.setSounds(p.Point());
+				allSounds.addAll(a.sounds);
+			}
 		}
 		// FF SOUNDS
 		for (ForceField ff : env.FFs)
-			for (SoundEffect s : ff.sounds)
-				allSounds.add(s);
+			allSounds.addAll(ff.sounds);
+		// FURNITURE SOUNDS
+		for (Furniture f : env.furniture)
+			allSounds.addAll(f.sounds);
 		// PORTAL SOUNDS
 		for (Portal p : env.portals)
 		{
@@ -602,10 +605,10 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 
 				if (p instanceof Player)
 				{
-					pauseAllSounds(true);
+					doSomethingToAllSounds("pause");
 					env.people.remove(player);
 					env = newEnv;
-					pauseAllSounds(false);
+					doSomethingToAllSounds("unpause");
 					env.people.add(player);
 					camera.x += p.portalVariableX - p.x;
 					camera.y += p.portalVariableY - p.y;
@@ -761,8 +764,13 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 					double angleToPerson = Math.atan2(p.y - aff.y, p.x - aff.x);
 					double pushStrength = 10000;
 					double distFromCenterPow2 = Methods.DistancePow2(aff.x, aff.y, p.x, p.y);
+					// if inside the AFF
 					if (distFromCenterPow2 < Math.pow(aff.maxRadius / 2 + aff.minRadius / 2, 2))
 					{
+						// if it's not a bubble
+						if (aff.arc < TAU)
+							continue;
+						// if not touching the edges
 						if (distFromCenterPow2 < Math.pow(aff.minRadius - p.radius, 2))
 							continue;
 						else
@@ -1531,11 +1539,12 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 
 		environmentList = new ArrayList<Environment>();
 		world = new Environment[5][5];
-		world[2][2] = new Environment(2 * squareSize * 48, 2 * squareSize * 48, 48, 48);
-		environmentList.add(world[2][2]);
-		env = world[2][2];
+		worldCoordsX = 2;
+		worldCoordsY = 2;
+		world[worldCoordsX][worldCoordsY] = new Environment(worldCoordsX * squareSize * 48, worldCoordsY * squareSize * 48, 48, 48);
+		environmentList.add(world[worldCoordsX][worldCoordsY]);
+		env = world[worldCoordsX][worldCoordsY];
 		env.tempBuild();
-
 		// env.subEnvironments.add(new Environment(env.globalX + squareSize * 3, env.globalY + squareSize * 3, 10, 10));
 		// Environment sub = env.subEnvironments.get(0);
 		// environmentList.add(sub);
@@ -1550,6 +1559,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		// player.abilities.add(Ability.ability("Force Shield", 5));
 		// player.abilities.add(Ability.ability("Beam <Energy>", 5));
 		player.defaultHotkeys();
+		updateNiceHotkeys();
 		env.people.add(player);
 		camera = new Point3D((int) player.x, (int) player.y, (int) player.z + 25);
 		player.rename();
@@ -1564,9 +1574,10 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		// env.people.add(shmulik);
 
 		// three neutral people
-		for (int i = 0; i < 0; i++)
+		for (int i = 0; i < 3; i++)
 		{
-			Person person = new NPC((int) (100 + Math.random() * (env.widthPixels - 200)), (int) (100 + Math.random() * (env.heightPixels - 200)), Strategy.PASSIVE);
+			Person person = new NPC((int) (100 + Math.random() * (env.widthPixels - 200)), (int) (100 + Math.random() * (env.heightPixels - 200)), Strategy.AGGRESSIVE);
+			person.commanderID = 2;
 			env.people.add(person);
 		}
 
@@ -1748,11 +1759,12 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			}
 
 		}
-		// landing
+		// fly-punching
 		if (p.abilityTryingToRepetitivelyUse != -1 && p.flySpeed != -1 && p.abilities.get(p.abilityTryingToRepetitivelyUse).name.equals("Punch"))
 		{
 			return 0;
 		}
+		// landing
 		if (p.z <= 1 && p.z >= 0 && p.zVel < -200 * gravity * deltaTime)
 		{
 			boolean safeLanding = false;
@@ -1869,19 +1881,36 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		else
 		// world
 		{
+			double viewRangeDistancePow2 = viewRangeDistance * viewRangeDistance;
 			for (int i = 0; i < world.length; i++)
 				for (int j = 0; j < world[0].length; j++)
 					if (world[i][j] != null && world[i][j].id != env.id)
 					{
-						if (player.x < world[i][j].globalX - env.globalX && world[i][j].globalX - env.globalX - player.x > viewRangeDistance)
+						double x = world[i][j].globalX - env.globalX;
+						double y = world[i][j].globalY - env.globalY;
+						double w = world[i][j].widthPixels;
+						double h = world[i][j].widthPixels;
+						if (player.x < x && x - player.x > viewRangeDistance)
 							continue;
-						if (player.y < world[i][j].globalY - env.globalY && world[i][j].globalY - env.globalY - player.y > viewRangeDistance)
+						if (player.y < y && y - player.y > viewRangeDistance)
 							continue;
-						if (player.x > world[i][j].globalX - env.globalX && player.x - world[i][j].globalX - env.globalX > world[i][j].widthPixels + viewRangeDistance)
+						if (player.x > x && player.x - x > w + viewRangeDistance)
 							continue;
-						if (player.y > world[i][j].globalY - env.globalY && player.y - world[i][j].globalY - env.globalY > world[i][j].heightPixels + viewRangeDistance)
+						if (player.y > y && player.y - y > h + viewRangeDistance)
 							continue;
-						drawnEnvironments.add(world[i][j]);
+						boolean visible = true;
+						if ((player.x < x || player.x >= x + w) && (player.y < y || player.y >= y + h))
+							visible = false;
+						if (Methods.DistancePow2(player.x, player.y, x, y) < viewRangeDistancePow2)
+							visible = true;
+						else if (Methods.DistancePow2(player.x, player.y, x + w, y) < viewRangeDistancePow2)
+							visible = true;
+						else if (Methods.DistancePow2(player.x, player.y, x, y + h) < viewRangeDistancePow2)
+							visible = true;
+						else if (Methods.DistancePow2(player.x, player.y, x + w, y + h) < viewRangeDistancePow2)
+							visible = true;
+						if (visible)
+							drawnEnvironments.add(world[i][j]);
 					}
 		}
 		drawnEnvironments.add(env);
@@ -1909,7 +1938,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 					Area visibleArea = e.updateVisibility(player, player.seenBefore.get(e));
 					Ellipse2D viewRange = new Ellipse2D.Double(player.x - viewRangeDistance, player.y - viewRangeDistance, 2 * viewRangeDistance, 2 * viewRangeDistance);
 					visibleArea.intersect(new Area(viewRange));
-					player.visibleArea.put(e, visibleArea); // maybe this slows down the game a tiny bit
+					player.visibleArea.put(e, visibleArea);
 					if (playerRememberPreviouslySeenPlaces)
 					{
 						// ~4 ms
@@ -1925,10 +1954,6 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 						player.visibleRememberArea.put(e, visibleArea);
 					}
 				}
-				// fill with black
-				buffer.setClip(new Area(new Rectangle2D.Double(0, 0, e.widthPixels, e.heightPixels)));
-				buffer.setColor(Color.black);
-				buffer.fillRect(0, 0, e.widthPixels, e.heightPixels);
 				// Draws everything within the player's view range that is inside the rememberArea.
 				if (playerRememberPreviouslySeenPlaces)
 					buffer.setClip(player.visibleRememberArea.get(e));
@@ -2778,7 +2803,8 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 					p.directionOfAttemptedMovement = p.rotation; // Only changes it to that value when p isn't trying to move, so it's not bad
 				}
 			}
-			else if (p.z != 0 && p.flySpeed != -1 && !(p.abilityTryingToRepetitivelyUse != -1 && p.abilities.get(p.abilityTryingToRepetitivelyUse).justName().equals("Punch")))
+			// fly-punching
+			else if (p.flySpeed != -1 && !(p.abilityTryingToRepetitivelyUse != -1 && p.abilities.get(p.abilityTryingToRepetitivelyUse).justName().equals("Punch")))
 			{
 				p.switchAnimation(9); // slowing down / hover animation
 				// glide down slowly
@@ -2811,7 +2837,9 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		}
 		// can't move or auto-rotate to movement direction while fisting
 		if (p.notMovingTimer > 0) // should never be happening when in the air
+		{
 			return;
+		}
 		// A very specific fix for a case. TODO fix this mess one day (See what happens when you punch with minimum amount of stamina, while holding a movement key)
 		if (p.abilityTryingToRepetitivelyUse != -1 && p.abilities.get(p.abilityTryingToRepetitivelyUse).justName().equals("Punch")
 				&& p.abilities.get(p.abilityTryingToRepetitivelyUse).cooldownLeft == 0 && p.abilities.get(p.abilityTryingToRepetitivelyUse).cost > p.stamina)
@@ -2913,7 +2941,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				p.strengthOfAttemptedMovement = 0.5; // TODO why not 0?
 				p.directionOfAttemptedMovement = p.rotation;
 
-				// air-punching (trying to punch while flying)
+				// fly-punching (trying to punch while flying)
 				if (p.flySpeed != -1)
 				{
 					if (p.xVel * p.xVel + p.yVel * p.yVel < p.flySpeed * p.flySpeed)
@@ -2932,7 +2960,11 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 					else if (p.z > 1.1) // to avoid weird flickering
 						p.zVel = -0.2 * p.flySpeed * 5 * deltaTime; // glide down
 					if (p.z <= 0.6)
-						p.zVel = 0.7 * p.flySpeed * 5 * deltaTime; // glide...up
+					{
+						p.zVel = 1; // glide...up
+						if (p.z == 0)
+							p.z = 0.2;
+					}
 				}
 			}
 		}
@@ -3003,7 +3035,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		buffy.translate(-xCenter, -yCenter);
 	}
 
-	void pauseAllSounds(Boolean pausePlay)
+	void doSomethingToAllSounds(String command)
 	{
 		List<SoundEffect> sounds = new ArrayList<SoundEffect>();
 		sounds.addAll(env.ongoingSounds);
@@ -3018,36 +3050,29 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		for (Portal p : env.portals)
 			if (p != null)
 				sounds.add(p.sound);
+		for (Furniture f : env.furniture)
+			for (SoundEffect s : f.sounds)
+				sounds.add(s);
 
 		for (SoundEffect s : sounds)
-		{
 			if (s == null)
 				errorMessage("ERROR - a sound is null. I dunno which sound. It's null.");
-			if (pausePlay)
-				s.pause();
 			else
-				s.cont(); // inue
-		}
-	}
-
-	void stopAllSounds()
-	{
-		List<SoundEffect> sounds = new ArrayList<SoundEffect>();
-		sounds.addAll(env.ongoingSounds);
-		for (Person p : env.people)
-		{
-			for (Ability a : p.abilities)
-				sounds.addAll(a.sounds);
-			sounds.addAll(p.sounds);
-		}
-		for (ForceField ff : env.FFs)
-			sounds.addAll(ff.sounds);
-		for (Portal p : env.portals)
-			if (p.sound != null)
-				sounds.add(p.sound);
-
-		for (SoundEffect s : sounds)
-			s.stop();
+				switch (command)
+				{
+				case "stop":
+					s.stop();
+					break;
+				case "pause":
+					s.pause();
+					break;
+				case "unpause":
+					s.cont(); // inue
+					break;
+				default:
+					MAIN.errorMessage("sibyl system one two three");
+					break;
+				}
 	}
 
 	void pause(Menu target, boolean bool)
@@ -3067,12 +3092,12 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				menu = Menu.NO;
 				tooltip = "";
 				pauseHoverAbility = -1;
-				pauseAllSounds(false);
+				doSomethingToAllSounds("unpause");
 				return;
 			}
 			menu = target;
 			if (!paused)
-				pauseAllSounds(true);
+				doSomethingToAllSounds("pause");
 			paused = true;
 		}
 		else // pause key released
@@ -3085,7 +3110,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			if (!paused)
 			{
 				pauseHoverAbility = -1;
-				pauseAllSounds(false);
+				doSomethingToAllSounds("unpause");
 			}
 		}
 		updatePauseMenu();
@@ -3311,7 +3336,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		switch (e.getKeyCode())
 		{ // TODO sort to development-only keys
 		case KeyEvent.VK_BACK_SPACE:// Restart
-			stopAllSounds();
+			doSomethingToAllSounds("stop");
 			restart();
 			break;
 		case KeyEvent.VK_ESCAPE:// Pause menu

@@ -1,5 +1,7 @@
 package abilities;
 
+import mainResourcesPackage.SoundEffect;
+
 public class Elemental_Fists_E extends _PunchAbility
 {
 
@@ -10,6 +12,7 @@ public class Elemental_Fists_E extends _PunchAbility
 	{
 		super("Elemental Fists <" + e + ">", p);
 
+		sounds.add(new SoundEffect(e + " Smash.wav"));
 		damage = level;
 		pushback = 0;
 	}

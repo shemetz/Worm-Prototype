@@ -63,6 +63,8 @@ public class Trail_E extends Ability
 			lastPlace = new Point((int) (user.x / squareSize), (int) (user.y / squareSize));
 	}
 
+	double debrisTimer = 0;
+
 	public void maintain(Environment env, Person user, Point target, double deltaTime)
 	{
 		if (user.mana >= cost)
@@ -93,6 +95,12 @@ public class Trail_E extends Ability
 				}
 				lastPlace = new Point((int) (user.x / squareSize), (int) (user.y / squareSize));
 				user.mana -= cost;
+			}
+			debrisTimer += deltaTime;
+			if (debrisTimer > 0.5)
+			{
+				debrisTimer = 0;
+				env.otherDebris(user.x, user.y, elementNum, "trail", 0);
 			}
 		}
 	}

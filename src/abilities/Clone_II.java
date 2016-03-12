@@ -37,7 +37,6 @@ public class Clone_II extends Ability
 			clone.life = clone.maxLife;
 			clone.lifeRegen = 0.5;
 			clone.strategy = NPC.Strategy.CLONE;
-			clone.legs = 0;
 			clone.chest = 0;
 			clone.initAnimation();
 			env.people.add(clone);

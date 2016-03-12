@@ -937,68 +937,6 @@ public class Environment
 			p.x += moveQuantumX;
 			p.y += moveQuantumY;
 
-			// check collisions with walls in the environment, locked to a grid
-			List<Point> intersectingWalls = new ArrayList<Point>();
-			int minGridX = Math.min(Math.max((int) (p.x - p.radius) / squareSize, 0), width - 1);
-			int minGridY = Math.min(Math.max((int) (p.y - p.radius) / squareSize, 0), height - 1);
-			int maxGridX = Math.min(Math.max((int) (p.x + p.radius) / squareSize, 0), width - 1);
-			int maxGridY = Math.min(Math.max((int) (p.y + p.radius) / squareSize, 0), height - 1);
-			for (int i = minGridX; i <= maxGridX; i++)
-				for (int j = minGridY; j <= maxGridY; j++)
-					if (p.z <= 1 && wallTypes[i][j] != -1)
-						intersectingWalls.add(new Point(i, j));
-			if (!intersectingWalls.isEmpty())
-				if (!p.ghostMode) // ghosts pass through stuff
-				{
-					if (p.z > 0.1 && p.z <= 1 && p.zVel < 0) // if falling into a wall
-					{
-						p.z = 1; // standing on a wall
-						p.zVel = 0;
-						if (p instanceof NPC)
-							((NPC) p).justCollided = true;
-					}
-					else if (p.z < 1)
-					{
-						Point closestWall = null;
-						double closestWallDistancePow2 = Double.MAX_VALUE;
-						for (int i = 0; i < intersectingWalls.size(); i++)
-						{
-							double distancePow2 = Methods.DistancePow2(p.x, p.y, intersectingWalls.get(i).x * squareSize + squareSize / 2, intersectingWalls.get(i).y * squareSize + squareSize / 2);
-							if (distancePow2 < closestWallDistancePow2)
-							{
-								closestWallDistancePow2 = distancePow2;
-								closestWall = intersectingWalls.get(i);
-							}
-						}
-						int x = closestWall.x;
-						int y = closestWall.y;
-						double prevVelocity = velocityLeft;
-						if (collideWithWall(p, x, y))
-						{
-							p.x -= moveQuantumX;
-							p.y -= moveQuantumY;
-							if (p instanceof NPC)
-								((NPC) p).justCollided = true;
-							if (p.z > 0 && p.zVel < 0)
-							{
-								p.z -= p.zVel * deltaTime;
-								p.zVel = 0;
-							}
-							velocityLeft *= Math.sqrt(p.xVel * p.xVel + p.yVel * p.yVel) * deltaTime / prevVelocity;
-							// "velocity" decreases as the thing moves. If speed is decreased, velocity is multiplied by the ratio of the previous speed and the current one.
-							if (velocityLeft != 0)
-							{
-								moveQuantumX = p.xVel / velocityLeft * deltaTime;
-								moveQuantumY = p.yVel / velocityLeft * deltaTime;
-								p.x += moveQuantumX;
-								p.y += moveQuantumY;
-							}
-						}
-					}
-				}
-				else // to avoid ghosts reappearing inside walls
-					p.insideWall = true;
-
 			// Furniture
 			if (p.z < 1)
 				if (!p.ghostMode) // ghosts pass through stuff
@@ -1223,6 +1161,68 @@ public class Environment
 				}
 
 			}
+
+			// check collisions with walls in the environment, locked to a grid
+			List<Point> intersectingWalls = new ArrayList<Point>();
+			int minGridX = Math.min(Math.max((int) (p.x - p.radius) / squareSize, 0), width - 1);
+			int minGridY = Math.min(Math.max((int) (p.y - p.radius) / squareSize, 0), height - 1);
+			int maxGridX = Math.min(Math.max((int) (p.x + p.radius) / squareSize, 0), width - 1);
+			int maxGridY = Math.min(Math.max((int) (p.y + p.radius) / squareSize, 0), height - 1);
+			for (int i = minGridX; i <= maxGridX; i++)
+				for (int j = minGridY; j <= maxGridY; j++)
+					if (p.z <= 1 && wallTypes[i][j] != -1)
+						intersectingWalls.add(new Point(i, j));
+			if (!intersectingWalls.isEmpty())
+				if (!p.ghostMode) // ghosts pass through stuff
+				{
+					if (p.z > 0.1 && p.z <= 1 && p.zVel < 0) // if falling into a wall
+					{
+						p.z = 1; // standing on a wall
+						p.zVel = 0;
+						if (p instanceof NPC)
+							((NPC) p).justCollided = true;
+					}
+					else if (p.z < 1)
+					{
+						Point closestWall = null;
+						double closestWallDistancePow2 = Double.MAX_VALUE;
+						for (int i = 0; i < intersectingWalls.size(); i++)
+						{
+							double distancePow2 = Methods.DistancePow2(p.x, p.y, intersectingWalls.get(i).x * squareSize + squareSize / 2, intersectingWalls.get(i).y * squareSize + squareSize / 2);
+							if (distancePow2 < closestWallDistancePow2)
+							{
+								closestWallDistancePow2 = distancePow2;
+								closestWall = intersectingWalls.get(i);
+							}
+						}
+						int x = closestWall.x;
+						int y = closestWall.y;
+						double prevVelocity = velocityLeft;
+						if (collideWithWall(p, x, y))
+						{
+							p.x -= moveQuantumX;
+							p.y -= moveQuantumY;
+							if (p instanceof NPC)
+								((NPC) p).justCollided = true;
+							if (p.z > 0 && p.zVel < 0)
+							{
+								p.z -= p.zVel * deltaTime;
+								p.zVel = 0;
+							}
+							velocityLeft *= Math.sqrt(p.xVel * p.xVel + p.yVel * p.yVel) * deltaTime / prevVelocity;
+							// "velocity" decreases as the thing moves. If speed is decreased, velocity is multiplied by the ratio of the previous speed and the current one.
+							if (velocityLeft != 0)
+							{
+								moveQuantumX = p.xVel / velocityLeft * deltaTime;
+								moveQuantumY = p.yVel / velocityLeft * deltaTime;
+								p.x += moveQuantumX;
+								p.y += moveQuantumY;
+							}
+						}
+					}
+				}
+				else // to avoid ghosts reappearing inside walls
+					p.insideWall = true;
 
 			// Portals
 			for (Portal por : portals)
@@ -3093,8 +3093,29 @@ public class Environment
 		}
 	}
 
-	public void otherDebris(double x, double y, int n, String type, int frameNum)
+	public void otherDebris(double x, double y, int elementNum, String type, int frameNum)
 	{
+		double velocityModifier = 1;
+		switch (elementNum)
+		{
+		case 1: // water
+		case 5: // ice
+		case 7: // acid
+		case 8: // lava
+		case 3: // electricity
+			velocityModifier = 0;
+			break;
+		case 0: // fire
+		case 2: // wind
+		case 9: // flesh
+		case 4: // metal
+		case 6: // energy
+		case 10: // earth
+		case 11: // plant
+		default:
+			velocityModifier = 1;
+			break;
+		}
 		switch (type)
 		{
 		case "pool heal blood":
@@ -3102,18 +3123,27 @@ public class Environment
 			{
 				double angle = Math.random() * Math.PI * 2;
 				double distance = Math.random() * 100 + 50;
-				debris.add(new Debris(x + distance * Math.cos(angle), y + distance * Math.sin(angle), 0, angle, n, 0));
+				debris.add(new Debris(x + distance * Math.cos(angle), y + distance * Math.sin(angle), 0, angle, elementNum, 0));
 			}
 			break;
 		case "pool heal":
 		case "wall heal":
 			if (frameNum % 10 == 0)
 				for (double i = Math.random(); i < 3; i++)
-					debris.add(new Debris(x, y, 0, i + Math.random(), n, 300));
+					debris.add(new Debris(x, y, 0, i + Math.random(), elementNum, 300 * velocityModifier));
 			break;
 		case "destroy":
 			for (int i = 0; i < 5; i++)
-				debris.add(new Debris(x * squareSize + 0.5 * squareSize, y * squareSize + 0.5 * squareSize, 0, Math.PI * 2 / 5 * i, n, 200));
+				debris.add(new Debris(x * squareSize + 0.5 * squareSize, y * squareSize + 0.5 * squareSize, 0, Math.PI * 2 / 5 * i, elementNum, 200));
+			break;
+		case "trail":
+			for (int i = 0; i < 3; i++)
+			{
+				double randomDirection = TAU * Math.random();
+				double randomDistance = 20 + Math.random() * 80;
+				debris.add(
+						new Debris(x + randomDistance * Math.cos(randomDirection), y + randomDistance * Math.sin(randomDirection), 0, Math.PI * 2 * Math.random(), elementNum, 200 * velocityModifier));
+			}
 			break;
 		default:
 			MAIN.errorMessage("Error message 7: BEBHMAXBRI0903 T");
@@ -3222,7 +3252,7 @@ public class Environment
 
 			// Grunt sound, if damage is bad enough
 			if (!p.dead)
-				if (damage >= 0.15 * p.maxLife)
+				if (damage >= 0.12 * p.maxLife)
 					p.sounds.get(2 + (int) (Math.random() * 5)).play(); // grunt
 
 			// dealing the actual damage!
@@ -3450,19 +3480,19 @@ public class Environment
 
 	private void recursivePoolUpdate(int x, int y, int elementNum, int newHealth)
 	{
-		if (x < 0 || y < 0 || x >= width || y >= height)
+		if (x < 0 || y < 0 || x > width - 1 || y > height - 1)
 			return;
 		if (poolTypes[x][y] != elementNum || !checkedSquares[x][y])
 			return;
 		poolHealths[x][y] = newHealth;
 		if (pCornerStyles[x][y][elementNum] != -1)
 			pCornerTransparencies[x][y][elementNum] = newHealth;
-		if (pCornerStyles[x + 1][y + 1][elementNum] != -1)
-			pCornerTransparencies[x + 1][y + 1][elementNum] = newHealth;
 		if (pCornerStyles[x + 1][y][elementNum] != -1)
 			pCornerTransparencies[x + 1][y][elementNum] = newHealth;
 		if (pCornerStyles[x][y + 1][elementNum] != -1)
 			pCornerTransparencies[x][y + 1][elementNum] = newHealth;
+		if (pCornerStyles[x + 1][y + 1][elementNum] != -1)
+			pCornerTransparencies[x + 1][y + 1][elementNum] = newHealth;
 		checkedSquares[x][y] = false;
 		recursivePoolUpdate(x - 1, y, elementNum, newHealth);
 		recursivePoolUpdate(x, y - 1, elementNum, newHealth);
@@ -3881,14 +3911,10 @@ public class Environment
 		final double extra = 70;
 		final double visibilityFromAbovePow2 = Math.pow(person.flightVisionDistance * person.z, 2);
 
-		double minX = 0 + 6;
-		double maxX = widthPixels - 1 - 6;
-		double minY = 0 + 6;
-		double maxY = heightPixels - 1 - 6;
-		// if (minX == maxX || minY == maxY)
-		// return new Area();
-		if (person.x < minX || person.x > maxX || person.y < minY || person.y > maxY)
-			return new Area();
+		double minX = Math.min(0 + 6, person.x - 6);
+		double maxX = Math.max(widthPixels - 1 - 6, person.x + 6);
+		double minY = Math.min(0 + 6, person.y - 6);
+		double maxY = Math.max(heightPixels - 1 - 6, person.y + 6);
 		Line2D top = new Line2D.Double(minX, minY, maxX, minY);
 		Line2D left = new Line2D.Double(minX, minY, minX, maxY);
 		Line2D bottom = new Line2D.Double(minX, maxY, maxX, maxY);
@@ -3912,7 +3938,7 @@ public class Environment
 				Point2D closest = Methods.getSegmentIntersection(line, l);
 				if (closest != null)
 				{
-					double distPow2 = Methods.DistancePow2(line.getP1(), closest);
+					double distPow2 = Methods.DistancePow2(start, closest);
 					if (distPow2 < shortestDistPow2)
 					{
 						shortestDistPow2 = distPow2;
@@ -3930,13 +3956,15 @@ public class Environment
 								if (wallTypes[x][y] == -2
 										|| Methods.DistancePow2(x * squareSize + squareSize / 2, y * squareSize + squareSize / 2, start.getX(), start.getY()) > visibilityFromAbovePow2)
 								{
+									if (wallTypes[x][y] == 11) // plant walls are transparent
+										continue;
 									Rectangle2D wallRect = new Rectangle2D.Double(x * squareSize, y * squareSize, squareSize, squareSize);
 									if (line.intersects(wallRect))
 									{
 										Point2D closest = Methods.getClosestIntersectionPoint(line, wallRect);
 										if (closest != null)
 										{
-											double distPow2 = Methods.DistancePow2(line.getP1(), closest);
+											double distPow2 = Methods.DistancePow2(start, closest);
 											if (distPow2 < shortestDistPow2)
 											{
 												shortestDistPow2 = distPow2;

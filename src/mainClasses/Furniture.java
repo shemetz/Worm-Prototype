@@ -4,6 +4,10 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
+
+import mainResourcesPackage.SoundEffect;
 
 public class Furniture extends Drawable
 {
@@ -25,6 +29,7 @@ public class Furniture extends Drawable
 	public int debrisToCreate = 0;
 	public int armor = 3; // TODO maybe uh not
 	public BufferedImage originalImage;
+	public List<SoundEffect> sounds;
 
 	public Furniture(double x1, double y1, String typeString, double rotation1)
 	{
@@ -32,6 +37,7 @@ public class Furniture extends Drawable
 		x = x1;
 		y = y1;
 		z = 0;
+		sounds = new ArrayList<SoundEffect>();
 		height = 0.9;
 		rotation = rotation1;
 		type = Type.valueOf(typeString.toUpperCase());
@@ -67,6 +73,10 @@ public class Furniture extends Drawable
 			MAIN.errorMessage("No excuses!");
 			break;
 		}
+		sounds.add(new SoundEffect(type.toString() + " smash.wav"));
+		sounds.add(new SoundEffect(type.toString() + " hit.wav"));
+		for (SoundEffect s : sounds)
+			s.setPosition(x, y);
 		originalImage = new BufferedImage(image.getWidth(), image.getHeight(), image.getType());
 		originalImage.createGraphics().drawImage(image, 0, 0, null);
 	}
@@ -138,7 +148,10 @@ public class Furniture extends Drawable
 		{
 			life = 0;
 			debrisToCreate += 2;
+			sounds.get(0).play();
 		}
+		if (damage > 2)
+			sounds.get(1).play();
 		while (life < lifeDamageThingie)
 		{
 			lifeDamageThingie -= 10;

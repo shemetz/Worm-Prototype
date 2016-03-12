@@ -1217,12 +1217,6 @@ public class Person extends RndPhysObj implements Mover
 				{
 					if (a instanceof Elemental_Void)
 						drawColoredShadow(buffer, a.level * 10, Color.gray);
-					if (a instanceof Elastic)
-						if (velocityPow2() >= ((Elastic) a).minimumVelocityPow2)
-							drawColoredShadow(buffer, 10, Color.yellow);
-					if (a instanceof Charge)
-						if (velocityPow2() >= ((Charge) a).minimumVelocityPow2)
-							drawColoredShadow(buffer, 10, Color.yellow);
 				}
 
 			if (timeEffect != 1 && timeEffect != 0)
@@ -1281,8 +1275,19 @@ public class Person extends RndPhysObj implements Mover
 			buffer.drawImage(img, (int) (x - 0.5 * imgW), (int) (y - 0.5 * imgH), null);
 
 			// Special effects
+			// Eyes
 			if (possessionVessel)
-				buffer.drawImage(Resources.possessionEyes, (int) (x - 0.5 * imgW), (int) (y - 0.5 * imgH), null);
+				buffer.drawImage(Resources.abilities.get("possession_eyes"), (int) (x - 0.5 * imgW), (int) (y - 0.5 * imgH), null);
+			for (Ability a : abilities)
+				if (a.on)
+				{
+					if (a instanceof Elastic)
+						if (velocityPow2() >= ((Elastic) a).minimumVelocityPow2)
+							buffer.drawImage(Resources.abilities.get("elasticcharge_eyes"), (int) (x - 0.5 * imgW), (int) (y - 0.5 * imgH), null);
+					if (a instanceof Charge)
+						if (velocityPow2() >= ((Charge) a).minimumVelocityPow2)
+							buffer.drawImage(Resources.abilities.get("elasticcharge_eyes"), (int) (x - 0.5 * imgW), (int) (y - 0.5 * imgH), null);
+				}
 			for (Effect e : effects)
 			{
 				if (e instanceof Burning)

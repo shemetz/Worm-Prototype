@@ -8,7 +8,7 @@ import mainClasses.Person;
 public class Charge extends _PassiveAbility
 {
 
-	public double minimumVelocityPow2 = Math.pow(400,2);
+	public double minimumVelocityPow2 = Math.pow(350,2);
 
 	public Charge(int p)
 	{

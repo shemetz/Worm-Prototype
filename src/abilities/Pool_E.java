@@ -28,8 +28,9 @@ public class Pool_E extends GridTargetingAbility
 		boolean lesserCost = false;
 		for (int i = gridX - 1; i <= gridX + 1; i++)
 			for (int j = gridY - 1; j <= gridY + 1; j++)
-				if (env.poolTypes[i][j] == elementNum)
-					lesserCost = true;
+				if (i >= 0 && j >= 0 && i < env.width && j < env.height)
+					if (env.poolTypes[i][j] == elementNum)
+						lesserCost = true;
 		if (!on && !user.maintaining && (cost <= user.mana || (lesserCost && Math.max(cost - 2, 0) < user.mana)))
 		{
 			boolean canCreate = true;
@@ -96,7 +97,7 @@ public class Pool_E extends GridTargetingAbility
 				env.otherDebris((targetGridX + 0.5) * squareSize, (targetGridY + 0.5) * squareSize, 14, "pool heal blood", frameNum);
 			}
 			else
-			env.otherDebris((targetGridX + 0.5) * squareSize, (targetGridY + 0.5) * squareSize, element, "pool heal", frameNum);
+				env.otherDebris((targetGridX + 0.5) * squareSize, (targetGridY + 0.5) * squareSize, element, "pool heal", frameNum);
 			env.poolHealths[(int) targetGridX][(int) targetGridY] += level;
 			if (env.poolHealths[(int) targetGridX][(int) targetGridY] >= 100)
 				env.poolHealths[(int) targetGridX][(int) targetGridY] = 100;

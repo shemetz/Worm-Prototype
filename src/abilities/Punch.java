@@ -46,7 +46,6 @@ public class Punch extends Ability
 
 	public void use(Environment env, Person user, Point target)
 	{
-		setSounds(user.Point());
 		range = (int) (2.3 * user.radius);
 
 		/*
@@ -57,7 +56,7 @@ public class Punch extends Ability
 		double tempAngleThing = Math.abs(user.rotation - angle) % (2 * Math.PI);
 		double angleDifference = tempAngleThing > Math.PI ? 2 * Math.PI - tempAngleThing : tempAngleThing;
 
-		if (user.z == 0 || user.z == 1)
+		if (user.flySpeed == -1 && user.z == 0 || user.z == 1)
 		{
 			if (user.maintaining && user.abilityMaintaining == -1)
 			{
@@ -159,6 +158,7 @@ public class Punch extends Ability
 		{
 			if (a instanceof Pushy_Fists)
 				pushback *= 2;
+
 		}
 
 		// Notice:
@@ -185,6 +185,7 @@ public class Punch extends Ability
 					user.target = new Point((int) (user.x + range * Math.cos(user.rotation + extraAimingAngle * m)), (int) (user.y + range * Math.sin(user.rotation + extraAimingAngle * m)));
 					if (!onlyOrganics)
 					{
+						// Walls
 						int i = Math.min(Math.max(user.target.x / squareSize, 0), env.width - 1);
 						int j = Math.min(Math.max(user.target.y / squareSize, 0), env.height - 1);
 						if (user.z < 1 && env.wallTypes[i][j] > 0)
@@ -193,7 +194,10 @@ public class Punch extends Ability
 							{
 								if (a instanceof Shattering_Fists)
 									if (Math.random() < 0.25 * a.level)
+									{
 										env.nonRecursiveDamageWall(i, j, (damage + pushback) / timeEffect * 10, punchDamageType);
+										a.sounds.get(0).play();
+									}
 								if (a instanceof Strike_E)
 									env.damageWall(i, j, (a.damage + a.pushback) / timeEffect, a.elementNum);
 							}
@@ -203,6 +207,7 @@ public class Punch extends Ability
 							user.punchedSomething = true;
 							break collisionCheck;
 						}
+						// Furniture
 						if (user.z < 1)
 							for (Furniture f : env.furniture)
 							{
@@ -220,7 +225,10 @@ public class Punch extends Ability
 										{
 											if (a instanceof Shattering_Fists)
 												if (Math.random() < 0.25 * a.level)
+												{
 													damage *= 10;
+													a.sounds.get(0).play();
+												}
 											if (a instanceof Strike_E)
 												damage += (a.damage + a.pushback) / timeEffect; // together why not
 										}
@@ -250,7 +258,10 @@ public class Punch extends Ability
 										{
 											if (a instanceof Shattering_Fists)
 												if (Math.random() < 0.25 * a.level)
+												{
 													damage *= 10;
+													a.sounds.get(0).play();
+												}
 											if (a instanceof Strike_E)
 												damage += (a.damage + a.pushback) / timeEffect; // together why not
 										}
@@ -312,7 +323,10 @@ public class Punch extends Ability
 								{
 									if (a instanceof Shattering_Fists)
 										if (Math.random() < 0.25 * a.level)
+										{
 											damage *= 10;
+											a.sounds.get(0).play();
+										}
 									if (a instanceof Strike_E)
 										damage += (a.damage + a.pushback) / timeEffect; // together why not
 								}
@@ -328,37 +342,41 @@ public class Punch extends Ability
 						}
 					for (Person p : env.people)
 						if (user.ghostMode == p.ghostMode)
-							// allowing higher vertical range, for flying people? //TODO leave it as it is or remove it and lower Punch-flight height to about 0.6
 							if (p.highestPoint() > user.z - extraVerticalHeight && p.z < user.highestPoint() + extraVerticalHeight)
-								// This is actually the purpose of the punches, by the way
 								if (!p.equals(user))
-								if (p.x - p.radius < user.target.x && p.y - p.radius < user.target.y && p.x + p.radius > user.target.x && p.y + p.radius > user.target.y)
-								{
-								env.hitPerson(p, damage, pushback, user.rotation, punchElement); // This is such an elegant line of code :3
+									if (p.x - p.radius < user.target.x && p.y - p.radius < user.target.y && p.x + p.radius > user.target.x && p.y + p.radius > user.target.y)
+									{
+										env.hitPerson(p, damage, pushback, user.rotation, punchElement); // This is such an elegant line of code :3
 
-								for (Ability a : user.punchAffectingAbilities)
-								{
-								if (a instanceof Sapping_Fists)
-								if (Math.random() < 0.1 * a.level) // 10% * level
-								p.affect(new Nullified(1, true, a), true);
-								if (a instanceof Elemental_Fists_E)
-								env.hitPerson(p, a.damage / timeEffect, a.pushback / timeEffect, user.rotation, a.elementNum);
-								if (a instanceof Strike_E)
-								{
-								// apply effect
-								double[] dmgpush = env.trySpecialEffectReturnDamageAndPushback(p, a.elementNum, a.damage, a.pushback, 1); // 1 = certain
-								double damage2 = dmgpush[0];
-								double pushback2 = dmgpush[1];
-								// might apply effect twice in some cases - I don't want to try to solve this, I'm lazy
-								env.hitPerson(p, damage2 / timeEffect, pushback2 / timeEffect, user.rotation, a.elementNum);
-								}
-								if (a instanceof Vampiric_Fists)
-								user.heal(0.2 * a.level * damage);
-								}
+										for (Ability a : user.punchAffectingAbilities)
+										{
+											if (a instanceof Sapping_Fists)
+												if (Math.random() < 0.1 * a.level) // 10% * level
+												{
+													p.affect(new Nullified(1, true, a), true);
+													a.sounds.get(0).play();
+												}
+											if (a instanceof Elemental_Fists_E)
+												env.hitPerson(p, a.damage / timeEffect, a.pushback / timeEffect, user.rotation, a.elementNum);
+											if (a instanceof Strike_E)
+											{
+												// apply effect
+												double[] dmgpush = env.trySpecialEffectReturnDamageAndPushback(p, a.elementNum, a.damage, a.pushback, 1); // 1 = certain
+												double damage2 = dmgpush[0];
+												double pushback2 = dmgpush[1];
+												// might apply effect twice in some cases - I don't want to try to solve this, I'm lazy
+												env.hitPerson(p, damage2 / timeEffect, pushback2 / timeEffect, user.rotation, a.elementNum);
+											}
+											if (a instanceof Vampiric_Fists)
+											{
+												user.heal(0.2 * a.level * damage);
+												a.sounds.get(0).play();
+											}
+										}
 
-								user.punchedSomething = true;
-								break collisionCheck;
-								}
+										user.punchedSomething = true;
+										break collisionCheck;
+									}
 				}
 			}
 		}
@@ -377,6 +395,8 @@ public class Punch extends Ability
 					env.createExplosion(user.target.x, user.target.y, user.z, a.radius, a.damage, a.pushback, -1);
 				if (a instanceof Strike_E)
 					((Strike_E) a).turnOff();
+				if (a instanceof Strike_E || a instanceof Elemental_Fists_E || a instanceof Pushy_Fists)
+					a.sounds.get(0).play();
 			}
 			return true;
 		}

@@ -19,17 +19,22 @@ public class Muscle_Charge extends Ability
 		cost = 0;
 		costType = CostType.CHARGE;
 		instant = true;
+		cooldown = 5;
 
 		extraStrength = Math.pow(2, level);
 	}
 
 	public void use(Environment env, Person user, Point target)
 	{
-		on = !on;
-		if (on)
-			user.STRENGTH += extraStrength;
-		else
-			user.STRENGTH -= extraStrength;
+		if (cooldownLeft == 0)
+		{
+			on = !on;
+			cooldownLeft = cooldown;
+			if (on)
+				user.STRENGTH += extraStrength;
+			else
+				user.STRENGTH -= extraStrength;
+		}
 	}
 
 	public void maintain(Environment env, Person user, Point target, double deltaTime)

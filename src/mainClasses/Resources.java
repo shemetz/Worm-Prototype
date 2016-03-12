@@ -40,9 +40,7 @@ public class Resources
 	public static BufferedImage disabled;
 	public static Map<String, BufferedImage> furniture; // name, image
 	public static Map<String, List<BufferedImage>> specialPunches; // name, list of 3 pictures (left, right, inbetween)
-	public static BufferedImage healingBeam;
-	public static BufferedImage stealPowerBeam;
-	public static BufferedImage possessionEyes;
+	public static Map<String, BufferedImage> abilities; // name, image
 
 	public static void initialize()
 	{
@@ -56,6 +54,7 @@ public class Resources
 		bodyPart = new ArrayList<List<List<List<BufferedImage>>>>(); // LEGS, CHEST (+arms), HEAD, HAIR, VINES
 
 		icons = new HashMap<String, BufferedImage>();
+		abilities = new HashMap<String, BufferedImage>();
 		arcForceFields = new BufferedImage[numOfElements + 1][4]; // 0-11 = elemental, 12 = Prot. Bubble
 		balls = new BufferedImage[numOfElements];
 		sprayDrops = new BufferedImage[numOfElements][3];
@@ -557,9 +556,10 @@ public class Resources
 		effects.get(0).add(ResourceLoader.getBufferedImage("people/burning_2.png"));
 		effects.get(0).add(ResourceLoader.getBufferedImage("people/burning_3.png"));
 
-		healingBeam = ResourceLoader.getBufferedImage("other abilities/heal.png");
-		stealPowerBeam = ResourceLoader.getBufferedImage("other abilities/steal.png");
-		possessionEyes = ResourceLoader.getBufferedImage("other abilities/possession_eyes.png");
+		String[] miscAbilities = new String[]
+		{ "heal", "steal", "possession_eyes", "elasticcharge_eyes" };
+		for (String s : miscAbilities)
+			abilities.put(s, ResourceLoader.getBufferedImage("other abilities/" + s + ".png"));
 
 		explosions.add(new ArrayList<BufferedImage>());
 		for (int i = 0; i < 6; i++)

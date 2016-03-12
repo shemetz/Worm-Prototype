@@ -4,6 +4,7 @@ import java.awt.Point;
 
 import mainClasses.Environment;
 import mainClasses.Person;
+import mainResourcesPackage.SoundEffect;
 
 public class Pushy_Fists extends _PunchAbility
 {
@@ -11,6 +12,8 @@ public class Pushy_Fists extends _PunchAbility
 	public Pushy_Fists(int p)
 	{
 		super("Pushy Fists", p);
+
+		sounds.add(new SoundEffect("Pushy Fists.wav"));
 	}
 
 	@Override

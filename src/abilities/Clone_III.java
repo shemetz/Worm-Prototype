@@ -36,8 +36,6 @@ public class Clone_III extends Ability
 			clone.maxLife = 30 * level;
 			clone.life = clone.maxLife;
 			clone.strategy = NPC.Strategy.CLONE;
-			clone.legs = 0;
-			clone.chest = 0;
 			clone.initAnimation();
 			for (Ability a : user.abilities)
 				if (!a.equals(this))
