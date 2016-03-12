@@ -944,7 +944,7 @@ public class Person extends RndPhysObj implements Mover
 		possibleAbilities.remove("Punch");
 		possibleAbilities.remove("Sprint");
 		possibleAbilities.remove("Elemental Combat I");
-		for (int i = 0; i < 10;)
+		for (int i = 0; i < 4;)
 		{
 			String str = possibleAbilities.get(rand.nextInt(possibleAbilities.size()));
 			if (!Ability.elementalPowers.contains(str))

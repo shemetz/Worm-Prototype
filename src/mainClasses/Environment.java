@@ -2694,16 +2694,16 @@ public class Environment
 		double velocityModifier = 1;
 		switch (b.elementNum)
 		{
-		case 0: // fire
 		case 1: // water
 		case 5: // ice
 		case 7: // acid
 		case 8: // lava
-		case 9: // flesh
 		case 3: // electricity
 			velocityModifier = 0;
 			break;
+		case 0: // fire
 		case 2: // wind
+		case 9: // flesh
 		case 4: // metal
 		case 6: // energy
 		case 10: // earth

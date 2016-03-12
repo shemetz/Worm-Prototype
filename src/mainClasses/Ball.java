@@ -61,6 +61,7 @@ public class Ball extends RndPhysObj
 			radius = 30;
 			break;
 		case 5: // ice
+			radius = 30;
 			break;
 		case 6: // energy
 			radius = 15;
@@ -69,8 +70,11 @@ public class Ball extends RndPhysObj
 			radius = 45;
 			break;
 		case 8: // lava
+			radius = 45;
 			break;
 		case 9: // flesh
+			radius = 30;
+			angularVelocity = 4;
 			break;
 		case 10: // earth
 			radius = 30;
