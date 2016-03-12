@@ -1001,92 +1001,93 @@ public class Environment
 
 			// Furniture
 			if (p.z < 1)
-				for (Furniture f : furniture)
-				{
-					// Copy of the FF collision code
-					boolean collided = false;
-					boolean collidedWithACorner = false;
-					double newAngle = 0;
-					Point[] fPoints = f.getPoints();
-					for (Point p1 : fPoints)
-						if (p1.x > p.x - p.radius && p1.x < p.x + p.radius && p1.y > p.y - p.radius && p1.y < p.y + p.radius)
-						{
-							collidedWithACorner = true;
-							collided = true;
-							newAngle = Math.atan2(p.y - f.y, p.x - f.x);
-						}
-					if (!collidedWithACorner)
+				if (!p.ghostMode) // ghosts pass through stuff
+					for (Furniture f : furniture)
 					{
-						double personAngle = p.angle();
-						Line2D l1 = new Line2D.Double(fPoints[0].x, fPoints[0].y, fPoints[3].x, fPoints[3].y);
-						Line2D l2 = new Line2D.Double(fPoints[0].x, fPoints[0].y, fPoints[1].x, fPoints[1].y);
-						Line2D l3 = new Line2D.Double(fPoints[2].x, fPoints[2].y, fPoints[1].x, fPoints[1].y);
-						Line2D l4 = new Line2D.Double(fPoints[2].x, fPoints[2].y, fPoints[3].x, fPoints[3].y);
-						if (personRect.intersectsLine(l1))
-						{
-							collided = true;
-							newAngle = 2 * f.rotation - personAngle;
-						}
-						if (personRect.intersectsLine(l2))
-						{
-							collided = true;
-							newAngle = 2 * f.rotation - personAngle + Math.PI;
-						}
-						if (personRect.intersectsLine(l3))
-						{
-							collided = true;
-							newAngle = 2 * f.rotation - personAngle;
-						}
-						if (personRect.intersectsLine(l4))
-						{
-							collided = true;
-							newAngle = 2 * f.rotation - personAngle + Math.PI;
-						}
-
-					}
-					if (collided)
-					{
-						if (charge != null && p.velocityPow2() >= charge.minimumVelocityPow2)
-							damageFurniture(f, (charge.damage + charge.pushback) * 4, 0); // blunt damage, x4 because charge deals more to inorganics
-						if (f.life > 0)
-						{
-							if (f.type == Furniture.Type.DOOR)
+						// Copy of the FF collision code
+						boolean collided = false;
+						boolean collidedWithACorner = false;
+						double newAngle = 0;
+						Point[] fPoints = f.getPoints();
+						for (Point p1 : fPoints)
+							if (p1.x > p.x - p.radius && p1.x < p.x + p.radius && p1.y > p.y - p.radius && p1.y < p.y + p.radius)
 							{
-								if (f.state == 0) // closed
-								{
-									f.activate();
-									continue;
-								}
-								if (f.state == 1) // open
-									continue;
-								if (f.state == 2) // locked
-									;
+								collidedWithACorner = true;
+								collided = true;
+								newAngle = Math.atan2(p.y - f.y, p.x - f.x);
 							}
-							// THIS IS NOT GOOD CODE, THIS IS BAD CODE, BUT I CAN'T MAKE THIS PHYSICS THING WORK LIKE I WANT IT TO
-							p.x -= moveQuantumX;
-							p.y -= moveQuantumY;
-							// attempt at physics
-							double bounceEfficiency = 0.6;
-							if (elastic != null && p.velocityPow2() >= elastic.minimumVelocityPow2)
-								bounceEfficiency = 1;
-							double velocity = bounceEfficiency * p.velocity();
-							p.xVel = velocity * Math.cos(newAngle);
-							p.yVel = velocity * Math.sin(newAngle);
-							moveQuantumX = Math.cos(newAngle) * deltaTime;
-							moveQuantumY = Math.sin(newAngle) * deltaTime;
-							p.x += 80 * moveQuantumX;
-							p.y += 80 * moveQuantumY;
-							if (p instanceof NPC)
-								((NPC) p).justCollided = true;
-						}
-						else
-						// reduce speed by a bit
+						if (!collidedWithACorner)
 						{
-							p.xVel *= 0.95;
-							p.yVel *= 0.95;
+							double personAngle = p.angle();
+							Line2D l1 = new Line2D.Double(fPoints[0].x, fPoints[0].y, fPoints[3].x, fPoints[3].y);
+							Line2D l2 = new Line2D.Double(fPoints[0].x, fPoints[0].y, fPoints[1].x, fPoints[1].y);
+							Line2D l3 = new Line2D.Double(fPoints[2].x, fPoints[2].y, fPoints[1].x, fPoints[1].y);
+							Line2D l4 = new Line2D.Double(fPoints[2].x, fPoints[2].y, fPoints[3].x, fPoints[3].y);
+							if (personRect.intersectsLine(l1))
+							{
+								collided = true;
+								newAngle = 2 * f.rotation - personAngle;
+							}
+							if (personRect.intersectsLine(l2))
+							{
+								collided = true;
+								newAngle = 2 * f.rotation - personAngle + Math.PI;
+							}
+							if (personRect.intersectsLine(l3))
+							{
+								collided = true;
+								newAngle = 2 * f.rotation - personAngle;
+							}
+							if (personRect.intersectsLine(l4))
+							{
+								collided = true;
+								newAngle = 2 * f.rotation - personAngle + Math.PI;
+							}
+
+						}
+						if (collided)
+						{
+							if (charge != null && p.velocityPow2() >= charge.minimumVelocityPow2)
+								damageFurniture(f, (charge.damage + charge.pushback) * 4, 0); // blunt damage, x4 because charge deals more to inorganics
+							if (f.life > 0)
+							{
+								if (f.type == Furniture.Type.DOOR)
+								{
+									if (f.state == 0) // closed
+									{
+										f.activate();
+										continue;
+									}
+									if (f.state == 1) // open
+										continue;
+									if (f.state == 2) // locked
+										;
+								}
+								// THIS IS NOT GOOD CODE, THIS IS BAD CODE, BUT I CAN'T MAKE THIS PHYSICS THING WORK LIKE I WANT IT TO
+								p.x -= moveQuantumX;
+								p.y -= moveQuantumY;
+								// attempt at physics
+								double bounceEfficiency = 0.6;
+								if (elastic != null && p.velocityPow2() >= elastic.minimumVelocityPow2)
+									bounceEfficiency = 1;
+								double velocity = bounceEfficiency * p.velocity();
+								p.xVel = velocity * Math.cos(newAngle);
+								p.yVel = velocity * Math.sin(newAngle);
+								moveQuantumX = Math.cos(newAngle) * deltaTime;
+								moveQuantumY = Math.sin(newAngle) * deltaTime;
+								p.x += 80 * moveQuantumX;
+								p.y += 80 * moveQuantumY;
+								if (p instanceof NPC)
+									((NPC) p).justCollided = true;
+							}
+							else
+							// reduce speed by a bit
+							{
+								p.xVel *= 0.95;
+								p.yVel *= 0.95;
+							}
 						}
 					}
-				}
 
 			// People-people collisions
 			for (Person p2 : people)
