@@ -23,7 +23,6 @@ import java.util.function.Predicate;
 import abilities.Charge;
 import abilities.Elastic;
 import abilities.Explosion_Resistance;
-import abilities.FurnitureDebris;
 import abilities.Portals;
 import effects.Burning;
 import effects.E_Resistant;
@@ -3103,6 +3102,7 @@ public class Environment
 		case 7: // acid
 		case 8: // lava
 		case 3: // electricity
+		case 14: //blood
 			velocityModifier = 0;
 			break;
 		case 0: // fire
@@ -3118,19 +3118,15 @@ public class Environment
 		}
 		switch (type)
 		{
-		case "pool heal blood":
-			if (frameNum % 3 == 0)
-			{
-				double angle = Math.random() * Math.PI * 2;
-				double distance = Math.random() * 100 + 50;
-				debris.add(new Debris(x + distance * Math.cos(angle), y + distance * Math.sin(angle), 0, angle, elementNum, 0));
-			}
-			break;
 		case "pool heal":
 		case "wall heal":
 			if (frameNum % 10 == 0)
 				for (double i = Math.random(); i < 3; i++)
-					debris.add(new Debris(x, y, 0, i + Math.random(), elementNum, 300 * velocityModifier));
+				{
+					double angle = Math.random() * Math.PI * 2;
+					double distance = Math.random() * 100 + 50;
+					debris.add(new Debris(x + distance * Math.cos(angle), y + distance * Math.sin(angle), 0, i + Math.random(), elementNum, 300 * velocityModifier));
+				}
 			break;
 		case "destroy":
 			for (int i = 0; i < 5; i++)

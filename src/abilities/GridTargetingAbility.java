@@ -21,11 +21,7 @@ public class GridTargetingAbility extends Ability
 	public GridTargetingAbility(String n, int p)
 	{
 		super(n, p);
-		cost = Math.max(3 - 0.3 * level, 0.8);
 		costType = CostType.MANA;
-		cooldown = Math.max(3 - 0.3 * level, 0.3); // is used for creating the wall
-		costPerSecond = 1;
-		range = 600;
 		rangeType = RangeType.CREATE_IN_GRID;
 		maintainable = true;
 		instant = true;
@@ -34,6 +30,15 @@ public class GridTargetingAbility extends Ability
 		targetGridY = -1;
 		canBuildInTarget = false;
 		rangeArea = new Area();
+	}
+
+	public void updateStats()
+	{
+		cost = Math.max(3 - 0.3 * level, 0.8);
+		cooldown = Math.max(3 - 0.3 * level, 0.3); // is used for creating the wall
+		costPerSecond = 1;
+		range = 600;
+		
 	}
 
 	public void UPT(Environment env, Person player)

@@ -33,6 +33,11 @@ public class MenuThingie extends MenuElement
 
 	public void draw(Graphics2D buffer)
 	{
+		if (type == Type.ABILITIES)
+		{
+
+			return;
+		}
 		buffer.setStroke(new BasicStroke(3));
 		buffer.setColor(Color.black);
 		buffer.drawRect(x, y, width, height);

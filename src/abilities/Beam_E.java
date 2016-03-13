@@ -18,22 +18,16 @@ public class Beam_E extends Ability
 {
 
 	int beamFrameNum;
+	int beamLevel;
 	public List<Evasion> evasions;
 	public double criticalTimeLeft = 0;
 
 	public Beam_E(String elementName, int p)
 	{
 		super("Beam <" + elementName + ">", p);
-		cost = 0;
-		costPerSecond = 1;
 		costType = CostType.MANA;
 		rangeType = RangeType.EXACT_RANGE;
-		cooldown = 0.5; // after stopping a beam attack, this is the cooldown to start a new one
 
-		if (getElement().equals("Plant"))
-			range = 80 * level;
-		else
-			range = 500 * level;
 		stopsMovement = false;
 		maintainable = true;
 		instant = true;
@@ -52,6 +46,17 @@ public class Beam_E extends Ability
 			sounds.add(new SoundEffect(elementName + " Beam.wav"));
 			sounds.get(0).endUnlessMaintained = true;
 		}
+	}
+
+	public void updateStats()
+	{
+		if (getElement().equals("Plant"))
+			range = 80 * level;
+		else
+			range = 500 * level;
+		costPerSecond = 1;
+		cooldown = 0.5; // after stopping a beam attack, this is the cooldown to start a new one
+		beamLevel = level; //TODO remove this, instead have constructors take more stuff
 	}
 
 	public void use(Environment env, Person user, Point target)
@@ -124,7 +129,7 @@ public class Beam_E extends Ability
 				angle = angle + user.inaccuracyAngle; // rotation changes in updateTargeting
 				Point3D start = new Point3D((int) (user.x + vineExitDistance * Math.cos(angle)), (int) (user.y + vineExitDistance * Math.sin(angle)), (int) user.z); // starts beamExitDistance pixels in front of the user
 				Point3D end = new Point3D((int) (user.x + 2 * vineExitDistance * Math.cos(angle)), (int) (user.y + 2 * vineExitDistance * Math.sin(angle)), (int) user.z);
-				Vine v = new Vine(user, start, end, level, range);
+				Vine v = new Vine(user, start, end, beamLevel, range);
 				env.vines.add(v);
 				user.switchAnimation(2);
 				sounds.get(0).play();
@@ -162,7 +167,7 @@ public class Beam_E extends Ability
 					Point3D start = new Point3D((int) (user.x + beamExitDistance * Math.cos(angle)), (int) (user.y + beamExitDistance * Math.sin(angle)), user.z + user.height / 2); // starts beamExitDistance pixels in front of the user
 					// TODO piercing beams, or electric lightning bolts
 					Point3D end = new Point3D((int) (user.x + range * Math.cos(angle)), (int) (user.y + range * Math.sin(angle)), user.z + user.height / 2);
-					Beam b = new Beam(user, this, start, end, elementNum, level, range);
+					Beam b = new Beam(user, this, start, end, elementNum, beamLevel, range);
 					frameNum++;
 					b.frameNum = beamFrameNum;
 					// critical chance
@@ -198,7 +203,7 @@ public class Beam_E extends Ability
 						double angle = targetAngle + user.inaccuracyAngle; // rotation changes in updateTargeting
 						Point3D start = new Point3D((int) (user.x + vineExitDistance * Math.cos(angle)), (int) (user.y + vineExitDistance * Math.sin(angle)), (int) user.z); // starts beamExitDistance pixels in front of the user
 						Point3D end = new Point3D((int) (user.x + 2 * vineExitDistance * Math.cos(angle)), (int) (user.y + 2 * vineExitDistance * Math.sin(angle)), (int) user.z);
-						Vine v = new Vine(user, start, end, level, range);
+						Vine v = new Vine(user, start, end, beamLevel, range);
 						env.vines.add(v);
 						env.moveVine(v, deltaTime);
 					}

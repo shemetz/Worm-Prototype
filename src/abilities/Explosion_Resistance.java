@@ -12,6 +12,11 @@ public class Explosion_Resistance extends _PassiveAbility
 		super("Explosion Resistance", p);
 	}
 
+	public void updateStats()
+	{
+		
+	}
+
 	public void use(Environment env, Person user, Point target)
 	{
 		on = !on;

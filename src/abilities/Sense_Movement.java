@@ -11,7 +11,12 @@ public class Sense_Movement extends _PassiveAbility
 	public Sense_Movement(int p)
 	{
 		super("Sense Movement", p);
+	}
+
+	public void updateStats()
+	{
 		range = (int) Math.pow(3, level);
+		
 	}
 
 	public void use(Environment env, Person user, Point target)

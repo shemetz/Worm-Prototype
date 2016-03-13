@@ -13,16 +13,21 @@ public class Undo_II extends _LoopAbility
 	{
 		super("Undo II", p, Targeting.TARGETED);
 
-		cost = 6 - 0.5 * level;
 		costType = CostType.MANA;
-		cooldown = 2;
-		range = 500;
 		rangeType = RangeType.CIRCLE_AREA;
 		instant = false;
-
-		amount = level;
+		
 		position = false;
 		state = true;
+	}
+
+	public void updateStats()
+	{
+		cost = 6 - 0.5 * level;
+		cooldown = 2;
+		range = 500;
+		duration = level;
+		
 	}
 
 	public void use(Environment env, Person user, Point target)

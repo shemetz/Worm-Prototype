@@ -11,7 +11,6 @@ import mainClasses.Player;
 public class Chronobiology extends Ability
 {
 
-	double amount;
 	boolean initialChange = false;
 	ChronobiologyEffect effect;
 	public boolean state; // true = fast, false = slow
@@ -19,13 +18,17 @@ public class Chronobiology extends Ability
 	public Chronobiology(int p)
 	{
 		super("Chronobiology", p);
-		cost = 3; // to switch
 		costType = CostType.MANA;
 		instant = true;
 
-		amount = 1 + 0.2 * level;
 		state = true;
 		on = true; // stays like that
+	}
+
+	public void updateStats()
+	{
+		amount = 1 + 0.2 * level;
+		cost = 3; // to switch
 	}
 
 	public void use(Environment env, Person user, Point target)

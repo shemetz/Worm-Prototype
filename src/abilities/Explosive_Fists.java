@@ -16,11 +16,15 @@ public class Explosive_Fists extends _PunchAbility
 		super("Explosive Fists", p);
 
 		rangeType = Ability.RangeType.EXPLOSION;
+
+		givenAbility = (Explosion_Resistance) Ability.ability("Explosion Resistance", 0);
+	}
+
+	public void updateStats()
+	{
 		radius = 200;
 		damage = level;
 		pushback = level * 8;
-
-		givenAbility = (Explosion_Resistance) Ability.ability("Explosion Resistance", 0);
 	}
 
 	public void use(Environment env, Person user, Point target)

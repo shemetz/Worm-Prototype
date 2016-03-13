@@ -15,6 +15,11 @@ public class Elemental_Combat_I_E extends Ability
 		super("Elemental Combat I <" + elementName + ">", p);
 	}
 
+	public void updateStats()
+	{
+		; // TODO maybe
+	}
+
 	public void use(Environment env, Person user, Point target)
 	{
 		List<Ability> addedAbilities = new LinkedList<Ability>();

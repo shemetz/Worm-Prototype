@@ -8,21 +8,29 @@ import mainClasses.Person;
 public class Precision_III extends _PassiveAbility
 {
 	double oldValue;
+	double dexBonus;
 
 	public Precision_III(int p)
 	{
 		super("Precision III", p);
 	}
 
+	public void updateStats()
+	{
+		dexBonus = 3 * level;
+		amount = 1;
+		
+	}
+
 	public void use(Environment env, Person user, Point target)
 	{
 		on = !on;
 		int val = on ? 1 : -1;
-		user.DEXTERITY += 3 * val * level;
+		user.DEXTERITY += val * dexBonus;
 		if (on) // activate
 		{
 			oldValue = user.accuracy;
-			user.accuracy = 1;
+			user.accuracy = amount;
 		}
 		else
 			user.accuracy = oldValue;

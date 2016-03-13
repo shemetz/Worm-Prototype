@@ -21,9 +21,14 @@ public class Elemental_Resistance_E extends _PassiveAbility
 		damageType = EP.damageType(element);
 	}
 
+	public void updateStats()
+	{
+		amount = level;
+	}
+
 	public void use(Environment env, Person user, Point target)
 	{
 		on = !on;
-		user.affect(new E_Resistant(EP.elementList[elementNum], level, this), on);
+		user.affect(new E_Resistant(EP.elementList[elementNum], (int) amount, this), on);
 	}
 }

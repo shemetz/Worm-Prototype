@@ -10,18 +10,18 @@ import mainClasses.Player;
 public class Muscle_Charge extends Ability
 {
 
-	double extraStrength;
-
 	public Muscle_Charge(int p)
 	{
 		super("Muscle Charge", p);
-		costPerSecond = 20;
-		cost = 0;
 		costType = CostType.CHARGE;
 		instant = true;
-		cooldown = 5;
+	}
 
-		extraStrength = Math.pow(2, level);
+	public void updateStats()
+	{
+		cooldown = 5;
+		costPerSecond = 20;
+		amount = Math.pow(2, level);
 	}
 
 	public void use(Environment env, Person user, Point target)
@@ -31,9 +31,9 @@ public class Muscle_Charge extends Ability
 			on = !on;
 			cooldownLeft = cooldown;
 			if (on)
-				user.STRENGTH += extraStrength;
+				user.STRENGTH += amount;
 			else
-				user.STRENGTH -= extraStrength;
+				user.STRENGTH -= amount;
 		}
 	}
 

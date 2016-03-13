@@ -16,15 +16,19 @@ public class Shield_E extends Ability
 	public Shield_E(String elementName, int p)
 	{
 		super("Shield <" + elementName + ">", p);
-		cost = 2;
-		costPerSecond = 0.3;
 		costType = CostType.MANA;
-		cooldown = 5;
-		range = -1;
 		rangeType = RangeType.NONE;
 		maintainable = true;
 
 		shield = null;
+	}
+
+	public void updateStats()
+	{
+		cost = 2;
+		costPerSecond = 0.3;
+		cooldown = 5;
+		
 	}
 
 	public void use(Environment env, Person user, Point target)

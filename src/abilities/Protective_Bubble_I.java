@@ -13,19 +13,26 @@ import mainResourcesPackage.SoundEffect;
 public class Protective_Bubble_I extends Ability
 {
 	public ArcForceField bubble;
+	double life;
 
 	public Protective_Bubble_I(int p)
 	{
 		super("Protective Bubble I", p);
-		cooldown = 1;
 		costType = CostType.MANA;
-		cost = 3;
 		instant = true;
 
 		bubble = null;
 
 		sounds.add(new SoundEffect("Bubble_appear.wav"));
 		sounds.add(new SoundEffect("Bubble_pop.wav"));
+	}
+
+	public void updateStats()
+	{
+		cooldown = 1;
+		cost = 3;
+		life = 10 * level;
+		
 	}
 
 	public void use(Environment env, Person user, Point target)
@@ -60,7 +67,7 @@ public class Protective_Bubble_I extends Ability
 				}
 
 			// Add a new protective bubble
-			bubble = new ArcForceField(user, 0, 2 * Math.PI, 107, 10 * level, 12, ArcForceField.Type.MOBILE_BUBBLE);
+			bubble = new ArcForceField(user, 0, 2 * Math.PI, 107, life, 12, ArcForceField.Type.MOBILE_BUBBLE);
 			env.AFFs.add(bubble);
 			user.mana -= this.cost;
 			this.cooldownLeft = this.cooldown;

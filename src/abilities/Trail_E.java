@@ -23,10 +23,14 @@ public class Trail_E extends Ability
 	public Trail_E(String element, int p)
 	{
 		super("Trail <" + element + ">", p);
-		cost = Math.max(0, 0.7 - 0.1 * level);
 		costType = CostType.MANA;
-		cooldown = 0; // once per frame
 		instant = true;
+	}
+
+	public void updateStats()
+	{
+		cooldown = 0; // once per frame
+		cost = Math.max(0, 0.7 - 0.1 * level);
 
 		switch (elementNum)
 		{
@@ -54,6 +58,7 @@ public class Trail_E extends Ability
 			MAIN.errorMessage("You made a bear! Undo it, undo it!");
 			break;
 		}
+		
 	}
 
 	public void use(Environment env, Person user, Point target)

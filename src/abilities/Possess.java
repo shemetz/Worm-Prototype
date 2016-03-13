@@ -20,13 +20,17 @@ public class Possess extends Ability
 	public Possess(int p)
 	{
 		super("Possess", p);
-		cost = 7;
 		costType = CostType.MANA;
+		rangeType = RangeType.CIRCLE_AREA;
+	}
+
+	public void updateStats()
+	{
+		cost = 7;
 		cooldown = 18 - level;
 		range = 500;
-		rangeType = RangeType.CIRCLE_AREA;
-
 		duration = 3 * level; // or when reduced to < 20% HP
+		
 	}
 
 	public Person getTarget(Environment env, Point targetPoint)

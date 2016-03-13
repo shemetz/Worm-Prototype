@@ -16,12 +16,17 @@ public class Time_Freeze_Target_II extends Ability
 	public Time_Freeze_Target_II(int p)
 	{
 		super("Time Freeze Target II", p);
-		cost = 2;
+		rangeType = RangeType.CIRCLE_AREA;
 		costType = CostType.MANA;
+	}
+
+	public void updateStats()
+	{
+		cost = 2;
 		cooldown = 0.2;
 		range = 1500;
-		rangeType = RangeType.CIRCLE_AREA;
 		duration = 2 * level;
+		
 	}
 
 	public void disable(Environment env, Person user)

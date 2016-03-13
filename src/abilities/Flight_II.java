@@ -9,15 +9,20 @@ import mainClasses.Player;
 
 public class Flight_II extends Ability
 {
+	double flySpeed;
 
 	public Flight_II(int p)
 	{
 		super("Flight II", p);
-		costPerSecond = 0.4;
 		costType = CostType.STAMINA;
-		cooldown = 1;
-		cost = 0;
 		instant = true;
+	}
+
+	public void updateStats()
+	{
+		flySpeed = 300 * level; // 800 to 1200 pixels per second
+		cooldown = 1;
+		costPerSecond = 0.4;
 	}
 
 	public void use(Environment env, Person user, Point target)
@@ -27,9 +32,10 @@ public class Flight_II extends Ability
 			on = true;
 			if (user.z == 0)
 				user.z += 0.1;
-			user.flySpeed = 300 * level; // 800 to 1200 pixels per second
+			user.flySpeed = flySpeed;
 			cooldownLeft = 0.5; // constant activation cooldown - to fix keys being stuck, etc.
-		} else if (on && cooldownLeft == 0)
+		}
+		else if (on && cooldownLeft == 0)
 		{
 			on = false;
 			cooldownLeft = cooldown;

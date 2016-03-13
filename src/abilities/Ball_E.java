@@ -11,24 +11,28 @@ import mainResourcesPackage.SoundEffect;
 
 public class Ball_E extends Ability
 {
+	double startingDistance;
 
 	public Ball_E(String elementName, int p)
 	{
 		super("Ball <" + elementName + ">", p);
-		cost = 5.0 / elementalAttackNumbers[elementNum][2];
 		costType = CostType.MANA;
-		cooldown = 5.0 / elementalAttackNumbers[elementNum][2];
-		range = 80;
 		rangeType = RangeType.NONE;
 		stopsMovement = false;
 		maintainable = true;
 		instant = true;
 
-		damage = 0.6 * level * Ability.elementalAttackNumbers[elementNum][0];
-		pushback = 0.6 * level * Ability.elementalAttackNumbers[elementNum][1] + 1;
-
 		for (int i = 1; i < 6; i++)
 			sounds.add(new SoundEffect("Ball_" + i + ".wav"));
+	}
+
+	public void updateStats()
+	{
+		startingDistance = 80;
+		damage = 0.6 * level * Ability.elementalAttackNumbers[elementNum][0];
+		pushback = 0.6 * level * Ability.elementalAttackNumbers[elementNum][1] + 1;
+		cost = 5.0 / elementalAttackNumbers[elementNum][2];
+		cooldown = 5.0 / elementalAttackNumbers[elementNum][2];
 	}
 
 	public void use(Environment env, Person user, Point target)
@@ -63,8 +67,8 @@ public class Ball_E extends Ability
 				double angle = targetAngle + user.missAngle * (2 * Math.random() - 1);
 				cooldownLeft = cooldown;
 				Ball b = new Ball(elementNum, damage, pushback, angle, user);
-				b.x = user.x + range * Math.cos(angle);
-				b.y = user.y + range * Math.sin(angle);
+				b.x = user.x + startingDistance * Math.cos(angle);
+				b.y = user.y + startingDistance * Math.sin(angle);
 				b.z = user.z + 0.9;
 				b.xVel += user.xVel;
 				b.yVel += user.yVel;
@@ -89,7 +93,7 @@ public class Ball_E extends Ability
 	{
 		double angle = Math.atan2(target.y - player.y, target.x - player.x);
 		player.aimType = Player.AimType.NONE;
-		player.target = new Point((int) (player.x + range * Math.cos(angle)), (int) (player.y + range * Math.sin(angle)));
+		player.target = new Point((int) (player.x + startingDistance * Math.cos(angle)), (int) (player.y + startingDistance * Math.sin(angle)));
 		if (!player.leftMousePressed)
 			player.rotate(angle, 3.0 * deltaTime);
 	}

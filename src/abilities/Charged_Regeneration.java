@@ -18,6 +18,11 @@ public class Charged_Regeneration extends _PassiveAbility
 		super("Charged Regeneration", p);
 	}
 
+	public void updateStats()
+	{
+		amount = 0.1 * level;
+	}
+
 	public void use(Environment env, Person user, Point target)
 	{
 		on = !on;
@@ -29,11 +34,11 @@ public class Charged_Regeneration extends _PassiveAbility
 	public void maintain(Environment env, Person user, Point target, double deltaTime)
 	{
 		wasDamaged = false;
-		double amount = (0.1 * level * (currLife - user.life));
-		if (amount > 0)
+		double chargeAmount = (amount * (currLife - user.life));
+		if (chargeAmount > 0)
 		{
 			wasDamaged = true;
-			user.charge += amount;
+			user.charge += chargeAmount;
 		}
 
 		if (user.timeSinceLastHit < 3)
@@ -73,5 +78,4 @@ public class Charged_Regeneration extends _PassiveAbility
 		player.aimType = Player.AimType.NONE;
 	}
 
-	
 }

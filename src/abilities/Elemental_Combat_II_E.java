@@ -15,6 +15,11 @@ public class Elemental_Combat_II_E extends Ability
 		super("Elemental Combat I <" + elementName + ">", p);
 	}
 
+	public void updateStats()
+	{
+		; // TODO maybe
+	}
+
 	public void use(Environment env, Person user, Point target)
 	{
 		List<Ability> addedAbilities = new LinkedList<Ability>();
@@ -33,6 +38,6 @@ public class Elemental_Combat_II_E extends Ability
 	public void disable(Environment env, Person user)
 	{
 		disabled = true;
-		//DOES NOT REMOVE THE ADDED ABILITIES
+		// DOES NOT REMOVE THE ADDED ABILITIES
 	}
 }

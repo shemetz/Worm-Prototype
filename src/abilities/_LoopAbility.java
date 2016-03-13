@@ -13,7 +13,6 @@ import mainClasses.Player;
 
 public class _LoopAbility extends Ability
 {
-	public int amount; // amount of time in seconds the target of the ability goes backwards in time.
 	public boolean state;
 	public boolean position;
 	public double maxDistFromTargetedPoint = 250;
@@ -80,7 +79,7 @@ public class _LoopAbility extends Ability
 			cooldownLeft = cooldown;
 
 			for (Person p : targets)
-				p.loop(amount, state, position);
+				p.loop((int) duration, state, position);
 		}
 	}
 

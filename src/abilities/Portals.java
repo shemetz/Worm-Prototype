@@ -25,20 +25,24 @@ public class Portals extends Ability
 	public Portals(int p)
 	{
 		super("Portals", p);
-		cost = (10 - level) / 2; // divided by 2 because 2 portals
 		costType = CostType.MANA;
-		cooldown = 0;
-		range = 1000;
 		rangeType = RangeType.EXACT_RANGE;
 		toggleable = true;
 
 		alignPortals = false;
 		p1 = null;
 		p2 = null;
-		minPortalLength = 100;
-		maxPortalLength = 2000;
 		minimumDistanceBetweenPortalsPow2 = 120 * 120;
 		sounds.add(new SoundEffect("Portal_failure.wav"));
+	}
+
+	public void updateStats()
+	{
+		cost = (10 - level) / 2; // divided by 2 because 2 portals
+		range = 1000;
+		minPortalLength = 100;
+		maxPortalLength = 2000;
+		
 	}
 
 	public void use(Environment env, Person user, Point target)

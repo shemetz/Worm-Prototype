@@ -11,4 +11,9 @@ public class Sapping_Fists extends _PunchAbility
 
 		sounds.add(new SoundEffect("Sapping Fists.wav"));
 	}
+
+	public void updateStats()
+	{
+		
+	}
 }

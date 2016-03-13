@@ -27,13 +27,10 @@ public class Punch extends Ability
 	public Punch(int p)
 	{
 		super("Punch", p);
-		cost = 0.7;
 		costType = CostType.STAMINA;
-		cooldown = 0.55; // is actually 0.55 - Math.min(0.02*FITNESS, 0.15);
 		rangeType = RangeType.EXACT_RANGE;
 		stopsMovement = true;
 		instant = true;
-		range = 6174; // will be recalculated the moment this ability is added in Person.something()
 		natural = true;
 
 		sounds.add(new SoundEffect("Punch_hit_1.wav"));
@@ -42,6 +39,14 @@ public class Punch extends Ability
 		sounds.add(new SoundEffect("Punch_miss_1.wav"));
 		sounds.add(new SoundEffect("Punch_miss_2.wav"));
 		sounds.add(new SoundEffect("Punch_miss_3.wav"));
+	}
+
+	public void updateStats()
+	{
+		cooldown = 0.55; // is actually 0.55 - Math.min(0.02*FITNESS, 0.15);
+		cost = 0.7;
+		range = 6174; // will be recalculated the moment this ability is added in Person.something()
+		
 	}
 
 	public void use(Environment env, Person user, Point target)
@@ -157,7 +162,7 @@ public class Punch extends Ability
 		for (Ability a : user.punchAffectingAbilities)
 		{
 			if (a instanceof Pushy_Fists)
-				pushback *= 2;
+				pushback += a.pushback;
 
 		}
 
@@ -193,7 +198,7 @@ public class Punch extends Ability
 							for (Ability a : user.punchAffectingAbilities)
 							{
 								if (a instanceof Shattering_Fists)
-									if (Math.random() < 0.25 * a.level)
+									if (Math.random() < a.chance)
 									{
 										env.nonRecursiveDamageWall(i, j, (damage + pushback) / timeEffect * 10, punchDamageType);
 										a.sounds.get(0).play();
@@ -224,7 +229,7 @@ public class Punch extends Ability
 										for (Ability a : user.punchAffectingAbilities)
 										{
 											if (a instanceof Shattering_Fists)
-												if (Math.random() < 0.25 * a.level)
+												if (Math.random() < a.chance)
 												{
 													damage *= 10;
 													a.sounds.get(0).play();
@@ -257,7 +262,7 @@ public class Punch extends Ability
 										for (Ability a : user.punchAffectingAbilities)
 										{
 											if (a instanceof Shattering_Fists)
-												if (Math.random() < 0.25 * a.level)
+												if (Math.random() < a.chance)
 												{
 													damage *= 10;
 													a.sounds.get(0).play();
@@ -322,7 +327,7 @@ public class Punch extends Ability
 								for (Ability a : user.punchAffectingAbilities)
 								{
 									if (a instanceof Shattering_Fists)
-										if (Math.random() < 0.25 * a.level)
+										if (Math.random() < a.chance)
 										{
 											damage *= 10;
 											a.sounds.get(0).play();
@@ -369,7 +374,7 @@ public class Punch extends Ability
 											}
 											if (a instanceof Vampiric_Fists)
 											{
-												user.heal(0.2 * a.level * damage);
+												user.heal(a.steal * damage);
 												a.sounds.get(0).play();
 											}
 										}

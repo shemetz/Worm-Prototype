@@ -12,11 +12,17 @@ public class Toughness_I extends _PassiveAbility
 		super("Toughness I", p);
 	}
 
+	public void updateStats()
+	{
+		amount = 20 * level;
+		
+	}
+
 	public void use(Environment env, Person user, Point target)
 	{
 		int val = on ? -1 : 1;
-		user.life *= val * 20 * level / user.maxLife + 1;
-		user.maxLife += val * 20 * level;
+		user.life *= val * amount / user.maxLife + 1;
+		user.maxLife += val * amount;
 		on = !on;
 	}
 }

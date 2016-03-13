@@ -11,8 +11,13 @@ public class Sense_Parahumans extends _PassiveAbility
 	public Sense_Parahumans(int p)
 	{
 		super("Sense Parahumans", p);
-		range = (int) (50 * Math.pow(3, level));
 		rangeType = RangeType.CIRCLE_AREA;
+	}
+
+	public void updateStats()
+	{
+		range = (int) (50 * Math.pow(3, level));
+		
 	}
 
 	public void use(Environment env, Person user, Point target)

@@ -12,11 +12,17 @@ public class Wound_Regeneration_II extends _PassiveAbility
 	{
 		super("Wound Regeneration II", p);
 	}
+	
+	public void updateStats()
+	{
+		amount = 2 * level;
+		
+	}
 
 	public void use(Environment env, Person user, Point target)
 	{
 		int val = on ? -1 : 1;
-		user.lifeRegen += val * 2 * level;
+		user.lifeRegen += val * amount;
 		on = !on;
 	}
 }

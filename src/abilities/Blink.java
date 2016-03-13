@@ -7,20 +7,24 @@ import mainClasses.Person;
 import mainClasses.VisualEffect;
 import mainResourcesPackage.SoundEffect;
 
-public class Blink extends TeleportAbility
+public class Blink extends _TeleportAbility
 {
 
 	public Blink(int p)
 	{
 		super("Blink", p);
-		cost = 1 + (double) (level) / 3;
 		costType = CostType.MANA;
-		cooldown = 0.1 + (double) (level) / 4;
-		range = level * 100;
 		rangeType = RangeType.EXACT_RANGE; // maybe change it to up-to range?
 
 		sounds.add(new SoundEffect("Blink_success.wav"));
 		sounds.add(new SoundEffect("Blink_fail.wav"));
+	}
+
+	public void updateStats()
+	{
+		cooldown = 0.1 + (double) (level) / 4;
+		range = level * 100;
+		cost = 1 + (double) (level) / 3;
 	}
 
 	public void use(Environment env, Person user, Point target)

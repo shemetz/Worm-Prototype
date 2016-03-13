@@ -21,19 +21,24 @@ public class Nullification_Aura_II extends Ability
 	{
 		super("Nullification Aura II", p);
 		costType = CostType.MANA;
-		range = 100 + level * 100;
 		rangeType = RangeType.CIRCLE_AREA;
-		cost = 5;
 		instant = true;
-		cooldown = 0.8;
 		affectedTargets = new ArrayList<Person>();
+	}
+
+	public void updateStats()
+	{
+		range = 100 + level * 100;
+		cost = 5;
+		cooldown = 0.8;
+		
 	}
 
 	public void use(Environment env, Person user, Point target)
 	{
 		if (on)
 		{
-			int oldRange = range;
+			double oldRange = range;
 			range = 0;
 			maintain(env, user, null, 0);
 			range = oldRange;
@@ -74,7 +79,7 @@ public class Nullification_Aura_II extends Ability
 		disabled = true;
 		if (on)
 		{
-			int oldRange = range;
+			double oldRange = range;
 			range = 0;
 			maintain(env, user, null, 0);
 			range = oldRange;

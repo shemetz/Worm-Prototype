@@ -8,11 +8,11 @@ import mainClasses.ForceField;
 import mainClasses.Person;
 import mainClasses.Player;
 
-public class ForceFieldAbility extends Ability
+public class _ForceFieldAbility extends Ability
 {
 	public int length, width, height, life, armor;
 
-	public ForceFieldAbility(String n, int p)
+	public _ForceFieldAbility(String n, int p)
 	{
 		super(n, p);
 		costType = CostType.MANA;

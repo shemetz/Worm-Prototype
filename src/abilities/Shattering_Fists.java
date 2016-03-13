@@ -10,4 +10,10 @@ public class Shattering_Fists extends _PunchAbility
 		super("Shattering Fists", p);
 		sounds.add(new SoundEffect("Shattering Fists.wav"));
 	}
+
+	public void updateStats()
+	{
+		chance = 0.2 * level;
+		
+	}
 }

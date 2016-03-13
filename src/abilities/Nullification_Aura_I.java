@@ -18,9 +18,14 @@ public class Nullification_Aura_I extends _PassiveAbility
 	public Nullification_Aura_I(int p)
 	{
 		super("Nullification Aura I", p);
-		range = 100 + level * 50;
 		rangeType = RangeType.CIRCLE_AREA;
 		affectedTargets = new ArrayList<Person>();
+	}
+
+	public void updateStats()
+	{
+		range = 100 + level * 50;
+		
 	}
 
 	public void use(Environment env, Person user, Point target)

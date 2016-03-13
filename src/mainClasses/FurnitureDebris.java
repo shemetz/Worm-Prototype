@@ -1,9 +1,7 @@
-package abilities;
+package mainClasses;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-
-import mainClasses.Debris;
 
 public class FurnitureDebris extends Debris
 {

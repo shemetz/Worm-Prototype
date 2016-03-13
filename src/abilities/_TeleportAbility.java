@@ -8,14 +8,14 @@ import mainClasses.Methods;
 import mainClasses.Person;
 import mainClasses.Player;
 
-public class TeleportAbility extends Ability
+public class _TeleportAbility extends Ability
 {
 	final int	squareSize	= 96;
 	public double		triangle1;
 	public double triangle2;
 	public double triangle3;
 
-	public TeleportAbility(String n, int p)
+	public _TeleportAbility(String n, int p)
 	{
 		super(n, p);
 		triangle1 = 0;

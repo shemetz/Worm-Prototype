@@ -16,11 +16,16 @@ public class Twitch extends Ability
 	public Twitch(int p)
 	{
 		super("Twitch", p);
-		cost = Math.min(4 - level, 1);
 		costType = CostType.MANA;
+		rangeType = RangeType.CIRCLE_AREA;
+	}
+
+	public void updateStats()
+	{
+		cost = Math.min(4 - level, 1);
 		cooldown = Math.min(2 - level * 0.4, 0.1);
 		range = 500;
-		rangeType = RangeType.CIRCLE_AREA;
+		
 	}
 
 	public void disable(Environment env, Person user)

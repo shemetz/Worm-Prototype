@@ -50,7 +50,7 @@ import javax.swing.Timer;
 
 import abilities.Chronobiology;
 import abilities.Elastic;
-import abilities.ForceFieldAbility;
+import abilities._ForceFieldAbility;
 import abilities.GridTargetingAbility;
 import abilities.Portals;
 import abilities.Protective_Bubble_I;
@@ -60,7 +60,7 @@ import abilities.Sense_Powers;
 import abilities.Shield_E;
 import abilities.Sprint;
 import abilities.Steal_Power;
-import abilities.TeleportAbility;
+import abilities._TeleportAbility;
 import abilities.Time_Freeze_Target_I;
 import abilities.Time_Freeze_Target_II;
 import abilities.Wild_Power;
@@ -146,6 +146,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 	String tooltip = "";
 	int hotkeyHovered = -1;
 	int hotkeySelected = -1;
+	int abilityExamined = -1;
 
 	Line2D drawLine = null; // temp
 	Rectangle2D drawRect = null; // also temp
@@ -670,6 +671,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 						for (int i = 0; i < 10; i++)
 							player.hotkeys[i] = player.oldHotkeys[i];
 					}
+					abilityExamined = -1;
 					updateNiceHotkeys();
 				}
 				// make victim possessed
@@ -1148,7 +1150,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		case EXACT_RANGE:
 			buffer.setColor(new Color(255, 255, 255, 80)); // transparent white
 			buffer.setStroke(dashedStroke3);
-			buffer.drawOval((int) (player.x - ability.range), (int) (player.y - ability.range), 2 * ability.range, 2 * ability.range);
+			buffer.drawOval((int) (player.x - ability.range), (int) (player.y - ability.range), (int) (2 * ability.range), (int) (2 * ability.range));
 			break;
 		case CIRCLE_AREA:
 			// "filled" area, not just outlines.
@@ -1162,7 +1164,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			for (int y = (int) (player.y - ability.range) / 18 * 18; y < (int) (player.y + ability.range + 18) / 18 * 18; y += 18)
 				buffer.drawLine((int) (player.x - ability.range), y, (int) (player.x + ability.range), y);
 			buffer.setClip(originalClip);
-			buffer.drawOval((int) (player.x - ability.range), (int) (player.y - ability.range), ability.range * 2, ability.range * 2);
+			buffer.drawOval((int) (player.x - ability.range), (int) (player.y - ability.range), (int) (ability.range * 2), (int) (ability.range * 2));
 
 			// more resource-intensive method ahead, that does the exact same thing :)
 
@@ -1186,8 +1188,8 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 					(int) (player.x + ability.range * Math.cos(player.rotation + ability.arc / 2)), (int) (player.y + ability.range * Math.sin(player.rotation + ability.arc / 2)));
 			buffer.drawLine((int) (player.x + 50 * Math.cos(player.rotation - ability.arc / 2)), (int) (player.y + 50 * Math.sin(player.rotation - ability.arc / 2)),
 					(int) (player.x + ability.range * Math.cos(player.rotation - ability.arc / 2)), (int) (player.y + ability.range * Math.sin(player.rotation - ability.arc / 2)));
-			buffer.drawArc((int) (player.x - ability.range), (int) (player.y - ability.range), ability.range * 2, ability.range * 2, (int) ((-player.rotation - ability.arc / 2) / Math.PI * 180),
-					(int) (ability.arc / Math.PI * 180));
+			buffer.drawArc((int) (player.x - ability.range), (int) (player.y - ability.range), (int) (ability.range * 2), (int) (ability.range * 2),
+					(int) ((-player.rotation - ability.arc / 2) / Math.PI * 180), (int) (ability.arc / Math.PI * 180));
 			buffer.drawArc((int) (player.x - 50), (int) (player.y - 50), 50 * 2, 50 * 2, (int) ((-player.rotation - ability.arc / 2) / Math.PI * 180), (int) (ability.arc / Math.PI * 180));
 			break;
 		case NONE:
@@ -1377,7 +1379,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		case TELEPORT:
 			buffer.setStroke(new BasicStroke(3));
 			final int radius = 35;
-			TeleportAbility teleportAbility = (TeleportAbility) ability;
+			_TeleportAbility teleportAbility = (_TeleportAbility) ability;
 			if (player.successfulTarget)
 			{
 				buffer.setColor(new Color(53, 230, 240));
@@ -1440,7 +1442,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 
 			break;
 		case CREATE_FF:
-			ForceFieldAbility ffAbility = (ForceFieldAbility) ability;
+			_ForceFieldAbility ffAbility = (_ForceFieldAbility) ability;
 			double angleToFF = Math.atan2(player.y - player.target.y, player.x - player.target.x);
 			buffer.setColor(new Color(53, 218, 255));
 			buffer.setStroke(dashedStroke3);
@@ -1472,11 +1474,11 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 					{
 						buffer.setColor(new Color(182, 255, 0, 128));
 						int last = targetedPerson.pastCopies.size() - 1;
-						for (int i = 0; i < last && i < loopAbility.amount; i++)
+						for (int i = 0; i < last && i < loopAbility.duration; i++)
 							buffer.drawLine((int) targetedPerson.pastCopies.get(last - i).x, (int) targetedPerson.pastCopies.get(last - i).y, (int) targetedPerson.pastCopies.get(last - i - 1).x,
 									(int) targetedPerson.pastCopies.get(last - i - 1).y);
 						buffer.drawLine((int) targetedPerson.x, (int) targetedPerson.y, (int) targetedPerson.pastCopies.get(last).x, (int) targetedPerson.pastCopies.get(last).y);
-						targetedPerson.pastCopies.get(Math.max(last - loopAbility.amount, 0)).draw(buffer);
+						targetedPerson.pastCopies.get((int) Math.max(last - loopAbility.duration, 0)).draw(buffer);
 					}
 
 				}
@@ -2671,13 +2673,14 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			m.draw(buffer);
 
 		if (menu == Menu.TAB)
-		{
 			drawPauseAbilities(buffer);
-		}
 		// TODO make everything scale with uizoom or buffer scale
 		if (menu == Menu.CHEATS)
+			drawPauseAbilities(buffer);
+		if (menu == Menu.ABILITIES)
 		{
 			drawPauseAbilities(buffer);
+			drawAbilitiesMenu(buffer);
 		}
 	}
 
@@ -2733,6 +2736,144 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 					buffer.drawString(hotkeyStrings[j], (int) (rectStartX + i * 80 * UIzoomLevel + 12 * UIzoomLevel), (int) (rectStartY + 60 * UIzoomLevel + timesAssigned * 16 * UIzoomLevel));
 				}
 		}
+	}
+
+	void drawAbilitiesMenu(Graphics2D buffer)
+	{
+		if (abilityExamined == -1)
+		{
+			buffer.setFont(new Font("Serif", Font.PLAIN, 60));
+			buffer.setColor(Color.white);
+			buffer.drawString("CHOOSE AN ABILITY TO EXAMINE", frameWidth / 2 - 500 - 1, frameHeight / 2 - 1);
+			buffer.setColor(Color.white);
+			buffer.drawString("CHOOSE AN ABILITY TO EXAMINE", frameWidth / 2 - 500 - 1, frameHeight / 2 + 1);
+			buffer.setColor(Color.white);
+			buffer.drawString("CHOOSE AN ABILITY TO EXAMINE", frameWidth / 2 - 500 + 1, frameHeight / 2 - 1);
+			buffer.setColor(Color.white);
+			buffer.drawString("CHOOSE AN ABILITY TO EXAMINE", frameWidth / 2 - 500 + 1, frameHeight / 2 + 1);
+			buffer.setColor(Color.black);
+			buffer.drawString("CHOOSE AN ABILITY TO EXAMINE", frameWidth / 2 - 500, frameHeight / 2);
+			return;
+		}
+		int cx = frameWidth / 2, cy = frameHeight * 2 / 5, rectWidth = 1200, rectHeight = 500;
+		buffer.setColor(new Color(0, 0, 0, 90));
+		buffer.fillRect(cx - rectWidth / 2, cy - rectHeight / 2, rectWidth, rectHeight);
+
+		// ~~left column~~
+		// ability icon
+		int iconCenterX = (int) (cx - rectWidth * 0.32);
+		int iconCenterY = (int) (cy + rectHeight * 0.05);
+		Ability ability = player.abilities.get(abilityExamined);
+		buffer.translate(iconCenterX, iconCenterY);
+		buffer.scale(4, 4);
+		buffer.translate(-iconCenterX, -iconCenterY);
+		buffer.setColor(new Color(255, 255, 255, 63));
+		buffer.fillRect(iconCenterX - 30, iconCenterY - 30, 60, 60);
+		buffer.setColor(Color.black);
+		buffer.setStroke(new BasicStroke(3));
+		buffer.drawRect(iconCenterX - 30, iconCenterY - 30, 60, 60);
+		buffer.drawImage(Resources.icons.get(ability.name), iconCenterX - 30, iconCenterY - 30, null); // 30 = icon width / 2
+		buffer.translate(iconCenterX, iconCenterY);
+		buffer.scale((double) 1 / 4, (double) 1 / 4);
+		buffer.translate(-iconCenterX, -iconCenterY);
+
+		// ability basic details
+		buffer.setColor(Color.white);
+		Font nameFont = new Font("Serif", Font.PLAIN, 40);
+		buffer.setFont(nameFont);
+		frc = buffer.getFontRenderContext();
+		int nameTextWidth = (int) (nameFont.getStringBounds(Ability.niceName(ability.name), frc).getWidth());
+		buffer.drawString(Ability.niceName(ability.name), iconCenterX - nameTextWidth / 2, iconCenterY + 170);
+		buffer.setFont(new Font("Sans-Serif", Font.BOLD, 50));
+		buffer.drawString("Level " + ability.level, iconCenterX - 80, iconCenterY - 160);
+		buffer.drawLine(iconCenterX - nameTextWidth / 2, iconCenterY + 180, iconCenterX + nameTextWidth / 2, iconCenterY + 180);
+		buffer.setFont(new Font("Serif", Font.PLAIN, 20));
+		buffer.drawString(ability.getFluff(), iconCenterX - 140, iconCenterY + 215);
+
+		// ~~right column~~
+		// ability stats
+		buffer.setFont(new Font("Serif", Font.PLAIN, 40));
+		final int lineGap = 50, linesUpperY = cy - rectHeight / 2 + 50, stringX = cx - 150, valueX = stringX + 300;
+		int lines = 0;
+		if (ability.range != -1)
+		{
+			buffer.drawString("Range:", stringX, linesUpperY + lines * lineGap);
+			buffer.drawString("" + niceNumber(ability.range * 0.01) + " m", valueX, linesUpperY + lines * lineGap);
+			lines++;
+		}
+		if (ability.cooldown != -1)
+		{
+			buffer.drawString("Cooldown:", stringX, linesUpperY + lines * lineGap);
+			buffer.drawString("" + niceNumber(ability.cooldown) + " s", valueX, linesUpperY + lines * lineGap);
+			lines++;
+		}
+		if (ability.cost != -1)
+		{
+			buffer.drawString("Cost:", stringX, linesUpperY + lines * lineGap);
+			buffer.drawString("" + niceNumber(ability.cost) + " " + ability.costType.toString().toLowerCase(), valueX, linesUpperY + lines * lineGap);
+			lines++;
+		}
+		if (ability.costPerSecond != -1)
+		{
+			buffer.drawString("Cost Per Second:", stringX, linesUpperY + lines * lineGap);
+			buffer.drawString("" + niceNumber(ability.costPerSecond) + " " + ability.costType.toString().toLowerCase(), valueX, linesUpperY + lines * lineGap);
+			lines++;
+		}
+		if (ability.radius != -1)
+		{
+			buffer.drawString("Radius:", stringX, linesUpperY + lines * lineGap);
+			buffer.drawString("" + niceNumber(ability.radius * 0.01) + " m", valueX, linesUpperY + lines * lineGap);
+			lines++;
+		}
+		if (ability.damage != -1)
+		{
+			buffer.drawString("Damage:", stringX, linesUpperY + lines * lineGap);
+			buffer.drawString("" + niceNumber(ability.damage), valueX, linesUpperY + lines * lineGap);
+			lines++;
+		}
+		if (ability.pushback != -1)
+		{
+			buffer.drawString("Pushback:", stringX, linesUpperY + lines * lineGap);
+			buffer.drawString("" + niceNumber(ability.pushback), valueX, linesUpperY + lines * lineGap);
+			lines++;
+		}
+		if (ability.steal != -1)
+		{
+			buffer.drawString("Steal:", stringX, linesUpperY + lines * lineGap);
+			buffer.drawString("" + niceNumber(ability.steal * 100) + "%", valueX, linesUpperY + lines * lineGap);
+			lines++;
+		}
+		if (ability.duration != -1)
+		{
+			buffer.drawString("Duration:", stringX, linesUpperY + lines * lineGap);
+			buffer.drawString("" + niceNumber(ability.duration) + " s", valueX, linesUpperY + lines * lineGap);
+			lines++;
+		}
+		if (ability.chance != -1)
+		{
+			buffer.drawString("Chance:", stringX, linesUpperY + lines * lineGap);
+			buffer.drawString("" + niceNumber(ability.chance * 100) + "%", valueX, linesUpperY + lines * lineGap);
+			lines++;
+		}
+		if (ability.amount != -1)
+		{
+			buffer.drawString("Amount:", stringX, linesUpperY + lines * lineGap);
+			buffer.drawString("" + niceNumber(ability.amount), valueX, linesUpperY + lines * lineGap);
+			lines++;
+		}
+	}
+
+	String niceNumber(double number)
+	{
+		// leaves only 2 sig figs, deletes trailing zeros
+		String string = "" + number;
+		while (string.contains(".") && (string.charAt(string.length() - 1) == '.' || string.charAt(string.length() - 1) == '0'))
+			string = string.substring(0, string.length() - 1);
+		int indexOfPoint = string.indexOf(".");
+		if (indexOfPoint == -1 || indexOfPoint + 3 >= string.length())
+			return string;
+		string = string.substring(0, indexOfPoint + 3);
+		return string;
 	}
 
 	void checkPlayerMovementKeys()
@@ -3157,7 +3298,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			menuStuff.add(new MenuText(frameWidth / 2 - 78, frameHeight / 2 - 30, 156, 60, "RESUME"));
 			break;
 		case ABILITIES:
-			menuStuff.add(new MenuText(frameWidth / 2 - 78, frameHeight / 2 - 30, 156, 60, "RESUME"));
+			menuStuff.add(new MenuText(frameWidth / 2 - 78, 50, 156, 60, "Resume"));
 			break;
 		case ESC:
 			menuStuff.add(new MenuText(frameWidth / 2 - 78, frameHeight / 2 - 100, 156, 60, "RESUME"));
@@ -3207,6 +3348,10 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			break;
 		case CHEATS:
 			menu = Menu.CHEATS;
+			updatePauseMenu();
+			break;
+		case ABILITIES:
+			menu = Menu.ABILITIES;
 			updatePauseMenu();
 			break;
 		case CHEATS_ABILITY:
@@ -3307,6 +3452,8 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 					if (player.hotkeys[i] > removedIndex)
 						player.hotkeys[i]--;
 				}
+				if (abilityExamined == removedIndex)
+					abilityExamined = -1;
 				updateNiceHotkeys();
 				break;
 			}
@@ -3879,6 +4026,17 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 							pressMenuButton(mm);
 					}
 			}
+			if (menu == Menu.ABILITIES)
+			{
+				if (hotkeyHovered != -1)
+					abilityExamined = player.hotkeys[hotkeyHovered];
+				else if (pauseHoverAbility != -1)
+					abilityExamined = pauseHoverAbility;
+				else
+				{
+					return;
+				}
+			}
 		}
 		if (me.getButton() == MouseEvent.BUTTON2) // Mid Click
 		{
@@ -3988,7 +4146,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		}
 
 		if (paused)
-			if (menu == Menu.TAB || menu == Menu.CHEATS)
+			if (menu == Menu.TAB || menu == Menu.CHEATS || menu == Menu.ABILITIES)
 			{
 				pauseHoverAbility = -1;
 				for (int i = 0; i < player.abilities.size(); i++)

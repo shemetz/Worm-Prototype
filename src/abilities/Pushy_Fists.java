@@ -8,6 +8,8 @@ import mainResourcesPackage.SoundEffect;
 
 public class Pushy_Fists extends _PunchAbility
 {
+	double strengthBonus;
+	double pushbackResistanceBonus;
 
 	public Pushy_Fists(int p)
 	{
@@ -16,12 +18,20 @@ public class Pushy_Fists extends _PunchAbility
 		sounds.add(new SoundEffect("Pushy Fists.wav"));
 	}
 
+	public void updateStats()
+	{
+		pushback = 4 * level;
+		strengthBonus = 0.5 * level;
+		pushbackResistanceBonus = 0.5;
+		
+	}
+
 	@Override
 	public void use(Environment env, Person user, Point target)
 	{
 		super.use(env, user, target);
-		user.STRENGTH += 0.5 * level * (on ? 1 : -1);
-		user.pushbackResistance = 1 - (1 - user.pushbackResistance) * (on ? 0.5 : 2);
+		user.STRENGTH += strengthBonus * (on ? 1 : -1);
+		user.pushbackResistance = 1 - (1 - user.pushbackResistance) * (on ? pushbackResistanceBonus : 1 / pushbackResistanceBonus);
 	}
 
 }

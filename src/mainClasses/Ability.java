@@ -125,10 +125,6 @@ public class Ability implements Cloneable
 	// permanent variables of the ability
 	public String name; // name of the ability
 	public int level; // 1-10. AKA "level". Measures how powerful the ability is.
-	protected double cooldown; // Duration in which power doesn't work after using it. -1 = passive, 0 = no cooldown
-	protected double cost; // -1 = passive. Is a cost in mana, stamina or charge...depending on the power.
-	protected double costPerSecond; // applies to some abilities. Is a cost in mana, stamina or charge...depending on the power.
-	protected int range; // distance from user in which ability can be used. For some abilities - how far they go before stopping. -1 = not ranged, or only direction-aiming.
 	protected boolean instant; // Instant abilities don't aim, they immediately activate after a single click. Maintained abilities are always instant.
 	public boolean toggleable;
 	protected boolean maintainable; // Maintained abilities are instant, and require you to continue holding the button to use them (they're continuous abilities).
@@ -136,11 +132,19 @@ public class Ability implements Cloneable
 	protected CostType costType;
 	public double arc; // used for abilities with an arc - the Spray ability
 	public boolean natural;
+
+	// Stuff that affects the ability's effectiveness and is shown in the Abilities menu
+	protected double range; // distance from user in which ability can be used. For some abilities - how far they go before stopping. -1 = not ranged, or only direction-aiming.
+	protected double cooldown; // Duration in which power doesn't work after using it. -1 = passive, 0 = no cooldown
+	protected double cost; // -1 = passive. Is a cost in mana, stamina or charge...depending on the power.
+	protected double costPerSecond; // applies to some abilities. Is a cost in mana, stamina or charge...depending on the power.
 	public double radius; // radius of area of effect of ability.
 	public double damage;
 	public double pushback;
 	public double steal;
 	public double duration;
+	public double chance;
+	public double amount;
 
 	// changing variables of the ability
 	protected double timeLeft; // how much time the ability has been on.
@@ -217,15 +221,19 @@ public class Ability implements Cloneable
 		level = p;
 
 		// default values.
-		costPerSecond = -1;
-		cooldown = 0;
-		cooldownLeft = 0;
+		range = -1;
+		cooldown = -1;
 		cost = -1;
 		costPerSecond = -1;
-		range = -1;
+		radius = -1;
 		damage = -1;
 		pushback = -1;
-		radius = -1;
+		steal = -1;
+		duration = -1;
+		chance = -1;
+		amount = -1;
+
+		cooldownLeft = 0;
 		instant = false;
 		maintainable = false;
 		stopsMovement = false;
@@ -560,19 +568,51 @@ public class Ability implements Cloneable
 		}
 	};
 
-	public void init()
+	void readjust()
 	{
-		if (cooldown == -1) // todo remove this
-			System.out.println(this.name);
+		updateStats();
+		fixStats();
+	}
+
+	public void updateStats()
+	{
+		// Override this, and call fixStats()
+		MAIN.errorMessage("no updateStats() method for " + name);
+	}
+
+	public void fixStats()
+	{
 		// make sure all values are OK
 		level = Math.min(level, 10);
 		level = Math.max(1, level);
-		cooldown = Math.max(0, cooldown);
-		cost = Math.max(0, cost);
-		costPerSecond = Math.max(0, costPerSecond);
-		range = Math.max(0, range);
-		radius = Math.max(0, radius);
-		arc = Math.max(0, arc);
+
+		range = fixValue(range);
+		cooldown = fixValue(cooldown);
+		cost = fixValue(cost);
+		costPerSecond = fixValue(costPerSecond);
+		radius = fixValue(radius);
+		damage = fixValue(damage);
+		pushback = fixValue(pushback);
+		steal = fixValue(steal);
+		duration = fixValue(duration);
+		chance = fixValue(chance);
+		amount = fixValue(amount);
+
+		arc = fixValue(arc);
+	}
+
+	int fixValue(int value)
+	{
+		return (int) fixValue((double) value);
+	}
+
+	double fixValue(double value)
+	{
+		if (value == -1)
+			return -1;
+		if (value < 0)
+			return 0;
+		return value;
 	}
 
 	public static Ability ability(String abilityName, int pnts)
@@ -846,7 +886,7 @@ public class Ability implements Cloneable
 		// Just because the game isn't finished yet and I still haven't made all 151 ability methods:
 		}
 
-		ab.init();
+		ab.readjust();
 
 		return ab;
 	}

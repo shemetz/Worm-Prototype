@@ -20,17 +20,22 @@ public class Steal_Power extends Ability
 	public Steal_Power(int p)
 	{
 		super("Steal Power", p);
-		cost = 3;
-		costPerSecond = 0.5;
 		costType = CostType.MANA;
-		cooldown = 1;
-		range = 300 + level * 100;
 		rangeType = RangeType.CIRCLE_AREA;
 		instant = false;
 
 		stolenPower = null;
 		stolee = null;
 		originalStolenPowerLevel = -1;
+	}
+
+	public void updateStats()
+	{
+		cost = 3;
+		costPerSecond = 0.5;
+		cooldown = 1;
+		range = 300 + level * 100;
+		
 	}
 
 	public Person getTarget(Environment env, Person user)

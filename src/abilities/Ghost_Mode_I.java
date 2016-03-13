@@ -15,14 +15,16 @@ public class Ghost_Mode_I extends Ability
 	public Ghost_Mode_I(int p)
 	{
 		super("Ghost Mode I", p);
-		cost = 2 * level;
 		costType = CostType.MANA;
-		costPerSecond = 0.3;
-		cooldown = 5;
-		range = -1;
 		rangeType = RangeType.NONE;
 		instant = true;
+	}
 
+	public void updateStats()
+	{
+		cost = 2 * level;
+		costPerSecond = 0.3;
+		cooldown = 5;
 		duration = level;
 	}
 

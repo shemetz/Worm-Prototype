@@ -12,22 +12,29 @@ import mainClasses.Player;
 public class Clone_II extends Ability
 {
 	public int clonesMade;
+	int maxNumOfClones;
+	int life;
 
 	public Clone_II(int p)
 	{
 		super("Clone II", p);
-		cost = 5;
 		costType = CostType.MANA;
-		cooldown = 5; // after last clone died
-		range = 300;
 		rangeType = RangeType.NONE;
 
 		clonesMade = 0;
 	}
 
+	public void updateStats()
+	{
+		range = 300;
+		cost = 5;
+		cooldown = 5; // after last clone died
+		maxNumOfClones = 2;
+	}
+
 	public void use(Environment env, Person user, Point target)
 	{
-		if (clonesMade < 2 && user.mana >= cost && cooldownLeft == 0)
+		if (clonesMade < maxNumOfClones && user.mana >= cost && cooldownLeft == 0)
 		{
 			user.mana -= cost;
 			double angle = Math.atan2(target.y - user.y, target.x - user.x);
@@ -41,7 +48,7 @@ public class Clone_II extends Ability
 			clone.initAnimation();
 			env.people.add(clone);
 			clonesMade++;
-			if (clonesMade == 2)
+			if (clonesMade == maxNumOfClones)
 				on = true;
 		}
 	}
@@ -53,7 +60,8 @@ public class Clone_II extends Ability
 
 	public void maintain(Environment env, Person user, Point target, double deltaTime)
 	{
-		;
+		if (clonesMade < maxNumOfClones)
+			on = false;
 	}
 
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)

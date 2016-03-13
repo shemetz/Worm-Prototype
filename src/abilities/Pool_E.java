@@ -10,10 +10,18 @@ import mainClasses.Player;
 public class Pool_E extends GridTargetingAbility
 {
 
+	double healRate;
+
 	public Pool_E(String elementName, int p)
 	{
 		super("Pool <" + elementName + ">", p);
 		// reduced cost normal cost minus 1.5
+	}
+
+	public void updateStats()
+	{
+		healRate = level;
+		super.updateStats();
 	}
 
 	public void use(Environment env, Person user, Point target)
@@ -94,11 +102,11 @@ public class Pool_E extends GridTargetingAbility
 			int element = elementNum;
 			if (element == EP.toInt("Flesh"))
 			{
-				env.otherDebris((targetGridX + 0.5) * squareSize, (targetGridY + 0.5) * squareSize, 14, "pool heal blood", frameNum);
+				env.otherDebris((targetGridX + 0.5) * squareSize, (targetGridY + 0.5) * squareSize, 14, "pool heal", frameNum);
 			}
 			else
 				env.otherDebris((targetGridX + 0.5) * squareSize, (targetGridY + 0.5) * squareSize, element, "pool heal", frameNum);
-			env.poolHealths[(int) targetGridX][(int) targetGridY] += level;
+			env.poolHealths[(int) targetGridX][(int) targetGridY] += healRate;
 			if (env.poolHealths[(int) targetGridX][(int) targetGridY] >= 100)
 				env.poolHealths[(int) targetGridX][(int) targetGridY] = 100;
 			// Might be resource-costly:

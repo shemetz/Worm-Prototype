@@ -15,17 +15,22 @@ public class Self_Bomb extends Ability
 	public Self_Bomb(int p)
 	{
 		super("Self-Bomb", p);
-		cost = 3;
-		costType = CostType.MANA;
-		cooldown = 1;
-		range = 0;
 		rangeType = Ability.RangeType.EXPLOSION;
-		radius = 400;
-		damage = level * 4;
-		pushback = level * 10;
+		costType = CostType.MANA;
 
 		haventGivenResistance = true;
 		givenAbility = (Explosion_Resistance) Ability.ability("Explosion Resistance", 0);
+	}
+
+	public void updateStats()
+	{
+		cost = 3;
+		cooldown = 1;
+		range = 0;
+		radius = 400;
+		damage = level * 4;
+		pushback = level * 10;
+		
 	}
 
 	public void use(Environment env, Person user, Point target)

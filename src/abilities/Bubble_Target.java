@@ -19,10 +19,7 @@ public class Bubble_Target extends Ability
 	public Bubble_Target(int p)
 	{
 		super("Bubble Target", p);
-		cooldown = Math.min(6 - level, 0.3);
 		costType = CostType.MANA;
-		cost = 3;
-		range = 500;
 		rangeType = Ability.RangeType.CIRCLE_AREA;
 		instant = false;
 
@@ -30,6 +27,13 @@ public class Bubble_Target extends Ability
 
 		sounds.add(new SoundEffect("Bubble_appear.wav"));
 		sounds.add(new SoundEffect("Bubble_pop.wav"));
+	}
+
+	public void updateStats()
+	{
+		cooldown = Math.min(6 - level, 0.3);
+		cost = 3;
+		range = 500;
 	}
 
 	public Person getTarget(Environment env, Point targetPoint)
@@ -73,7 +77,7 @@ public class Bubble_Target extends Ability
 	public void maintain(Environment env, Person user, Point target, double deltaTime)
 	{
 		bubble.life -= bubble.life * 0.1 * deltaTime;
-		if (Methods.DistancePow2(bubble.target.Point(), bubble.Point()) > bubble.maxRadius*bubble.maxRadius) // if target got out
+		if (Methods.DistancePow2(bubble.target.Point(), bubble.Point()) > bubble.maxRadius * bubble.maxRadius) // if target got out
 			bubble.life = 0;
 	}
 

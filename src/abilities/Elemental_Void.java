@@ -18,14 +18,17 @@ public class Elemental_Void extends Ability
 	public Elemental_Void(int p)
 	{
 		super("Elemental Void", p);
-		cost = 0;
 		costType = CostType.MANA;
-		cooldown = 0.2;
-		range = level * 100;
 		rangeType = RangeType.CIRCLE_AREA;
 		instant = true;
 
 		timer = 0;
+	}
+
+	public void updateStats()
+	{
+		cooldown = 0.2;
+		range = level * 100;
 	}
 
 	public void use(Environment env, Person user, Point target)

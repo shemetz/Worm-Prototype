@@ -10,15 +10,21 @@ import mainClasses.Player;
 public class Telekinetic_Flight extends Ability
 {
 	boolean gaveBonuses;
+	double flySpeed;
 
 	public Telekinetic_Flight(int p)
 	{
 		super("Telekinetic Flight", p);
 		costType = CostType.NONE;
-		cooldown = 1;
-		cost = 0;
 		instant = true;
 		gaveBonuses = false;
+	}
+
+	public void updateStats()
+	{
+		cooldown = 1;
+		flySpeed = 900 * level;
+		
 	}
 
 	public void use(Environment env, Person user, Point target)
@@ -28,7 +34,7 @@ public class Telekinetic_Flight extends Ability
 			on = true;
 			if (user.z == 0)
 				user.z += 0.2;
-			user.flySpeed = 900 * level; //
+			user.flySpeed = flySpeed;
 			cooldownLeft = 0.5; // constant activation cooldown - to fix keys being stuck, etc.
 
 			if (!gaveBonuses)

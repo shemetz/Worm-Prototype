@@ -12,16 +12,21 @@ public class Retrace_I extends _LoopAbility
 	{
 		super("Retrace I", p, Targeting.SELF);
 
-		cost = 4 - 0.5 * level;
 		costType = CostType.MANA;
-		cooldown = 2;
-		range = 0;
 		rangeType = RangeType.NONE;
 		instant = false;
-
-		amount = level;
+		
 		position = true;
 		state = false;
+	}
+
+	public void updateStats()
+	{
+		cost = 4 - 0.5 * level;
+		cooldown = 2;
+		range = 0;
+		duration = level;
+		
 	}
 
 	public void use(Environment env, Person user, Point target)

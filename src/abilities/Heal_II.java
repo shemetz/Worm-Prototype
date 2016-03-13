@@ -19,19 +19,22 @@ public class Heal_II extends _ApplyEffect
 	public Heal_II(int p)
 	{
 		super("Heal II", p, _ApplyEffect.targetTypes.AREA, VisualEffect.Type.CONNECTING_BEAM);
-		cost = 0;
-		costPerSecond = 3;
 		costType = CostType.MANA;
-		cooldown = 0;
-		range = 100 * level;
 		rangeType = RangeType.CIRCLE_AREA;
 		stopsMovement = false;
 		maintainable = true;
 		instant = true;
 
 		healTextTimer = 0;
-		lifeRegenBuff = 4 * level;
 		beamImage = Resources.abilities.get("heal");
+	}
+
+	public void updateStats()
+	{
+		costPerSecond = 3;
+		range = 100 * level;
+		lifeRegenBuff = 4 * level;
+		
 	}
 
 	public boolean viableTarget(Person p, Person user)

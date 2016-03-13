@@ -13,7 +13,10 @@ public class Elemental_Fists_E extends _PunchAbility
 		super("Elemental Fists <" + e + ">", p);
 
 		sounds.add(new SoundEffect(e + " Smash.wav"));
+	}
+
+	public void updateStats()
+	{
 		damage = level;
-		pushback = 0;
 	}
 }

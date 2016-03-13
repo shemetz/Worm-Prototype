@@ -13,7 +13,6 @@ public class MenuElement
 	enum Type
 	{
 		CHEATS_ELEMENT, CHEATS_ABILITY, EXIT_GAME, RESUME, TEXT, CHEATS, CHEATS_RESULT_ABILITY, ICON, ABILITIES;
-
 	}
 
 	public boolean contains(int mx, int my)

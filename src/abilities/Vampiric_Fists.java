@@ -10,6 +10,11 @@ public class Vampiric_Fists extends _PunchAbility
 		super("Vampiric Fists", p);
 
 		sounds.add(new SoundEffect("Vampiric Fists.wav"));
+	}
+
+	public void updateStats()
+	{
 		steal = 0.2 * level;
+		
 	}
 }

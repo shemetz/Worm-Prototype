@@ -16,18 +16,22 @@ public class Spray_E extends Ability
 	public Spray_E(String elementName, int p)
 	{
 		super("Spray <" + elementName + ">", p);
-		cost = 0;
-		costPerSecond = 2;
 		costType = CostType.MANA;
 		rangeType = RangeType.CONE;
-		cooldown = 1; // after running out of mana
-		range = 500; // TODO make range depend on points
 		stopsMovement = false;
 		maintainable = true;
 		instant = true;
-		arc = Math.PI * 1 / 2; // not really
 
 		sounds.add(new SoundEffect(elementName + " Beam.wav"));
+	}
+
+	public void updateStats()
+	{
+		costPerSecond = 2;
+		cooldown = 1; // after running out of mana
+		range = 500; // TODO make range depend on points
+		arc = Math.PI * 1 / 2; // not really
+		
 	}
 
 	public void disable(Environment env, Person user)

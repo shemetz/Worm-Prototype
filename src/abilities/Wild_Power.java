@@ -18,11 +18,16 @@ public class Wild_Power extends Ability
 	public Wild_Power(int p)
 	{
 		super("Wild Power", p);
-		cost = 4;
 		costType = CostType.MANA;
+		rangeType = RangeType.CIRCLE_AREA;
+	}
+	
+	public void updateStats()
+	{
+		cost = 4;
 		cooldown = 8 - 0.5 * level;
 		range = 500;
-		rangeType = RangeType.CIRCLE_AREA;
+		
 	}
 
 	public void disable(Environment env, Person user)

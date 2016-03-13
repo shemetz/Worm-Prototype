@@ -15,6 +15,11 @@ public class Danger_Sense extends _PassiveAbility
 		super("Danger Sense", p);
 	}
 
+	public void updateStats()
+	{
+		amount = Math.pow(0.9, level);
+	}
+
 	public void use(Environment env, Person user, Point target)
 	{
 		on = !on;
@@ -34,9 +39,9 @@ public class Danger_Sense extends _PassiveAbility
 		if (user instanceof Player)
 		{
 			if (on)
-				user.evasion = 1 - (1 - user.evasion) * Math.pow(0.9, level);
+				user.evasion = 1 - (1 - user.evasion) * amount;
 			else
-				user.evasion = 1 - (1 - user.evasion) / Math.pow(0.9, level);
+				user.evasion = 1 - (1 - user.evasion) / amount;
 		}
 	}
 }

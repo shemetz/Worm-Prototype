@@ -14,13 +14,18 @@ public class Strike_E extends Ability
 	public Strike_E(String elementName, int p)
 	{
 		super("Strike <" + elementName + ">", p);
-		cost = 3 / elementalAttackNumbers[elementNum][2];
 		costType = Ability.CostType.MANA;
 		instant = true;
 
 		sounds.add(new SoundEffect(elementName + " Smash.wav"));
+	}
+
+	public void updateStats()
+	{
+		cost = 3 / elementalAttackNumbers[elementNum][2];
 		damage = 0.6 * level * Ability.elementalAttackNumbers[elementNum][0];
 		pushback = 0.6 * level * Ability.elementalAttackNumbers[elementNum][1] + 1;
+		
 	}
 
 	public void use(Environment env, Person user, Point target)
