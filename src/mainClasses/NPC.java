@@ -18,12 +18,15 @@ public class NPC extends Person
 
 	public enum Strategy
 	{
-		AGGRESSIVE, DEFENSIVE, PASSIVE, POSSESSED, CLONE
+		AGGRESSIVE, DEFENSIVE, PASSIVE, POSSESSED, CLONE, HALF_PASSIVE, HALF_AGGRESSIVE
 	}
 	// AGGRESSIVE = attack enemies if possible, then heal/buff and follow if possible.
 	// DEFENSIVE = push away enemies and block them if possible, run away if possible.
 	// PASSIVE = does nothing.
-	// CLONE_I = attacks closest enemy in 8 meters range, follow master otherwise
+	// CLONE = attacks closest enemy in 8 meters range, follow master otherwise
+	// POSSESSED = does nothing at all.
+	// HALF_PASSIVE = passive until it takes damage, and is then aggressive in a small radius until combat is over
+	// HALF_AGGRESSIVE = aggressive form of HALF_PASSIVE.
 
 	Tactic tactic;
 
@@ -40,6 +43,7 @@ public class NPC extends Person
 
 	boolean hasAllies = false;
 
+	final double halfAggressiveMaxEnemyDistancePow2 = Math.pow(600, 2);
 	int targetID = -1;
 	boolean rightOrLeft = false; // true = right or CW. false = left or CCW.
 	boolean justCollided = false;
@@ -168,6 +172,9 @@ public class NPC extends Person
 		case POSSESSED:
 			this.tactic = Tactic.NO_TARGET;
 			break;
+		case HALF_PASSIVE:
+			if (this.life < 0.9 * this.maxLife)
+				strategy = Strategy.HALF_AGGRESSIVE;
 		case PASSIVE:
 			// Panic if panicking
 			if (this.panic)
@@ -184,6 +191,11 @@ public class NPC extends Person
 					break tacticSearch;
 				}
 			break;
+		case HALF_AGGRESSIVE:
+			if (this.life >= 0.9 * this.maxLife)
+				strategy = Strategy.HALF_PASSIVE;
+			else if (distanceToTargetPow2 > halfAggressiveMaxEnemyDistancePow2)
+				targetPerson = null;
 		case AGGRESSIVE:
 			// Panic if panicking
 			if (this.panic)

@@ -13,21 +13,21 @@ import java.util.List;
 public class AStarPathFinder implements PathFinder
 {
 	/** The set of nodes that have been searched through */
-	private ArrayList<Node>	closed	= new ArrayList<Node>();
+	private ArrayList<Node> closed = new ArrayList<Node>();
 	/** The set of nodes that we do not yet consider fully searched */
-	private SortedList		open	= new SortedList();
+	private SortedList open = new SortedList();
 
 	/** The map being searched */
-	private EnvMap			map;
+	private EnvMap map;
 	/** The maximum depth of search we're willing to accept before giving up */
-	private int				maxSearchDistance;
+	private int maxSearchDistance;
 
 	/** The complete set of nodes across the map */
-	private Node[][]		nodes;
+	private Node[][] nodes;
 	/** True if we allow diagonal movement */
-	private boolean			allowDiagMovement;
+	private boolean allowDiagMovement;
 	/** The heuristic we're applying to determine which nodes to search first */
-	private AStarHeuristic	heuristic;
+	private AStarHeuristic heuristic;
 
 	/**
 	 * Create a path finder with the default heuristic - closest to target.
@@ -80,14 +80,18 @@ public class AStarPathFinder implements PathFinder
 	{
 		// easy first check, if the destination is blocked, we can't get there
 
-		if (map.blocked(mover, tx, ty) || map.blocked(mover, sx, sy))
+		if (map.blocked(mover, tx, ty))
 		{
 			return null;
+		}
+		if (map.blocked(mover, sx, sy))
+		{
+			; // DO NOT CARE IF YOU'RE IN A BLOCKED BLOCK
 		}
 
 		// initial state for A*. The closed group is empty. Only the starting
 
-		// tile is in the open list and it'e're already there
+		// tile is in the open list and it's already there
 		nodes[sx][sy].cost = 0;
 		nodes[sx][sy].depth = 0;
 		closed.clear();
@@ -457,17 +461,17 @@ public class AStarPathFinder implements PathFinder
 	private class Node implements Comparable
 	{
 		/** The x coordinate of the node */
-		private int		x;
+		private int x;
 		/** The y coordinate of the node */
-		private int		y;
+		private int y;
 		/** The path cost for this node */
-		private float	cost;
+		private float cost;
 		/** The parent of this node, how we reached it in the search */
-		private Node	parent;
+		private Node parent;
 		/** The heuristic cost of this node */
-		private float	heuristicCost;
+		private float heuristicCost;
 		/** The search depth of this node */
-		private int		depth;
+		private int depth;
 
 		/**
 		 * Create a new node
@@ -511,10 +515,12 @@ public class AStarPathFinder implements PathFinder
 			if (f < of)
 			{
 				return -1;
-			} else if (f > of)
+			}
+			else if (f > of)
 			{
 				return 1;
-			} else
+			}
+			else
 			{
 				return 0;
 			}

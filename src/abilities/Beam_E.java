@@ -56,7 +56,7 @@ public class Beam_E extends Ability
 			range = 500 * level;
 		costPerSecond = 1;
 		cooldown = 0.5; // after stopping a beam attack, this is the cooldown to start a new one
-		beamLevel = level; //TODO remove this, instead have constructors take more stuff
+		beamLevel = level; // TODO remove this, instead have constructors take more stuff
 	}
 
 	public void use(Environment env, Person user, Point target)
@@ -142,7 +142,8 @@ public class Beam_E extends Ability
 		setSounds(user.Point());
 
 		double targetAngle = Math.atan2(target.y - user.y, target.x - user.x);
-		user.rotate(targetAngle, deltaTime * user.timeEffect);
+		if (!user.holdingVine && !(user instanceof Player && ((Player) user).leftMousePressed))
+			user.rotate(targetAngle, deltaTime * user.timeEffect);
 		for (int j = 0; j < this.evasions.size(); j++)
 			if (this.evasions.get(j).timeLeft > 0)
 				this.evasions.get(j).timeLeft -= deltaTime;
@@ -236,10 +237,6 @@ public class Beam_E extends Ability
 
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
 	{
-		double angle = Math.atan2(target.y - player.y, target.x - player.x);
 		player.aimType = Player.AimType.NONE;
-		if (!player.leftMousePressed && !player.holdingVine)
-			player.rotate(angle, 3.0 * deltaTime);
-		// if it's a vine and it's holding onto something, the person's rotation is hard-changed to the vine's angle in frame()
 	}
 }

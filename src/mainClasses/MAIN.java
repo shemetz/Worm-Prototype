@@ -40,6 +40,7 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
@@ -1603,11 +1604,35 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		shmulik.name = "Shmulik";
 		// env.people.add(shmulik);
 
-		// three neutral people
+		// three unpowered thugs against you
 		for (int i = 0; i < 3; i++)
 		{
 			Person person = new NPC((int) (100 + Math.random() * (env.widthPixels - 200)), (int) (100 + Math.random() * (env.heightPixels - 200)), Strategy.AGGRESSIVE);
 			person.commanderID = 2;
+			env.people.add(person);
+		} // three individual powered people, passive until damaged
+		for (int i = 0; i < 3; i++)
+		{
+			Person person = new NPC((int) (100 + Math.random() * (env.widthPixels - 200)), (int) (100 + Math.random() * (env.heightPixels - 200)), Strategy.HALF_PASSIVE);
+			if (i == 0)
+			{
+				person.abilities.add(Ability.ability("Explosive Fists", 5));
+				person.DNA = Arrays.asList(new EP(28, 10));
+			}
+			if (i == 1)
+			{
+				person.abilities.add(Ability.ability("Toughness II", 2));
+				person.abilities.add(Ability.ability("Strength II", 2));
+				person.DNA = Arrays.asList(new EP(17, 5), new EP(13, 5));
+			}
+			if (i == 2)
+			{
+				person.abilities.add(Ability.ability("Protective Bubble I", 3));
+				person.abilities.add(Ability.ability("Beam <Energy>", 3));
+				person.DNA = Arrays.asList(new EP(21, 5), new EP(6, 5));
+			}
+			person.rotation = TAU * Math.random();
+			person.rename();
 			env.people.add(person);
 		}
 

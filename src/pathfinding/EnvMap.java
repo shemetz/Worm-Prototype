@@ -50,13 +50,28 @@ public class EnvMap implements TileBasedMap
 					walls[x][y] = true;
 				}
 			}
+		double squareroot2by2 = SQUARE * Math.sqrt(0.5);
 		for (ForceField ff : env.FFs)
 		{
 			if (ff.z < 1)
 				for (int x = (int) (ff.x - ff.length / 2) / SQUARE; x <= (int) (ff.x + ff.length / 2) / SQUARE; x++)
 					for (int y = (int) (ff.y - ff.length / 2) / SQUARE; y <= (int) (ff.y + ff.length / 2) / SQUARE; y++)
 						if (x >= 0 && y >= 0 && x < width && y < height)
-							FFs[x][y] = true; // TODO make it real
+						{
+							if (Methods.getSegmentPointDistancePow2(ff.p[0].x, ff.p[0].y, ff.p[1].x, ff.p[1].y, x * SQUARE + SQUARE / 2, y * SQUARE + SQUARE / 2) < Math
+									.pow(squareroot2by2 + ff.width / 2, 2))
+								FFs[x][y] = true; // TODO make it real
+							else if (Methods.getSegmentPointDistancePow2(ff.p[1].x, ff.p[1].y, ff.p[2].x, ff.p[2].y, x * SQUARE + SQUARE / 2, y * SQUARE + SQUARE / 2) < Math
+									.pow(squareroot2by2 + ff.width / 2, 2))
+								FFs[x][y] = true; // TODO make it real
+							else if (Methods.getSegmentPointDistancePow2(ff.p[2].x, ff.p[2].y, ff.p[3].x, ff.p[3].y, x * SQUARE + SQUARE / 2, y * SQUARE + SQUARE / 2) < Math
+									.pow(squareroot2by2 + ff.width / 2, 2))
+								FFs[x][y] = true; // TODO make it real
+							else if (Methods.getSegmentPointDistancePow2(ff.p[3].x, ff.p[3].y, ff.p[0].x, ff.p[0].y, x * SQUARE + SQUARE / 2, y * SQUARE + SQUARE / 2) < Math
+									.pow(squareroot2by2 + ff.width / 2, 2))
+								FFs[x][y] = true; // TODO make it real
+
+						}
 		}
 		for (Portal p : env.portals)
 			if (p.z < 1)

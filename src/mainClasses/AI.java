@@ -85,15 +85,15 @@ public class AI
 					double v = Ball.giveVelocity();
 					double xv = v * Math.cos(angleToTarget);
 					double yv = v * Math.sin(angleToTarget);
-					xv -= npc.xVel;
-					yv -= npc.yVel;
-					npc.target = new Point((int) (npc.x + xv), (int) (npc.y + yv));
+					xv -= targetPerson.xVel;
+					yv -= targetPerson.yVel;
+					npc.target = new Point((int) (targetPerson.x + xv), (int) (targetPerson.y + yv));
 					main.pressAbilityKey(aIndex, true, npc);
 				}
 			if (a instanceof Beam_E) // beam
 			{
 				// aims the beam exactly at the target, so will miss often
-				npc.target = new Point((int) (npc.x), (int) (npc.y));
+				npc.target = new Point((int) (targetPerson.x), (int) (targetPerson.y));
 				main.pressAbilityKey(aIndex, true, npc);
 			}
 		}
@@ -105,7 +105,8 @@ public class AI
 		double distanceToTargetPow2 = Methods.DistancePow2(npc.x, npc.y, targetPerson.x, targetPerson.y);
 
 		npc.timeSinceLastDistCheck += deltaTime;
-		// move towards target
+		// move towards target via pathfinding:
+		boolean blocked = npc.envMap.blocked(npc, (int) (npc.x / 96), (int) (npc.y / 96));
 		if (distanceToTargetPow2 > Math.pow(96, 2)) // If distance to target > 2 blocks
 		{
 			if (npc.timeSinceLastDistCheck >= 1) // once per second. that variable is reduced by 1 soon after npc
@@ -127,6 +128,29 @@ public class AI
 			npc.directionOfAttemptedMovement = angleToTarget;
 			npc.strengthOfAttemptedMovement = 1;
 		}
+		// if close to target but blocked and target's getting away
+		else if (blocked && npc.lastDistPow2 > distanceToTargetPow2)
+		{
+			if (npc.timeSinceLastDistCheck >= 1) // once per second. that variable is reduced by 1 soon after npc
+			{
+				Point targetPoint = new Point((int) (npc.x) + (int) (Math.random() * 3) - 1, (int) (npc.y) + (int) (Math.random() * 3) - 1);
+				npc.path = npc.pathFind(targetPoint);
+			}
+
+			// move according to pathfinding
+			npc.updatePath(env);
+			if (npc.path != null && !npc.path.isEmpty())
+			{
+				angleToTarget = Math.atan2(npc.path.get(0).y - npc.y, npc.path.get(0).x - npc.x);
+				npc.target = new Point(npc.path.get(0).x, npc.path.get(0).y);
+			}
+
+			// even if path is finished, will just walk towards targeted person
+			npc.rotate(angleToTarget, deltaTime);
+			npc.directionOfAttemptedMovement = angleToTarget;
+			npc.strengthOfAttemptedMovement = 1;
+		}
+		// if close to target and not blocked for long
 		else
 		{
 			npc.rotate(angleToTarget, deltaTime);

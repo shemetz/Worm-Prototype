@@ -182,7 +182,7 @@ public class Person extends RndPhysObj implements Mover
 		punchAffectingAbilities = new ArrayList<Ability>();
 		ghostMode = false;
 		insideWall = false;
-		timeSinceLastHit = 0;
+		timeSinceLastHit = 0.01;
 		timeBetweenDamageTexts = 0;
 		waitingDamage = 0;
 		panic = false;
