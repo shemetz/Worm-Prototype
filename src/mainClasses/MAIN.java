@@ -2503,7 +2503,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 					if (ability.cooldownLeft != 0)
 					{// note that when the cooldown is over it will "jump" from low transparency to full transparency
 						buffer.setColor(new Color(0, 0, 0, (int) (130 + 100 * ability.cooldownLeft / ability.cooldown)));
-						buffer.fillRect(x + (int) (UIzoomLevel), y + (int) (UIzoomLevel), (int) (59 * UIzoomLevel), (int) (59 * UIzoomLevel));
+						buffer.fillRect(x + (int) (UIzoomLevel), y + (int) (UIzoomLevel), (int) (60 * UIzoomLevel), (int) (60 * UIzoomLevel));
 					}
 					if (ability.cost > player.mana)
 					{

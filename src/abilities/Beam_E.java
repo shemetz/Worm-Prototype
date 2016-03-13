@@ -25,7 +25,7 @@ public class Beam_E extends Ability
 	{
 		super("Beam <" + elementName + ">", p);
 		cost = 0;
-		costPerSecond = 5 / elementalAttackNumbers[elementNum][2] * 1.5;
+		costPerSecond = 1;
 		costType = CostType.MANA;
 		rangeType = RangeType.EXACT_RANGE;
 		cooldown = 0.5; // after stopping a beam attack, this is the cooldown to start a new one

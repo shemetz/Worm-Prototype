@@ -5,7 +5,7 @@ import java.awt.Point;
 
 public class ArcForceField extends Drawable
 {
-	static double Width = 12;
+	static double Width = 20;
 	public Person target;
 	public double arc;
 	public double minRadius;
