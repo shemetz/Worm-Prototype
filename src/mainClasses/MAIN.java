@@ -59,9 +59,6 @@ import abilities.Punch;
 import abilities.Sense_Powers;
 import abilities.Shield_E;
 import abilities.Sprint;
-import abilities.Steal_Power;
-import abilities.Time_Freeze_Target_I;
-import abilities.Time_Freeze_Target_II;
 import abilities.Wild_Power;
 import abilities._ForceFieldAbility;
 import abilities._LoopAbility;
@@ -1361,14 +1358,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			}
 			break;
 		case TARGET_IN_RANGE:
-			Person targetPerson = null;
-			// Bad code incoming
-			if (ability instanceof Time_Freeze_Target_I)
-				targetPerson = ((Time_Freeze_Target_I) ability).getTarget(env, player.target);
-			if (ability instanceof Time_Freeze_Target_II)
-				targetPerson = ((Time_Freeze_Target_II) ability).getTarget(env, player.target);
-			if (ability instanceof Steal_Power)
-				targetPerson = ((Steal_Power) ability).getTarget(env, player);
+			Person targetPerson = ability.getTarget(env, player, player.target);
 			if (targetPerson != null)
 			{
 				buffer.setStroke(new BasicStroke(3));
@@ -1610,8 +1600,8 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			Person person = new NPC((int) (100 + Math.random() * (env.widthPixels - 200)), (int) (100 + Math.random() * (env.heightPixels - 200)), Strategy.AGGRESSIVE);
 			person.commanderID = 2;
 			env.people.add(person);
-		} // three individual powered people, passive until damaged
-		for (int i = 0; i < 3; i++)
+		} // four individual powered people, passive until damaged
+		for (int i = 0; i < 4; i++)
 		{
 			Person person = new NPC((int) (100 + Math.random() * (env.widthPixels - 200)), (int) (100 + Math.random() * (env.heightPixels - 200)), Strategy.HALF_PASSIVE);
 			if (i == 0)
@@ -1629,7 +1619,16 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			{
 				person.abilities.add(Ability.ability("Protective Bubble I", 3));
 				person.abilities.add(Ability.ability("Beam <Energy>", 3));
-				person.DNA = Arrays.asList(new EP(21, 5), new EP(6, 5));
+				person.DNA = Arrays.asList(new EP(21, 4), new EP(6, 6));
+			}
+			if (i == 3)
+			{
+				person.abilities.add(Ability.ability("Leg Muscles", 3));
+				person.abilities.add(Ability.ability("Trail <Acid>", 2));
+				pressAbilityKey(person.abilities.get(3), true, person); // start the trail
+				pressAbilityKey(person.abilities.get(3), false, person); // start the trail
+				person.abilities.add(Ability.ability("Elemental Resistance <Acid>", 5));
+				person.DNA = Arrays.asList(new EP(18, 3), new EP(7, 7));
 			}
 			person.rotation = TAU * Math.random();
 			person.rename();

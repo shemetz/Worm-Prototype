@@ -39,7 +39,7 @@ public class Heal_II extends _ApplyEffect
 
 	public boolean viableTarget(Person p, Person user)
 	{
-		if (!defaultViableTarget(p, user))
+		if (!super.viableTarget(p, user))
 			return false;
 		if (p.life == p.maxLife)
 			return false;

@@ -7,7 +7,6 @@ import mainClasses.Ability;
 import mainClasses.Effect;
 import mainClasses.Environment;
 import mainClasses.MAIN;
-import mainClasses.Methods;
 import mainClasses.Person;
 import mainClasses.Player;
 
@@ -15,7 +14,6 @@ public class Possess extends Ability
 {
 	Person original;
 	Person victim;
-	double maxDistFromTargetedPoint = 100;
 
 	public Possess(int p)
 	{
@@ -30,24 +28,18 @@ public class Possess extends Ability
 		cooldown = 18 - level;
 		range = 500;
 		duration = 3 * level; // or when reduced to < 20% HP
-		
+
 	}
 
-	public Person getTarget(Environment env, Point targetPoint)
+	public boolean viableTarget(Person p, Person user)
 	{
-		Person target = null;
-		double shortestDistPow2 = maxDistFromTargetedPoint * maxDistFromTargetedPoint;
-		for (Person p : env.people)
-			if (!p.possessionVessel)
-			{
-				double distPow2 = Methods.DistancePow2(p.Point(), targetPoint);
-				if (distPow2 < shortestDistPow2)
-				{
-					shortestDistPow2 = distPow2;
-					target = p;
-				}
-			}
-		return target;
+		if (p.equals(user))
+			return false;
+		if (p.possessionVessel)
+			return false;
+		if (p.dead)
+			return false;
+		return true;
 	}
 
 	public void use(Environment env, Person user, Point target)
@@ -55,7 +47,7 @@ public class Possess extends Ability
 		if (user.possessingControllerID == -1) // no chain-possessions!
 			if (!on && user.mana >= cost && cooldownLeft == 0 && !user.prone && !user.maintaining)
 			{
-				victim = getTarget(env, target);
+				victim = getTarget(env, user, target);
 				if (victim == null || victim.equals(user))
 					return;
 

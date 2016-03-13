@@ -5,13 +5,11 @@ import java.awt.Point;
 import effects.Twitching;
 import mainClasses.Ability;
 import mainClasses.Environment;
-import mainClasses.Methods;
 import mainClasses.Person;
 import mainClasses.Player;
 
 public class Twitch extends Ability
 {
-	public double maxDistFromTargetedPoint = 100;
 
 	public Twitch(int p)
 	{
@@ -25,7 +23,7 @@ public class Twitch extends Ability
 		cost = Math.min(4 - level, 1);
 		cooldown = Math.min(2 - level * 0.4, 0.1);
 		range = 500;
-		
+
 	}
 
 	public void disable(Environment env, Person user)
@@ -33,25 +31,14 @@ public class Twitch extends Ability
 		disabled = true;
 	}
 
-	public Person getTarget(Environment env, Point targetPoint)
+	public boolean viableTarget(Person p, Person user)
 	{
-		Person target = null;
-		double shortestDistPow2 = maxDistFromTargetedPoint * maxDistFromTargetedPoint;
-		for (Person p : env.people)
-		{
-			double distPow2 = Methods.DistancePow2(p.Point(), targetPoint);
-			if (distPow2 < shortestDistPow2)
-			{
-				shortestDistPow2 = distPow2;
-				target = p;
-			}
-		}
-		return target;
+		return super.viableTarget(p, user) && !p.equals(user);
 	}
 
 	public void use(Environment env, Person user, Point target1)
 	{
-		Person target = getTarget(env, target1);
+		Person target = getTarget(env, user, target1);
 		if (target == null)
 			return;
 		if (user.mana >= cost && cooldownLeft <= 0)

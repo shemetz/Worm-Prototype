@@ -206,6 +206,43 @@ public class Ability implements Cloneable
 		return false;
 	}
 
+	public double maxDistFromTargetedPoint = 100; // for players only
+
+	public Person getTarget(Environment env, Person user, Point targetPoint)
+	{
+		// Should be overridden if needed
+		Person target = null;
+		double shortestDistPow2 = maxDistFromTargetedPoint * maxDistFromTargetedPoint;
+		for (Person p : env.people)
+			if (viableTarget(p, user))
+			{
+				double distPow2 = Methods.DistancePow2(p.Point(), targetPoint);
+				if (distPow2 < shortestDistPow2)
+				{
+					shortestDistPow2 = distPow2;
+					target = p;
+				}
+			}
+		return target;
+	}
+
+	/**
+	 * Returns true unless p is dead.
+	 * 
+	 * @param p
+	 * @param user
+	 * @return
+	 */
+	public boolean viableTarget(Person p, Person user)
+	{
+		// Should be overridden if needed, or super-ed
+		if (p.dead)
+			return false;
+		if (p.highestPoint() < user.z || user.highestPoint() < p.z)
+			return false;
+		return true;
+	}
+
 	public Ability clone()
 	{
 		Ability clone = Ability.ability(this.name, this.level);

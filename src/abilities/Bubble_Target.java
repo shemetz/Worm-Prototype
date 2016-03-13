@@ -14,8 +14,6 @@ public class Bubble_Target extends Ability
 {
 	public ArcForceField bubble;
 
-	public double maxDistFromTargetedPoint = 100;
-
 	public Bubble_Target(int p)
 	{
 		super("Bubble Target", p);
@@ -36,22 +34,6 @@ public class Bubble_Target extends Ability
 		range = 500;
 	}
 
-	public Person getTarget(Environment env, Point targetPoint)
-	{
-		Person target = null;
-		double shortestDistPow2 = maxDistFromTargetedPoint * maxDistFromTargetedPoint;
-		for (Person p : env.people)
-		{
-			double distPow2 = Methods.DistancePow2(p.Point(), targetPoint);
-			if (distPow2 < shortestDistPow2)
-			{
-				shortestDistPow2 = distPow2;
-				target = p;
-			}
-		}
-		return target;
-	}
-
 	public void use(Environment env, Person user, Point target)
 	{
 		setSounds(user.Point());
@@ -59,7 +41,7 @@ public class Bubble_Target extends Ability
 		{
 			if (cost > user.mana || cooldownLeft > 0)
 				return;
-			Person targetPerson = getTarget(env, target);
+			Person targetPerson = getTarget(env, user, target);
 			if (targetPerson == null)
 				return;
 

@@ -28,7 +28,7 @@ public class Repeat_III extends _LoopAbility
 		cooldown = 2;
 		range = 1500;
 		duration = level;
-		
+		radius = 250;
 	}
 
 	public void use(Environment env, Person user, Point target)

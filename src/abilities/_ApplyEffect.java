@@ -123,22 +123,6 @@ public class _ApplyEffect extends Ability
 		}
 	}
 
-	public boolean defaultViableTarget(Person p, Person user)
-	{
-		if (p.equals(user))
-			return false;
-		if (p.highestPoint() < user.z || user.highestPoint() < p.z)
-			return false;
-		// TODO check for walls!!
-		return true;
-	}
-
-	public boolean viableTarget(Person p, Person user)
-	{
-		// Override this if needed
-		return defaultViableTarget(p, user);
-	}
-
 	public void disable(Environment env, Person user)
 	{
 		disabled = true;

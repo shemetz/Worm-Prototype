@@ -13,7 +13,6 @@ import mainClasses.VisualEffect;
 
 public class Wild_Power extends Ability
 {
-	public double maxDistFromTargetedPoint = 100; // NOTE: USED IN DRAWAIM!
 
 	public Wild_Power(int p)
 	{

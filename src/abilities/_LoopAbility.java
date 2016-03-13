@@ -15,7 +15,6 @@ public class _LoopAbility extends Ability
 {
 	public boolean state;
 	public boolean position;
-	public double maxDistFromTargetedPoint = 250;
 
 	public enum Targeting
 	{
@@ -55,7 +54,7 @@ public class _LoopAbility extends Ability
 			for (Person p : env.people)
 			{
 				double distPow2 = Methods.DistancePow2(p.Point(), target);
-				if (distPow2 < maxDistFromTargetedPoint * maxDistFromTargetedPoint)
+				if (distPow2 < radius * radius)
 				{
 					targets.add(p);
 				}

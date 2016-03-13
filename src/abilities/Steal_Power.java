@@ -12,7 +12,6 @@ import mainClasses.VisualEffect;
 
 public class Steal_Power extends Ability
 {
-	public double maxDistFromTargetedPoint = 100; // NOTE: USED IN DRAWAIM!
 	Ability stolenPower;
 	Person stolee;
 	int originalStolenPowerLevel;
@@ -35,24 +34,7 @@ public class Steal_Power extends Ability
 		costPerSecond = 0.5;
 		cooldown = 1;
 		range = 300 + level * 100;
-		
-	}
-
-	public Person getTarget(Environment env, Person user)
-	{
-		Person target = null;
-		double shortestDistPow2 = maxDistFromTargetedPoint * maxDistFromTargetedPoint;
-		for (Person p : env.people)
-			if (!p.equals(user))
-			{
-				double distPow2 = Methods.DistancePow2(p.Point(), user.target);
-				if (distPow2 < shortestDistPow2)
-				{
-					shortestDistPow2 = distPow2;
-					target = p;
-				}
-			}
-		return target;
+		maxDistFromTargetedPoint = range;
 	}
 
 	public void use(Environment env, Person user, Point target1)
@@ -60,7 +42,7 @@ public class Steal_Power extends Ability
 		if (cooldownLeft <= 0)
 			if (!on && user.mana >= cost)
 			{
-				Person target = getTarget(env, user);
+				Person target = getTarget(env, user, target1);
 				if (target == null)
 					return;
 
