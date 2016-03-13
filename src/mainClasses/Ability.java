@@ -32,6 +32,7 @@ import abilities.Flight_I;
 import abilities.Flight_II;
 import abilities.Force_Shield;
 import abilities.Ghost_Mode_I;
+import abilities.Ghost_Mode_II;
 import abilities.Heal_I;
 import abilities.Heal_II;
 import abilities.Leg_Muscles;
@@ -96,10 +97,10 @@ public class Ability implements Cloneable
 {
 	final static List<String> implementedAbilities = Arrays.asList("Elemental Combat I", "Beam", "Ball", "Shield", "Pool", "Wall", "Spray", "Sense Element", "Elemental Resistance", "Strike",
 			"Portals", "Elemental Void", "Precision I", "Precision II", "Precision III", "Protective Bubble I", "Protective Bubble II", "Sprint", "Strength I", "Strength II", "Strength III", "Punch",
-			"Heal I", "Heal II", "Force Shield", "Strong Force Field", "Wide Force Field", "Ranged Explosion", "Flight I", "Flight II", "Telekinetic Flight", "Blink", "Ghost Mode I", "Toughness I", "Toughness II",
-			"Toughness III", "Sense Life", "Sense Mana and Stamina", "Sense Powers", "Slow Target", "Chronobiology", "Retrace I", "Retrace II", "Retrace III", "Undo I", "Undo II", "Undo III",
-			"Repeat I", "Repeat II", "Repeat III", "Time Freeze Target I", "Nullification Aura I", "Nullification Aura II", "Wild Power", "Clone I", "Clone II", "Clone III", "Twitch",
-			"Sense Structure", "Sense Parahumans", "Steal Power", "Danger Sense", "Sapping Fists", "Pushy Fists", "Explosive Fists", "Vampiric Fists", "Shattering Fists", "Elemental Fists",
+			"Heal I", "Heal II", "Force Shield", "Strong Force Field", "Wide Force Field", "Ranged Explosion", "Flight I", "Flight II", "Telekinetic Flight", "Blink", "Ghost Mode I", "Ghost Mode II",
+			"Toughness I", "Toughness II", "Toughness III", "Sense Life", "Sense Mana and Stamina", "Sense Powers", "Slow Target", "Chronobiology", "Retrace I", "Retrace II", "Retrace III", "Undo I",
+			"Undo II", "Undo III", "Repeat I", "Repeat II", "Repeat III", "Time Freeze Target I", "Nullification Aura I", "Nullification Aura II", "Wild Power", "Clone I", "Clone II", "Clone III",
+			"Twitch", "Sense Structure", "Sense Parahumans", "Steal Power", "Danger Sense", "Sapping Fists", "Pushy Fists", "Explosive Fists", "Vampiric Fists", "Shattering Fists", "Elemental Fists",
 			"Explosion Resistance", "Leg Muscles", "Speedrun", "Charge", "Elastic", "Trail", "Bubble Target", "Self-Bomb", "Possess", "Muscle Charge", "Charged Regeneration");
 	protected static List<String> descriptions = new ArrayList<String>();
 	protected static boolean[][] elementalAttacksPossible = new boolean[12][7]; // [element][ability]
@@ -759,6 +760,9 @@ public class Ability implements Cloneable
 			break;
 		case "Ghost Mode I":
 			ab = new Ghost_Mode_I(pnts);
+			break;
+		case "Ghost Mode II":
+			ab = new Ghost_Mode_II(pnts);
 			break;
 		case "Strong Force Field":
 			ab = new Strong_Force_Field(pnts);

@@ -28,6 +28,9 @@ public class MenuText extends MenuElement
 			case CHEATS:
 				text = "Cheats";
 				break;
+			case ABILITIES:
+				text = "Abilities";
+				break;
 			default:
 				MAIN.errorMessage("problematic is " + type);
 				break;

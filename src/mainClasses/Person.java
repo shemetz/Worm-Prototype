@@ -22,6 +22,7 @@ import abilities.Punch;
 import abilities.Sprint;
 import effects.Burning;
 import effects.E_Resistant;
+import effects.Ethereal;
 import effects.Healed;
 import effects.Nullified;
 import effects.Possessed;
@@ -151,6 +152,7 @@ public class Person extends RndPhysObj implements Mover
 	public int possessingControllerID = -1;
 	public int possessionTargetID = -1;
 	public boolean possessionVessel = false;
+	public boolean onlyNaturalAbilities = false;
 
 	public Person(double x1, double y1)
 	{
@@ -1105,6 +1107,8 @@ public class Person extends RndPhysObj implements Mover
 					e.timeLeft -= deltaTime;
 				if (e.timeLeft <= 0)
 				{
+					if (e instanceof Ethereal && insideWall)
+						continue;
 					affect(e, false); // will remove the effect
 					eNum--;
 				}
@@ -1596,6 +1600,7 @@ public class Person extends RndPhysObj implements Mover
 
 	public void copy(Person other)
 	{
+		this.onlyNaturalAbilities = other.onlyNaturalAbilities;
 		this.id = other.id;
 		this.setStats(other.STRENGTH, other.DEXTERITY, other.FITNESS, other.WITS, other.KNOWLEDGE, other.SOCIAL);
 		this.maintaining = other.maintaining;

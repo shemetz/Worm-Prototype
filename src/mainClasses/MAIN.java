@@ -54,6 +54,7 @@ import abilities.ForceFieldAbility;
 import abilities.GridTargetingAbility;
 import abilities.Portals;
 import abilities.Protective_Bubble_I;
+import abilities.Protective_Bubble_II;
 import abilities.Punch;
 import abilities.Sense_Powers;
 import abilities.Shield_E;
@@ -65,6 +66,7 @@ import abilities.Time_Freeze_Target_II;
 import abilities.Wild_Power;
 import abilities._LoopAbility;
 import effects.Burning;
+import effects.Ethereal;
 import effects.Tangled;
 import mainClasses.NPC.Strategy;
 import mainResourcesPackage.SoundEffect;
@@ -160,7 +162,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 	// Pause menus
 	enum Menu
 	{
-		NO, ABILITIES, ESC, CHEATS
+		NO, TAB, ESC, CHEATS, ABILITIES
 	};
 
 	Menu menu = Menu.NO;
@@ -774,7 +776,12 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 						if (distFromCenterPow2 < Math.pow(aff.minRadius - p.radius, 2))
 							continue;
 						else
-							pushStrength *= -3; // pull people inwards if they're inside
+						{
+							if (aff.type == ArcForceField.Type.MOBILE_BUBBLE)
+								aff.life = 0;
+							else
+								pushStrength *= -3; // pull people inwards if they're inside
+						}
 
 					}
 					double xMax = 0.03 * pushStrength * Math.cos(angleToPerson);
@@ -841,6 +848,20 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 					if (a instanceof Protective_Bubble_I)
 					{
 						Protective_Bubble_I ability = (Protective_Bubble_I) a;
+						if (aff.equals(ability.bubble))
+						{
+							ability.on = false;
+							ability.sounds.get(1).play();
+							ability.cooldownLeft = ability.cooldown;
+							env.shieldDebris(aff, "bubble");
+							env.AFFs.remove(i);
+							i--;
+							continue affloop;
+						}
+					}
+					if (a instanceof Protective_Bubble_II)
+					{
+						Protective_Bubble_II ability = (Protective_Bubble_II) a;
 						if (aff.equals(ability.bubble))
 						{
 							ability.on = false;
@@ -1630,7 +1651,8 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 							if (!a.on)
 							{
 								if (!a.disabled)
-									a.use(env, p, p.target);
+									if (!p.onlyNaturalAbilities || a.natural)
+										a.use(env, p, p.target);
 							}
 						} // Can't start a maintainable ability while maintaining another
 					}
@@ -1639,7 +1661,8 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 						if (a.instant && !a.hasTag("on-off")) // Instant ability, without aim
 						{ // TODO does this make sense? where's the on-off stuff?
 							if (!a.disabled)
-								a.use(env, p, p.target);
+								if (!p.onlyNaturalAbilities || a.natural)
+									a.use(env, p, p.target);
 							p.abilityTryingToRepetitivelyUse = abilityIndex;
 						}
 						else
@@ -1652,13 +1675,14 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				}
 				// if trying to use ability while repetitively trying another, doesn't work
 			}
-			else if (p.abilityAiming != -1 && p.abilityAiming == abilityIndex) // = activate currently aimed ability
+			else if (p.abilityAiming != -1 && p.abilityAiming == abilityIndex) // Activate currently aimed ability
 			{
 				if (!a.disabled || a instanceof Chronobiology) // can toggle chronobiology while it's disabled
-					a.use(env, p, p.target);
+					if (!p.onlyNaturalAbilities || a.natural)
+						a.use(env, p, p.target);
 				p.abilityAiming = -1;
 			}
-			else if (p.maintaining && p.abilityMaintaining == abilityIndex)
+			else if (p.maintaining && p.abilityMaintaining == abilityIndex) // Stop maintaining currently maintained ability
 			{
 				if (!a.disabled)
 					a.use(env, p, p.target); // stop maintaining
@@ -2564,7 +2588,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 
 					// disabled?
 
-					if (ability.disabled)
+					if (ability.disabled || (!ability.natural && player.onlyNaturalAbilities))
 					{
 						buffer.drawImage(Resources.disabled, x, y, null);
 					}
@@ -2616,6 +2640,13 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				buffer.setClip(new Rectangle2D.Double(place.x, place.y, place.width, place.height));
 				buffer.fillArc(place.x - place.width / 2, place.y - place.height / 2, place.width * 2, place.height * 2, +90, (int) (360 * e.timeLeft / e.duration));
 				buffer.setClip(prevClip);
+				// for ghost mode panic
+				if (e instanceof Ethereal && player.insideWall)
+				{
+					buffer.setStroke(new BasicStroke(1));
+					buffer.setColor(Color.red);
+					buffer.drawRect(place.x, place.y, place.width, place.height);
+				}
 			}
 		}
 	}
@@ -2639,7 +2670,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		for (MenuElement m : menuStuff)
 			m.draw(buffer);
 
-		if (menu == Menu.ABILITIES)
+		if (menu == Menu.TAB)
 		{
 			drawPauseAbilities(buffer);
 		}
@@ -3122,14 +3153,18 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		menuStuff.clear(); // remove all current stuff
 		switch (menu)
 		{
+		case TAB:
+			menuStuff.add(new MenuText(frameWidth / 2 - 78, frameHeight / 2 - 30, 156, 60, "RESUME"));
+			break;
 		case ABILITIES:
-			menuStuff.add(new MenuText(frameWidth / 2 - 78, frameHeight / 2 - 30, 156, 60, "Resume"));
+			menuStuff.add(new MenuText(frameWidth / 2 - 78, frameHeight / 2 - 30, 156, 60, "RESUME"));
 			break;
 		case ESC:
-			menuStuff.add(new MenuText(frameWidth / 2 - 78, frameHeight / 2 - 30, 156, 60, "RESUME"));
-			menuStuff.add(new MenuText(frameWidth / 2 - 137, frameHeight / 2 - 100, 274, 60, "EXIT_GAME"));
+			menuStuff.add(new MenuText(frameWidth / 2 - 78, frameHeight / 2 - 100, 156, 60, "RESUME"));
+			menuStuff.add(new MenuText(frameWidth / 2 - 137, frameHeight / 2 + 40, 274, 60, "EXIT_GAME"));
+			menuStuff.add(new MenuText(frameWidth / 2 - 78, frameHeight / 2 - 30, 156, 60, "ABILITIES"));
 			// TODO OPTIONS
-			menuStuff.add(new MenuText(frameWidth / 2 - 73, frameHeight / 2 + 40, 146, 60, "CHEATS"));
+			menuStuff.add(new MenuText(frameWidth / 2 - 73, frameHeight / 2 + 110, 146, 60, "CHEATS"));
 			break;
 		case CHEATS:
 			menuStuff.add(new MenuText(frameWidth / 2 - 78, 50, 156, 60, "Resume"));
@@ -3343,7 +3378,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			pause(Menu.ESC, true);
 			break;
 		case KeyEvent.VK_TAB:
-			pause(Menu.ABILITIES, true);
+			pause(Menu.TAB, true);
 			break;
 		case KeyEvent.VK_A:
 			player.leftPressed = true;
@@ -3500,7 +3535,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			pause(Menu.ESC, false);
 			break;
 		case KeyEvent.VK_TAB:
-			pause(Menu.ABILITIES, false);
+			pause(Menu.TAB, false);
 			break;
 		case KeyEvent.VK_SHIFT:
 			playerPressHotkey(2, false);
@@ -3953,7 +3988,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		}
 
 		if (paused)
-			if (menu == Menu.ABILITIES || menu == Menu.CHEATS)
+			if (menu == Menu.TAB || menu == Menu.CHEATS)
 			{
 				pauseHoverAbility = -1;
 				for (int i = 0; i < player.abilities.size(); i++)

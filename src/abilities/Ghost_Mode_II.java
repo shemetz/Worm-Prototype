@@ -8,22 +8,22 @@ import mainClasses.Environment;
 import mainClasses.Person;
 import mainClasses.Player;
 
-public class Ghost_Mode_I extends Ability
+public class Ghost_Mode_II extends Ability
 {
 	Ethereal effect;
 
-	public Ghost_Mode_I(int p)
+	public Ghost_Mode_II(int p)
 	{
-		super("Ghost Mode I", p);
-		cost = 2 * level;
+		super("Ghost Mode II", p);
+		cost = level;
 		costType = CostType.MANA;
-		costPerSecond = 0.3;
-		cooldown = 5;
+		costPerSecond = 0.2;
+		cooldown = 3;
 		range = -1;
 		rangeType = RangeType.NONE;
 		instant = true;
 
-		duration = level;
+		duration = 2 * level;
 	}
 
 	public void use(Environment env, Person user, Point target)
@@ -36,22 +36,19 @@ public class Ghost_Mode_I extends Ability
 			if (cooldownLeft > 0 || cost > user.mana)
 				return;
 			on = true;
-			// TODO some kind of visual effect maybe?
 			user.ghostMode = true;
-			user.onlyNaturalAbilities = true;
 			user.mana -= cost;
 			timeLeft = duration;
 			cooldownLeft = 0.5;
 			effect = new Ethereal(duration, this);
 			user.affect(effect, true);
 		}
-		else if (cooldownLeft == 0) // NOTE: This ability can't normally be turned off prematurely because of the onlyNaturalAbilities part.
+		else if (cooldownLeft == 0)
 		{
 			if (!user.insideWall)
 			{
 				on = false;
 				user.ghostMode = false;
-				user.onlyNaturalAbilities = false;
 				cooldownLeft = cooldown;
 				timeLeft = 0;
 				user.affect(effect, false);
@@ -91,7 +88,6 @@ public class Ghost_Mode_I extends Ability
 		{
 			on = false;
 			user.ghostMode = false;
-			user.onlyNaturalAbilities = false;
 			cooldownLeft = cooldown;
 			timeLeft = 0;
 			user.affect(effect, false);
