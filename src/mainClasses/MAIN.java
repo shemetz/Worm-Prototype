@@ -50,7 +50,6 @@ import javax.swing.Timer;
 
 import abilities.Chronobiology;
 import abilities.Elastic;
-import abilities._ForceFieldAbility;
 import abilities.GridTargetingAbility;
 import abilities.Portals;
 import abilities.Protective_Bubble_I;
@@ -60,11 +59,12 @@ import abilities.Sense_Powers;
 import abilities.Shield_E;
 import abilities.Sprint;
 import abilities.Steal_Power;
-import abilities._TeleportAbility;
 import abilities.Time_Freeze_Target_I;
 import abilities.Time_Freeze_Target_II;
 import abilities.Wild_Power;
+import abilities._ForceFieldAbility;
 import abilities._LoopAbility;
+import abilities._TeleportAbility;
 import effects.Burning;
 import effects.Ethereal;
 import effects.Tangled;
@@ -261,6 +261,13 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				camera.x += xChange;
 				camera.y += yChange;
 				env.removeAroundPerson(player);
+
+				// avoiding a bug/exploit in a patchworky way because I'm lazy
+				for (PersonCopy pc : player.pastCopies)
+				{
+					pc.x = player.x;
+					pc.y = player.y;
+				}
 			}
 		}
 
@@ -3296,6 +3303,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		{
 		case TAB:
 			menuStuff.add(new MenuText(frameWidth / 2 - 78, frameHeight / 2 - 30, 156, 60, "RESUME"));
+			menuStuff.add(new MenuText(frameWidth / 2 - 78, frameHeight / 2 + 40, 156, 60, "ABILITIES"));
 			break;
 		case ABILITIES:
 			menuStuff.add(new MenuText(frameWidth / 2 - 78, 50, 156, 60, "Resume"));

@@ -12,6 +12,7 @@ import mainResourcesPackage.SoundEffect;
 
 public class Spray_E extends Ability
 {
+	double outOfManaCooldown = 1;
 
 	public Spray_E(String elementName, int p)
 	{
@@ -28,10 +29,8 @@ public class Spray_E extends Ability
 	public void updateStats()
 	{
 		costPerSecond = 2;
-		cooldown = 1; // after running out of mana
 		range = 500; // TODO make range depend on points
 		arc = Math.PI * 1 / 2; // not really
-		
 	}
 
 	public void disable(Environment env, Person user)
@@ -50,7 +49,7 @@ public class Spray_E extends Ability
 			on = false;
 			user.maintaining = false;
 			if (user.mana <= 0.3)
-				cooldownLeft = cooldown;
+				cooldownLeft = outOfManaCooldown;
 			stopAllSounds();
 		}
 		else if (!user.prone && !user.maintaining && cooldownLeft <= 0 && user.timeEffect != 0) // activate
@@ -88,7 +87,7 @@ public class Spray_E extends Ability
 			else
 			{
 				sounds.get(0).pause();
-				cooldownLeft = cooldown;
+				cooldownLeft = outOfManaCooldown;
 			}
 	}
 

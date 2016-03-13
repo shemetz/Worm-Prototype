@@ -3205,7 +3205,7 @@ public class Environment
 		percentageOfTheDamage *= p.timeEffect;
 		damage *= percentageOfTheDamage;
 		pushback *= percentageOfTheDamage;
-		if (damage > 0)
+		if (damage > 0.01)
 		{
 			// damage is multiplied by 0.9 to 1.1
 			damage *= 0.9 + Math.random() * 0.2;

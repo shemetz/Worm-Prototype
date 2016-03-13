@@ -939,19 +939,20 @@ public class Person extends RndPhysObj implements Mover
 	{
 		// like trigger(), but only with currently implemented abilities, and also entirely random :/
 
-		// give 3 random abilities, levels 5
+		// give 6 random abilities, levels 1-7
 		Random rand = new Random();
 		List<String> possibleAbilities = new ArrayList<String>();
 		possibleAbilities.addAll(Ability.implementedAbilities);
 		possibleAbilities.remove("Punch");
 		possibleAbilities.remove("Sprint");
 		possibleAbilities.remove("Elemental Combat I");
-		for (int i = 0; i < 4;)
+		for (int i = 0; i < 6;)
 		{
+			int level = (int) (Math.random() * 9) + 1;
 			String str = possibleAbilities.get(rand.nextInt(possibleAbilities.size()));
 			if (!Ability.elementalPowers.contains(str))
 			{
-				abilities.add(Ability.ability(str, 5));
+				abilities.add(Ability.ability(str, level));
 				i++;
 				possibleAbilities.remove(str);
 			}
@@ -967,7 +968,7 @@ public class Person extends RndPhysObj implements Mover
 					String elementString = " <" + elements.get(0) + ">";
 					if (Resources.icons.get(str + elementString) != null)
 					{
-						abilities.add(Ability.ability(str + elementString, 5));
+						abilities.add(Ability.ability(str + elementString, level));
 						i++;
 						elements.clear();
 						found = true;
