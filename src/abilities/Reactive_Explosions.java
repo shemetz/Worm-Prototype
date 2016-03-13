@@ -7,45 +7,55 @@ import mainClasses.Environment;
 import mainClasses.Person;
 import mainClasses.Player;
 
-public class Self_Bomb extends Ability
+public class Reactive_Explosions extends _PassiveAbility
 {
 	Explosion_Resistance givenAbility;
 	boolean haventGivenResistance;
+	public double minimumDamageNeeded;
+	public boolean prepareToExplode;
 
-	public Self_Bomb(int p)
+	public Reactive_Explosions(int p)
 	{
-		super("Self-Bomb", p);
+		super("Reactive Explosions", p);
 		rangeType = Ability.RangeType.EXPLOSION;
-		costType = CostType.MANA;
 
 		haventGivenResistance = true;
 		givenAbility = (Explosion_Resistance) Ability.ability("Explosion Resistance", 0);
+		prepareToExplode = false;
 	}
 
 	public void updateStats()
 	{
-		cost = 3;
-		cooldown = 1;
+		cooldown = (double) 5 / level;
 		radius = 400;
-		damage = level * 4;
-		pushback = level * 10;
-		
+		damage = level * 1.5;
+		pushback = level * 4;
+		minimumDamageNeeded = Math.min(10 - level, 1);
 	}
 
 	public void use(Environment env, Person user, Point target)
 	{
+		on = true;
 		if (haventGivenResistance)
 		{
-			// TODO have this in an "initializeAbility" method of some sort?
 			haventGivenResistance = false;
 			user.abilities.add(givenAbility);
 		}
-		if (user.mana >= cost && !user.maintaining && cooldownLeft == 0)
+	}
+
+	public void maintain(Environment env, Person user, Point target, double deltaTime)
+	{
+		cooldownLeft -= deltaTime;
+		if (cooldownLeft < 0)
+			cooldownLeft = 0;
+		if (prepareToExplode)
 		{
-			// TODO make it not only in the user'z Z but in the one the user tried to do (most likely 0, unless cursor is above another object)
-			env.createExplosion(user.x, user.y, user.z, radius, damage, pushback, -1);
-			user.mana -= cost;
-			cooldownLeft = cooldown;
+			prepareToExplode = false;
+			if (cooldownLeft == 0)
+			{
+				env.createExplosion(user.x, user.y, user.z, radius, damage, pushback, -1);
+				cooldownLeft = cooldown;
+			}
 		}
 	}
 
@@ -53,12 +63,12 @@ public class Self_Bomb extends Ability
 	{
 		disabled = true;
 		user.abilities.remove(givenAbility);
+		on = false;
 		haventGivenResistance = true;
 	}
 
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
 	{
-		player.aimType = Player.AimType.AIMLESS;
-		player.target = player.Point();
+		player.aimType = Player.AimType.NONE;
 	}
 }

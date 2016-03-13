@@ -188,7 +188,7 @@ public class AI
 				{
 					double angle = angleToTarget + angleAttempts[attempts];
 					// test multiple distances
-					for (int i = 1000; i >= 300 && path == null; i--) // 1000 to 300
+					for (int i = 1000; i >= 300 && path == null; i -= 50) // 1000 to 300
 					{
 						targetPoint = new Point((int) (targetPerson.x + i * Math.cos(angle)), (int) (targetPerson.y + i * Math.sin(angle)));
 						path = npc.pathFind(targetPoint);

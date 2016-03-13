@@ -19,6 +19,7 @@ import abilities.Charge;
 import abilities.Elastic;
 import abilities.Elemental_Void;
 import abilities.Punch;
+import abilities.Reactive_Explosions;
 import abilities.Sprint;
 import effects.Burning;
 import effects.E_Resistant;
@@ -374,6 +375,16 @@ public class Person extends RndPhysObj implements Mover
 		{
 			timeSinceLastHit = 0;
 		}
+		for (Ability a : abilities)
+			if (a.on)
+			{
+				if (a instanceof Reactive_Explosions)
+				{
+					Reactive_Explosions aa = (Reactive_Explosions) a;
+					if (damage >= aa.minimumDamageNeeded)
+						aa.prepareToExplode = true;
+				}
+			}
 		// TODO - this is kinda buggy with the fact that normal wall collisions can damage, and that makes clones stay "in combat" too much
 		inCombat = true;
 		if (possessedTimeLeft > 0 && life < 0.20 * maxLife && !this.isAvatar) // get out of possession

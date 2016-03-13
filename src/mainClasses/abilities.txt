@@ -30,7 +30,7 @@ Ball (Activated) <Element>
 offensive damaging pushing projectile cooldown aim cost
 Create a ball of <e> and throw it with force towards a target.
 Deals normal damage with an extra 1 pushback. 
-Costs 1 M/s, while attacking.
+Costs ….some amount per second. 5 / attackRate * 1.5.
 
 Beam (Maintained) <Element>
 offensive damaging pushing beam aim continuous-cost
@@ -58,8 +58,8 @@ Costs 2 M/s while attacking.
 Strike (Activated) <Element>
 offensive damaging pushing cost
 Strike with <an e> fist.
-A melee-attack that deals regular melee-attack damage, plus the elemental damage of a ball attack, and same pushback. Strikes will usually cause the element’s effects, if it has any. The cooldown for strikes is 1.5 seconds.
-Costs 2 mana in addition to a normal Punch’s stamina cost.
+Your next Punch will deal the normal punch damage plus  the elemental damage of a ball attack, and same pushback plus the pushback of a ball attack. Strikes will usually cause the element’s effects, if it has any.
+Costs 3 divided by something, in addition to a normal Punch’s stamina cost.
 
 Elemental Resistance (Passive) <Element>
 passive
@@ -114,7 +114,7 @@ See mana and stamina bars on living creatures within a range of 0.5 * 2^Level me
 Danger Sense (Passive)
 passive sense
 Feel when you’re in danger.
-Get a bonus to evasion, which becomes greater when you’re not in combat (remember, combat starts after the first attack). Also, be able to sense “abstract danger” when there is a very strong cape or a Class S threat within 1 Km.
+Players with this ability have (1-evasion) multiplied by 0.9^Level. NPCs have their avoidance delay multiplied by 0.7^Level, and range multiplied by Level ^ 1.5. Also, players with this ability are able to sense “abstract danger” when there is a very strong cape or a Class S threat within 1 Km.
 
 Sense Powers (On/Off)
 on-off sense range
@@ -155,7 +155,7 @@ Gain a bonus to your Strength stat equal to 2*Level, and to your Fitness stat a 
 Strength III (Passive)
 passive stat-boost
 You are really, REALLY strong. Nobody needs that much strength, but you have it.
-Gain a bonus to your Strength stat equal to 2^Level, and to your Fitness stat a bonus of 0.5*Level (rounded up). Strongest cape, a cape who’s got Strength III Level 10, has ~1027 STR and can lift about 25 cars at once. This cape can easily kill an average person with a punch, and can jump...500 meters up?. Basically, any cape with Strength III has >100 STR and will have a very interesting life.
+Gain a bonus to your Strength stat equal to 2^Level, and to your Fitness stat a bonus of 0.5*Level (rounded up). Strongest cape, a cape who’s got Strength III Level 10, has ~1000 STR and can lift about 25 cars at once. This cape can easily kill an average person with a punch, and can jump...500 meters up?. Basically, any cape with Strength III has >100 STR and will have a very interesting life.
 
 Critical Thinking (Passive)
 passive sub-stat-boost
@@ -165,12 +165,12 @@ Multiply your (1-critical chance) by 0.9^(Level).
 Explosive Fists (Passive)
 passive explosion extra-abilities
 Each of your punches creates an explosion, to which you are immune.
-You have Explosion Resistance. Melee hits with your punches create an explosion that deals 4*Level damage and 4*Level pushback force to the target and anything in a 1 meter radius from you.
+You have Explosion Resistance. Melee hits with your punches create an explosion that deals 1*Level damage and 8*Level pushback force to the target and anything in a 2 meter radius from the punch.
 
 Elemental Fists (Passive) <Element>
 passive damage
 Your punches are infused with <e>.
-Each of your punches deals an additional Level damage, and has a 15% chance to cause an additional (elemental) effect.
+Each of your punches deals an additional Level elemental damage.
 
 Pushy Fists (Passive)
 passive level-up
@@ -180,8 +180,8 @@ You also get +0.5*Level Strength.
 
 Shattering Fists (Passive)
 passive level-up
-Your punches have a chance to shatter force fields.
-Each of your punches that hit a force field has a 25%*Level chance to deal x10 damage to the field.
+Your punches have a chance to shatter objects.
+Each of your punches that hit a force field has a 25%*Level chance to deal x10 damage to objects (force fields, walls, furniture).
 
 Sapping Fists (Passive)
 passive duration level-up
@@ -248,7 +248,7 @@ Flying costs 0.4 S/s.
 Telekinetic Flight (On/Off + Passive)
 on-off flight
 You are a master of flight!
-Be able to fly at your regular speed*9*Level. In addition, you gain 50% resistance to pushback, +20% evasion chance and +2 to Strength.
+Be able to fly at your regular speed*9*Level. In addition, you gain 50% resistance to pushback, (1-evasion) * 0.8 and +2 to Strength.
 
 Chemtrail (On/Off)
 on-off level-up cooldown cost
@@ -333,10 +333,10 @@ As long as an enemy in a range of 1 meter has non-natural armor, every second yo
 If your Level is 7 or more, you can also use this power on natural armor; you steal skin and add it to your own skin, thereby permanently increasing your natural armor and damaging the enemy’s. If your enemy has no more natural armor (skin) left, they will instead lose 3*Level percent of their current health every second.
 Costs 0.5*Level M/s while absorbing.
 
-Exploding Aura (Passive)
+Reactive Explosions (Passive)
 passive explosion cooldown extra-abilities
-Whenever you are damaged, you explosively retreat.
-You have Explosion Resistance, and whenever you suffer damage, immediately activate Self-Bomb-like explosion.
+Whenever you are damaged, you explosively retaliate.
+You have Explosion Resistance, and whenever you suffer a burst of damage, immediately activate weak Self-Bomb-like explosion: Radius = 4, Damage = 1.5*Level, Pushpack = 4*Level.
 Cooldown (between explosions): 5/Level seconds
 
 Leg Muscles (Passive)
@@ -351,14 +351,14 @@ Your speed is increased by 1.5*Level m/s. Your acceleration is increased by 10*L
 
 Charge (Passive)
 passive level-up
-Push people aside while running, to damage them and make them fall.
-Gain a permanent +Level Strength. While running, every person you touch with less strength than you will be pushed perpendicular to your direction of movement 1+0.2*Level meters away, suffering 2*Level damage and falling to the ground. If you hit a person stronger than you, instead you will bounce backwards and lose your speed, in addition to falling and suffering 5 damage.
+Damage and push things you run into.
+Gain a permanent +Level Strength. While running at high enough speed, every person you touch with less strength than you will be pushed perpendicular to your direction of movement 1 + 1*Level pushback, suffering 2*Level damage if they’re standing and falling to the ground. Will also damage/destroy furniture and walls like that. If you destroy a wall/furniture this way, or hit a person with less strength than you, you will only be affected with 20% of the damage and momentum-stop you normally would. If you hit a person stronger than you, a wall durable enough or furniture durable enough you will be affected by the full amount of the hit as usual.
 
 Elastic (Passive)
 passive level-up
 Bounce off of walls and people.
-Gain a permanent +Level Strength. While trying to move (holding movement buttons), friction affects you much less but so do your feet while trying to change direction. While running, every person you touch with less strength than you will be pushed in your direction of movement 0.1*speed meter away, suffering 0.1*speed damage and falling to the ground. You yourself will bounce away, gaining an extra 2.5*Level% to your speed. If you hit a person stronger than you, You simply bounce away.
-You also bounce when hitting walls, again gaining an extra 2.5*Level% speed.
+Gain a permanent +Level Strength. While trying to move (holding movement buttons), friction affects you much less (multiplied by 10%) but so do your feet while trying to change direction. While running, every person you touch with less strength than you will be pushed in your direction of movement 2*Level pushback, suffering 1*Level damage and falling to the ground. You yourself will bounce away. If you hit a person stronger than you, you simply bounce away.
+You also bounce when hitting solid objects. They will not be dealt damage or deal you damage.
 
 Trail (On/Off)
 cost on-off
@@ -438,16 +438,18 @@ Costs 8 - 0.5*Level M (minimum 1M).
 Ghost Mode I (Activated)
 escape cost duration
 You can temporarily become ethereal, and phase through most physical things.
-Become ethereal for as long as this is active. While ethereal, you cannot affect or be affected by physical objects or creatures, except for Shock and Burn damage. These deal x4 damage to you (That’s a lot of damage). Any ability you use while ethereal will be forever ethereal and will therefore only affect ethereal beings. You can’t use any of the Fire, Electricity etc. powers while ethereal.
+Become ethereal for as long as this is active. While ethereal, you cannot affect or be affected by physical objects or creatures, except for Shock and Burn damage. These deal x4 damage to you (That’s a lot of damage). You can’t use any non-natural abilities while ethereal. This includes turning off the Ghost Mode I ability before its duration is over.
 You can stay in Ghost Mode for Level seconds.
 Costs: 2*Level Mana.
+Cooldown: 5 seconds.
 
 Ghost Mode II (Activated)
 escape cost duration
 You can temporarily become ethereal, and phase through most physical things.
-Become ethereal for as long as this is active. While ethereal, you cannot affect or be affected by physical objects or creatures, except for Shock and Burn damage. These deal x2 damage to you. Any ability you use while ethereal will be forever ethereal and will therefore only affect ethereal beings. You can’t use any of the Fire, Electricity etc. powers while ethereal.
+Become ethereal for as long as this is active. While ethereal, you cannot affect or be affected by physical objects or creatures, except for Shock and Burn damage. These deal x4 damage to you. Any ability you use while ethereal will be forever ethereal and will therefore only affect ethereal beings. You can’t use any of the Fire, Electricity etc. powers while ethereal.
 You can stay in Ghost Mode for 2*Level seconds.
 Costs: Level Mana.
+Cooldown: 3 seconds.
 
 Ghost Weapons I (On/Off)
 on-off cost
@@ -464,7 +466,7 @@ Costs 2-0.1*Level Mana per attack with the weapon.
 Ghost Evasion (Passive)
 passive level-up
 Sometimes your body randomly fluctuates through ethereal spacetime in order to evade attacks.
-Whenever you’re being attacked, there’s a 50% chance that your (1-evasion) will be temporarily multiplied by 0.95/Level.
+Whenever you’re being attacked, there’s a 50% chance that your (1-evasion) will be temporarily multiplied by 0.95^Level.
 
 Ethereal Poison (Passive)
 passive damaging
@@ -495,7 +497,7 @@ Costs 4 Mana.
 Wide Force Field (Activated)
 defensive force-field cost cooldown range
 Create a wide force field in front of you.
-Create a rectangular force field in front of you. The FF’s dimensions are: length 3+Level, height 1, width 0.1+0.1*Level (meters). The FF has 50*Level HP and loses 5% of its current life every second (minimum 1). Has Level/2 armor.
+Create a rectangular force field in front of you. The FF’s dimensions are: length 3+Level, height 1, width 0.05+0.02*Level (meters). The FF has 50*Level HP and loses 5% of its current life every second (minimum 1). Has Level/2 armor.
 Cooldown: 7-Level seconds (minimum 0.3).
 Costs 4 Mana.
 
@@ -859,20 +861,21 @@ Cooldown: 3 seconds.
 Self-Bomb (Activated)
 offensive extra-abilities damaging explosion cost cooldown
 Create an explosion centered around you that deals a lot of damage and pushback to others around you.
-You have Explosion Resistance. Create an explosion where you stand, with a radius of 4 meters, a damage of 5*Level and a pushback of 5*Level. The explosion doesn’t affect you in any way.
+You have Explosion Resistance. Create an explosion where you stand, with a radius of 4 meters, a damage of 4*Level and a pushback of 10*Level. The explosion doesn’t affect you in any way.
 Cost: 3 Mana.
 Cooldown: 1 second.
 
 Ranged Explosion (Activated)
 point offensive damaging explosion cost cooldown
 Create an explosion from range.
-Create an explosion centered around a point, r = Level, d = 3*Level, p = 3*Level.
+Create an explosion centered around a point, r = Level, d = 3*Level, p = 8*Level.
 Cost: 3 Mana.
+Cooldown: 1 second.
 
-Spontaneous Explosions Aura (On/Off)
+Spontaneous Explosions (On/Off)
 on-off offensive continuous-cost explosion range damaging
 Explosions randomly appear around you.
-Explosions appear around you, at a rate of Level explosions per 5 seconds. The rate is twice as fast if you have less than 50% health. The explosions’ centers are less than 15 meters away from you, more than 5 meters away from you, at a random angle. The explosions have r = 5, d = 5*Level, p = 3*Level.
+Explosions appear around you, at a rate of Level explosions per 5 seconds. The rate is twice as fast if you have less than 50% health. The explosions’ centers are less than 9 meters away from you, more than 3 meters away from you, at a random angle. The explosions have r = 5, d = 3*Level, p = 8*Level.
 You can turn this power on/off at no cost, without any cooldown.
 Cost: 1 M/s while on.
 
@@ -915,8 +918,8 @@ Cost: 4-Level (minimum 1).
 Possess (Activated)
 offensive cost cooldown duration range
 Take control of a creature for a short while.
-Target an enemy. You have a 10%*Level chance of succeeding in possessing them. If you do, you become their controller for the next 15 seconds or until they are reduced to less than 20% of their maximum health. Your original body remains inactive.
-Cooldown: 18-Level seconds, whether or not you succeeded in Possessing.
+Target an enemy. You become their controller for the next 3*level seconds or until they are reduced to less than 20% of their maximum health. Your original body remains inactive.
+Cooldown: 18-Level seconds, after end of possession.
 Cost: 7 Mana.
 
 Command (Activated)
@@ -998,7 +1001,7 @@ Costs 3 Mana.
 Buff Evasion (Activated)
 buff sub-stat-boost cost cooldown duration
 Enhance the evasion of people around you.
-The nearest ally in range of Level/2 meters gains (1-evasion) *= 0.3/Level for 5 seconds. If there’s no ally, the ability affects you instead.
+The nearest ally in range of Level/2 meters gains (1-evasion) *= 0.8^Level for 5 seconds. If there’s no ally, the ability affects you instead.
 Cooldown of 5 seconds.
 Costs 3 Mana.
 
@@ -1032,7 +1035,7 @@ Cost: 0 Mana.
 Muscle Charge (Charge + On/Off)
 charge on-off stat-boost
 Charge while in combat. Release to make yourself stronger.
-Charge while in a fight. While on: Gain +3*Level Strength.
+Charge while in a fight. While on: Gain +2^Level Strength.
 Cost while on: 20 C/s.
 
 Clairvoyance Charge (Charge, Maintained)
@@ -1043,7 +1046,7 @@ Costs 25 C/s.
 
 Charged Regeneration (Charge + Passive)
 charge passive
-Regenerate quicker while you’re injured.
+Regenerate quicker while you’re injured, but not while you’re being damaged.
 Charge whenever you get hurt, by 0.1*Level*the amount of damage you suffered. Charge is slowly removed at the rate of 0.1*Level*(current charge+4) C/s. Your HP is restored by exactly the amount of charge removed.  That means that your charge meter depletes much faster when it’s much fuller, I.E. when you’re more injured.
 
 Divebomb (Charge + Activated)
