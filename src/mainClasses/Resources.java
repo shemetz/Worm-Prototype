@@ -558,7 +558,7 @@ public class Resources
 		effects.get(0).add(ResourceLoader.getBufferedImage("people/burning_3.png"));
 
 		String[] miscAbilities = new String[]
-		{ "heal", "steal", "possession_eyes", "elasticcharge_eyes" };
+		{ "heal", "steal", "possession_eyes", "elasticcharge_eyes", "clairvoyance_eyes" };
 		for (String s : miscAbilities)
 			abilities.put(s, ResourceLoader.getBufferedImage("other abilities/" + s + ".png"));
 

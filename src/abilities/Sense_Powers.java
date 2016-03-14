@@ -79,6 +79,5 @@ public class Sense_Powers extends Ability
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
 	{
 		player.aimType = Player.AimType.NONE;
-		player.target = new Point(-1, -1);
 	}
 }

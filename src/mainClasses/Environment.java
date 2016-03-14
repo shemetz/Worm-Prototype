@@ -106,9 +106,9 @@ public class Environment
 		poolImages = new BufferedImage[width][height];
 		floorTypes = new int[width][height];
 		cornerCracks = new int[width][height];
-		wCornerStyles = new int[width][height][amountOfElements + 1]; // 12 = cement
-		pCornerStyles = new int[width][height][amountOfElements];
-		pCornerTransparencies = new int[width][height][amountOfElements];
+		wCornerStyles = new int[width+1][height+1][amountOfElements + 1]; // 12 = cement
+		pCornerStyles = new int[width+1][height+1][amountOfElements];
+		pCornerTransparencies = new int[width+1][height+1][amountOfElements];
 		checkedSquares = new boolean[width][height];
 		widthPixels = width * squareSize;
 		heightPixels = height * squareSize;

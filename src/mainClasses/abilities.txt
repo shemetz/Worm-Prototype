@@ -127,7 +127,7 @@ Sense where <e> exists, and people with <e> powers.
 See silhouettes of capes with your elemental power, walls/pools of your element or creatures under your element’s effect. The range is 0.5 * 3^Level. Sense Element <Earth> allows you to pretty much also have Sense Structure! Yup!
 
 Clairvoyance (Maintained)
-todo sense range continuous-cost
+sense range continuous-cost
 See EVERYTHING (in your range).
 Combine Sense Parahumans, Sense Life, Sense Mana and Stamina, Sense Powers, Danger Sense, Sense Structure. Your range is 3^Level.
 Costs 2 M/s to maintain, and cannot be activated with less than 90% mana or deactivated with more than 60% mana. If it is not deactivated before you run out of mana, it will start using HP, draining 5 HP/s.

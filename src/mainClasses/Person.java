@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Random;
 
 import abilities.Charge;
+import abilities.Clairvoyance;
 import abilities.Elastic;
 import abilities.Elemental_Void;
 import abilities.Punch;
@@ -1297,6 +1298,8 @@ public class Person extends RndPhysObj implements Mover
 			for (Ability a : abilities)
 				if (a.on)
 				{
+					if (a instanceof Clairvoyance)
+						buffer.drawImage(Resources.abilities.get("clairvoyance_eyes"), (int) (x - 0.5 * imgW), (int) (y - 0.5 * imgH), null);
 					if (a instanceof Elastic)
 						if (velocityPow2() >= ((Elastic) a).minimumVelocityPow2)
 							buffer.drawImage(Resources.abilities.get("elasticcharge_eyes"), (int) (x - 0.5 * imgW), (int) (y - 0.5 * imgH), null);

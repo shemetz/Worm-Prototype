@@ -1687,7 +1687,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 									if (!p.onlyNaturalAbilities || a.natural)
 										a.use(env, p, p.target);
 							}
-						} // Can't start a maintainable ability while maintaining another
+						} // Can't start a maintainable ability while maintaining another (or the same one)
 					}
 					else
 					{
@@ -2135,6 +2135,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			if (a.on)
 				switch (a.justName())
 				{
+				case "Clairvoyance":
 				case "Sense Structure":
 					drawStructureDistancePow2 = Math.pow(a.range, 2);
 					break;
@@ -2182,7 +2183,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 	void drawExtraPeopleInfo(Graphics2D buffer, Environment e)
 	{
 		// exists after coordinate shift
-		double drawLifeDistancePow2 = 0, drawManaDistancePow2 = 0, drawStaminaDistancePow2 = 0, drawParahumansDistancePow2 = 0;
+		double drawLifeDistancePow2 = 0, drawMovementDistancePow2 = 0, drawManaDistancePow2 = 0, drawStaminaDistancePow2 = 0, drawParahumansDistancePow2 = 0;
 		double[] elementSenses = new double[12];
 		for (Ability a : player.abilities)
 			if (a.on)
@@ -2194,6 +2195,9 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				case "Sense Life":
 					drawLifeDistancePow2 = Math.pow(a.range, 2);
 					break;
+				case "Sense Movement":
+					drawMovementDistancePow2 = Math.pow(a.range, 2);
+					break;
 				case "Sense Mana and Stamina":
 					drawManaDistancePow2 = Math.pow(a.range, 2);
 					drawStaminaDistancePow2 = Math.pow(a.range, 2);
@@ -2201,6 +2205,12 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				case "Sense Element":
 					elementSenses[a.elementNum] = Math.pow(a.range, 2);
 					break;
+				case "Clairvoyance":
+					drawParahumansDistancePow2 = Math.pow(a.range, 2);
+					drawMovementDistancePow2 = Math.pow(a.range, 2);
+					drawLifeDistancePow2 = Math.pow(a.range, 2);
+					drawManaDistancePow2 = Math.pow(a.range, 2);
+					drawStaminaDistancePow2 = Math.pow(a.range, 2);
 				case "Sense Powers":
 					Sense_Powers spAbility = (Sense_Powers) a;
 					// summing up the levels
@@ -2279,7 +2289,21 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 							buffer.drawLine((int) (p.x - radius * sqrt2by2), (int) (p.y + radius * sqrt2by2), (int) (p.x + radius * sqrt2by2), (int) (p.y - radius * sqrt2by2));
 						}
 					}
-				// DOES NOT draw name out of visibility
+				// Sense Movement
+				if (distancePow2 < drawMovementDistancePow2 && p.velocityPow2() > 400) // 400 - because I felt like it
+				{
+					// draws a red arrow, length equal to velocity
+					double lengthOfArrow = 0.1 * p.velocity(), angleOfArrow = p.angle(), arrowSidewaysThingieLength = 20;
+					buffer.setColor(Color.red);
+					Point endOfArrow = new Point((int) (p.x + lengthOfArrow * Math.cos(angleOfArrow)), (int) (p.y + lengthOfArrow * Math.sin(angleOfArrow)));
+					buffer.setStroke(new BasicStroke(3));
+					buffer.drawLine((int) p.x, (int) p.y, endOfArrow.x, endOfArrow.y);
+					buffer.drawLine(endOfArrow.x, endOfArrow.y, (int) (endOfArrow.x + arrowSidewaysThingieLength * Math.cos(angleOfArrow + Math.PI - Math.PI / 5)),
+							(int) (endOfArrow.y + arrowSidewaysThingieLength * Math.sin(angleOfArrow + Math.PI - Math.PI / 5)));
+					buffer.drawLine(endOfArrow.x, endOfArrow.y, (int) (endOfArrow.x + arrowSidewaysThingieLength * Math.cos(angleOfArrow + Math.PI + Math.PI / 5)),
+							(int) (endOfArrow.y + arrowSidewaysThingieLength * Math.sin(angleOfArrow + Math.PI + Math.PI / 5)));
+				}
+				// Name (DOES NOT draw name out of visibility)
 				if (!player.limitedVisibility || player.visibleRememberArea.get(e).contains(p.x, p.y))
 				{
 					Color nameColor = Color.white; // neutral
@@ -2289,7 +2313,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 						nameColor = Color.red;
 					p.drawName(buffer, nameColor, cameraRotation);
 				}
-				// DOES draw life/stamina/mana out of visibility
+				// life/stamina/mana
 				p.drawData(buffer, distancePow2 < drawLifeDistancePow2, distancePow2 < drawManaDistancePow2, distancePow2 < drawStaminaDistancePow2, cameraRotation);
 
 				buffer.translate(p.x, p.y);
