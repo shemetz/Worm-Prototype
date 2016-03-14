@@ -2223,10 +2223,11 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 					Point center = new Point((int) (player.x), (int) (player.y));
 					buffer.translate(center.x, center.y);
 					buffer.rotate(cameraRotation);
+					buffer.rotate(spAbility.angle);
 					for (int i = 0; i < elementIndexes.length; i++)
 					{
 						double angle = TAU / elementIndexes.length * i - 0.3 * TAU;
-						int elementLevel = 2 * spAbility.details[elementIndexes[i]];
+						int elementLevel = 2 * (int) spAbility.details[elementIndexes[i]];
 						if (elementLevel <= 0)
 							continue;
 						Color color = EP.elementColors[elementIndexes[i]];
@@ -2235,6 +2236,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 						buffer.fillRect(-35, (int) (-radius - elementLevel), 70, elementLevel);
 						buffer.rotate(-angle);
 					}
+					buffer.rotate(-spAbility.angle);
 					buffer.rotate(-cameraRotation);
 					buffer.translate(-center.x, -center.y);
 					break;

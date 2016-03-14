@@ -46,7 +46,10 @@ public class Clairvoyance extends Sense_Powers
 			on = !on;
 
 			if (on)
+			{
 				user.notMovingTimer = 99;
+				timer = updatePeriod - 0.3;
+			}
 			else
 			{
 				cooldownLeft = cooldown;

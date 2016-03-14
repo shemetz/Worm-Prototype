@@ -1,7 +1,6 @@
 package abilities;
 
 import java.awt.Point;
-import java.util.Random;
 
 import mainClasses.Ability;
 import mainClasses.EP;
@@ -13,10 +12,10 @@ import mainClasses.Player;
 
 public class Sense_Powers extends Ability
 {
-	public int[] details;
-	Random random = new Random();
+	public double[] details;
 	double timer;
 	double updatePeriod;
+	public double angle;
 
 	public Sense_Powers(int p)
 	{
@@ -25,7 +24,7 @@ public class Sense_Powers extends Ability
 		rangeType = RangeType.CIRCLE_AREA;
 		instant = true;
 
-		details = new int[MAIN.numOfElements];
+		details = new double[MAIN.numOfElements];
 		for (int i = 0; i < details.length; i++)
 			details[i] = 0;
 		timer = 0;
@@ -36,7 +35,7 @@ public class Sense_Powers extends Ability
 		cooldown = 1;
 		range = (int) (50 * Math.pow(2, level));
 		updatePeriod = 10 - level;
-		
+
 	}
 
 	public void disable(Environment env, Person user)
@@ -51,26 +50,27 @@ public class Sense_Powers extends Ability
 		{
 			on = !on;
 			cooldownLeft = cooldown;
-			timer = updatePeriod;
+			timer = updatePeriod - 0.3;
 		}
 	}
 
 	public void maintain(Environment env, Person user, Point target, double deltaTime)
 	{
+		angle += 1.26873 * deltaTime;
 		if (timer >= updatePeriod)
 		{
 			timer = 0;
 			for (int i = 0; i < details.length; i++)
 			{
-				details[i] = (int) (random.nextGaussian() * 2); // deviation of 2 really seems like the best one.
+				details[i] = 0;
 			}
 			for (Person p : env.people)
-				if (!p.equals(user))
+				if (!p.equals(user) && !p.dead)
 				{
 					double distancePow2 = Methods.DistancePow2(user.x, user.y, p.x, p.y);
 					if (distancePow2 < Math.pow(range, 2))
 						for (EP ep : p.DNA)
-							details[ep.elementNum] += ep.points;
+							details[ep.elementNum] += ep.points * (10 - Math.log10(distancePow2));
 				}
 		}
 		timer += deltaTime;

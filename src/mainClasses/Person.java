@@ -1466,7 +1466,13 @@ public class Person extends RndPhysObj implements Mover
 		}
 		deltaTime *= timeEffect;
 		final double lerp_constant = 7;
-		this.rotation += (((((rotationAngle - this.rotation) % (Math.PI * 2)) + (Math.PI * 3)) % (Math.PI * 2)) - Math.PI) * lerp_constant * deltaTime;
+		double amount = (((((rotationAngle - this.rotation) % (Math.PI * 2)) + (Math.PI * 3)) % (Math.PI * 2)) - Math.PI);
+		double maxRotation = maintaining ? 0.4 : 2;
+		if (amount > maxRotation)
+			amount = maxRotation;
+		if (amount < -maxRotation)
+			amount = -maxRotation;
+		this.rotation += amount * lerp_constant * deltaTime;
 	}
 
 	public double damageAfterHittingArmor(double damage, int damageType, double percentageOfTheDamage)
