@@ -31,12 +31,12 @@ public class Bubble_Target extends _AFFAbility
 
 	public void updateStats()
 	{
-		cooldown = Math.min(6 - level, 0.3);
+		cooldown = Math.min(6 - LEVEL, 0.3);
 		cost = 3;
 		range = 500;
 
-		life = 10 * level;
-		armor = level * 2;
+		life = 10 * LEVEL;
+		armor = LEVEL * 2;
 		decayRate = 0.1;
 	}
 

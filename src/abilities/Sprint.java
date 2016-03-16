@@ -22,7 +22,7 @@ public class Sprint extends Ability
 
 	public void updateStats()
 	{
-		costPerSecond = 3 - 0.3 * level;
+		costPerSecond = 3 - 0.3 * LEVEL;
 		
 	}
 

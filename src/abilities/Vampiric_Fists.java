@@ -14,7 +14,7 @@ public class Vampiric_Fists extends _PunchAbility
 
 	public void updateStats()
 	{
-		steal = 0.2 * level;
+		steal = 0.2 * LEVEL;
 		
 	}
 }

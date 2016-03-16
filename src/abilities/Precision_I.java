@@ -17,8 +17,8 @@ public class Precision_I extends _PassiveAbility
 
 	public void updateStats()
 	{
-		dexBonus = 1 * level;
-		amount = Math.pow(0.9, level);
+		dexBonus = 1 * LEVEL;
+		amount = Math.pow(0.9, LEVEL);
 		
 	}
 

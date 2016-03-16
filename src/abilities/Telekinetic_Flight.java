@@ -22,7 +22,7 @@ public class Telekinetic_Flight extends _FlightAbility
 	public void updateStats()
 	{
 		cooldown = 1;
-		flySpeed = 900 * level;
+		flySpeed = 900 * LEVEL;
 	}
 
 	public void use(Environment env, Person user, Point target)

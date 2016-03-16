@@ -19,10 +19,10 @@ public class Slow_Target extends _ApplyEffect
 
 	public void updateStats()
 	{
-		cost = 6 - level / 2;
+		cost = 6 - LEVEL / 2;
 		cooldown = 3;
 		range = 500;
-		duration = level * 2;
+		duration = LEVEL * 2;
 		
 	}
 

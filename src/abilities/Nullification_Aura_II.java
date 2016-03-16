@@ -28,7 +28,7 @@ public class Nullification_Aura_II extends Ability
 
 	public void updateStats()
 	{
-		range = 100 + level * 100;
+		range = 100 + LEVEL * 100;
 		cost = 5;
 		cooldown = 0.8;
 		

@@ -21,9 +21,9 @@ public class Clone_I extends _SummoningAbility
 	public void updateStats()
 	{
 		cost = 5;
-		cooldown = 10 - level; // after last clone died
+		cooldown = 10 - LEVEL; // after last clone died
 		range = 300;
-		life = 15 * level;
+		life = 15 * LEVEL;
 		maxNumOfClones = 1;
 		statMultiplier = 2/3;
 	}

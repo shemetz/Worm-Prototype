@@ -45,13 +45,13 @@ public class Beam_E extends _BeamAbility
 	public void updateStats()
 	{
 		if (getElement().equals("Plant"))
-			range = 80 * level;
+			range = 80 * LEVEL;
 		else
-			range = 500 * level;
+			range = 500 * LEVEL;
 		costPerSecond = 1;
 		cooldown = 0.5; // after stopping a beam attack, this is the cooldown to start a new one
-		damage = level * 0.25 * Ability.elementalAttackNumbers[elementNum][2] * Ability.elementalAttackNumbers[elementNum][0];
-		pushback = level * 0.25 * Ability.elementalAttackNumbers[elementNum][2] * Ability.elementalAttackNumbers[elementNum][1];
+		damage = LEVEL * 0.25 * Ability.elementalAttackNumbers[elementNum][2] * Ability.elementalAttackNumbers[elementNum][0];
+		pushback = LEVEL * 0.25 * Ability.elementalAttackNumbers[elementNum][2] * Ability.elementalAttackNumbers[elementNum][1];
 	}
 
 	public void use(Environment env, Person user, Point target)

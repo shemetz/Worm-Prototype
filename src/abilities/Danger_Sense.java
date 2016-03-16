@@ -17,7 +17,7 @@ public class Danger_Sense extends _PassiveAbility
 
 	public void updateStats()
 	{
-		amount = Math.pow(0.9, level);
+		amount = Math.pow(0.9, LEVEL);
 	}
 
 	public void use(Environment env, Person user, Point target)
@@ -27,13 +27,13 @@ public class Danger_Sense extends _PassiveAbility
 		{
 			if (on)
 			{
-				((NPC) user).instinctDelayTime *= 0.7 * level;
-				((NPC) user).maximumDistanceICareAboutPow2 *= Math.pow(level, 3);
+				((NPC) user).instinctDelayTime *= 0.7 * LEVEL;
+				((NPC) user).maximumDistanceICareAboutPow2 *= Math.pow(LEVEL, 3);
 			}
 			else
 			{
-				((NPC) user).instinctDelayTime /= 0.7 * level;
-				((NPC) user).maximumDistanceICareAboutPow2 /= Math.pow(level, 3);
+				((NPC) user).instinctDelayTime /= 0.7 * LEVEL;
+				((NPC) user).maximumDistanceICareAboutPow2 /= Math.pow(LEVEL, 3);
 			}
 		}
 		if (user instanceof Player)

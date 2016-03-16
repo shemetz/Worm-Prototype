@@ -14,7 +14,7 @@ public class Toughness_II extends _PassiveAbility
 
 	public void updateStats()
 	{
-		amount = 40 * level;
+		amount = 40 * LEVEL;
 		
 	}
 

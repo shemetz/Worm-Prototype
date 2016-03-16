@@ -17,8 +17,8 @@ public class Strength_III extends _PassiveAbility
 
 	public void updateStats()
 	{
-		amount = Math.pow(2, level);
-		fitnessAmount = 0.5 * level;
+		amount = Math.pow(2, LEVEL);
+		fitnessAmount = 0.5 * LEVEL;
 		
 	}
 

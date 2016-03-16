@@ -13,7 +13,7 @@ public class Shattering_Fists extends _PunchAbility
 
 	public void updateStats()
 	{
-		chance = 0.2 * level;
+		chance = 0.2 * LEVEL;
 		
 	}
 }

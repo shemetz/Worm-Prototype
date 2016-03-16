@@ -356,7 +356,7 @@ public class Punch extends Ability
 										for (Ability a : user.punchAffectingAbilities)
 										{
 											if (a instanceof Sapping_Fists)
-												if (Math.random() < 0.1 * a.level) // 10% * level
+												if (Math.random() < 0.1 * a.LEVEL) // 10% * level
 												{
 													p.affect(new Nullified(1, true, a), true);
 													a.sounds.get(0).play();

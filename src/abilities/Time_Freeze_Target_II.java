@@ -23,7 +23,7 @@ public class Time_Freeze_Target_II extends Ability
 		cost = 2;
 		cooldown = 0.2;
 		range = 1500;
-		duration = 2 * level;
+		duration = 2 * LEVEL;
 
 	}
 

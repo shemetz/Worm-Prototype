@@ -16,7 +16,7 @@ public class Sense_Parahumans extends _PassiveAbility
 
 	public void updateStats()
 	{
-		range = (int) (50 * Math.pow(3, level));
+		range = (int) (50 * Math.pow(3, LEVEL));
 		
 	}
 

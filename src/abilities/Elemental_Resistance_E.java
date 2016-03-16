@@ -23,7 +23,7 @@ public class Elemental_Resistance_E extends _PassiveAbility
 
 	public void updateStats()
 	{
-		amount = level;
+		amount = LEVEL;
 	}
 
 	public void use(Environment env, Person user, Point target)

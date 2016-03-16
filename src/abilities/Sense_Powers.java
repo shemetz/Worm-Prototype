@@ -33,8 +33,8 @@ public class Sense_Powers extends Ability
 	public void updateStats()
 	{
 		cooldown = 1;
-		range = (int) (50 * Math.pow(2, level));
-		updatePeriod = 10 - level;
+		range = (int) (50 * Math.pow(2, LEVEL));
+		updatePeriod = 10 - LEVEL;
 
 	}
 

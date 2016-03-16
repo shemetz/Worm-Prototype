@@ -17,7 +17,7 @@ public class Strength_II extends _PassiveAbility
 
 	public void updateStats()
 	{
-		amount = 2 * level;
+		amount = 2 * LEVEL;
 		fitnessAmount = 2;
 		
 	}

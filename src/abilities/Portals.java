@@ -38,7 +38,7 @@ public class Portals extends Ability
 
 	public void updateStats()
 	{
-		cost = (10 - level) / 2; // divided by 2 because 2 portals
+		cost = (10 - LEVEL) / 2; // divided by 2 because 2 portals
 		range = 1000;
 		minPortalLength = 100;
 		maxPortalLength = 2000;

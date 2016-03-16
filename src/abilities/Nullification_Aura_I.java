@@ -24,7 +24,7 @@ public class Nullification_Aura_I extends _PassiveAbility
 
 	public void updateStats()
 	{
-		range = 100 + level * 50;
+		range = 100 + LEVEL * 50;
 		
 	}
 

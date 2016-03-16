@@ -23,8 +23,8 @@ public class Strike_E extends Ability
 	public void updateStats()
 	{
 		cost = 3 / elementalAttackNumbers[elementNum][2];
-		damage = 0.6 * level * Ability.elementalAttackNumbers[elementNum][0];
-		pushback = 0.6 * level * Ability.elementalAttackNumbers[elementNum][1] + 1;
+		damage = 0.6 * LEVEL * Ability.elementalAttackNumbers[elementNum][0];
+		pushback = 0.6 * LEVEL * Ability.elementalAttackNumbers[elementNum][1] + 1;
 		
 	}
 

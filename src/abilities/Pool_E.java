@@ -20,7 +20,7 @@ public class Pool_E extends _GridTargetingAbility
 
 	public void updateStats()
 	{
-		healRate = level;
+		healRate = LEVEL;
 		super.updateStats();
 	}
 

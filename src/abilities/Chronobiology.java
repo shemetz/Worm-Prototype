@@ -27,7 +27,7 @@ public class Chronobiology extends Ability
 
 	public void updateStats()
 	{
-		amount = 1 + 0.2 * level;
+		amount = 1 + 0.2 * LEVEL;
 		cost = 3; // to switch
 	}
 

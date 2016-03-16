@@ -27,8 +27,8 @@ public class Self_Bomb extends Ability
 		cost = 3;
 		cooldown = 1;
 		radius = 400;
-		damage = level * 4;
-		pushback = level * 10;
+		damage = LEVEL * 4;
+		pushback = LEVEL * 10;
 		
 	}
 

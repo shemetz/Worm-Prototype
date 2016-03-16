@@ -18,9 +18,9 @@ public class Elastic extends _PassiveAbility
 
 	public void updateStats()
 	{
-		damage = level * 1;
-		pushback = level * 2;
-		bonusStrength = level;
+		damage = LEVEL * 1;
+		pushback = LEVEL * 2;
+		bonusStrength = LEVEL;
 	}
 
 	public void use(Environment env, Person user, Point target)

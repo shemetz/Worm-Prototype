@@ -28,7 +28,7 @@ public class Shield_E extends _AFFAbility
 		costPerSecond = 0.3;
 		cooldown = 5;
 
-		life = level * 10;
+		life = LEVEL * 10;
 		armor = 0;
 		decayRate = 0;
 	}
@@ -83,7 +83,7 @@ public class Shield_E extends _AFFAbility
 					env.AFFs.remove(i);
 					i--;
 				}
-			cooldownLeft = 1 + 0.8 * cooldown - 0.8 * cooldown * remainingFFhealth / (level * 10); // if shield had full HP, 1 cooldown. if had no HP, full
+			cooldownLeft = 1 + 0.8 * cooldown - 0.8 * cooldown * remainingFFhealth / (LEVEL * 10); // if shield had full HP, 1 cooldown. if had no HP, full
 																									// cooldown.
 			user.maintaining = false;
 			on = false;

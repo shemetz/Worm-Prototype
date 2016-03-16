@@ -17,7 +17,7 @@ public class Precision_III extends _PassiveAbility
 
 	public void updateStats()
 	{
-		dexBonus = 3 * level;
+		dexBonus = 3 * LEVEL;
 		amount = 1;
 		
 	}

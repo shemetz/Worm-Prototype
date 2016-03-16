@@ -30,7 +30,7 @@ public class Trail_E extends Ability
 	public void updateStats()
 	{
 		cooldown = 0; // once per frame
-		cost = Math.max(0, 0.7 - 0.1 * level);
+		cost = Math.max(0, 0.7 - 0.1 * LEVEL);
 
 		switch (elementNum)
 		{
@@ -51,8 +51,8 @@ public class Trail_E extends Ability
 		case 3: // Electricity
 		case 6: // Energy
 			type = Type.BALL;
-			damage = 0.6 * level * Ability.elementalAttackNumbers[elementNum][0];
-			pushback = 0.6 * level * Ability.elementalAttackNumbers[elementNum][1] + 1;
+			damage = 0.6 * LEVEL * Ability.elementalAttackNumbers[elementNum][0];
+			pushback = 0.6 * LEVEL * Ability.elementalAttackNumbers[elementNum][1] + 1;
 			break;
 		default:
 			MAIN.errorMessage("You made a bear! Undo it, undo it!");

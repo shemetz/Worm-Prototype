@@ -34,8 +34,8 @@ public class _GridTargetingAbility extends Ability
 
 	public void updateStats()
 	{
-		cost = Math.max(3 - 0.3 * level, 0.8);
-		cooldown = Math.max(3 - 0.3 * level, 0.3); // is used for creating the wall
+		cost = Math.max(3 - 0.3 * LEVEL, 0.8);
+		cooldown = Math.max(3 - 0.3 * LEVEL, 0.3); // is used for creating the wall
 		costPerSecond = 1;
 		range = 600;
 		

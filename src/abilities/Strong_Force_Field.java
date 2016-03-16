@@ -11,14 +11,14 @@ public class Strong_Force_Field extends _ForceFieldAbility
 
 	public void updateStats()
 	{
-		cooldown = Math.max(7 - level, 0.3);
+		cooldown = Math.max(7 - LEVEL, 0.3);
 		range = 68;
 		cost = 4;
 
-		length = 100 + 50 * (int) level;
-		width = 5 + (int) level * 7;
-		life = 80 * level;
-		armor = level;
+		length = 100 + 50 * LEVEL;
+		width = 5 + LEVEL * 7;
+		life = 80 * LEVEL;
+		armor = LEVEL;
 		decayRate = 0.05;
 	}
 }

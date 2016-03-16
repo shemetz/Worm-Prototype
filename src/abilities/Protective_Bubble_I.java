@@ -29,7 +29,7 @@ public class Protective_Bubble_I extends _AFFAbility
 	{
 		cooldown = 1;
 		cost = 3;
-		life = 10 * level;
+		life = 10 * LEVEL;
 		decayRate = 0.1;
 	}
 

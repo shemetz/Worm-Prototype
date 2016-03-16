@@ -15,7 +15,7 @@ public class Speedrun extends _PassiveAbility
 
 	public void updateStats()
 	{
-		amount = 1.5 * level;
+		amount = 1.5 * LEVEL;
 		
 	}
 

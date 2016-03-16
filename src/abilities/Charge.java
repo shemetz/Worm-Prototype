@@ -18,9 +18,9 @@ public class Charge extends _PassiveAbility
 
 	public void updateStats()
 	{
-		damage = 2 * level;
-		pushback = 1 + level * 1;
-		extraStrength = level;
+		damage = 2 * LEVEL;
+		pushback = 1 + LEVEL * 1;
+		extraStrength = LEVEL;
 	}
 
 	public void use(Environment env, Person user, Point target)

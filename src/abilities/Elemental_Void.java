@@ -28,7 +28,7 @@ public class Elemental_Void extends Ability
 	public void updateStats()
 	{
 		cooldown = 0.2;
-		range = level * 100;
+		range = LEVEL * 100;
 	}
 
 	public void use(Environment env, Person user, Point target)

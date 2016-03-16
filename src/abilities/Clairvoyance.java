@@ -28,8 +28,8 @@ public class Clairvoyance extends Sense_Powers
 		costPerSecond = 2;
 		damagePerSecond = costPerSecond * 5;
 		cooldown = 3;
-		range = 100 * Math.pow(2, level);
-		updatePeriod = 10 - level;
+		range = 100 * Math.pow(2, LEVEL);
+		updatePeriod = 10 - LEVEL;
 	}
 
 	public void use(Environment env, Person user, Point target)

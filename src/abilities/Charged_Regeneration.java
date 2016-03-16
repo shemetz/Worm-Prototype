@@ -20,7 +20,7 @@ public class Charged_Regeneration extends _PassiveAbility
 
 	public void updateStats()
 	{
-		amount = 0.1 * level;
+		amount = 0.1 * LEVEL;
 		chargeRate = 5;
 	}
 
@@ -47,7 +47,7 @@ public class Charged_Regeneration extends _PassiveAbility
 		else
 			timer += deltaTime;
 
-		double healAmount = 0.5 * 0.1 * level * (user.charge + 4); // +4 because.
+		double healAmount = 0.5 * 0.1 * LEVEL * (user.charge + 4); // +4 because.
 		healAmount = Math.min(healAmount, user.maxLife - user.life);
 		if (user.life < user.maxLife)
 			if (user.charge >= healAmount)

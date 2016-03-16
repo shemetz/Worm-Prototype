@@ -16,7 +16,7 @@ public class Sense_Mana_and_Stamina extends _PassiveAbility
 
 	public void updateStats()
 	{
-		range = (int) (50 * Math.pow(2, level));
+		range = (int) (50 * Math.pow(2, LEVEL));
 		
 	}
 

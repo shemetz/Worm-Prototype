@@ -14,9 +14,9 @@ public class Force_Shield extends _ForceFieldAbility
 		cost = 3;
 		cooldown = 1;
 		range = 68;
-		length = 100 + 100 * level / 3;
-		width = 10 + level * 1;
-		life = 20 * level;
+		length = 100 + 100 * LEVEL / 3;
+		width = 10 + LEVEL * 1;
+		life = 20 * LEVEL;
 		armor = 0;
 		decayRate = 0.5;
 	}

@@ -1243,7 +1243,7 @@ public class Person extends RndPhysObj implements Mover
 				if (a.on)
 				{
 					if (a instanceof Elemental_Void)
-						drawColoredShadow(buffer, a.level * 10, Color.gray);
+						drawColoredShadow(buffer, a.LEVEL * 10, Color.gray);
 				}
 
 			if (timeEffect != 1 && timeEffect != 0)

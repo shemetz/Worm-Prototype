@@ -16,7 +16,7 @@ public class Sense_Movement extends _PassiveAbility
 
 	public void updateStats()
 	{
-		range = (int) (100 * Math.pow(2, level));
+		range = (int) (100 * Math.pow(2, LEVEL));
 
 	}
 

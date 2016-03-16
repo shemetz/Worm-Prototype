@@ -1261,8 +1261,8 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				Point point = (Point) target1;
 				buffer.setStroke(new BasicStroke(3));
 				buffer.setColor(Color.yellow);
-				buffer.drawRect(point.x * squareSize - ((int) (ability.level / 4)) * squareSize, point.y * squareSize - ((int) (ability.level / 4)) * squareSize,
-						((int) (ability.level / 4)) * 2 * squareSize + squareSize, ((int) (ability.level / 4)) * 2 * squareSize + squareSize);
+				buffer.drawRect(point.x * squareSize - ((int) (ability.LEVEL / 4)) * squareSize, point.y * squareSize - ((int) (ability.LEVEL / 4)) * squareSize,
+						((int) (ability.LEVEL / 4)) * 2 * squareSize + squareSize, ((int) (ability.LEVEL / 4)) * 2 * squareSize + squareSize);
 			}
 			break;
 		case PORTALS:
@@ -2831,7 +2831,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		int nameTextWidth = (int) (nameFont.getStringBounds(Ability.niceName(ability.name), frc).getWidth());
 		buffer.drawString(Ability.niceName(ability.name), iconCenterX - nameTextWidth / 2, iconCenterY + 170);
 		buffer.setFont(new Font("Sans-Serif", Font.BOLD, 50));
-		buffer.drawString("Level " + ability.level, iconCenterX - 80, iconCenterY - 160);
+		buffer.drawString("Level " + ability.LEVEL, iconCenterX - 80, iconCenterY - 160);
 		buffer.drawLine(iconCenterX - nameTextWidth / 2, iconCenterY + 180, iconCenterX + nameTextWidth / 2, iconCenterY + 180);
 		buffer.setFont(new Font("Serif", Font.PLAIN, 20));
 		buffer.drawString(ability.getFluff(), iconCenterX - 140, iconCenterY + 215);
@@ -3607,7 +3607,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			// remove existing ability if exists
 			int removedIndex = -1;
 			for (int i = 0; i < player.abilities.size(); i++)
-				if (player.abilities.get(i).name.equals(abilityName) && player.abilities.get(i).level == cheatedAbilityLevel)
+				if (player.abilities.get(i).name.equals(abilityName) && player.abilities.get(i).LEVEL == cheatedAbilityLevel)
 				{
 					if (player.abilities.get(i).on)
 						player.abilities.get(i).disable(env, player);
@@ -4181,7 +4181,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 					element = player.abilities.get(pauseHoverAbility).getElement();
 				else
 					element = null;
-				cheatedAbilityLevel = player.abilities.get(pauseHoverAbility).level;
+				cheatedAbilityLevel = player.abilities.get(pauseHoverAbility).LEVEL;
 				for (int i = 0; i < menuStuff.size(); i++)
 					if (menuStuff.get(i) instanceof MenuThingie)
 					{
@@ -4291,7 +4291,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 					tooltip = Ability.niceName(player.abilities.get(player.hotkeys[i]).name);
 					if (player.rightMousePressed)
 					{
-						tooltip += " " + player.abilities.get(player.hotkeys[i]).level + "\n" + player.abilities.get(player.hotkeys[i]).getFluff();
+						tooltip += " " + player.abilities.get(player.hotkeys[i]).LEVEL + "\n" + player.abilities.get(player.hotkeys[i]).getFluff();
 						tooltipPoint.y -= 30;
 					}
 				}
@@ -4335,7 +4335,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 						tooltip = Ability.niceName(player.abilities.get(i).name);
 						if (player.rightMousePressed)
 						{
-							tooltip += " " + player.abilities.get(i).level + "\n" + player.abilities.get(i).getFluff();
+							tooltip += " " + player.abilities.get(i).LEVEL + "\n" + player.abilities.get(i).getFluff();
 							tooltipPoint.y -= 30;
 						}
 					}

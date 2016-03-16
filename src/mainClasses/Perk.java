@@ -93,7 +93,7 @@ public class Perk
 			a.steal *= Math.pow(1.2, k);
 			break;
 		case "Empowered":
-			a.level += k;
+			a.LEVEL += k;
 			break;
 		case "Better summons":
 			((_SummoningAbility) a).statMultiplier *= Math.pow(1.2, k);

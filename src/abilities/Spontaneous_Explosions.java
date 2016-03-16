@@ -25,10 +25,10 @@ public class Spontaneous_Explosions extends _PassiveAbility
 		costPerSecond = 1;
 		range = 200;
 		range2 = 100;
-		cooldown = (double) 5 / level; // doubled if user is on <50% health. No pun intended
+		cooldown = (double) 5 / LEVEL; // doubled if user is on <50% health. No pun intended
 		radius = 100;
-		damage = level * 4;
-		pushback = level * 8;
+		damage = LEVEL * 4;
+		pushback = LEVEL * 8;
 	}
 
 	public void use(Environment env, Person user, Point target)

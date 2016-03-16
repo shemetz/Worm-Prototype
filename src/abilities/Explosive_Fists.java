@@ -23,8 +23,8 @@ public class Explosive_Fists extends _PunchAbility
 	public void updateStats()
 	{
 		radius = 200;
-		damage = level;
-		pushback = level * 8;
+		damage = LEVEL;
+		pushback = LEVEL * 8;
 	}
 
 	public void use(Environment env, Person user, Point target)

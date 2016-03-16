@@ -26,11 +26,11 @@ public class Reactive_Explosions extends _PassiveAbility
 
 	public void updateStats()
 	{
-		cooldown = (double) 5 / level;
+		cooldown = (double) 5 / LEVEL;
 		radius = 400;
-		damage = level * 1.5;
-		pushback = level * 4;
-		minimumDamageNeeded = Math.min(10 - level, 1);
+		damage = LEVEL * 1.5;
+		pushback = LEVEL * 4;
+		minimumDamageNeeded = Math.min(10 - LEVEL, 1);
 	}
 
 	public void use(Environment env, Person user, Point target)

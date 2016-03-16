@@ -12,8 +12,8 @@ public class Blink extends _TeleportAbility
 
 	public void updateStats()
 	{
-		cooldown = 0.1 + (double) (level) / 4;
-		range = level * 100;
-		cost = 1 + (double) (level) / 3;
+		cooldown = 0.1 + (double) (LEVEL) / 4;
+		range = LEVEL * 100;
+		cost = 1 + (double) (LEVEL) / 3;
 	}
 }

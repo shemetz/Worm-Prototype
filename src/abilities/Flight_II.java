@@ -10,7 +10,7 @@ public class Flight_II extends _FlightAbility
 
 	public void updateStats()
 	{
-		flySpeed = 300 * level; // 800 to 1200 pixels per second
+		flySpeed = 300 * LEVEL; // 800 to 1200 pixels per second
 		cooldown = 1;
 		costPerSecond = 0.4;
 	}

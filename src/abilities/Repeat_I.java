@@ -22,10 +22,10 @@ public class Repeat_I extends _LoopAbility
 
 	public void updateStats()
 	{
-		cost = 4 - 0.5 * level;
+		cost = 4 - 0.5 * LEVEL;
 		cooldown = 2;
 		range = 0;
-		duration = level;
+		duration = LEVEL;
 		
 	}
 

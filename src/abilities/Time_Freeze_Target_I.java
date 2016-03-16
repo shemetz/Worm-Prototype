@@ -21,9 +21,9 @@ public class Time_Freeze_Target_I extends Ability
 	public void updateStats()
 	{
 		cost = 5;
-		cooldown = 3 * level;
+		cooldown = 3 * LEVEL;
 		range = 500;
-		duration = 2 * level;
+		duration = 2 * LEVEL;
 
 	}
 

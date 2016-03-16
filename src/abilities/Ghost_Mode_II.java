@@ -22,10 +22,10 @@ public class Ghost_Mode_II extends Ability
 
 	public void updateStats()
 	{
-		cost = level;
+		cost = LEVEL;
 		costPerSecond = 0.2;
 		cooldown = 3;
-		duration = 2 * level;
+		duration = 2 * LEVEL;
 	}
 
 	public void use(Environment env, Person user, Point target)

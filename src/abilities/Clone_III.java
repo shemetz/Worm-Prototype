@@ -24,7 +24,7 @@ public class Clone_III extends _SummoningAbility
 		range = 300;
 		cooldown = 2; // after last clone died
 		cost = 5;
-		life = 30 * level;
+		life = 30 * LEVEL;
 		maxNumOfClones = 3;
 		statMultiplier = 1.1;
 	}

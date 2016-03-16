@@ -20,8 +20,8 @@ public class Pushy_Fists extends _PunchAbility
 
 	public void updateStats()
 	{
-		pushback = 4 * level;
-		strengthBonus = 0.5 * level;
+		pushback = 4 * LEVEL;
+		strengthBonus = 0.5 * LEVEL;
 		pushbackResistanceBonus = 0.5;
 		
 	}

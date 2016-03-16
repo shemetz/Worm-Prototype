@@ -26,7 +26,7 @@ public class Elemental_Combat_II_E extends Ability
 		// TODO make variances in the abilities - but make sure that with those variances the ability can still be turned on and off and they'll stay constant. MAke them dependent on some seed of this ability?
 		for (int i = 0; i < 7; i++)
 			if (elementalAttacksPossible[elementNum][i])
-				addedAbilities.add(Ability.ability((elementalAttacks[i]) + " <" + getElement() + ">", level));
+				addedAbilities.add(Ability.ability((elementalAttacks[i]) + " <" + getElement() + ">", LEVEL));
 
 		if (!on)
 			user.abilities.addAll(addedAbilities);

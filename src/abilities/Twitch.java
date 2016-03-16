@@ -20,8 +20,8 @@ public class Twitch extends Ability
 
 	public void updateStats()
 	{
-		cost = Math.min(4 - level, 1);
-		cooldown = Math.min(2 - level * 0.4, 0.1);
+		cost = Math.min(4 - LEVEL, 1);
+		cooldown = Math.min(2 - LEVEL * 0.4, 0.1);
 		range = 500;
 
 	}

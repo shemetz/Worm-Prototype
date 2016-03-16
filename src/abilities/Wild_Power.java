@@ -24,7 +24,7 @@ public class Wild_Power extends Ability
 	public void updateStats()
 	{
 		cost = 4;
-		cooldown = 8 - 0.5 * level;
+		cooldown = 8 - 0.5 * LEVEL;
 		range = 500;
 		
 	}
@@ -91,24 +91,24 @@ public class Wild_Power extends Ability
 				{
 					vfx.subtype = 0;
 					if (rand == 0) // Heal
-						p.life = Math.min(p.maxLife, p.life + 3 * level); // 3 * Level HP
+						p.life = Math.min(p.maxLife, p.life + 3 * LEVEL); // 3 * Level HP
 					if (rand == 1) // Remove effects
-						p.removeEffects((int) (level + 1) / 2); // level/2 effects rounded up
+						p.removeEffects((int) (LEVEL + 1) / 2); // level/2 effects rounded up
 					if (rand == 2) // Restore mana and stamina
 					{
-						p.mana = Math.min(p.maxMana, p.mana + level);
-						p.stamina = Math.min(p.maxStamina, p.stamina + level);
+						p.mana = Math.min(p.maxMana, p.mana + LEVEL);
+						p.stamina = Math.min(p.maxStamina, p.stamina + LEVEL);
 					} // level mana and stamina
 				}
 				else // ENEMY
 				{
 					vfx.subtype = 1;
 					if (rand == 0) // Damage
-						env.hitPerson(p, 1 * level, 0, 0, -1); // 1 * Level damage
+						env.hitPerson(p, 1 * LEVEL, 0, 0, -1); // 1 * Level damage
 					if (rand == 1) // Nullify for Level seconds
-						p.affect(new Nullified(level, true, this), true);
+						p.affect(new Nullified(LEVEL, true, this), true);
 					if (rand == 2) // Damage random armor part
-						p.damageArmorPart(p.armorParts[(int) (Math.random() * p.armorParts.length)], 10 * level, -1, 1);
+						p.damageArmorPart(p.armorParts[(int) (Math.random() * p.armorParts.length)], 10 * LEVEL, -1, 1);
 				}
 			}
 			// BALL
@@ -128,7 +128,7 @@ public class Wild_Power extends Ability
 				}
 				if (rand == 1) // Make fast and randomize angle
 				{
-					double velocity = b.velocity() * Math.min(1.5, level / 2);
+					double velocity = b.velocity() * Math.min(1.5, LEVEL / 2);
 					double angle = Math.random() * 2 * Math.PI;
 					b.xVel = velocity * Math.cos(angle);
 					b.yVel = velocity * Math.sin(angle);
@@ -150,10 +150,10 @@ public class Wild_Power extends Ability
 				vfx.z = 0;
 				Point p = (Point) target;
 				vfx.p1 = new Point((int) ((p.x + 0.5) * Environment.squareSize), (int) ((p.y + 0.5) * Environment.squareSize));
-				int minX = p.x - ((int) (level / 4));
-				int minY = p.y - ((int) (level / 4));
-				int maxX = p.x + ((int) (level / 4));
-				int maxY = p.y + ((int) (level / 4));
+				int minX = p.x - ((int) (LEVEL / 4));
+				int minY = p.y - ((int) (LEVEL / 4));
+				int maxX = p.x + ((int) (LEVEL / 4));
+				int maxY = p.y + ((int) (LEVEL / 4));
 				// WALL
 				if (env.wallTypes[p.x][p.y] != -1)
 				{

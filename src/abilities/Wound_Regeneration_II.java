@@ -15,7 +15,7 @@ public class Wound_Regeneration_II extends _PassiveAbility
 	
 	public void updateStats()
 	{
-		amount = 2 * level;
+		amount = 2 * LEVEL;
 		
 	}
 

@@ -23,10 +23,10 @@ public class Undo_II extends _LoopAbility
 
 	public void updateStats()
 	{
-		cost = 6 - 0.5 * level;
+		cost = 6 - 0.5 * LEVEL;
 		cooldown = 2;
 		range = 500;
-		duration = level;
+		duration = LEVEL;
 		
 	}
 

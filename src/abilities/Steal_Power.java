@@ -33,7 +33,7 @@ public class Steal_Power extends Ability
 		cost = 3;
 		costPerSecond = 0.5;
 		cooldown = 1;
-		range = 300 + level * 100;
+		range = 300 + LEVEL * 100;
 		maxDistFromTargetedPoint = range;
 	}
 
@@ -50,7 +50,7 @@ public class Steal_Power extends Ability
 				// Finds power with highest level
 				for (Ability a : target.abilities)
 					if (!a.natural)
-						if (bestAbility == null || a.level > bestAbility.level)
+						if (bestAbility == null || a.LEVEL > bestAbility.LEVEL)
 							bestAbility = a;
 				if (bestAbility != null)
 				{
@@ -59,10 +59,10 @@ public class Steal_Power extends Ability
 					stolenPower.disable(env, stolee);
 					stolee.abilities.remove(stolenPower);
 
-					originalStolenPowerLevel = stolenPower.level;
-					stolenPower.level += 1;
-					if (stolenPower.level > 10) // 10 is maximum
-						stolenPower.level = 10;
+					originalStolenPowerLevel = stolenPower.LEVEL;
+					stolenPower.LEVEL += 1;
+					if (stolenPower.LEVEL > 10) // 10 is maximum
+						stolenPower.LEVEL = 10;
 
 					stolenPower.disabled = false;
 					user.abilities.add(stolenPower);
@@ -114,7 +114,7 @@ public class Steal_Power extends Ability
 	{
 		stolenPower.disable(env, user);
 		user.abilities.remove(stolenPower);
-		stolenPower.level = originalStolenPowerLevel;
+		stolenPower.LEVEL = originalStolenPowerLevel;
 		stolenPower.disabled = false;
 		stolee.abilities.add(stolenPower);
 		stolee = null;

@@ -22,9 +22,9 @@ public class Ranged_Explosion extends Ability
 		cost = 3;
 		cooldown = 1;
 		range = 600;
-		radius = level * 100;
-		damage = level * 3;
-		pushback = level * 8;
+		radius = LEVEL * 100;
+		damage = LEVEL * 3;
+		pushback = LEVEL * 8;
 		
 	}
 

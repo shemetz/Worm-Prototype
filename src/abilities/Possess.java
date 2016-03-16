@@ -25,9 +25,9 @@ public class Possess extends Ability
 	public void updateStats()
 	{
 		cost = 7;
-		cooldown = 18 - level;
+		cooldown = 18 - LEVEL;
 		range = 500;
-		duration = 3 * level; // or when reduced to < 20% HP
+		duration = 3 * LEVEL; // or when reduced to < 20% HP
 
 	}
 

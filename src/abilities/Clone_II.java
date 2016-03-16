@@ -36,7 +36,7 @@ public class Clone_II extends _SummoningAbility
 			Clone clone = new Clone(user.x + range * Math.cos(angle), user.y + range * Math.sin(angle), user, this);
 			clone.multiplyStats(statMultiplier);
 			clone.updateSubStats();
-			clone.maxLife = 25 * level;
+			clone.maxLife = 25 * LEVEL;
 			clone.life = clone.maxLife;
 			clone.lifeRegen = 0.5;
 			clone.strategy = NPC.Strategy.CLONE;

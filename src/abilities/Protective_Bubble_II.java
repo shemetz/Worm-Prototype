@@ -29,8 +29,8 @@ public class Protective_Bubble_II extends _AFFAbility
 	{
 		cooldown = 1;
 		cost = 4;
-		life = 20 * level;
-		armor = level;
+		life = 20 * LEVEL;
+		armor = LEVEL;
 		decayRate = 0.1;
 	}
 

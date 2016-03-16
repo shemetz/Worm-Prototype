@@ -26,8 +26,8 @@ public class Ball_E extends _ProjectileAbility
 
 	public void updateStats()
 	{
-		damage = 0.6 * level * Ability.elementalAttackNumbers[elementNum][0];
-		pushback = 0.6 * level * Ability.elementalAttackNumbers[elementNum][1] + 1;
+		damage = 0.6 * LEVEL * Ability.elementalAttackNumbers[elementNum][0];
+		pushback = 0.6 * LEVEL * Ability.elementalAttackNumbers[elementNum][1] + 1;
 		cost = 5.0 / elementalAttackNumbers[elementNum][2];
 		cooldown = 5.0 / elementalAttackNumbers[elementNum][2];
 

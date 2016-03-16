@@ -15,7 +15,7 @@ public class Leg_Muscles extends _PassiveAbility
 
 	public void updateStats()
 	{
-		amount = 0.5 * level;
+		amount = 0.5 * LEVEL;
 		
 	}
 

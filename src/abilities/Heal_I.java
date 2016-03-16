@@ -32,8 +32,8 @@ public class Heal_I extends _ApplyEffect
 	public void updateStats()
 	{
 		costPerSecond = 1;
-		range = 50 * level;
-		lifeRegenBuff = 2 * level;
+		range = 50 * LEVEL;
+		lifeRegenBuff = 2 * LEVEL;
 		
 	}
 

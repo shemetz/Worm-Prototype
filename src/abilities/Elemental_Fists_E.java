@@ -17,6 +17,6 @@ public class Elemental_Fists_E extends _PunchAbility
 
 	public void updateStats()
 	{
-		damage = level;
+		damage = LEVEL;
 	}
 }

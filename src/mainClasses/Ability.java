@@ -128,7 +128,7 @@ public class Ability implements Cloneable
 
 	// permanent variables of the ability
 	public String name; // name of the ability
-	public int level; // 1-10. AKA "level". Measures how powerful the ability is.
+	public int LEVEL; // 1-10. AKA "level". Measures how powerful the ability is.
 	protected boolean instant; // Instant abilities don't aim, they immediately activate after a single click. Maintained abilities are always instant.
 	public boolean toggleable;
 	protected boolean maintainable; // Maintained abilities are instant, and require you to continue holding the button to use them (they're continuous abilities).
@@ -252,7 +252,7 @@ public class Ability implements Cloneable
 
 	public Ability clone()
 	{
-		Ability clone = Ability.ability(this.name, this.level);
+		Ability clone = Ability.ability(this.name, this.LEVEL);
 		if (this.hasTag("on-off"))
 			clone.on = this.on;
 
@@ -262,7 +262,7 @@ public class Ability implements Cloneable
 	public Ability(String n, int p)
 	{
 		name = n;
-		level = p;
+		LEVEL = p;
 
 		// default values.
 		range = -1;
@@ -599,15 +599,15 @@ public class Ability implements Cloneable
 
 	public String toString()
 	{
-		return name + " [" + level + "]";
+		return name + " [" + LEVEL + "]";
 	}
 
 	static Comparator<Ability> pointsThenAlphabetical = new Comparator<Ability>()
 	{
 		public int compare(Ability a1, Ability a2)
 		{
-			if (a1.level != a2.level)
-				return Integer.compare(a2.level, a1.level);
+			if (a1.LEVEL != a2.LEVEL)
+				return Integer.compare(a2.LEVEL, a1.LEVEL);
 			else
 				return a1.name.compareTo(a2.name);
 		}
@@ -628,8 +628,8 @@ public class Ability implements Cloneable
 	public void fixStats()
 	{
 		// make sure all values are OK
-		level = Math.min(level, 10);
-		level = Math.max(1, level);
+		LEVEL = Math.min(LEVEL, 10);
+		LEVEL = Math.max(1, LEVEL);
 
 		range = fixValue(range);
 		cooldown = fixValue(cooldown);
