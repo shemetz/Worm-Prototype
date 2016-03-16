@@ -82,7 +82,7 @@ public class AI
 				if (a instanceof Ball_E)
 				{
 					// aim the ball the right direction, taking into account the velocity addition caused by the person moving
-					double v = Ball.giveVelocity();
+					double v = ((Ball_E) a).velocity;
 					double xv = v * Math.cos(angleToTarget);
 					double yv = v * Math.sin(angleToTarget);
 					xv -= targetPerson.xVel;
@@ -127,6 +127,11 @@ public class AI
 			npc.rotate(angleToTarget, deltaTime);
 			npc.directionOfAttemptedMovement = angleToTarget;
 			npc.strengthOfAttemptedMovement = 1;
+
+			//check for blocking bubbles/shields; if there are any, punch 'em
+			for (ArcForceField aff : env.AFFs)
+				if (Methods.DistancePow2(aff.x, aff.y,targetPerson.x,targetPerson.y)< aff.maxRadius*aff.maxRadius)
+					PUNCH(targetPerson);
 		}
 		// if close to target but blocked and target's getting away
 		else if (blocked && npc.lastDistPow2 > distanceToTargetPow2)
@@ -157,6 +162,11 @@ public class AI
 			npc.directionOfAttemptedMovement = angleToTarget;
 			npc.strengthOfAttemptedMovement = 1;
 			npc.target = new Point((int) targetPerson.x, (int) targetPerson.y);
+			
+			//check for blocking bubbles/shields; if there are any, punch 'em
+			for (ArcForceField aff : env.AFFs)
+				if (Methods.DistancePow2(aff.x, aff.y,targetPerson.x,targetPerson.y)< aff.maxRadius*aff.maxRadius)
+					PUNCH(targetPerson);
 		}
 
 		if (npc.timeSinceLastDistCheck >= 1) // Check distance every second
@@ -259,8 +269,6 @@ public class AI
 		if (distanceToTargetPow2 < Math.pow(maxDistanceNeeded, 2))
 			main.pressAbilityKey(index, true, npc);
 		else if (punch.cooldownLeft <= 0)
-		{
 			main.pressAbilityKey(index, false, npc); // stop punching
-		}
 	}
 }

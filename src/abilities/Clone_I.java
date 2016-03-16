@@ -2,25 +2,20 @@ package abilities;
 
 import java.awt.Point;
 
-import mainClasses.Ability;
 import mainClasses.Clone;
 import mainClasses.Environment;
 import mainClasses.NPC;
 import mainClasses.Person;
 import mainClasses.Player;
 
-public class Clone_I extends Ability
+public class Clone_I extends _SummoningAbility
 {
-	public int clonesMade;
-	int maxNumOfClones;
-	int life;
 
 	public Clone_I(int p)
 	{
 		super("Clone I", p);
 		rangeType = RangeType.NONE;
 		costType = CostType.MANA;
-		clonesMade = 0;
 	}
 
 	public void updateStats()
@@ -30,6 +25,7 @@ public class Clone_I extends Ability
 		range = 300;
 		life = 15 * level;
 		maxNumOfClones = 1;
+		statMultiplier = 2/3;
 	}
 
 	public void use(Environment env, Person user, Point target)
@@ -39,7 +35,7 @@ public class Clone_I extends Ability
 			user.mana -= cost;
 			double angle = Math.atan2(target.y - user.y, target.x - user.x);
 			Clone clone = new Clone(user.x + range * Math.cos(angle), user.y + range * Math.sin(angle), user, this);
-			clone.setStats(2, 2, 2, 2, 2, 2);
+			clone.multiplyStats(statMultiplier);
 			clone.updateSubStats();
 			clone.maxLife = life;
 			clone.life = clone.maxLife;

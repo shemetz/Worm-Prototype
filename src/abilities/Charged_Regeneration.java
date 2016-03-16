@@ -21,6 +21,7 @@ public class Charged_Regeneration extends _PassiveAbility
 	public void updateStats()
 	{
 		amount = 0.1 * level;
+		chargeRate = 5;
 	}
 
 	public void use(Environment env, Person user, Point target)

@@ -431,6 +431,16 @@ public class Person extends RndPhysObj implements Mover
 		SOCIAL = soc;
 	}
 
+	public void multiplyStats(double statMultiplier)
+	{
+		STRENGTH = (int) (statMultiplier*STRENGTH);
+		DEXTERITY = (int) (statMultiplier*DEXTERITY);
+		FITNESS = (int) (statMultiplier*FITNESS);
+		WITS = (int) (statMultiplier*WITS);
+		KNOWLEDGE = (int) (statMultiplier*KNOWLEDGE);
+		SOCIAL = (int) (statMultiplier*SOCIAL);
+	}
+
 	public void updateSubStats()
 	{
 		// should always be overridden.

@@ -12,16 +12,16 @@ import mainResourcesPackage.SoundEffect;
 
 public class ForceField extends Drawable
 {
-	public int					length, width;
-	public double				life;
-	public int					maxLife;
-	public int					armor;
-	public Point[]				p;
-	public int					type;
-	public List<SoundEffect>	sounds	= new ArrayList<SoundEffect>();
+	public int length, width;
+	public double life;
+	public double decayRate;
+	public int maxLife;
+	public int armor;
+	public Point[] p;
+	public List<SoundEffect> sounds = new ArrayList<SoundEffect>();
 
 	// TODO type
-	public ForceField(double x1, double y1, double z1, int l1, int w1, double rotation1, int life1, int t1)
+	public ForceField(double x1, double y1, double z1, int l1, int w1, double rotation1, int life1, double disintegrateRate)
 	{
 		x = x1;
 		y = y1;
@@ -31,7 +31,7 @@ public class ForceField extends Drawable
 		length = l1;
 		life = life1;
 		maxLife = life1;
-		type = t1;
+		decayRate = disintegrateRate;
 
 		initializePoints();
 		initSounds();
@@ -106,5 +106,10 @@ public class ForceField extends Drawable
 			buffer.scale(1 / (z * MAIN.heightZoomRatio + 1), 1 / (z * MAIN.heightZoomRatio + 1));
 			buffer.translate(-x, -y);
 		}
+	}
+
+	public void decay(double deltaTime)
+	{
+		life -= deltaTime * (life * decayRate + 1);
 	}
 }

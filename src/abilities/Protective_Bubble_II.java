@@ -2,7 +2,6 @@ package abilities;
 
 import java.awt.Point;
 
-import mainClasses.Ability;
 import mainClasses.ArcForceField;
 import mainClasses.Environment;
 import mainClasses.Methods;
@@ -10,11 +9,9 @@ import mainClasses.Person;
 import mainClasses.Player;
 import mainResourcesPackage.SoundEffect;
 
-public class Protective_Bubble_II extends Ability
+public class Protective_Bubble_II extends _AFFAbility
 {
 	public ArcForceField bubble;
-	double life;
-	int armor;
 
 	public Protective_Bubble_II(int p)
 	{
@@ -34,7 +31,7 @@ public class Protective_Bubble_II extends Ability
 		cost = 4;
 		life = 20 * level;
 		armor = level;
-		
+		decayRate = 0.1;
 	}
 
 	public void use(Environment env, Person user, Point target)
@@ -81,7 +78,7 @@ public class Protective_Bubble_II extends Ability
 
 	public void maintain(Environment env, Person user, Point target, double deltaTime)
 	{
-		bubble.life -= bubble.life * 0.1 * deltaTime;
+		bubble.life -= bubble.life * decayRate * deltaTime;
 		bubble.rotation = Methods.lerpAngle(bubble.rotation, user.rotation, deltaTime);
 	}
 

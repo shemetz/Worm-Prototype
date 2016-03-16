@@ -252,6 +252,9 @@ public class NPC extends Person
 			MAIN.errorMessage("No code found for strategy named   " + this.strategy);
 			break;
 		}
+		
+		if (this.abilityTryingToRepetitivelyUse != -1)
+			main.pressAbilityKey(this.abilityTryingToRepetitivelyUse, false, this);
 
 		if (prevTactic != this.tactic)
 		{
@@ -259,7 +262,6 @@ public class NPC extends Person
 				main.pressAbilityKey(this.abilityMaintaining, false, this);
 			this.abilityMaintaining = -1;
 			this.abilityAiming = -1;
-			this.abilityTryingToRepetitivelyUse = -1;
 		}
 
 		// Do the AI tactic chosen
@@ -576,8 +578,8 @@ public class NPC extends Person
 				{
 					boolean clockwise = (b.start.x - this.x) * Math.sin(b.angle()) > (b.start.y - this.y) * Math.cos(b.angle());
 					double peakAngleToPerson = b.angle() + (clockwise ? Math.PI / 2 : -Math.PI / 2);
-					xElement += Math.cos(peakAngleToPerson) * b.getDamage() / distanceToLinePow2;
-					yElement += Math.sin(peakAngleToPerson) * b.getDamage() / distanceToLinePow2;
+					xElement += Math.cos(peakAngleToPerson) * b.damage / distanceToLinePow2;
+					yElement += Math.sin(peakAngleToPerson) * b.damage / distanceToLinePow2;
 				}
 			}
 		}

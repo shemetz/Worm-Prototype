@@ -136,6 +136,8 @@ public class Ability implements Cloneable
 	protected CostType costType;
 	public double arc; // used for abilities with an arc - the Spray ability
 	public boolean natural;
+	
+	List<Perk> perks;
 
 	// Stuff that affects the ability's effectiveness and is shown in the Abilities menu
 	protected double range; // distance from user in which ability can be used. For some abilities - how far they go before stopping. -1 = not ranged, or only direction-aiming.
@@ -149,6 +151,7 @@ public class Ability implements Cloneable
 	public double duration;
 	public double chance;
 	public double amount;
+	public double chargeRate;
 
 	// changing variables of the ability
 	protected double timeLeft; // how much time the ability has been on.
@@ -273,6 +276,7 @@ public class Ability implements Cloneable
 		duration = -1;
 		chance = -1;
 		amount = -1;
+		chargeRate = -1;
 
 		cooldownLeft = 0;
 		instant = false;
@@ -638,6 +642,7 @@ public class Ability implements Cloneable
 		duration = fixValue(duration);
 		chance = fixValue(chance);
 		amount = fixValue(amount);
+		chargeRate = fixValue(chargeRate);
 
 		arc = fixValue(arc);
 	}

@@ -19,6 +19,6 @@ public class Wide_Force_Field extends _ForceFieldAbility
 		width = 5 + level * 2;
 		life = 50 * level;
 		armor = (int) (0.5 * level);
-		
+		decayRate = 0.05;
 	}
 }

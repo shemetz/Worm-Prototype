@@ -6,12 +6,10 @@ import mainClasses.Ability;
 import mainClasses.Ball;
 import mainClasses.Environment;
 import mainClasses.Person;
-import mainClasses.Player;
 import mainResourcesPackage.SoundEffect;
 
-public class Ball_E extends Ability
+public class Ball_E extends _ProjectileAbility
 {
-	double startingDistance;
 
 	public Ball_E(String elementName, int p)
 	{
@@ -28,11 +26,14 @@ public class Ball_E extends Ability
 
 	public void updateStats()
 	{
-		startingDistance = 80;
 		damage = 0.6 * level * Ability.elementalAttackNumbers[elementNum][0];
 		pushback = 0.6 * level * Ability.elementalAttackNumbers[elementNum][1] + 1;
 		cost = 5.0 / elementalAttackNumbers[elementNum][2];
 		cooldown = 5.0 / elementalAttackNumbers[elementNum][2];
+
+		startingDistance = 80;
+		velocity = 500;
+		size = 1;
 	}
 
 	public void use(Environment env, Person user, Point target)
@@ -66,12 +67,13 @@ public class Ball_E extends Ability
 			{
 				double angle = targetAngle + user.missAngle * (2 * Math.random() - 1);
 				cooldownLeft = cooldown;
-				Ball b = new Ball(elementNum, damage, pushback, angle, user);
+				Ball b = new Ball(elementNum, damage, pushback, angle, user, velocity);
 				b.x = user.x + startingDistance * Math.cos(angle);
 				b.y = user.y + startingDistance * Math.sin(angle);
 				b.z = user.z + 0.9;
 				b.xVel += user.xVel;
 				b.yVel += user.yVel;
+				b.size = size;
 				b.timeEffect = user.timeEffect;
 
 				// critical chance
@@ -82,19 +84,5 @@ public class Ball_E extends Ability
 				user.mana -= cost;
 				user.rotate(angle, deltaTime);
 			}
-	}
-
-	public void disable(Environment env, Person user)
-	{
-		disabled = true;
-	}
-
-	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
-	{
-		double angle = Math.atan2(target.y - player.y, target.x - player.x);
-		player.aimType = Player.AimType.NONE;
-		player.target = new Point((int) (player.x + startingDistance * Math.cos(angle)), (int) (player.y + startingDistance * Math.sin(angle)));
-		if (!player.leftMousePressed)
-			player.rotate(angle, 3.0 * deltaTime);
 	}
 }

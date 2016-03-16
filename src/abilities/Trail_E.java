@@ -89,9 +89,7 @@ public class Trail_E extends Ability
 					break;
 				case BALL:
 					// if user no longer intersects last place
-					Ball b = new Ball((lastPlace.x + 0.5) * squareSize, (lastPlace.y + 0.5) * squareSize, user.z + 0.9, elementNum, damage, pushback, user.angle() + Math.PI, user);
-					b.xVel *= 0.2;
-					b.yVel *= 0.2;
+					Ball b = new Ball((lastPlace.x + 0.5) * squareSize, (lastPlace.y + 0.5) * squareSize, user.z + 0.9, elementNum, damage, pushback, user.angle() + Math.PI, user, 100);
 					env.balls.add(b);
 					break;
 				default:

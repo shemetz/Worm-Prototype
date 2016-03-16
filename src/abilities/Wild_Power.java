@@ -121,9 +121,9 @@ public class Wild_Power extends Ability
 				if (rand == 0) // Split
 				{
 					env.balls.add(new Ball(b.x + (int) ((b.radius + 3) * Math.cos(b.angle() + Math.PI / 2)), b.y + (int) ((b.radius + 3) * Math.sin(b.angle() + Math.PI / 2)), b.z, b.elementNum,
-							b.damage, b.pushback, b.angle() + Math.PI / 4, user));
+							b.damage, b.pushback, b.angle() + Math.PI / 4, user, b.velocity()));
 					env.balls.add(new Ball(b.x + (int) ((b.radius + 3) * Math.cos(b.angle() - Math.PI / 2)), b.y + (int) ((b.radius + 3) * Math.sin(b.angle() - Math.PI / 2)), b.z, b.elementNum,
-							b.damage, b.pushback, b.angle() - Math.PI / 4, user));
+							b.damage, b.pushback, b.angle() - Math.PI / 4, user, b.velocity()));
 					env.balls.remove(b);
 				}
 				if (rand == 1) // Make fast and randomize angle

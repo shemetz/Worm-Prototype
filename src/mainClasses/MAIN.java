@@ -51,7 +51,6 @@ import javax.swing.Timer;
 
 import abilities.Chronobiology;
 import abilities.Elastic;
-import abilities.GridTargetingAbility;
 import abilities.Portals;
 import abilities.Protective_Bubble_I;
 import abilities.Protective_Bubble_II;
@@ -60,8 +59,14 @@ import abilities.Sense_Powers;
 import abilities.Shield_E;
 import abilities.Sprint;
 import abilities.Wild_Power;
+import abilities._AFFAbility;
+import abilities._BeamAbility;
+import abilities._FlightAbility;
 import abilities._ForceFieldAbility;
+import abilities._GridTargetingAbility;
 import abilities._LoopAbility;
+import abilities._ProjectileAbility;
+import abilities._SummoningAbility;
 import abilities._TeleportAbility;
 import effects.Burning;
 import effects.Ethereal;
@@ -492,7 +497,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 							if (a.checkCharge(env, p, deltaTime))
 							{
 								p.isChargingChargeAbility = true;
-								p.charge += 5 * deltaTime; // 5 Charge per Second
+								p.charge += a.chargeRate * deltaTime; // 5 Charge per Second, usually
 							}
 						}
 					}
@@ -895,7 +900,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		{
 			ForceField ff = env.FFs.get(i);
 			// Force Shield decay
-			updateFF(ff, deltaTime);
+			ff.decay(deltaTime);
 			if (ff.life <= 0)
 			{
 				ff.stopAllSounds();
@@ -1057,22 +1062,6 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		keyPressFixingMethod(-1, true);
 	}
 
-	void updateFF(ForceField ff, double deltaTime)
-	{
-		switch (ff.type)
-		{
-		case 0: // Force Shield. Life decreased by 50% of current life + 1 every second.
-			ff.life -= deltaTime * (ff.life / 2 + 1); // 5 seconds for weakest Force Shield, 10 seconds for strongest.
-			break;
-		case 1: // Strong Force Field
-			ff.life -= deltaTime * (ff.life * 0.05 + 1);
-			break;
-		default:
-			errorMessage("They don't think it be like it is, but it do.");
-			break;
-		}
-	}
-
 	void pauseFrame()
 	{
 		// TODO
@@ -1139,7 +1128,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			break;
 		case CREATE_IN_GRID:
 			buffer.setStroke(dashedStroke3);
-			GridTargetingAbility gAbility = (GridTargetingAbility) ability;
+			_GridTargetingAbility gAbility = (_GridTargetingAbility) ability;
 			gAbility.UPT(env, player);
 			if (player.abilityAiming == -1 || ability.on)
 			{
@@ -2917,6 +2906,130 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			buffer.drawString("Amount:", stringX, linesUpperY + lines * lineGap);
 			buffer.drawString("" + niceNumber(ability.amount), valueX, linesUpperY + lines * lineGap);
 			lines++;
+		}
+		if (ability.chargeRate != -1)
+		{
+			buffer.drawString("Charge Rate:", stringX, linesUpperY + lines * lineGap);
+			buffer.drawString("" + niceNumber(ability.chargeRate) + " %/s", valueX, linesUpperY + lines * lineGap);
+			lines++;
+		}
+		if (ability instanceof _AFFAbility)
+		{
+			_AFFAbility a = (_AFFAbility) ability;
+			if (a.life != 0)
+			{
+				buffer.drawString("Durability:", stringX, linesUpperY + lines * lineGap);
+				buffer.drawString("" + niceNumber(a.life) + " HP", valueX, linesUpperY + lines * lineGap);
+				lines++;
+			}
+			if (a.decayRate != 0)
+			{
+				buffer.drawString("Decay Rate:", stringX, linesUpperY + lines * lineGap);
+				buffer.drawString("" + niceNumber(a.decayRate * 100) + " %/s", valueX, linesUpperY + lines * lineGap);
+				lines++;
+			}
+			if (a.armor != 0)
+			{
+				buffer.drawString("Armor:", stringX, linesUpperY + lines * lineGap);
+				buffer.drawString("" + niceNumber(a.armor) + "", valueX, linesUpperY + lines * lineGap);
+				lines++;
+			}
+		}
+		if (ability instanceof _BeamAbility)
+		{
+			_BeamAbility a = (_BeamAbility) ability;
+			if (a.size != 1)
+			{
+				buffer.drawString("Size:", stringX, linesUpperY + lines * lineGap);
+				buffer.drawString("" + niceNumber(a.size * 100) + "%", valueX, linesUpperY + lines * lineGap);
+				lines++;
+			}
+		}
+		if (ability instanceof _FlightAbility)
+		{
+			_FlightAbility a = (_FlightAbility) ability;
+			if (a.flySpeed != -1)
+			{
+				buffer.drawString("Speed:", stringX, linesUpperY + lines * lineGap);
+				buffer.drawString("" + niceNumber(a.flySpeed) + " m/s", valueX, linesUpperY + lines * lineGap);
+				lines++;
+			}
+		}
+		if (ability instanceof _ForceFieldAbility)
+		{
+			_ForceFieldAbility a = (_ForceFieldAbility) ability;
+			if (a.length != 0)
+			{
+				buffer.drawString("Length:", stringX, linesUpperY + lines * lineGap);
+				buffer.drawString("" + niceNumber(a.length) + " m", valueX, linesUpperY + lines * lineGap);
+				lines++;
+			}
+			if (a.width != 0)
+			{
+				buffer.drawString("Width:", stringX, linesUpperY + lines * lineGap);
+				buffer.drawString("" + niceNumber(a.width) + " m", valueX, linesUpperY + lines * lineGap);
+				lines++;
+			}
+			if (a.life != 0)
+			{
+				buffer.drawString("Life:", stringX, linesUpperY + lines * lineGap);
+				buffer.drawString("" + niceNumber(a.life) + " HP", valueX, linesUpperY + lines * lineGap);
+				lines++;
+			}
+			if (a.armor != 0)
+			{
+				buffer.drawString("Armor:", stringX, linesUpperY + lines * lineGap);
+				buffer.drawString("" + niceNumber(a.armor), valueX, linesUpperY + lines * lineGap);
+				lines++;
+			}
+		}
+		if (ability instanceof _ProjectileAbility)
+		{
+			_ProjectileAbility a = (_ProjectileAbility) ability;
+			if (a.velocity != 0)
+			{
+				buffer.drawString("Velocity:", stringX, linesUpperY + lines * lineGap);
+				buffer.drawString("" + niceNumber(a.velocity) + " m/s", valueX, linesUpperY + lines * lineGap);
+				lines++;
+			}
+			if (a.size != 1)
+			{
+				buffer.drawString("Size:", stringX, linesUpperY + lines * lineGap);
+				buffer.drawString("" + niceNumber(a.size * 100) + "%", valueX, linesUpperY + lines * lineGap);
+				lines++;
+			}
+		}
+		if (ability instanceof _SummoningAbility)
+		{
+			_SummoningAbility a = (_SummoningAbility) ability;
+			if (a.maxNumOfClones != 1)
+			{
+				buffer.drawString("Maximum:", stringX, linesUpperY + lines * lineGap);
+				buffer.drawString("" + niceNumber(a.maxNumOfClones), valueX, linesUpperY + lines * lineGap);
+				lines++;
+			}
+			if (a.statMultiplier != 1)
+			{
+				buffer.drawString("Stats:", stringX, linesUpperY + lines * lineGap);
+				buffer.drawString("x" + niceNumber(a.statMultiplier * 100) + "%", valueX, linesUpperY + lines * lineGap);
+				lines++;
+			}
+			if (a.life != 0)
+			{
+				buffer.drawString("Life:", stringX, linesUpperY + lines * lineGap);
+				buffer.drawString("" + niceNumber(a.life) + " HP", valueX, linesUpperY + lines * lineGap);
+				lines++;
+			}
+		}
+		if (ability instanceof _TeleportAbility)
+		{
+			_TeleportAbility a = (_TeleportAbility) ability;
+			if (a.telefragging)
+			{
+				buffer.drawString("Telefrags:", stringX, linesUpperY + lines * lineGap);
+				buffer.drawString("YEAH", valueX, linesUpperY + lines * lineGap);
+				lines++;
+			}
 		}
 	}
 

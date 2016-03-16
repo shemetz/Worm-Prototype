@@ -10,7 +10,7 @@ import mainClasses.MAIN;
 import mainClasses.Person;
 import mainClasses.Player;
 
-public class GridTargetingAbility extends Ability
+public class _GridTargetingAbility extends Ability
 {
 
 	final int		squareSize	= 96;
@@ -18,7 +18,7 @@ public class GridTargetingAbility extends Ability
 	public boolean	canBuildInTarget;
 	public Area		rangeArea;
 
-	public GridTargetingAbility(String n, int p)
+	public _GridTargetingAbility(String n, int p)
 	{
 		super(n, p);
 		costType = CostType.MANA;

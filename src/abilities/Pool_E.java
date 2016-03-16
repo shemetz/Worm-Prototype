@@ -7,7 +7,7 @@ import mainClasses.Environment;
 import mainClasses.Person;
 import mainClasses.Player;
 
-public class Pool_E extends GridTargetingAbility
+public class Pool_E extends _GridTargetingAbility
 {
 
 	double healRate;

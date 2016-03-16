@@ -2,13 +2,12 @@ package abilities;
 
 import java.awt.Point;
 
-import mainClasses.Ability;
 import mainClasses.ArcForceField;
 import mainClasses.Environment;
 import mainClasses.Person;
 import mainClasses.Player;
 
-public class Shield_E extends Ability
+public class Shield_E extends _AFFAbility
 {
 
 	public ArcForceField shield;
@@ -28,7 +27,10 @@ public class Shield_E extends Ability
 		cost = 2;
 		costPerSecond = 0.3;
 		cooldown = 5;
-		
+
+		life = level * 10;
+		armor = 0;
+		decayRate = 0;
 	}
 
 	public void use(Environment env, Person user, Point target)
@@ -45,7 +47,8 @@ public class Shield_E extends Ability
 
 			arc = Math.PI / 2; // arc of shield
 			double maxRadius = 92;
-			shield = new ArcForceField(user, angle, arc, maxRadius, (int) (level * 10), this.elementNum, ArcForceField.Type.SHIELD);
+			shield = new ArcForceField(user, angle, arc, maxRadius, life, this.elementNum, ArcForceField.Type.SHIELD);
+			shield.armor = armor;
 			boolean nope = false;
 			for (Person p : env.people)
 				if (env.personAFFCollision(p, shield))

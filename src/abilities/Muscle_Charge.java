@@ -22,6 +22,7 @@ public class Muscle_Charge extends Ability
 		cooldown = 5;
 		costPerSecond = 20;
 		amount = Math.pow(2, level);
+		chargeRate = 5;
 	}
 
 	public void use(Environment env, Person user, Point target)

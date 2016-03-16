@@ -9,38 +9,37 @@ import abilities.Beam_E;
 
 public class Vine extends Drawable // Vines are plant beams, sort of
 {
-	public final static int	lengthOfVineImg	= 200,
-									heightOfVineImg = 40;
-	public final static int	grabblingRange	= 45;
-	public Person			creator;
-	Beam_E					creatorAbility;
-	public RndPhysObj		grabbledThing;
-	public Point3D			start, end;
-	public int				state;							// -1 = none, 0 = flying in the air, 1 = grabbing onto something, 2 = retracting (like 0 but backwards)
-	public int				points;
-	public double			range;							// The maximum range of this vine. Measured from the PERSON to the END.
-	public double			size;							// currently unused; TODO
-	public double			startDistance, endDistance;		// distance from creator to start, and from creator to end
-	public double			length;							// only relevant, and fixed in size, when vine is grabbling something
-	public double			deltaLength;					// like a spring! the extra length a vine is pulled/pushed.
-	public double			rigidity;						// self-explanatory
-	public double			spinStrength;					// how strong can this be pulled sideways
-	public double			endPauseTimeLeft;
+	public final static int lengthOfVineImg = 200, heightOfVineImg = 40;
+	public final static int grabblingRange = 45;
+	public Person creator;
+	Beam_E creatorAbility;
+	public RndPhysObj grabbledThing;
+	public Point3D start, end;
+	public int state; // -1 = none, 0 = flying in the air, 1 = grabbing onto something, 2 = retracting (like 0 but backwards)
+	public double range; // The maximum range of this vine. Measured from the PERSON to the END.
+	public double size; // currently unused; TODO
+	public double startDistance, endDistance; // distance from creator to start, and from creator to end
+	public double length; // only relevant, and fixed in size, when vine is grabbling something
+	public double deltaLength; // like a spring! the extra length a vine is pulled/pushed.
+	public double rigidity; // self-explanatory
+	public double spinStrength; // how strong can this be pulled sideways
+	public double endPauseTimeLeft;
 	boolean retractionSound;
-	public double			life;
-	public List<Evasion>	evasions;
+	public double life;
+	public List<Evasion> evasions;
+	public double damage;
 
-	public Vine(Person creator, Point3D start, Point3D end, int points, double range)
+	public Vine(Person creator, Point3D start, Point3D end, double damage, double range)
 	{
 		creator.holdingVine = true;
-		for (Ability a: creator.abilities)
+		for (Ability a : creator.abilities)
 			if (a instanceof Beam_E && a.getElement().equals("Plant"))
-				creatorAbility = (Beam_E)a;
+				creatorAbility = (Beam_E) a;
 		this.creator = creator;
 		this.start = start;
 		this.end = end;
 		this.state = -1;
-		this.points = points;
+		this.damage = damage;
 		this.range = range;
 		state = 0;
 		image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
@@ -60,9 +59,9 @@ public class Vine extends Drawable // Vines are plant beams, sort of
 
 		size = 1; // temp
 		height = size / 2 + 0.1; // temp
-		rigidity = 25 * points; // temp
+		rigidity = 250 * damage; // temp
 		life = 100; // temp
-		spinStrength = 100000 * points; // temp
+		spinStrength = 1000000 * damage; // temp
 	}
 
 	public void evadedBy(Person p)
@@ -84,18 +83,6 @@ public class Vine extends Drawable // Vines are plant beams, sort of
 	{
 		retract();
 		endPauseTimeLeft = 0;
-	}
-
-	public double getDamage()
-	{
-		// 0.6 * points * 0.2 * attackRate * damage
-		return 0.6 * points * 0.2 * Ability.elementalAttackNumbers[11][2] * Ability.elementalAttackNumbers[11][0];
-	}
-
-	public double getPushback()
-	{
-		// 0.6 * points * 0.2 * attackRate * pushback.
-		return 0.6 * points * 0.2 * Ability.elementalAttackNumbers[11][2] * Ability.elementalAttackNumbers[11][1];
 	}
 
 	public void rotate(double angle, double deltaTime)
@@ -120,7 +107,8 @@ public class Vine extends Drawable // Vines are plant beams, sort of
 			end.y = (int) (grabbledThing.y);
 			endDistance = Math.sqrt(Methods.DistancePow2(creator.x, creator.y, end.x, end.y));
 			deltaLength = length - endDistance + startDistance;
-		} else // increase length
+		}
+		else // increase length
 		{
 			endDistance = Math.sqrt(Methods.DistancePow2(creator.x, creator.y, end.x, end.y));
 			length = endDistance - startDistance;
@@ -173,7 +161,8 @@ public class Vine extends Drawable // Vines are plant beams, sort of
 				buffer.drawImage(Resources.beams[11][12], end.x - (int) (0.5 * heightOfVineImg * size), end.y - (int) (0.5 * heightOfVineImg * size), (int) (heightOfVineImg * size),
 						(int) (heightOfVineImg * size), null);
 				buffer.rotate(-angle, end.x, end.y);
-			} else // TODO: Vines wrapping grabbled person
+			}
+			else // TODO: Vines wrapping grabbled person
 			{
 				;
 			}

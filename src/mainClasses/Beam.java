@@ -10,24 +10,23 @@ import abilities.Beam_E;
 
 public class Beam extends Drawable
 {
-	public Person			creator;
-	public boolean			isChild;
-	public Point3D			start, end;
-	public int				elementNum;
-	public int				endType;						// 0 = regular end, 1 = flat, -1 = not tested yet.
-	public double			endAngle;
-	public int				frameNum;						// 0, 1, 2 or 3
-	public double				strength;
-	public double			timeLeft;
-	public double			damaging;
-	public final static int	lengthOfBeamImg	= 200,
-									heightOfBeamImg = 40;
-	public double			range;							// The maximum range of this beam. Subsequent reflection-beams will have shorter range.
-	public double			size;
-	public Beam_E			theAbility;
-	public boolean			critical		= false;
+	public Person creator;
+	public boolean isChild;
+	public Point3D start, end;
+	public int elementNum;
+	public int endType; // 0 = regular end, 1 = flat, -1 = not tested yet.
+	public double endAngle;
+	public int frameNum; // 0, 1, 2 or 3
+	public double damage, pushback;
+	public double timeLeft;
+	public double damaging;
+	public final static int lengthOfBeamImg = 200, heightOfBeamImg = 40;
+	public double range; // The maximum range of this beam. Subsequent reflection-beams will have shorter range.
+	public double size;
+	public Beam_E theAbility;
+	public boolean critical = false;
 
-	public Beam(Person creator, Beam_E theAbility, Point3D start, Point3D end, int elementNum, double strength1, double range)
+	public Beam(Person creator, Beam_E theAbility, Point3D start, Point3D end, int elementNum, double damage1, double pushback1, double range)
 	{
 		this.theAbility = theAbility;
 		this.creator = creator;
@@ -36,7 +35,8 @@ public class Beam extends Drawable
 		this.elementNum = elementNum;
 		this.endType = -1;
 		this.endAngle = -1;
-		this.strength = strength1;
+		this.damage = damage1;
+		this.pushback = pushback1;
 		this.range = range;
 
 		isChild = false;
@@ -52,18 +52,6 @@ public class Beam extends Drawable
 
 		size = 1; // temp
 		height = size / 2 + 0.1; // temp
-	}
-
-	public double getDamage()
-	{
-		// 0.6 * strength * 0.25 * attackRate * damage
-		return 1 * strength * 0.25 * Ability.elementalAttackNumbers[elementNum][2] * Ability.elementalAttackNumbers[elementNum][0];
-	}
-
-	public double getPushback()
-	{
-		// 0.6 * strength * 0.25 * attackRate * pushback.
-		return 1 * strength * 0.25 * Ability.elementalAttackNumbers[elementNum][2] * Ability.elementalAttackNumbers[elementNum][1];
 	}
 
 	// unused
@@ -97,7 +85,8 @@ public class Beam extends Drawable
 		// PORTAL INTERSECTION
 		Portal p = intersectedPortal;
 
-		Point point = (Methods.LineToPointDistancePow2(p.start, p.end, new Point(start.x, start.y)) > Methods.LineToPointDistancePow2(p.start, p.end, new Point(end.x, end.y))) ? new Point(5*end.x/6 + start.x / 6, 5*end.y/6 + start.y / 6) : new Point(end.x/6 + 5*start.x / 6, end.y/6 + 5*start.y / 6);
+		Point point = (Methods.LineToPointDistancePow2(p.start, p.end, new Point(start.x, start.y)) > Methods.LineToPointDistancePow2(p.start, p.end, new Point(end.x, end.y)))
+				? new Point(5 * end.x / 6 + start.x / 6, 5 * end.y / 6 + start.y / 6) : new Point(end.x / 6 + 5 * start.x / 6, end.y / 6 + 5 * start.y / 6);
 		double k = (p.end.x - p.start.x) * (point.y - p.start.y) - (p.end.y - p.start.y) * (point.x - p.start.x);
 		// k is >0 if this is below p, <0 if this is above p, or 0 if this is in the middle of p
 
@@ -180,7 +169,8 @@ public class Beam extends Drawable
 				buffer.rotate(angle, end.x, end.y);
 				buffer.drawImage(Resources.beams[elementNum][frameNum + 12], end.x - (int) (48 * size), end.y - (int) (48 * size), (int) (96 * size), (int) (96 * size), null);
 				buffer.rotate(-angle, end.x, end.y);
-			} else
+			}
+			else
 			{
 				buffer.rotate(endAngle, end.x, end.y);
 				buffer.drawImage(Resources.beams[elementNum][frameNum + 8], end.x - (int) (48 * size), end.y - (int) (48 * size), (int) (96 * size), (int) (96 * size), null);

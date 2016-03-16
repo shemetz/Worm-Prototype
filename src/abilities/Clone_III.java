@@ -9,19 +9,14 @@ import mainClasses.NPC;
 import mainClasses.Person;
 import mainClasses.Player;
 
-public class Clone_III extends Ability
+public class Clone_III extends _SummoningAbility
 {
-	public int clonesMade;
-	int maxNumOfClones;
-	int life;
 
 	public Clone_III(int p)
 	{
 		super("Clone III", p);
 		costType = CostType.MANA;
 		rangeType = RangeType.NONE;
-
-		clonesMade = 0;
 	}
 
 	public void updateStats()
@@ -31,6 +26,7 @@ public class Clone_III extends Ability
 		cost = 5;
 		life = 30 * level;
 		maxNumOfClones = 3;
+		statMultiplier = 1.1;
 	}
 
 	public void use(Environment env, Person user, Point target)
@@ -40,6 +36,7 @@ public class Clone_III extends Ability
 			user.mana -= cost;
 			double angle = Math.atan2(target.y - user.y, target.x - user.x);
 			Clone clone = new Clone(user.x + range * Math.cos(angle), user.y + range * Math.sin(angle), user, this);
+			clone.multiplyStats(statMultiplier);
 			clone.updateSubStats();
 			clone.maxLife = life;
 			clone.life = clone.maxLife;

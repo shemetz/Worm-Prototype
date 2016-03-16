@@ -2,19 +2,18 @@ package abilities;
 
 import java.awt.Point;
 
-import mainClasses.Ability;
 import mainClasses.Environment;
 import mainClasses.Person;
-import mainClasses.Player;
 
-public class Telekinetic_Flight extends Ability
+public class Telekinetic_Flight extends _FlightAbility
 {
 	boolean gaveBonuses;
-	double flySpeed;
 
 	public Telekinetic_Flight(int p)
 	{
 		super("Telekinetic Flight", p);
+		cost = -1;
+		costPerSecond = -1;
 		costType = CostType.NONE;
 		instant = true;
 		gaveBonuses = false;
@@ -24,7 +23,6 @@ public class Telekinetic_Flight extends Ability
 	{
 		cooldown = 1;
 		flySpeed = 900 * level;
-		
 	}
 
 	public void use(Environment env, Person user, Point target)
@@ -53,24 +51,8 @@ public class Telekinetic_Flight extends Ability
 		}
 	}
 
-	public void disable(Environment env, Person user)
-	{
-		disabled = true;
-		if (on)
-		{
-			user.flySpeed = -1;
-			on = false;
-		}
-	}
-
 	public void maintain(Environment env, Person user, Point target, double deltaTime)
 	{
 
-	}
-
-	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
-	{
-		player.aimType = Player.AimType.NONE;
-		player.target = new Point(-1, -1);
 	}
 }

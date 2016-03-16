@@ -13,18 +13,19 @@ public class Ball extends RndPhysObj
 	public boolean critical = false;
 	public double timer;
 	public double damage, pushback;
+	public double size;
 
 	final static public double smokeEffectRate = 0.03;
 
-	public Ball(double x1, double y1, double z1, int en, double damage1, double pushback1, double angle, Person creator1)
+	public Ball(double x1, double y1, double z1, int en, double damage1, double pushback1, double angle, Person creator1, double velocity)
 	{
-		this(en, damage1, pushback1, angle, creator1);
+		this(en, damage1, pushback1, angle, creator1, velocity);
 		x = x1;
 		y = y1;
 		z = z1;
 	}
 
-	public Ball(int en, double damage1, double pushback1, double angle, Person creator1)
+	public Ball(int en, double damage1, double pushback1, double angle, Person creator1, double velocity)
 	{
 		super(-1, -1, 1, 1);
 		rotation = 0;
@@ -38,11 +39,11 @@ public class Ball extends RndPhysObj
 		angularVelocity = 1.8 * Math.PI;
 		height = 1;
 		mass = ballMass;
-		double velocity = Ball.giveVelocity(); // pixels per second. Below 330 and the character would probably accidentally touch them while running
+		size = 1;
 		xVel = Math.cos(angle) * velocity;
 		yVel = Math.sin(angle) * velocity;
 		evasions = new ArrayList<Evasion>();
-		
+
 		switch (elementNum)
 		{
 		case 0: // fire
@@ -92,10 +93,11 @@ public class Ball extends RndPhysObj
 		evasions.add(new Evasion(p.id));
 	}
 
-	public static double giveVelocity()
+	public void setSize(double newSize)
 	{
-		// TODO perhaps give different speeds to different elements.
-		return 500;
+		mass *= newSize / size;
+		radius *= newSize / size;
+		size = newSize;
 	}
 
 	public double getDamage()
@@ -124,6 +126,7 @@ public class Ball extends RndPhysObj
 		{
 			buffer.translate(x, y);
 			buffer.scale(z * MAIN.heightZoomRatio + 1, z * MAIN.heightZoomRatio + 1);
+			buffer.scale(size, size);
 			buffer.translate(-x, -y);
 
 			buffer.rotate(rotation, x, y);
@@ -131,6 +134,7 @@ public class Ball extends RndPhysObj
 			buffer.rotate(-rotation, x, y);
 
 			buffer.translate(x, y);
+			buffer.scale(1 / size, 1 / size);
 			buffer.scale(1 / (z * MAIN.heightZoomRatio + 1), 1 / (z * MAIN.heightZoomRatio + 1));
 			buffer.translate(-x, -y);
 		}

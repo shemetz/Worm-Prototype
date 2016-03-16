@@ -11,6 +11,7 @@ import mainClasses.Player;
 public class _ForceFieldAbility extends Ability
 {
 	public int length, width, height, life, armor;
+	public double decayRate;
 
 	public _ForceFieldAbility(String n, int p)
 	{
@@ -18,6 +19,10 @@ public class _ForceFieldAbility extends Ability
 		costType = CostType.MANA;
 		
 		height = 1;
+		length = 0;
+		width = 0;
+		life = 0;
+		armor = 0;
 	}
 
 	public void use(Environment env, Person user, Point target)
@@ -26,7 +31,7 @@ public class _ForceFieldAbility extends Ability
 		if (!user.maintaining && cost <= user.mana && cooldownLeft == 0)
 		{
 			// TODO check collisions
-			ForceField forcey = new ForceField(user.x + range * Math.cos(angle), user.y + range * Math.sin(angle), user.z, length, width, angle + 0.5 * Math.PI, life, 1);
+			ForceField forcey = new ForceField(user.x + range * Math.cos(angle), user.y + range * Math.sin(angle), user.z, length, width, angle + 0.5 * Math.PI, life, decayRate);
 			forcey.armor = armor;
 			env.FFs.add(forcey);
 			user.mana -= cost;

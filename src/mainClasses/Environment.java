@@ -106,9 +106,9 @@ public class Environment
 		poolImages = new BufferedImage[width][height];
 		floorTypes = new int[width][height];
 		cornerCracks = new int[width][height];
-		wCornerStyles = new int[width+1][height+1][amountOfElements + 1]; // 12 = cement
-		pCornerStyles = new int[width+1][height+1][amountOfElements];
-		pCornerTransparencies = new int[width+1][height+1][amountOfElements];
+		wCornerStyles = new int[width + 1][height + 1][amountOfElements + 1]; // 12 = cement
+		pCornerStyles = new int[width + 1][height + 1][amountOfElements];
+		pCornerTransparencies = new int[width + 1][height + 1][amountOfElements];
 		checkedSquares = new boolean[width][height];
 		widthPixels = width * squareSize;
 		heightPixels = height * squareSize;
@@ -1933,7 +1933,7 @@ public class Environment
 			if (v.state != 2)
 				v.retract();
 			v.fixPosition();
-			damageWall(collidedWall.x, collidedWall.y, v.getDamage() + v.getPushback(), EP.damageType(EP.toInt("Plant")));
+			damageWall(collidedWall.x, collidedWall.y, v.damage, EP.damageType(EP.toInt("Plant")));
 			break;
 		case 1: // force field
 			v.end.x = roundedIntersectionPoint.x;
@@ -1941,7 +1941,7 @@ public class Environment
 			if (v.state != 2)
 				v.retract();
 			v.fixPosition();
-			damageForceField(collidedFF, v.getDamage() + v.getPushback(), roundedIntersectionPoint);
+			damageForceField(collidedFF, v.damage, roundedIntersectionPoint);
 			break;
 		case 2: // arc force field
 			v.end.x = roundedIntersectionPoint.x;
@@ -1949,7 +1949,7 @@ public class Environment
 			if (v.state != 2)
 				v.retract();
 			v.fixPosition();
-			damageArcForceField(collidedAFF, v.getDamage() + v.getPushback(), roundedIntersectionPoint, EP.damageType("Plant"));
+			damageArcForceField(collidedAFF, v.damage, roundedIntersectionPoint, EP.damageType("Plant"));
 			break;
 		case 3: // person (grabbled)
 			if (checkForEvasion(collidedPerson))
@@ -1962,7 +1962,7 @@ public class Environment
 				v.fixPosition();
 
 				// damage
-				hitPerson(collidedPerson, v.getDamage() * deltaTime, 0, 0, 11, deltaTime);
+				hitPerson(collidedPerson, v.damage * deltaTime, 0, 0, 11, deltaTime);
 			}
 			break;
 		case 4: // person (intersected)
@@ -2491,7 +2491,7 @@ public class Environment
 				b.endAngle = Math.PI;
 			if (roundedIntersectionPoint.y == collidedWall.y * squareSize + squareSize) // down
 				b.endAngle = -Math.PI / 2;
-			damageWall(collidedWall.x, collidedWall.y, b.getDamage() + b.getPushback(), EP.damageType(b.elementNum));
+			damageWall(collidedWall.x, collidedWall.y, b.damage + b.pushback, EP.damageType(b.elementNum));
 			break;
 		case 1: // Force Field
 			b.end.x = roundedIntersectionPoint.x;
@@ -2540,7 +2540,7 @@ public class Environment
 						moveBeam(b2, true, deltaTime); // Recursion!!!
 					}
 				}
-				damageArcForceField(collidedAFF, deltaTime * (b.getDamage() + b.getPushback()), roundedIntersectionPoint, EP.damageType(b.elementNum));
+				damageArcForceField(collidedAFF, deltaTime * (b.damage + b.pushback), roundedIntersectionPoint, EP.damageType(b.elementNum));
 			}
 			break;
 		case 3: // Person
@@ -2553,7 +2553,7 @@ public class Environment
 			else
 			{
 				// damaging the person
-				hitPerson(collidedPerson, b.getDamage(), b.getPushback(), angle, b.elementNum, deltaTime);
+				hitPerson(collidedPerson, b.damage, b.pushback, angle, b.elementNum, deltaTime);
 
 				switch (b.elementNum)
 				{
@@ -2577,7 +2577,7 @@ public class Environment
 			b.end.y = roundedIntersectionPoint.y;
 			b.endType = 0;
 
-			collidedBall.mass -= 2 * b.getDamage() * deltaTime * collidedBall.timeEffect; // TODO what the shit? Damaging the ball's mass? Whaaa?
+			collidedBall.mass -= 2 * b.damage * deltaTime * collidedBall.timeEffect; // TODO what the shit? Damaging the ball's mass? Whaaa?
 			// I'm not sure what I did here with the angles but it looks OK
 			if (Math.random() < 0.5)
 				ballDebris(collidedBall, "beam hit", collidedBall.angle());
@@ -2591,7 +2591,7 @@ public class Environment
 			boolean sideOfVine = (b.x - collidedVine.start.x) * Math.sin(b.angle()) > (b.y - collidedVine.y) * Math.cos(b.angle());
 			b.endAngle = collidedVine.rotation + (sideOfVine ? TAU / 4 : -TAU / 4);
 
-			collidedVine.life -= b.getDamage();
+			collidedVine.life -= b.damage;
 			// TODO vine plant debris
 			break;
 		case 6: // Portal
@@ -2661,7 +2661,7 @@ public class Environment
 		if (newRange < 0) // because bugs
 			return null;
 		Beam b2 = new Beam(b.creator, b.theAbility, new Point3D((int) (b.end.x + startDistance * Math.cos(newBeamAngle)), (int) (b.end.y + startDistance * Math.sin(newBeamAngle)), b.end.z - 0.01),
-				new Point3D((int) (b.end.x + newRange * Math.cos(newBeamAngle)), (int) (b.end.y + newRange * Math.sin(newBeamAngle)), b.end.z - 0.01), b.elementNum, b.strength, newRange);
+				new Point3D((int) (b.end.x + newRange * Math.cos(newBeamAngle)), (int) (b.end.y + newRange * Math.sin(newBeamAngle)), b.end.z - 0.01), b.elementNum, b.damage, b.pushback, newRange);
 		b2.frameNum = b.frameNum;
 		b2.isChild = true;
 		return b2;
@@ -2682,7 +2682,7 @@ public class Environment
 						(int) (p.partner.y + distanceToPortalCenter * Math.sin(angleRelativeToPartner) + startDistance * Math.sin(newBeamAngle)), b.end.z + p.partner.z - p.z - 0.01),
 				new Point3D((int) (p.partner.x + distanceToPortalCenter * Math.cos(angleRelativeToPartner) + (startDistance + newRange) * Math.cos(newBeamAngle)),
 						(int) (p.partner.y + distanceToPortalCenter * Math.sin(angleRelativeToPartner) + (startDistance + newRange) * Math.sin(newBeamAngle)), b.end.z + p.partner.z - p.z - 0.01),
-				b.elementNum, b.strength, newRange);
+				b.elementNum, b.damage, b.pushback, newRange);
 		b2.frameNum = b.frameNum;
 		b2.isChild = true;
 		return b2;
@@ -3102,7 +3102,7 @@ public class Environment
 		case 7: // acid
 		case 8: // lava
 		case 3: // electricity
-		case 14: //blood
+		case 14: // blood
 			velocityModifier = 0;
 			break;
 		case 0: // fire

@@ -18,5 +18,6 @@ public class Force_Shield extends _ForceFieldAbility
 		width = 10 + level * 1;
 		life = 20 * level;
 		armor = 0;
+		decayRate = 0.5;
 	}
 }

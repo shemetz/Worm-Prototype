@@ -19,6 +19,6 @@ public class Strong_Force_Field extends _ForceFieldAbility
 		width = 5 + (int) level * 7;
 		life = 80 * level;
 		armor = level;
-		
+		decayRate = 0.05;
 	}
 }

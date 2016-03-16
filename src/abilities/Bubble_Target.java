@@ -1,6 +1,8 @@
 package abilities;
 
 import java.awt.Point;
+import java.util.ArrayList;
+import java.util.List;
 
 import mainClasses.Ability;
 import mainClasses.ArcForceField;
@@ -10,9 +12,9 @@ import mainClasses.Person;
 import mainClasses.Player;
 import mainResourcesPackage.SoundEffect;
 
-public class Bubble_Target extends Ability
+public class Bubble_Target extends _AFFAbility
 {
-	public ArcForceField bubble;
+	public List<ArcForceField> bubbles;
 
 	public Bubble_Target(int p)
 	{
@@ -21,7 +23,7 @@ public class Bubble_Target extends Ability
 		rangeType = Ability.RangeType.CIRCLE_AREA;
 		instant = false;
 
-		bubble = null;
+		bubbles = new ArrayList<ArcForceField>();
 
 		sounds.add(new SoundEffect("Bubble_appear.wav"));
 		sounds.add(new SoundEffect("Bubble_pop.wav"));
@@ -32,6 +34,10 @@ public class Bubble_Target extends Ability
 		cooldown = Math.min(6 - level, 0.3);
 		cost = 3;
 		range = 500;
+
+		life = 10 * level;
+		armor = level * 2;
+		decayRate = 0.1;
 	}
 
 	public void use(Environment env, Person user, Point target)
@@ -46,9 +52,10 @@ public class Bubble_Target extends Ability
 				return;
 
 			// Add a new protective bubble
-			bubble = new ArcForceField(targetPerson, 0, 2 * Math.PI, 107, 10 * level, 12, ArcForceField.Type.IMMOBILE_BUBBLE);
-			bubble.armor = level * 2;
+			ArcForceField bubble = new ArcForceField(targetPerson, 0, 2 * Math.PI, 107, life, 12, ArcForceField.Type.IMMOBILE_BUBBLE);
+			bubble.armor = armor;
 			env.AFFs.add(bubble);
+			bubbles.add(bubble);
 			user.mana -= this.cost;
 			this.cooldownLeft = this.cooldown;
 			this.on = true;
@@ -58,9 +65,20 @@ public class Bubble_Target extends Ability
 
 	public void maintain(Environment env, Person user, Point target, double deltaTime)
 	{
-		bubble.life -= bubble.life * 0.1 * deltaTime;
-		if (Methods.DistancePow2(bubble.target.Point(), bubble.Point()) > bubble.maxRadius * bubble.maxRadius) // if target got out
-			bubble.life = 0;
+		for (int i = 0; i < bubbles.size(); i++)
+		{
+			ArcForceField bubble = bubbles.get(i);
+			bubble.life -= bubble.life * decayRate * deltaTime;
+			if (Methods.DistancePow2(bubble.target.Point(), bubble.Point()) > bubble.maxRadius * bubble.maxRadius) // if target got out
+				bubble.life = 0;
+			if (bubble.life <= 0)
+			{
+				bubbles.remove(i);
+				i--;
+			}
+		}
+		if (bubbles.isEmpty())
+			on = false;
 	}
 
 	public void disable(Environment env, Person user)

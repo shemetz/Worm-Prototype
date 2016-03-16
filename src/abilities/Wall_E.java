@@ -6,7 +6,7 @@ import mainClasses.Environment;
 import mainClasses.Person;
 import mainClasses.Player;
 
-public class Wall_E extends GridTargetingAbility
+public class Wall_E extends _GridTargetingAbility
 {
 	// Hahahahahahahaha
 	//
