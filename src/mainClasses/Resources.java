@@ -514,6 +514,15 @@ public class Resources
 		for (String s : effectNames)
 			icons.put(s, ResourceLoader.getBufferedImage("icons/effects/" + s + ".png"));
 
+		// Perk icons:
+		List<String> perkNames = Arrays.asList("Increased damage", "Increased pushback", "Faster flight", "Longer teleport", "Telefrag", "Longer force fields", "Thicker force fields",
+				"Stable force fields", "Armored force fields", "Faster projectile", "Bigger projectile", "Longer beam", "Bigger beam", "Extra durable", "Bigger explosion",
+				"Improved armor", "Reduced cost", "Reduced continuous cost", "Reduced cooldown", "Increased duration", "Increased range", "Increased charge rate", "Increased absorption", "Empowered",
+				"Better summons", "Durable summons", "More summons", "Better summon");
+		// sure it happens
+		for (String s : perkNames)
+			icons.put(s, ResourceLoader.getBufferedImage("icons/perks/" + s + ".png"));
+
 		// Elemental effect icons:
 		List<String> elementalEffectNames = Arrays.asList("Resistant");
 		for (String name : elementalEffectNames)

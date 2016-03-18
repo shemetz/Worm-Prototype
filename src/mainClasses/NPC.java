@@ -43,7 +43,7 @@ public class NPC extends Person
 
 	boolean hasAllies = false;
 
-	final double halfAggressiveMaxEnemyDistancePow2 = Math.pow(600, 2);
+	final double halfAggressiveMaxEnemyDistancePow2 = Math.pow(1200, 2);
 	int targetID = -1;
 	boolean rightOrLeft = false; // true = right or CW. false = left or CCW.
 	boolean justCollided = false;

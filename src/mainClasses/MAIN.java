@@ -467,6 +467,14 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 					}
 					else
 						p.effects.get(i).timeLeft = -1;
+
+				if (p instanceof Player)
+				{
+					hotkeySelected = -1;
+					hotkeyHovered = -1;
+					abilityExamined = -1;
+					pauseHoverAbility = -1;
+				}
 			}
 			else
 			{
@@ -1097,11 +1105,10 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		// if the area isn't nice
 		if (!ability.rangeType.equals(Ability.RangeType.CREATE_IN_GRID))
 			if (ability.hasTag("range"))
-				// clamp target to range:
-				if (Methods.DistancePow2(p.x, p.y, p.target.x, p.target.y) > ability.range * ability.range)
+				if (Methods.DistancePow2(p.x, p.y, p.target.x, p.target.y) > ability.range * ability.range) // clamp target to range:
 				{
-				p.target.x = (int) (p.x + Math.cos(angle) * ability.range);
-				p.target.y = (int) (p.y + Math.sin(angle) * ability.range);
+					p.target.x = (int) (p.x + Math.cos(angle) * ability.range);
+					p.target.y = (int) (p.y + Math.sin(angle) * ability.range);
 				}
 	}
 
@@ -1364,55 +1371,153 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			}
 			break;
 		case TELEPORT:
-			buffer.setStroke(new BasicStroke(3));
 			final int radius = 35;
 			_TeleportAbility teleportAbility = (_TeleportAbility) ability;
 			if (player.successfulTarget)
 			{
+				Color red = Color.red;
+				boolean telefrag = false;
+				for (Person p1 : env.people)
+					if (!p1.equals(player))
+						if (p1.z + p1.height > player.z && p1.z < player.z + player.height)
+							if (Methods.DistancePow2(player.target.x, player.target.y, p1.x, p1.y) < Math.pow((player.radius + p1.radius), 2))
+							{
+								telefrag = true;
+								break;
+							}
+
+				buffer.setStroke(new BasicStroke(3));
 				buffer.setColor(new Color(53, 230, 240));
 				buffer.drawLine(player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle1)), player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle1)),
 						player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle1 + Math.PI * 2 / 3)),
 						player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle1 + Math.PI * 2 / 3)));
+				if (telefrag)
+				{
+					buffer.setStroke(new BasicStroke(1));
+					buffer.setColor(red);
+					buffer.drawLine(player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle1)), player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle1)),
+							player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle1 + Math.PI * 2 / 3)),
+							player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle1 + Math.PI * 2 / 3)));
+				}
+				buffer.setStroke(new BasicStroke(3));
 				buffer.setColor(new Color(40, 210, 250));
 				buffer.drawLine(player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle2)), player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle2)),
 						player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle2 + Math.PI * 2 / 3)),
 						player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle2 + Math.PI * 2 / 3)));
+				if (telefrag)
+				{
+					buffer.setStroke(new BasicStroke(1));
+					buffer.setColor(red);
+					buffer.drawLine(player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle2)), player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle2)),
+							player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle2 + Math.PI * 2 / 3)),
+							player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle2 + Math.PI * 2 / 3)));
+				}
+				buffer.setStroke(new BasicStroke(3));
 				buffer.setColor(new Color(20, 200, 255));
 				buffer.drawLine(player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle3)), player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle3)),
 						player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle3 + Math.PI * 2 / 3)),
 						player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle3 + Math.PI * 2 / 3)));
+				if (telefrag)
+				{
+					buffer.setStroke(new BasicStroke(1));
+					buffer.setColor(red);
+					buffer.drawLine(player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle3)), player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle3)),
+							player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle3 + Math.PI * 2 / 3)),
+							player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle3 + Math.PI * 2 / 3)));
+				}
+				buffer.setStroke(new BasicStroke(3));
 				buffer.setColor(new Color(53, 230, 240));
 				buffer.drawLine(player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle1)), player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle1)),
 						player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle1 - Math.PI * 2 / 3)),
 						player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle1 - Math.PI * 2 / 3)));
+				if (telefrag)
+				{
+					buffer.setStroke(new BasicStroke(1));
+					buffer.setColor(red);
+					buffer.drawLine(player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle1)), player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle1)),
+							player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle1 - Math.PI * 2 / 3)),
+							player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle1 - Math.PI * 2 / 3)));
+				}
+				buffer.setStroke(new BasicStroke(3));
 				buffer.setColor(new Color(53, 218, 255));
 				buffer.drawOval(player.target.x - radius, player.target.y - radius, radius * 2, radius * 2);
+				if (telefrag)
+				{
+					buffer.setStroke(new BasicStroke(1));
+					buffer.setColor(red);
+					buffer.drawOval(player.target.x - radius, player.target.y - radius, radius * 2, radius * 2);
+				}
+				buffer.setStroke(new BasicStroke(3));
 				buffer.setColor(new Color(40, 210, 250));
 				buffer.drawLine(player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle2)), player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle2)),
 						player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle2 - Math.PI * 2 / 3)),
 						player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle2 - Math.PI * 2 / 3)));
+				if (telefrag)
+				{
+					buffer.setStroke(new BasicStroke(1));
+					buffer.setColor(red);
+					buffer.drawLine(player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle2)), player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle2)),
+							player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle2 - Math.PI * 2 / 3)),
+							player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle2 - Math.PI * 2 / 3)));
+				}
+				buffer.setStroke(new BasicStroke(3));
 				buffer.setColor(new Color(53, 230, 240));
 				buffer.drawLine(player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle1 + Math.PI * 2 / 3)),
 						player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle1 + Math.PI * 2 / 3)),
 						player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle1 - Math.PI * 2 / 3)),
 						player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle1 - Math.PI * 2 / 3)));
+				if (telefrag)
+				{
+					buffer.setStroke(new BasicStroke(1));
+					buffer.setColor(red);
+					buffer.drawLine(player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle1 + Math.PI * 2 / 3)),
+							player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle1 + Math.PI * 2 / 3)),
+							player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle1 - Math.PI * 2 / 3)),
+							player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle1 - Math.PI * 2 / 3)));
+				}
+				buffer.setStroke(new BasicStroke(3));
 				buffer.setColor(new Color(20, 200, 255));
 				buffer.drawLine(player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle3)), player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle3)),
 						player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle3 - Math.PI * 2 / 3)),
 						player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle3 - Math.PI * 2 / 3)));
-
+				if (telefrag)
+				{
+					buffer.setStroke(new BasicStroke(1));
+					buffer.setColor(red);
+					buffer.drawLine(player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle3)), player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle3)),
+							player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle3 - Math.PI * 2 / 3)),
+							player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle3 - Math.PI * 2 / 3)));
+				}
+				buffer.setStroke(new BasicStroke(3));
 				buffer.setColor(new Color(40, 210, 250));
 				buffer.drawLine(player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle2 + Math.PI * 2 / 3)),
 						player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle2 + Math.PI * 2 / 3)),
 						player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle2 - Math.PI * 2 / 3)),
 						player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle2 - Math.PI * 2 / 3)));
-
+				if (telefrag)
+				{
+					buffer.setStroke(new BasicStroke(1));
+					buffer.setColor(red);
+					buffer.drawLine(player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle2 + Math.PI * 2 / 3)),
+							player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle2 + Math.PI * 2 / 3)),
+							player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle2 - Math.PI * 2 / 3)),
+							player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle2 - Math.PI * 2 / 3)));
+				}
+				buffer.setStroke(new BasicStroke(3));
 				buffer.setColor(new Color(20, 200, 255));
 				buffer.drawLine(player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle3 + Math.PI * 2 / 3)),
 						player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle3 + Math.PI * 2 / 3)),
 						player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle3 - Math.PI * 2 / 3)),
 						player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle3 - Math.PI * 2 / 3)));
-
+				if (telefrag)
+				{
+					buffer.setStroke(new BasicStroke(1));
+					buffer.setColor(red);
+					buffer.drawLine(player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle3 + Math.PI * 2 / 3)),
+							player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle3 + Math.PI * 2 / 3)),
+							player.target.x + (int) (radius * 1.3 * Math.cos(teleportAbility.triangle3 - Math.PI * 2 / 3)),
+							player.target.y + (int) (radius * 1.3 * Math.sin(teleportAbility.triangle3 - Math.PI * 2 / 3)));
+				}
 			}
 			else
 			{
@@ -1421,11 +1526,15 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				buffer.drawRect(player.target.x - player.radius / 2, player.target.y - player.radius / 2, player.radius, player.radius);
 				buffer.drawOval(player.target.x - radius, player.target.y - radius, radius * 2, radius * 2);
 			}
-			double angle = Math.atan2(player.target.y - player.y, player.target.x - player.x);
-			double distance = Math.sqrt(Math.pow(player.x - player.target.x, 2) + Math.pow(player.y - player.target.y, 2));
-			buffer.setStroke(dashedStroke3);
-			buffer.drawLine((int) (player.x + 0.1 * distance * Math.cos(angle)), (int) (player.y + 0.1 * distance * Math.sin(angle)), (int) (player.x + 0.9 * distance * Math.cos(angle)),
-					(int) (player.y + 0.9 * distance * Math.sin(angle)));
+
+			if (teleportAbility.type != _TeleportAbility.Type.TARGET_POINT)
+			{
+				double angle = Math.atan2(player.target.y - player.y, player.target.x - player.x);
+				double distance = Math.sqrt(Math.pow(player.x - player.target.x, 2) + Math.pow(player.y - player.target.y, 2));
+				buffer.setStroke(dashedStroke3);
+				buffer.drawLine((int) (player.x + 0.1 * distance * Math.cos(angle)), (int) (player.y + 0.1 * distance * Math.sin(angle)), (int) (player.x + 0.9 * distance * Math.cos(angle)),
+						(int) (player.y + 0.9 * distance * Math.sin(angle)));
+			}
 
 			break;
 		case CREATE_FF:
@@ -1602,6 +1711,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			{
 				person.abilities.add(Ability.ability("Toughness II", 2));
 				person.abilities.add(Ability.ability("Strength II", 2));
+				person.abilities.add(Ability.ability("Leg Muscles", 1));
 				person.DNA = Arrays.asList(new EP(17, 5), new EP(13, 5));
 			}
 			if (i == 2)
@@ -2982,6 +3092,12 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				buffer.drawString("" + niceNumber(a.armor), valueX, linesUpperY + lines * lineGap);
 				lines++;
 			}
+			if (a.decayRate != 0)
+			{
+				buffer.drawString("Decay Rate:", stringX, linesUpperY + lines * lineGap);
+				buffer.drawString("" + niceNumber(a.decayRate * 100) + " %/s", valueX, linesUpperY + lines * lineGap);
+				lines++;
+			}
 		}
 		if (ability instanceof _ProjectileAbility)
 		{
@@ -3030,6 +3146,19 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				buffer.drawString("YEAH", valueX, linesUpperY + lines * lineGap);
 				lines++;
 			}
+		}
+
+		int perkX = cx + 450;
+		Font perkFont = new Font("Sans Serif", Font.PLAIN, 20);
+		buffer.setFont(perkFont);
+		frc = buffer.getFontRenderContext();
+		lines = 0;
+		for (Perk p : ability.perks)
+		{
+			int perkTextWidth = (int) (perkFont.getStringBounds(p.name, frc).getWidth());
+			buffer.drawImage(Resources.icons.get(p.name), perkX - 30, linesUpperY + lines * lineGap * 2 - 30, null);
+			buffer.drawString(p.name, perkX - perkTextWidth / 2, linesUpperY + lines * lineGap * 2 + 50);
+			lines++;
 		}
 	}
 

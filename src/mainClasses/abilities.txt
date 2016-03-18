@@ -27,13 +27,13 @@ Use charged <e> attacks.
 Have Charge Ball <Element> and Charge Beam <Element>.
 
 Ball (Activated) <Element>
-offensive damaging pushing projectile cooldown aim cost
+offensive damaging pushing projectile cooldown cost
 Create a ball of <e> and throw it with force towards a target.
 Deals normal damage with an extra 1 pushback. 
 Costs ….some amount per second. 5 / attackRate * 1.5.
 
 Beam (Maintained) <Element>
-offensive damaging pushing beam aim continuous-cost
+offensive damaging pushing beam continuous-cost
 Shoot a continuous beam of <e>.
 Deals the same amount of damage but continuously (every 0.2 seconds, damage is damage*attackRate*0.04), instead of every X seconds. Hits immediately.
 Costs ….some amount per second. 5 / attackRate * 1.5.
@@ -43,7 +43,7 @@ Grabbled enemies are damaged by the vine at 0.5*points damage every 0.5 seconds.
 When a vine is dealt enough damage or the creator stops using it, it drops to the floor. 
 
 Shield (Maintained) <Element>
-defensive shield cost continuous-cost cooldown
+defensive arc-force-field cost continuous-cost cooldown
 Create a temporary <e> shield to block ranged attacks.
 Maintain a force-field-like shield suspended in the air in front of you, blocking 90 degrees. While maintaining a shield you cannot attack, and attacks that hit the shield damage it until it breaks. The shield takes 1.5 seconds to deploy from 0 to 10*Level health (and grow in size).
 Cooldown of 2 seconds.
@@ -74,19 +74,19 @@ Can only be granted if the Element is Fire, Lava, Acid, Electricity or Energy.
 Damage dealt to you by element sources of your element, instead of damaging you, restores 10*Level percentage mana and 10*Level percentage life. These percentages are from the damage not-dealt by the attack. Armor is still affected by the damage.
 
 Charge Ball (Activated) <Element>
-charge offensive damaging pushing projectile cooldown aim cost
+charge offensive damaging pushing projectile cooldown cost
 Charge to create a ball of <e> and throw it with force towards a target.
 Charge for 4 seconds, and then switch to Ball attack mode and gain triple damage for the next ball.
 Costs 2 Mana.
 
 Charge Beam (Maintained) <Element>
-charge offensive damaging pushing beam aim continuous-cost
+charge offensive damaging pushing beam continuous-cost
 Shoot a weak beam that grows stronger the more you use it continuously.
 Same as Beam, but the beam you shoot deals 50% damage which increases by 20% every second, to a maximum of 150% damage (same goes for pushback)
 Costs just like a beam.
 
 Exploding Ball (Activated) <Element>
-explosion offensive damaging pushing projectile cooldown aim cost
+explosion offensive damaging pushing projectile cooldown cost
 Create an explosive ball of <e> and throw it with force towards a target.
 Deals normal damage, and explodes immediately, creating an elemental explosion with r = 5, d = twice the ball’s normal damage, p = twice the ball’s normal pushback.
 Costs 2 M/s, while attacking.
@@ -119,7 +119,7 @@ Players with this ability have (1-evasion) multiplied by 0.9^Level. NPCs have th
 Sense Powers (On/Off)
 on-off sense range
 Sense the powers of parahumans.
-See a vague representation of the element distribution of the sum of capes around you. The graph that you see has a degree of variation (gaussian) and is updated every 5 seconds. Your range is 0.5 * 2^Level.
+See a vague representation of the element distribution of the sum of capes around you. The graph that you see has a degree of variation (gaussian) and is updated every 10-Level seconds. Your range is 0.5 * 2^Level.
 
 Sense Element (Passive) <Element>
 passive sense range
@@ -129,13 +129,13 @@ See silhouettes of capes with your elemental power, walls/pools of your element 
 Clairvoyance (Maintained)
 sense range continuous-cost
 See EVERYTHING (in your range).
-Combine Sense Parahumans, Sense Life, Sense Mana and Stamina, Sense Powers, Danger Sense, Sense Structure. Your range is 3^Level.
-Costs 2 M/s to maintain, and cannot be activated with less than 90% mana or deactivated with more than 60% mana. If it is not deactivated before you run out of mana, it will start using HP, draining 5 HP/s.
+Combine Sense Parahumans, Sense Life, Sense Mana and Stamina, Sense Powers, Danger Sense, Sense Structure, Sense Movement. Your range is 2^Level.
+Costs 2 M/s to maintain. If it is not deactivated before you run out of mana, it will start using HP, draining 10 HP/s.
 
 Sense Movement (Passive)
 passive sense range
 Sense movements.
-See hidden or out-of-view creatures, as long as they are moving, to a long range of 3^Level meters.
+See the movement vectors of hidden or out-of-view creatures, as long as they are moving, to a range of 2^Level meters.
 
 Sensibility (Passive)
 passive extra-abilities
@@ -143,22 +143,22 @@ Your extra senses keep changing.
 You have two random Sense powers, which are randomized every 5 minutes. Their Level is equal to this power’s Level.
 
 Strength I (Passive)
-passive stat-boost
+passive level-up
 You are strong.
 Gain a bonus to your Strength stat equal to Level, and to your Fitness stat a bonus of 1.
 
 Strength II (Passive)
-passive stat-boost
+passive level-up
 You are very strong.
 Gain a bonus to your Strength stat equal to 2*Level, and to your Fitness stat a bonus of 2.
 
 Strength III (Passive)
-passive stat-boost
+passive level-up
 You are really, REALLY strong. Nobody needs that much strength, but you have it.
 Gain a bonus to your Strength stat equal to 2^Level, and to your Fitness stat a bonus of 0.5*Level (rounded up). Strongest cape, a cape who’s got Strength III Level 10, has ~1000 STR and can lift about 25 cars at once. This cape can easily kill an average person with a punch, and can jump...500 meters up?. Basically, any cape with Strength III has >100 STR and will have a very interesting life.
 
 Critical Thinking (Passive)
-passive sub-stat-boost
+passive level-up
 You can see the enemy’s weak spots and target them for increased damage.
 Multiply your (1-critical chance) by 0.9^(Level).
 
@@ -168,7 +168,7 @@ Each of your punches creates an explosion, to which you are immune.
 You have Explosion Resistance. Melee hits with your punches create an explosion that deals 1*Level damage and 8*Level pushback force to the target and anything in a 2 meter radius from the punch.
 
 Elemental Fists (Passive) <Element>
-passive damage
+passive damaging
 Your punches are infused with <e>.
 Each of your punches deals an additional Level elemental damage.
 
@@ -194,27 +194,27 @@ Your punches steal the enemy’s life force.
 Each of your punches, if it damages the enemy, will give you 20%*Level of the life removed from them.
 
 Wound Regeneration I (Passive)
-passive sub-stat-boost
+passive level-up
 Your regenerate your wounds.
 Your life regeneration gains a bonus of Level life/sec.
 
 Wound Regeneration II (Passive)
-passive sub-stat boost
+passive level-up
 Your regenerate your wounds quickly.
 Your life regeneration gains a bonus of 2*Level life/sec.
 
 Energy Regeneration I (Passive)
-passive sub-stat-boost
+passive level-up
 Your regenerate your mana and stamina.
 Your mana and stamina regenerations gain a bonus of 0.5*Level M/sec or S/sec.
 
 Energy Regeneration II (Passive)
-passive sub-stat-boost
+passive level-up
 Your regenerate your mana and stamina quickly.
 Your mana and stamina regenerations gain a bonus of 1.5*Level M/sec or S/sec.
 
 Body Regeneration (Passive)
-passive sub-stat-boost
+passive level-up
 Your regenerate your body very quickly.
 Your life regeneration gains a bonus of 4*Level life/sec, and your mana and stamina regenerations gain a bonus of 2*Level M/sec or S/sec.
 
@@ -269,7 +269,6 @@ Your (1-accuracy) is multiplied by 0.8^Level. You also gain +2*Level Dexterity.
 Precision III (Passive)
 passive level-up
 Your aim is perfect.
-passive stat-boost
 Your accuracy is 1. You also gain +3*Level Dexterity.
 
 Evasion I (Passive)
@@ -288,22 +287,22 @@ Every single attack seems to miss you.
 Your evasion is 1. You also gain +3*Level Dexterity. Can only be hit by unavoidable attacks.
 
 Dexterousness (Passive)
-passive stat-boost
+passive level-up
 You are...dextrous. Your dexterity levels are...high.
 Gain +5*Level Dexterity.
 
 Toughness I (Passive)
-passive sub-stat-boost
+passive level-up
 You are tougher than normal humans; you have more HP than them.
 Gain a bonus to life max equal to 20*Level.
 
 Toughness II (Passive)
-passive sub-stat-boost
+passive level-up
 You are really tough.
 Gain a bonus to life max equal to 40*Level.
 
 Toughness III (Passive)
-passive sub-stat-boost
+passive level-up
 You have so much HP that it’s probably unhealthy.
 Gain a bonus to life max equal to 100*Level.
 
@@ -340,12 +339,12 @@ You have Explosion Resistance, and whenever you suffer a burst of damage, immedi
 Cooldown (between explosions): 5/Level seconds
 
 Leg Muscles (Passive)
-passive sub-stat-boost
+passive level-up
 You can run fast and jump high.
 Your maximum speed is increased by 0.5*Level m/s, and your acceleration by 10*Level m/s/s. Your jump height is increased by 1*Level meters.
 
 Speedrun (Passive)
-passive sub-stat-boost
+passive level-up
 You can run really fast and jump really high.
 Your speed is increased by 1.5*Level m/s. Your acceleration is increased by 10*Level m/s/s. Your jump height is increased by 2*Level meters.
 
@@ -367,7 +366,7 @@ While running, leave an elemental trail behind you every time you leave a grid s
 While this is active, it costs 0.7-0.1*Level mana per wall/pool/ball.
 
 Blink (Activated)
-escape cost teleport cooldown
+escape cost teleport cooldown range
 Teleport a few meters ahead.
 Teleport Level meters forward, instantly. If anything blocks your way, you can’t Blink and no mana will be spent.
 Note: If Level is 1, you can’t Blink through walls, so the power is much weaker.
@@ -375,28 +374,28 @@ Cooldown of Level/3 seconds.
 Costs 1+0.333*Level mana. (minimum 1)
 
 Teleport I (Activated)
-escape cost teleport cooldown
+escape cost teleport cooldown range
 Teleport somewhere in your line of sight.
-Teleport up to 3*Level meters to a place you can see and target.
+Teleport up to 2*Level meters to a place you can see and target.
 Cooldown of 8 seconds.
 Costs X/Level Mana, where X is the distance you traveled.
 
 Teleport II (Activated)
-escape cost teleport cooldown
+escape cost teleport cooldown range
 Teleport somewhere in your line of sight.
-Teleport up to 10*Level meters to a place you can see and target.
+Teleport up to 7*Level meters to a place you can see and target.
 Cooldown of 4 seconds.
 Costs X/Level^2 Mana (minimum 1M), where X is the distance you traveled.
 
 Teleport III (Activated)
-escape teleport cooldown
+escape teleport cooldown range
 Teleport somewhere in your line of sight.
-Teleport up to 100*Level meters to a place you can see and target. +can fast-travel.
+Teleport up to 50*Level meters to a place you can see and target. +can fast-travel.
 Cooldown of 2 seconds.
 Costs 0.5 Mana.
 
 Teleport Other (Activated)
-escape cost teleport cooldown
+escape cost teleport cooldown range
 Teleport someone or something somewhere else in your line of sight.
 Teleport a wall or a creature up to 10 Level meters away from their previous spot, to a place you can see and target.
 Cooldown of 13-Level seconds.
@@ -415,21 +414,21 @@ Whenever you teleport, you leave <an e> blast behind you.
 Whenever you teleport, a (r = 3, d = 0.5*Level, p = 0.5*Level) explosion is created in the place you left. Whenever you go through a portal, an elemental spray will come out of the side you just entered from. These effects apply both when you teleport somebody else, and when you’re teleported by somebody else.
 
 Elemental Teleport (Activated) <Element>
-escape cost cooldown
+escape cost cooldown range
 Teleport through <e>.
 Teleport up to 100 meters to an elemental ball, pool or wall you can see and target, replacing it. 
 Cooldown of 5-level/2 seconds.
 Costs 4-Level Mana.
 
 Trickst (Activated)
-escape cost cooldown
+escape cost cooldown range
 Switch the positions of two creatures/objects.
 Target two creatures, balls or walls (lone walls) and switch their positions. You can target yourself.
 Cooldown of 10.5-Level seconds.
 Costs 11-Level Mana.
 
 Teleclone (Activated)
-escape teleport duration cooldown cost summon-many
+escape teleport duration cooldown cost summon-many range
 Teleport, and leave behind you a clone that remains for a few seconds.
 Teleport up to 10*Level meters to a place you can see and target. Create a Clone I effect with level = this power’s Level, and duration (lifetime) of 0.8*Level seconds.
 Cooldown of 4-0.3*Level seconds.
@@ -481,14 +480,14 @@ Cooldown: 6-Level seconds (minimum 0.3).
 Costs 3 Mana.
 
 Protective Bubble I (Activated)
-defensive force-field cost cooldown
+defensive arc-force-field cost cooldown
 Create a spherical force field that surrounds you and follows you.
 Create a spherical force field around you, that moves to always stay the same distance from you. The FF’s radius is 1 meter, and its width is 0.05 + 0.05*Level meters. The FF’s life is 10*Level.
 Cooldown: 1 second.
 Costs 3 Mana.
 
 Protective Bubble II (Activated)
-defensive force-field cost cooldown
+defensive arc-force-field cost cooldown
 Create a strong spherical force field that surrounds you and follows you.
 Create a spherical force field around you. The FF’s radius is 1 meter, and its width is 0.05 + 0.2*Level meters. The FF’s life is 20*Level. The FF has Level armor.
 Cooldown: 1 second.
@@ -531,7 +530,7 @@ You can move force fields.
 Cost: 0.5 M/s while moving a force field?
 
 Bubble Target (Activated)
-defensive force-field cost cooldown range
+defensive arc-force-field cost cooldown range
 Create a spherical force field that surrounds somebody.
 Create a spherical force field around a targeted creature. The FF’s radius is 1 meter, and its width is 0.05 + 0.05*Level meters. The FF’s life is 10*Level. Has Level*2 armor.
 Notice: This bubble is stationary, and it can be used on enemies (to trap them).
@@ -558,14 +557,14 @@ Cooldown: 4*Level seconds.
 Costs 1 Mana.
 
 Slow Target (Activated)
-debuff offensive defensive cost cooldown duration point
+debuff offensive defensive cost cooldown duration
 Slow somebody’s time by 50%.
 For a period of 2*Level seconds, a target person slows down to 1/2 of what it was before. While it is slow, the target receives 50% of the damage and pushback with the exception of the Sting shard, AKA Ghost Weapons II, which can damage it.It  is affected by gravity and movement, times 0.5. When the effect ends the target’s speed is multiplied by 2 again.
 Cooldown: 3 seconds.
 Costs 6-level/2 Mana.
 
 Time Freeze Target I (Activated)
-debuff offensive defensive cost cooldown duration point
+debuff offensive defensive cost cooldown duration
 Chronologically freeze a target, while making them immovable and invulnerable.
 For a period of 2*Level seconds, a target person is frozen in time. It cannot be damaged, it can’t move, it isn’t affected by gravity and it is resistant to any effect (including control, sound…) with the exception of the Sting shard, AKA Ghost Weapons II, which can damage it.
 Range = 5 m.
@@ -573,7 +572,7 @@ Cooldown: 3*Level seconds.
 Costs 5 Mana.
 
 Time Freeze Target II (Activated)
-debuff offensive defensive cost cooldown duration point
+debuff offensive defensive cost cooldown duration
 Chronologically freeze targets more easily.
 For a period of 2*Level seconds, a target person is frozen in time. It cannot be damaged, it can’t move, it isn’t affected by gravity and it is resistant to any effect (including control, sound…) with the exception of the Sting shard, AKA Ghost Weapons II, which can damage it. Possibly make the cooldown a random number between 1*Level and 3*Level? (like Clockblocker :)
 Range = 15 m.
@@ -601,14 +600,14 @@ Cooldown: 2 seconds.
 Cost: 4-0.5*Level.
 
 Repeat II (Activated)
-point cooldown cost todo
+cooldown cost todo
 Loop someone back to the position and state they were in a few seconds ago.
 Set a target’s position and state to what they were Level seconds ago.
 Cooldown: 2 seconds.
 Cost: 6-0.5*Level.
 
 Repeat III (Activated)
-point range cooldown cost todo
+range cooldown cost todo
 Loop people back to the position and state they were in a few seconds ago.
 Within a circle with a range of Level meters, set every person’s position and state to what they were Level seconds ago.
 Cooldown: 2 seconds.
@@ -622,14 +621,14 @@ Cooldown: 2 seconds.
 Cost: 4-0.5*Level.
 
 Retrace II (Activated)
-point cooldown cost
+cooldown cost
 Loop someone back to the position it was in a few seconds ago.
 Set a target’s position to what it was Level seconds ago.
 Cooldown: 2 seconds.
 Cost: 6-0.5*Level.
 
 Retrace III (Activated)
-point range cooldown cost
+range cooldown cost
 Loop people back to the position it was in a few seconds ago.
 Within a circle with a range of Level meters, set every person’s position to what it was Level seconds ago.
 Range: 15 m.
@@ -644,14 +643,14 @@ Cooldown: 2 seconds.
 Cost: 4-0.5*Level.
 
 Undo II (Activated)
-point cooldown cost todo
+cooldown cost todo
 Loop someone back to the state it was in a few seconds ago.
 Set a target’s state to what it was Level seconds ago.
 Cooldown: 2 seconds.
 Cost: 6-0.5*Level.
 
 Undo III (Activated)
-point range cooldown cost todo
+range cooldown cost todo
 Loop people back to the state it was in a few seconds ago.
 Within a circle with a range of Level meters, set every person’s state to what it was Level seconds ago.
 Cooldown: 2 seconds.
@@ -728,14 +727,14 @@ Steal health, charge, mana and stamina from nearby creatures.
 Steal 0.1*Level Life, Charge, Mana and Stamina, per second, from every creature in a range of 5 meters from you. This ability is really strong - you can basically disable enemy mana powers if you got enough Levels.
 
 Distraction (Activated)
-range cooldown cost point
+range cooldown cost
 Create a sound coming from the air, to distract enemies.
 A sound is emitted from a targeted point. Enemies in a Level meter radius will turn to look at the distraction, stopping what they were about to do (move, attack). This usually distract them for 5 seconds or until they are hit, but it doesn’t work on the same enemy again for the next 20 seconds.
 Cooldown: 2 second.
 Cost: 2 Mana.
 
 Blind (Activated)
-auto-aim cooldown cost duration
+cooldown cost duration
 Create a strong flash in front of somebody’s eyes, blinding them temporarily.
 A targeted enemy is blind for the next 3*Level seconds. You can only target enemies that are looking at your general direction.
 Cooldown: 13 seconds.
@@ -755,7 +754,7 @@ Every second, all creatures except for you within a 20 meter radius and line of 
 Costs 0.3 M/s while on.
 
 Flashbang (Activated)
-offensive damaging range duration debuff point
+offensive damaging range duration debuff
 Create a very loud, very bright explosion that damages creatures, stuns them and blinds them.
 Target a point, and creatures within range of Level meters and line of sight from that point are blinded, stunned and damaged.
 Creatures in outer 25% of range are blinded for 3 seconds and stunned for 1 second.
@@ -766,7 +765,7 @@ Cooldown: 22-Level seconds.
 Costs 7 Mana.
 
 Force Shout (Activated)
-offensive aim pushing range cooldown cost
+offensive pushing range cooldown cost
 Roar a super-shout  forward that pushes enemies back.
 Enemies within 2*Level meters of you in a 70 degree cone are pushed away from you, a pushback force of 10*Level.
 Cooldown: 1 second.
@@ -866,7 +865,7 @@ Cost: 3 Mana.
 Cooldown: 1 second.
 
 Ranged Explosion (Activated)
-point offensive damaging explosion cost cooldown
+offensive damaging explosion cost cooldown
 Create an explosion from range.
 Create an explosion centered around a point, r = Level, d = 3*Level, p = 8*Level.
 Cost: 3 Mana.
@@ -875,12 +874,12 @@ Cooldown: 1 second.
 Spontaneous Explosions (On/Off)
 on-off offensive continuous-cost explosion range damaging
 Explosions randomly appear around you.
-Explosions appear around you, at a rate of Level explosions per 5 seconds. The rate is twice as fast if you have less than 50% health. The explosions’ centers are less than 9 meters away from you, more than 3 meters away from you, at a random angle. The explosions have r = 5, d = 3*Level, p = 8*Level.
+Explosions appear around you, at a rate of Level explosions per 5 seconds. The rate is twice as fast if you have less than 50% health. The explosions’ centers are 1-3 meters away from you, at a random angle. The explosions have r = 1, d = 4*Level, p = 8*Level.
 You can turn this power on/off at no cost, without any cooldown.
 Cost: 1 M/s while on.
 
 Recurring Explosion (Activated)
-offensive point damaging explosion duration cost cooldown
+offensive damaging explosion duration cost cooldown
 Create a looped explosion in an area.
 Create an “Explosion Loop” somewhere, which is a point that creates an explosion around it every 0.8-1.2 seconds. The explosion has r = 4, d = 4*Level, p = 5*Level. The explosion loop disappears at the end of combat, or 3 minutes after it was created, or when the middle of it is affected by a nullifying power. You can make “super-walls” like this. Walls that can’t be destroyed and harm anyone who is close to them.
 Cooldown: 1 second.
@@ -930,7 +929,7 @@ Cooldown: 18-Level seconds, whether or not you succeeded in Commanding. Command�
 Cost: 7 Mana.
 
 Chaos Circle (Activated)
-offensive point level-up cost cooldown
+offensive level-up cost cooldown
 Create an area of paranoia, where creatures believe anyone to be their enemies.
 Create a circle with a radius of Level. Any creatures within the circle consider anyone else inside as enemies, and anyone else outside as neutral. The circle disappears after 3*Level seconds, or if there are less than two conscious creatures within it. This is to prevent using the circle just for the neutrality bonus awarded to creatures outside it, in order to sneak past guards for example. Creatures within the circle will not try to move outside of it, mainly because their only enemies are within it.
 Cooldown: 5 seconds.
@@ -956,14 +955,14 @@ It’s easier for you to control people that can control <e>.
 When trying to use a control ability, targets that have at least one <Element> EP always get controlled, are controlled for x1.5 the time, and the mana cost (for Twitch and Mind Twitch) is reduced to 0. Also, gain +0.5*Level to maximum Mana. Needs to include level somehow!
 
 Wall (Activated) <Element>
-build cost
+cost
 Create <an e> wall.
 Create a human-high square <Element> wall. Walls take 3-Level*0.3 seconds to deploy.
 Ability can also be used to fix damaged <Element> walls.
 Cost: 6-0.5*EP Mana.
 
 Pool (Activated) <Element>
-build cost
+cost
 Create <an e> pool or pit.
 Create a 1x1 m pool of the element. When creating pools adjacent to existing pools of the same material, the mana cost is greatly decreased.
 Cost: 7-0.5*Level(minimum 1) Mana, or 3-0.5*Level Mana next to another pool.
@@ -974,13 +973,13 @@ You have an aura that destroys elemental pools and walls.
 Pools and walls that are not earth pools and walls are damaged at 20 HP/sec if they are within Level meters from you.
 
 Heal I (Maintained)
-defensive buff sub-stat-boost
+defensive buff level-up
 Heal somebody by making them regenerate life quicker.
 While active, the nearest ally in range of Level/2 meters gains a life regeneration bonus of 2*Level life/sec. If there is no nearby ally, you will heal yourself.
 Costs 1 M/s.
 
 Heal II (Maintained)
-defensive buff sub-stat-boost continuous-cost
+defensive buff level-up continuous-cost
 Heal people around you, quickly and efficiently.
 While active, all allies in range of Level meters including yourself gain a life regeneration bonus of 4*Level life/sec.
 Costs 3 M/s.
@@ -992,21 +991,21 @@ Allies gain immunity to damage and negative effects dealt to them by your powers
 In addition, gain +5*Level HP. ..To make this ability better in levels greater than 1.
 
 Buff Strength (Activated)
-buff stat-boost cost cooldown duration
+buff level-up cost cooldown duration
 Enhance the strength of people around you.
 The nearest ally in range of Level/2 meters gains +2*Level Strength for 5 seconds. If there’s no ally, the ability affects you instead.
 Cooldown of 5 seconds.
 Costs 3 Mana.
 
 Buff Evasion (Activated)
-buff sub-stat-boost cost cooldown duration
+buff level-up cost cooldown duration
 Enhance the evasion of people around you.
 The nearest ally in range of Level/2 meters gains (1-evasion) *= 0.8^Level for 5 seconds. If there’s no ally, the ability affects you instead.
 Cooldown of 5 seconds.
 Costs 3 Mana.
 
 Buff Armor (Activated)
-defensive buff sub-stat-boost cost cooldown duration
+defensive buff level-up cost cooldown duration
 Enhance the armor of people around you.
 The nearest ally in range of Level/2 meters gains +2*Level to their natural armor AR for 5 seconds. If there’s no ally, the ability affects you instead.
 Cooldown of 5 seconds.
@@ -1033,7 +1032,7 @@ Cooldown: 40-3*Level seconds.
 Cost: 0 Mana.
 
 Muscle Charge (Charge + On/Off)
-charge on-off stat-boost
+charge on-off level-up
 Charge while in combat. Release to make yourself stronger.
 Charge while in a fight. While on: Gain +2^Level Strength.
 Cost while on: 20 C/s.
@@ -1056,7 +1055,7 @@ Charge while flying. Release while flying above ground to very quickly descend a
 Cost: X Charge. Should have an innate extra flying ability!!! for Instability compatibility!
 
 Dexterity Charge (Charge + On/Off)
-charge stat-boost on-off
+charge level-up on-off
 Charge while in combat. Release to make yourself more evasive and precise.
 Charge while in combat. While on: Gain 3*Level Dexterity.
 Cost while on: 20 C/s.
@@ -1068,7 +1067,7 @@ Charge while in combat. Release to create an Elemental Armor III <Energy>.
 Cost: 100 Charge.
 
 Kinetic Charge (Charge + On/Off)
-charge on-off sub-stat-boost
+charge on-off level-up
 Charge while moving. Release to move incredibly quickly and ram into opponents.
 Charge while moving faster than 0.5 m/s. While on: Gain a bonus to running speed equal to Level*5 m/s.
 Cost: 20 C/s while on.
@@ -1099,7 +1098,7 @@ Charge whenever making normal force fields. Release to create a super-strong for
 Gain 20 Charge per Force Field you create. Release to create a forcefield with height 2, width 1 and length of 10 meters (or until it hits a wall?). The FF has 70*Level HP.
 Cost: 100 Charge.
 
-Time-Freeze Blast (Charge + Activated)
+Time Freeze Blast (Charge + Activated)
 defensive charge cost range
 Charge while in combat. Chronically freeze targets more easily.
 Charge while in combat. Release to time-freeze all creatures and objects within a 30 m range for a period of between 3 seconds and 30 seconds.

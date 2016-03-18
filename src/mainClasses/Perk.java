@@ -37,7 +37,7 @@ public class Perk
 		case "Telefrag":
 			((_TeleportAbility) a).telefragging = addOrRemove;
 			break;
-		case "Wider force fields":
+		case "Longer force fields":
 			((_ForceFieldAbility) a).length *= Math.pow(1.2, k);
 			break;
 		case "Thicker force fields":
@@ -56,16 +56,16 @@ public class Perk
 		case "Bigger projectile":
 			((_ProjectileAbility) a).size *= Math.pow(1.2, k);
 			break;
-		case "Increased beam range":
+		case "Longer beam":
 			((_BeamAbility) a).range *= Math.pow(1.5, k);
 			break;
-		case "Increased beam size":
+		case "Bigger beam":
 			((_BeamAbility) a).size *= Math.pow(1.2, k);
 			break;
 		case "Extra durable":
 			((_AFFAbility) a).life *= Math.pow(1.25, k);
 			break;
-		case "Increased explosion size":
+		case "Bigger explosion":
 			a.radius *= Math.pow(1.15, k);
 			break;
 		case "Improved armor":

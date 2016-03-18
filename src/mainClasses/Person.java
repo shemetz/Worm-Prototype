@@ -476,6 +476,9 @@ public class Person extends RndPhysObj implements Mover
 		switchAnimation(13); // TODO death animation
 		dead = true;
 		prone = false;
+		abilityAiming = -1;
+		abilityMaintaining = -1;
+		abilityTryingToRepetitivelyUse = -1;
 		// Abilities will be deactivated in the Main class' frame() method
 		// Abilities can't be activated any more (pressAbilityKey() will not work on dead people)
 	}
@@ -970,11 +973,13 @@ public class Person extends RndPhysObj implements Mover
 		possibleAbilities.remove("Elemental Combat I");
 		for (int i = 0; i < 6;)
 		{
+			Ability a = null;
 			int level = (int) (Math.random() * 9) + 1;
 			String str = possibleAbilities.get(rand.nextInt(possibleAbilities.size()));
 			if (!Ability.elementalPowers.contains(str))
 			{
-				abilities.add(Ability.ability(str, level));
+				a = Ability.ability(str, level);
+				abilities.add(a);
 				i++;
 				possibleAbilities.remove(str);
 			}
@@ -990,7 +995,8 @@ public class Person extends RndPhysObj implements Mover
 					String elementString = " <" + elements.get(0) + ">";
 					if (Resources.icons.get(str + elementString) != null)
 					{
-						abilities.add(Ability.ability(str + elementString, level));
+						a = Ability.ability(str + elementString, level);
+						abilities.add(a);
 						i++;
 						elements.clear();
 						found = true;
@@ -1000,6 +1006,12 @@ public class Person extends RndPhysObj implements Mover
 				}
 				if (!found)
 					possibleAbilities.remove(str); // all elements for this ability were used
+			}
+			if (a != null)
+			{
+				for (String s : a.possiblePerks())
+					if (Math.random() < 0.3)
+						a.addPerk(s);
 			}
 		}
 	}

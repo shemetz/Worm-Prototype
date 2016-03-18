@@ -81,6 +81,9 @@ import abilities.Strength_III;
 import abilities.Strike_E;
 import abilities.Strong_Force_Field;
 import abilities.Telekinetic_Flight;
+import abilities.Teleport_I;
+import abilities.Teleport_II;
+import abilities.Teleport_III;
 import abilities.Time_Freeze_Target_I;
 import abilities.Toughness_I;
 import abilities.Toughness_II;
@@ -100,12 +103,12 @@ public class Ability implements Cloneable
 {
 	final static List<String> implementedAbilities = Arrays.asList("Elemental Combat I", "Beam", "Ball", "Shield", "Pool", "Wall", "Spray", "Sense Element", "Elemental Resistance", "Strike",
 			"Portals", "Elemental Void", "Precision I", "Precision II", "Precision III", "Protective Bubble I", "Protective Bubble II", "Sprint", "Strength I", "Strength II", "Strength III", "Punch",
-			"Heal I", "Heal II", "Force Shield", "Strong Force Field", "Wide Force Field", "Flight I", "Flight II", "Telekinetic Flight", "Blink", "Ghost Mode I", "Ghost Mode II", "Toughness I",
-			"Toughness II", "Toughness III", "Sense Life", "Sense Mana and Stamina", "Sense Powers", "Sense Structure", "Sense Parahumans", "Sense Movement", "Clairvoyance", "Slow Target", "Chronobiology",
-			"Retrace I", "Retrace II", "Retrace III", "Undo I", "Undo II", "Undo III", "Repeat I", "Repeat II", "Repeat III", "Time Freeze Target I", "Nullification Aura I", "Nullification Aura II",
-			"Wild Power", "Clone I", "Clone II", "Clone III", "Twitch", "Steal Power", "Danger Sense", "Sapping Fists", "Pushy Fists", "Explosive Fists", "Vampiric Fists", "Shattering Fists",
-			"Elemental Fists", "Explosion Resistance", "Ranged Explosion", "Self-Bomb", "Reactive Explosions", "Spontaneous Explosions", "Leg Muscles", "Speedrun", "Charge", "Elastic", "Trail",
-			"Bubble Target", "Possess", "Muscle Charge", "Charged Regeneration");
+			"Heal I", "Heal II", "Force Shield", "Strong Force Field", "Wide Force Field", "Flight I", "Flight II", "Telekinetic Flight", "Blink", "Teleport I", "Teleport II", "Teleport III", "Ghost Mode I", "Ghost Mode II", "Toughness I",
+			"Toughness II", "Toughness III", "Sense Life", "Sense Mana and Stamina", "Sense Powers", "Sense Structure", "Sense Parahumans", "Sense Movement", "Clairvoyance", "Slow Target",
+			"Chronobiology", "Retrace I", "Retrace II", "Retrace III", "Undo I", "Undo II", "Undo III", "Repeat I", "Repeat II", "Repeat III", "Time Freeze Target I", "Nullification Aura I",
+			"Nullification Aura II", "Wild Power", "Clone I", "Clone II", "Clone III", "Twitch", "Steal Power", "Danger Sense", "Sapping Fists", "Pushy Fists", "Explosive Fists", "Vampiric Fists",
+			"Shattering Fists", "Elemental Fists", "Explosion Resistance", "Ranged Explosion", "Self-Bomb", "Reactive Explosions", "Spontaneous Explosions", "Leg Muscles", "Speedrun", "Charge",
+			"Elastic", "Trail", "Bubble Target", "Possess", "Muscle Charge", "Charged Regeneration");
 	protected static List<String> descriptions = new ArrayList<String>();
 	protected static boolean[][] elementalAttacksPossible = new boolean[12][7]; // [element][ability]
 	protected static int[][] elementalAttackNumbers = new int[12][3];
@@ -136,7 +139,7 @@ public class Ability implements Cloneable
 	protected CostType costType;
 	public double arc; // used for abilities with an arc - the Spray ability
 	public boolean natural;
-	
+
 	List<Perk> perks;
 
 	// Stuff that affects the ability's effectiveness and is shown in the Abilities menu
@@ -293,6 +296,7 @@ public class Ability implements Cloneable
 		natural = false;
 
 		addTags();
+		perks = new ArrayList<Perk>();
 		elementNum = getElementNum();
 	}
 
@@ -850,6 +854,15 @@ public class Ability implements Cloneable
 		case "Blink":
 			ab = new Blink(pnts);
 			break;
+		case "Teleport I":
+			ab = new Teleport_I(pnts);
+			break;
+		case "Teleport II":
+			ab = new Teleport_II(pnts);
+			break;
+		case "Teleport III":
+			ab = new Teleport_III(pnts);
+			break;
 		case "Ghost Mode I":
 			ab = new Ghost_Mode_I(pnts);
 			break;
@@ -944,5 +957,106 @@ public class Ability implements Cloneable
 		ab.readjust();
 
 		return ab;
+	}
+
+	public List<String> possiblePerks()
+	{
+		List<String> possibilities = new ArrayList<String>();
+		for (String s : tags)
+			switch (s)
+			{
+			case "damaging":
+				possibilities.add("Increased damage");
+				break;
+			case "pushing":
+				possibilities.add("Increased pushback");
+				break;
+			case "flight":
+				possibilities.add("Faster flight");
+				break;
+			case "teleport":
+				possibilities.add("Longer teleport");
+				possibilities.add("Telefrag");
+				break;
+			case "force-field":
+				possibilities.add("Longer force fields");
+				possibilities.add("Thicker force fields");
+				possibilities.add("Stable force fields");
+				possibilities.add("Armored force fields");
+				break;
+			case "projectile":
+				possibilities.add("Faster projectile");
+				possibilities.add("Bigger projectile");
+				break;
+			case "beam":
+				possibilities.add("Longer beam");
+				possibilities.add("Bigger beam");
+				break;
+			case "arc-force-field":
+				possibilities.add("Extra durable");
+				break;
+			case "explosion":
+				possibilities.add("Bigger explosion");
+				break;
+			case "armor":
+				possibilities.add("Improved armor");
+				break;
+			case "cost":
+				possibilities.add("Reduced cost");
+				break;
+			case "continuous-cost":
+				possibilities.add("Reduced continuous cost");
+				break;
+			case "cooldown":
+				possibilities.add("Reduced cooldown");
+				break;
+			case "duration":
+				possibilities.add("Increased duration");
+				break;
+			case "range":
+				possibilities.add("Increased range");
+				break;
+			case "charge":
+				possibilities.add("Increased charge rate");
+				break;
+			case "steal":
+				possibilities.add("Increased absorption");
+				break;
+			case "level-up":
+				possibilities.add("Empowered");
+				break;
+			case "summon-many":
+				possibilities.add("Better summons");
+				possibilities.add("Durable summons");
+				possibilities.add("More summons");
+				break;
+			case "summon-one":
+				possibilities.add("Better summon");
+				break;
+			case "offensive":
+			case "defensive":
+			case "wild":
+			case "escape":
+			case "buff":
+			case "debuff":
+			case "passive":
+			case "on-off":
+			case "extra-abilities":
+			case "sense":
+			case "todo":
+				break;
+			default:
+				MAIN.errorMessage("weird perk:   " + s);
+				MAIN.errorMessage(name);
+				break;
+			}
+		return possibilities;
+	}
+
+	public void addPerk(String string)
+	{
+		Perk perk = new Perk(string);
+		perks.add(perk);
+		perk.toggle(this, true);
 	}
 }
