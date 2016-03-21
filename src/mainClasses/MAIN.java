@@ -1674,7 +1674,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		// sub.parent = env;
 
 		player = new Player(96 * 15, 96 * 15);
-		player.trigger();
+		player.tempTrigger();
 		// player.abilities.add(Ability.ability("Force Shield", 5));
 		// player.abilities.add(Ability.ability("Beam <Energy>", 5));
 		player.defaultHotkeys();

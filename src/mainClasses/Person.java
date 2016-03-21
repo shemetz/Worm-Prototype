@@ -22,6 +22,7 @@ import abilities.Elemental_Void;
 import abilities.Punch;
 import abilities.Reactive_Explosions;
 import abilities.Sprint;
+import abilities._FlightAbility;
 import effects.Burning;
 import effects.E_Resistant;
 import effects.Ethereal;
@@ -397,6 +398,21 @@ public class Person extends RndPhysObj implements Mover
 		{
 			possessedTimeLeft = 0;
 			startStopPossession = true;
+		}
+
+		if (flySpeed != -1)
+		{
+			double chanceToDrop = damage / maxLife * 10;
+			if (Math.random() < chanceToDrop)
+			{
+				for (Ability a : abilities)
+					if (a.on)
+						if (a instanceof _FlightAbility)
+						{
+							a.use(null, this, null);
+							slip(true);
+						}
+			}
 		}
 	}
 
@@ -973,9 +989,17 @@ public class Person extends RndPhysObj implements Mover
 		Random rand = new Random();
 		List<String> possibleAbilities = new ArrayList<String>();
 		possibleAbilities.addAll(Ability.implementedAbilities);
+		possibleAbilities.add("Ball");
+		possibleAbilities.add("Ball");
+		possibleAbilities.add("Ball");
+		possibleAbilities.add("Beam");
+		possibleAbilities.add("Beam");
+		possibleAbilities.add("Spray");
+		possibleAbilities.add("Spray");
 		possibleAbilities.remove("Punch");
 		possibleAbilities.remove("Sprint");
 		possibleAbilities.remove("Elemental Combat I");
+		possibleAbilities.remove("Elemental Combat II");
 		for (int i = 0; i < 6;)
 		{
 			Ability a = null;

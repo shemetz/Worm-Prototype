@@ -101,14 +101,14 @@ import mainResourcesPackage.SoundEffect;
 
 public class Ability implements Cloneable
 {
-	final static List<String> implementedAbilities = Arrays.asList("Elemental Combat I", "Elemental Combat II", "Beam", "Ball", "Shield", "Pool", "Wall", "Spray", "Sense Element", "Elemental Resistance", "Strike",
-			"Portals", "Elemental Void", "Precision I", "Precision II", "Precision III", "Protective Bubble I", "Protective Bubble II", "Sprint", "Strength I", "Strength II", "Strength III", "Punch",
-			"Heal I", "Heal II", "Force Shield", "Strong Force Field", "Wide Force Field", "Flight I", "Flight II", "Telekinetic Flight", "Blink", "Teleport I", "Teleport II", "Teleport III", "Ghost Mode I", "Ghost Mode II", "Toughness I",
-			"Toughness II", "Toughness III", "Sense Life", "Sense Mana and Stamina", "Sense Powers", "Sense Structure", "Sense Parahumans", "Sense Movement", "Clairvoyance", "Slow Target",
-			"Chronobiology", "Retrace I", "Retrace II", "Retrace III", "Undo I", "Undo II", "Undo III", "Repeat I", "Repeat II", "Repeat III", "Time Freeze Target I", "Nullification Aura I",
-			"Nullification Aura II", "Wild Power", "Clone I", "Clone II", "Clone III", "Twitch", "Steal Power", "Danger Sense", "Sapping Fists", "Pushy Fists", "Explosive Fists", "Vampiric Fists",
-			"Shattering Fists", "Elemental Fists", "Explosion Resistance", "Ranged Explosion", "Self-Bomb", "Reactive Explosions", "Spontaneous Explosions", "Leg Muscles", "Speedrun", "Charge",
-			"Elastic", "Trail", "Bubble Target", "Possess", "Muscle Charge", "Charged Regeneration");
+	final static List<String> implementedAbilities = Arrays.asList("Elemental Combat I", "Elemental Combat II", "Beam", "Ball", "Shield", "Pool", "Wall", "Spray", "Sense Element",
+			"Elemental Resistance", "Strike", "Portals", "Elemental Void", "Precision I", "Precision II", "Precision III", "Protective Bubble I", "Protective Bubble II", "Sprint", "Strength I",
+			"Strength II", "Strength III", "Punch", "Heal I", "Heal II", "Force Shield", "Strong Force Field", "Wide Force Field", "Flight I", "Flight II", "Telekinetic Flight", "Blink", "Teleport I",
+			"Teleport II", "Teleport III", "Ghost Mode I", "Ghost Mode II", "Toughness I", "Toughness II", "Toughness III", "Sense Life", "Sense Mana and Stamina", "Sense Powers", "Sense Structure",
+			"Sense Parahumans", "Sense Movement", "Clairvoyance", "Slow Target", "Chronobiology", "Retrace I", "Retrace II", "Retrace III", "Undo I", "Undo II", "Undo III", "Repeat I", "Repeat II",
+			"Repeat III", "Time Freeze Target I", "Nullification Aura I", "Nullification Aura II", "Wild Power", "Clone I", "Clone II", "Clone III", "Twitch", "Steal Power", "Danger Sense",
+			"Sapping Fists", "Pushy Fists", "Explosive Fists", "Vampiric Fists", "Shattering Fists", "Elemental Fists", "Explosion Resistance", "Ranged Explosion", "Self-Bomb", "Reactive Explosions",
+			"Spontaneous Explosions", "Leg Muscles", "Speedrun", "Charge", "Elastic", "Trail", "Bubble Target", "Possess", "Muscle Charge", "Charged Regeneration");
 	protected static List<String> descriptions = new ArrayList<String>();
 	protected static boolean[][] elementalAttacksPossible = new boolean[12][7]; // [element][ability]
 	protected static int[][] elementalAttackNumbers = new int[12][3];
@@ -139,22 +139,23 @@ public class Ability implements Cloneable
 	protected CostType costType;
 	public double arc; // used for abilities with an arc - the Spray ability
 	public boolean natural;
+	public double verticalRange;
 
 	List<Perk> perks;
 
 	// Stuff that affects the ability's effectiveness and is shown in the Abilities menu
-	protected double range; // distance from user in which ability can be used. For some abilities - how far they go before stopping. -1 = not ranged, or only direction-aiming.
-	protected double cooldown; // Duration in which power doesn't work after using it. -1 = passive, 0 = no cooldown
-	protected double cost; // -1 = passive. Is a cost in mana, stamina or charge...depending on the power.
-	protected double costPerSecond; // applies to some abilities. Is a cost in mana, stamina or charge...depending on the power.
+	public double range; // distance from user in which ability can be used. For some abilities - how far they go before stopping. -1 = not ranged, or only direction-aiming.
+	public double cooldown; // Duration in which power doesn't work after using it. -1 = passive, 0 = no cooldown
+	public double cost; // -1 = passive. Is a cost in mana, stamina or charge...depending on the power.
+	public double costPerSecond; // applies to some abilities. Is a cost in mana, stamina or charge...depending on the power.
 	public double radius; // radius of area of effect of ability.
 	public double damage;
 	public double pushback;
-	public double steal;
-	public double duration;
-	public double chance;
-	public double amount;
-	public double chargeRate;
+	public double steal; // between 0 and 1
+	public double duration; // in seconds
+	public double chance; // between 0 and 1
+	public double amount; // depends on ability
+	public double chargeRate; // per second (usually 5)
 
 	// changing variables of the ability
 	protected double timeLeft; // how much time the ability has been on.
@@ -248,7 +249,7 @@ public class Ability implements Cloneable
 		// Should be overridden if needed, or super-ed
 		if (p.dead)
 			return false;
-		if (p.highestPoint() < user.z || user.highestPoint() < p.z)
+		if (p.highestPoint() < user.z - verticalRange || user.highestPoint() < p.z - verticalRange)
 			return false;
 		return true;
 	}
@@ -280,6 +281,8 @@ public class Ability implements Cloneable
 		chance = -1;
 		amount = -1;
 		chargeRate = -1;
+
+		verticalRange = 4; //default value.
 
 		cooldownLeft = 0;
 		instant = false;
@@ -944,7 +947,7 @@ public class Ability implements Cloneable
 		case "Elemental Combat I":
 			ab = new Elemental_Combat_I_E(element, pnts);
 			break;
-		case "Elemental Combat II": 
+		case "Elemental Combat II":
 			ab = new Elemental_Combat_II_E(element, pnts);
 			break;
 		default:

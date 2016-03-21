@@ -15,8 +15,6 @@ public class Nullification_Aura_II extends Ability
 {
 	List<Person> affectedTargets;
 
-	final double verticalRange = 5;
-
 	public Nullification_Aura_II(int p)
 	{
 		super("Nullification Aura II", p);
@@ -31,7 +29,18 @@ public class Nullification_Aura_II extends Ability
 		range = 100 + LEVEL * 100;
 		cost = 5;
 		cooldown = 0.8;
-		
+
+	}
+
+	public boolean viableTarget(Person p, Person user)
+	{
+		if (p.equals(user))
+			return false;
+		if (p.dead)
+			return false;
+		if (p.highestPoint() < user.z - verticalRange || user.highestPoint() < p.z - verticalRange)
+			return false;
+		return true;
 	}
 
 	public void use(Environment env, Person user, Point target)
@@ -55,23 +64,22 @@ public class Nullification_Aura_II extends Ability
 	public void maintain(Environment env, Person user, Point target, double deltaTime)
 	{
 		for (Person other : env.people)
-			if (!other.equals(user))
-				if (other.z <= user.z + verticalRange && other.z >= user.z - verticalRange)
+			if (viableTarget(other, user))
+			{
+				if (Methods.DistancePow2(other.Point(), user.Point()) < range * range)
 				{
-					if (Methods.DistancePow2(other.Point(), user.Point()) < range * range)
+					if (!affectedTargets.contains(other))
 					{
-						if (!affectedTargets.contains(other))
-						{
-							affectedTargets.add(other);
-							other.affect(new Nullified(-1, true, this), true);
-						}
-					}
-					else if (affectedTargets.contains(other))
-					{
-						affectedTargets.remove(other);
-						other.affect(new Nullified(-1, true, this), false);
+						affectedTargets.add(other);
+						other.affect(new Nullified(-1, true, this), true);
 					}
 				}
+				else if (affectedTargets.contains(other))
+				{
+					affectedTargets.remove(other);
+					other.affect(new Nullified(-1, true, this), false);
+				}
+			}
 	}
 
 	public void disable(Environment env, Person user)

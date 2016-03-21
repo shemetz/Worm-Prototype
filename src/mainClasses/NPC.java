@@ -92,7 +92,7 @@ public class NPC extends Person
 	{
 		if (enemy.commanderID == commanderID)
 			return false;
-		if (enemy.z >= z + height) // TODO remove this when ground-to-air combat is more possible
+		if (enemy.z > z + height + 0.1) // TODO remove this when ground-to-air combat is more possible
 			return false;
 		if (enemy.dead)
 			return false;

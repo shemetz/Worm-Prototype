@@ -13,8 +13,6 @@ public class Nullification_Aura_I extends _PassiveAbility
 {
 	List<Person> affectedTargets;
 
-	final double verticalRange = 5;
-
 	public Nullification_Aura_I(int p)
 	{
 		super("Nullification Aura I", p);
@@ -25,7 +23,17 @@ public class Nullification_Aura_I extends _PassiveAbility
 	public void updateStats()
 	{
 		range = 100 + LEVEL * 50;
-		
+	}
+
+	public boolean viableTarget(Person p, Person user)
+	{
+		if (p.equals(user))
+			return false;
+		if (p.dead)
+			return false;
+		if (p.highestPoint() < user.z - verticalRange || user.highestPoint() < p.z - verticalRange)
+			return false;
+		return true;
 	}
 
 	public void use(Environment env, Person user, Point target)
@@ -37,22 +45,21 @@ public class Nullification_Aura_I extends _PassiveAbility
 	public void maintain(Environment env, Person user, Point target, double deltaTime)
 	{
 		for (Person other : env.people)
-			if (!other.equals(user))
-				if (other.z <= user.z + verticalRange && other.z >= user.z - verticalRange)
+			if (viableTarget(other, user))
+			{
+				if (Methods.DistancePow2(other.Point(), user.Point()) < range * range)
 				{
-					if (Methods.DistancePow2(other.Point(), user.Point()) < range * range)
+					if (!affectedTargets.contains(other))
 					{
-						if (!affectedTargets.contains(other))
-						{
-							affectedTargets.add(other);
-							other.affect(new Nullified(-1, true, this), true);
-						}
-					}
-					else if (affectedTargets.contains(other))
-					{
-						affectedTargets.remove(other);
-						other.affect(new Nullified(-1, true, this), false); // if the Nullified effect was undone, this line will do nothing
+						affectedTargets.add(other);
+						other.affect(new Nullified(-1, true, this), true);
 					}
 				}
+				else if (affectedTargets.contains(other))
+				{
+					affectedTargets.remove(other);
+					other.affect(new Nullified(-1, true, this), false); // if the Nullified effect was undone, this line will do nothing
+				}
+			}
 	}
 }
