@@ -35,9 +35,14 @@ public class Elemental_Combat_I_E extends Ability
 		on = !on;
 	}
 
+	public void maintain(Environment env, Person user, Point target, double deltaTime)
+	{
+		;
+	}
+
 	public void disable(Environment env, Person user)
 	{
 		disabled = true;
-		//DOES NOT REMOVE THE ADDED ABILITIES
+		// DOES NOT REMOVE THE ADDED ABILITIES
 	}
 }

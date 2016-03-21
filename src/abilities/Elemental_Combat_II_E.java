@@ -35,6 +35,11 @@ public class Elemental_Combat_II_E extends Ability
 		on = !on;
 	}
 
+	public void maintain(Environment env, Person user, Point target, double deltaTime)
+	{
+		;
+	}
+
 	public void disable(Environment env, Person user)
 	{
 		disabled = true;

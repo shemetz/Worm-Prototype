@@ -113,6 +113,7 @@ public class Person extends RndPhysObj implements Mover
 	public boolean isAvatar = false;
 	public boolean hasChargeAbility = false;
 	public boolean isChargingChargeAbility = false;
+	public boolean slowRotation = false;
 
 	// for continuous inaccuracy stuff like beams
 	public double inaccuracyAngle = 0;
@@ -266,8 +267,12 @@ public class Person extends RndPhysObj implements Mover
 		this.possessionTargetID = other.possessingVictimID;
 
 		for (Ability a : this.abilities)
+		{
 			if (a.hasTag("on-off"))
 				a.on = other.abilities.get(a);
+			// This might be a BAD IDEA:
+			a.disabled = false;
+		}
 
 		this.effects = new ArrayList<Effect>();
 		for (Effect e : other.effects)
@@ -433,12 +438,12 @@ public class Person extends RndPhysObj implements Mover
 
 	public void multiplyStats(double statMultiplier)
 	{
-		STRENGTH = (int) (statMultiplier*STRENGTH);
-		DEXTERITY = (int) (statMultiplier*DEXTERITY);
-		FITNESS = (int) (statMultiplier*FITNESS);
-		WITS = (int) (statMultiplier*WITS);
-		KNOWLEDGE = (int) (statMultiplier*KNOWLEDGE);
-		SOCIAL = (int) (statMultiplier*SOCIAL);
+		STRENGTH = (int) (statMultiplier * STRENGTH);
+		DEXTERITY = (int) (statMultiplier * DEXTERITY);
+		FITNESS = (int) (statMultiplier * FITNESS);
+		WITS = (int) (statMultiplier * WITS);
+		KNOWLEDGE = (int) (statMultiplier * KNOWLEDGE);
+		SOCIAL = (int) (statMultiplier * SOCIAL);
 	}
 
 	public void updateSubStats()
@@ -1489,7 +1494,7 @@ public class Person extends RndPhysObj implements Mover
 		deltaTime *= timeEffect;
 		final double lerp_constant = 7;
 		double amount = (((((rotationAngle - this.rotation) % (Math.PI * 2)) + (Math.PI * 3)) % (Math.PI * 2)) - Math.PI);
-		double maxRotation = maintaining ? 0.4 : 2;
+		double maxRotation = slowRotation ? 0.4 : 2;
 		if (amount > maxRotation)
 			amount = maxRotation;
 		if (amount < -maxRotation)
@@ -1652,6 +1657,7 @@ public class Person extends RndPhysObj implements Mover
 		this.abilityTryingToRepetitivelyUse = -1;
 		this.hasChargeAbility = other.hasChargeAbility;
 		this.isChargingChargeAbility = other.isChargingChargeAbility;
+		this.slowRotation = other.slowRotation;
 		this.lifeRegen = other.lifeRegen;
 		this.manaRegen = other.manaRegen;
 		this.staminaRegen = other.staminaRegen;

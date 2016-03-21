@@ -59,9 +59,9 @@ public class Vine extends Drawable // Vines are plant beams, sort of
 
 		size = 1; // temp
 		height = size / 2 + 0.1; // temp
-		rigidity = 250 * damage; // temp
+		rigidity = 10000; // temp
 		life = 100; // temp
-		spinStrength = 1000000 * damage; // temp
+		spinStrength = 50000000; // temp
 	}
 
 	public void evadedBy(Person p)

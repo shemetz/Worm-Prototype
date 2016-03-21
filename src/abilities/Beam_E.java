@@ -15,7 +15,7 @@ import mainResourcesPackage.SoundEffect;
 
 public class Beam_E extends _BeamAbility
 {
-	
+
 	public Beam_E(String elementName, int p)
 	{
 		super("Beam <" + elementName + ">", p);
@@ -39,6 +39,8 @@ public class Beam_E extends _BeamAbility
 		{
 			sounds.add(new SoundEffect(elementName + " Beam.wav"));
 			sounds.get(0).endUnlessMaintained = true;
+			if (elementName.equals("Fire"))
+				sounds.add(new SoundEffect("Fire Beam Ignite.wav"));
 		}
 	}
 
@@ -77,6 +79,7 @@ public class Beam_E extends _BeamAbility
 				user.notAnimating = false;
 				on = false;
 				user.maintaining = false;
+				user.slowRotation = false;
 				if (user.mana <= 0.5)
 					cooldownLeft = cooldown;
 				for (int i = 0; i < env.beams.size(); i++)
@@ -91,10 +94,13 @@ public class Beam_E extends _BeamAbility
 			{
 				user.notAnimating = true;
 				user.maintaining = true;
+				user.slowRotation = true;
 				on = true;
 				user.switchAnimation(2);
 				evasions = new ArrayList<Evasion>();
 				sounds.get(0).loop();
+				if (elementNum == 0) // Fire
+					sounds.get(1).play(); // ignition sound
 			}
 		}
 		else
@@ -164,6 +170,7 @@ public class Beam_E extends _BeamAbility
 					// TODO piercing beams, or electric lightning bolts
 					Point3D end = new Point3D((int) (user.x + range * Math.cos(angle)), (int) (user.y + range * Math.sin(angle)), user.z + user.height / 2);
 					Beam b = new Beam(user, this, start, end, elementNum, damage, pushback, range);
+					b.size *= size;
 					frameNum++;
 					b.frameNum = beamFrameNum;
 					// critical chance

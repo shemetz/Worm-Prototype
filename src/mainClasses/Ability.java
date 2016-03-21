@@ -101,7 +101,7 @@ import mainResourcesPackage.SoundEffect;
 
 public class Ability implements Cloneable
 {
-	final static List<String> implementedAbilities = Arrays.asList("Elemental Combat I", "Beam", "Ball", "Shield", "Pool", "Wall", "Spray", "Sense Element", "Elemental Resistance", "Strike",
+	final static List<String> implementedAbilities = Arrays.asList("Elemental Combat I", "Elemental Combat II", "Beam", "Ball", "Shield", "Pool", "Wall", "Spray", "Sense Element", "Elemental Resistance", "Strike",
 			"Portals", "Elemental Void", "Precision I", "Precision II", "Precision III", "Protective Bubble I", "Protective Bubble II", "Sprint", "Strength I", "Strength II", "Strength III", "Punch",
 			"Heal I", "Heal II", "Force Shield", "Strong Force Field", "Wide Force Field", "Flight I", "Flight II", "Telekinetic Flight", "Blink", "Teleport I", "Teleport II", "Teleport III", "Ghost Mode I", "Ghost Mode II", "Toughness I",
 			"Toughness II", "Toughness III", "Sense Life", "Sense Mana and Stamina", "Sense Powers", "Sense Structure", "Sense Parahumans", "Sense Movement", "Clairvoyance", "Slow Target",
@@ -788,6 +788,9 @@ public class Ability implements Cloneable
 		case "Chronobiology":
 			ab = new Chronobiology(pnts);
 			break;
+		case "Slow Target":
+			ab = new Slow_Target(pnts);
+			break;
 		case "Portals":
 			ab = new Portals(pnts);
 			break;
@@ -941,11 +944,8 @@ public class Ability implements Cloneable
 		case "Elemental Combat I":
 			ab = new Elemental_Combat_I_E(element, pnts);
 			break;
-		case "Elemental Combat II": // NOT DONE
+		case "Elemental Combat II": 
 			ab = new Elemental_Combat_II_E(element, pnts);
-			break;
-		case "Slow Target":
-			ab = new Slow_Target(pnts);
 			break;
 		default:
 			MAIN.errorMessage("Donald trump peninsula error - " + abilityName);

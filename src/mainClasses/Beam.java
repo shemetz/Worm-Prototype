@@ -50,7 +50,8 @@ public class Beam extends Drawable
 
 		timeLeft = 0.02; // 0.02 = no trail, 0.04 = one trail, 0.06 = two trails....
 
-		size = 1; // temp
+		size = 1;
+		radius = 13;
 		height = size / 2 + 0.1; // temp
 	}
 

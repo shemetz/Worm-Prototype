@@ -52,7 +52,7 @@ public class Ball extends RndPhysObj
 		case 1: // water
 			break;
 		case 2: // wind
-			radius = 30;
+			radius = 35;
 			angularVelocity = 20;
 			break;
 		case 3: // electricity

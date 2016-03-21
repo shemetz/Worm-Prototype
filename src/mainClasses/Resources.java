@@ -96,6 +96,7 @@ public class Resources
 				icons.put(Ability.elementalPowersWithTheirOwnImages[j] + " <" + EP.elementList[i] + ">",
 						ResourceLoader.getBufferedImage("icons/abilities/" + EP.elementList[i] + "_" + Ability.elementalPowersWithTheirOwnImages[j] + ".png"));
 			icons.put("Elemental Combat I" + " <" + EP.elementList[i] + ">", ResourceLoader.getBufferedImage("icons/abilities/" + EP.elementList[i] + "_" + "Elemental Combat I" + ".png"));
+			icons.put("Elemental Combat II" + " <" + EP.elementList[i] + ">", ResourceLoader.getBufferedImage("icons/abilities/" + EP.elementList[i] + "_" + "Elemental Combat II" + ".png"));
 			// TODO icons for Charged Ball and Charge Beam
 			balls[i] = ResourceLoader.getBufferedImage("elementalAbilities/" + EP.elementList[i] + "_Ball.png");
 			for (int j = 0; j < 3; j++)
@@ -480,7 +481,7 @@ public class Resources
 				for (int j = 0; j < numOfElements; j++)
 				{
 					boolean applicable = false;
-					if (name.equals("Sense Elemente"))
+					if (name.equals("Sense Element"))
 						for (int k = 0; k < Sense_Element_E.applicable.length; k++)
 							if (Sense_Element_E.applicable[k].equals(EP.elementList[j]))
 								applicable = true;
