@@ -23,6 +23,7 @@ public class Resources
 	public static BufferedImage[][][] wCorner; // type, connection (up, bridge, bite, full), angle (in quarter-circles)
 	public static BufferedImage[][][] pCorner; // type, connection (up, bridge, bite, full), angle (in quarter-circles)
 	public static List<List<List<List<BufferedImage>>>> bodyPart; // body part, permutation, state, frame
+	public static List<List<List<BufferedImage>>> armor; // type, state, frame
 	public static Map<String, BufferedImage> icons;
 	public final static int numOfElements = 12;
 	public static BufferedImage[][] arcForceFields; // element (12 = Prot. Bubble), frame (healthy / 75% / 50% / 25%)
@@ -52,6 +53,7 @@ public class Resources
 		pCorner = new BufferedImage[pool.length][4][4];
 
 		bodyPart = new ArrayList<List<List<List<BufferedImage>>>>(); // LEGS, CHEST (+arms), HEAD, HAIR, VINES
+		armor = new ArrayList<List<List<BufferedImage>>>(); // 0-11 ELEMENTS
 
 		icons = new HashMap<String, BufferedImage>();
 		abilities = new HashMap<String, BufferedImage>();
@@ -320,7 +322,8 @@ public class Resources
 				if (i == 0 || i == 1 || i == 5 || i == 6 || i == 4) // if body part is legs or chest or vines
 				{
 					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // stand = 0
-					bodyPart.get(i).get(j).get(0).add(ResourceLoader.getBufferedImage("people/stand-" + bodyPartName + "_" + j + ".png"));
+					bodyPart.get(i).get(j).get(0).add(ResourceLoader.getBufferedImage("people/stand_1-" + bodyPartName + "_" + j + ".png"));
+					bodyPart.get(i).get(j).get(0).add(ResourceLoader.getBufferedImage("people/stand_2-" + bodyPartName + "_" + j + ".png"));
 					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // walk (run, actually) = 1
 					for (int k = 1; k < 5; k++) // TODO make it from 0 to 3 in the file names, not from 1 to 4
 						bodyPart.get(i).get(j).get(1).add(ResourceLoader.getBufferedImage("people/run_" + k + "-" + bodyPartName + "_" + j + ".png"));
@@ -347,6 +350,7 @@ public class Resources
 					stanly.dispose();
 					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // 0 stand
 					bodyPart.get(i).get(j).get(0).add(standImg);
+					bodyPart.get(i).get(j).get(0).add(standImg);
 					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // 1 walk (run, actually)
 					bodyPart.get(i).get(j).get(1).add(runImg);
 					bodyPart.get(i).get(j).add(new ArrayList<BufferedImage>()); // 2 hold shield
@@ -372,7 +376,7 @@ public class Resources
 				}
 				else if (i == 0 || i == 5 || i == 2 || i == 3)
 				{
-					BufferedImage runImg = ResourceLoader.getBufferedImage("people/stand-" + bodyPartName + "_" + j + ".png");
+					BufferedImage runImg = ResourceLoader.getBufferedImage("people/stand_1-" + bodyPartName + "_" + j + ".png");
 					BufferedImage punchImg = new BufferedImage(96, 96, BufferedImage.TYPE_INT_ARGB); // = empty image
 					Graphics2D punchy = punchImg.createGraphics();
 					punchy.drawImage(runImg, 0, 11, null);
@@ -466,6 +470,64 @@ public class Resources
 			}
 		}
 
+		// ARMOR
+		for (int i = 0; i < 12; i++)
+		{
+			armor.add(new ArrayList<List<BufferedImage>>());
+			String type = "NULL";
+			if (i < 12)
+				type = EP.elementList[i];
+			// Comment: Yes. this part is messy. And remember that it needs to be in combination with the Person.initAnimation part.
+			armor.get(i).add(new ArrayList<BufferedImage>()); // stand = 0
+			armor.get(i).get(0).add(ResourceLoader.getBufferedImage("people/armor/" + type + "/stand_1.png"));
+			armor.get(i).get(0).add(ResourceLoader.getBufferedImage("people/armor/" + type + "/stand_2.png"));
+			armor.get(i).add(new ArrayList<BufferedImage>()); // walk (run, actually) = 1
+			for (int k = 1; k < 5; k++) // TODO make it from 0 to 3 in the file names, not from 1 to 4
+				armor.get(i).get(1).add(ResourceLoader.getBufferedImage("people/armor/" + type + "/run_" + k + ".png"));
+			armor.get(i).add(new ArrayList<BufferedImage>()); // hold shield = 2
+			armor.get(i).get(2).add(ResourceLoader.getBufferedImage("people/armor/" + type + "/hold_shield.png"));
+			armor.get(i).add(new ArrayList<BufferedImage>()); // slip = 3
+			armor.get(i).get(3).add(ResourceLoader.getBufferedImage("people/armor/" + type + "/slip_0.png"));
+
+			armor.get(i).add(new ArrayList<BufferedImage>()); // 4 get up from slip
+			armor.get(i).get(4).add(ResourceLoader.getBufferedImage("people/armor/" + type + "/slip_1.png"));
+			armor.get(i).get(4).add(ResourceLoader.getBufferedImage("people/armor/" + type + "/slip_2.png"));
+			armor.get(i).get(4).add(ResourceLoader.getBufferedImage("people/armor/" + type + "/slip_3.png"));
+
+			armor.get(i).add(new ArrayList<BufferedImage>()); // 5 right punch
+			armor.get(i).get(5).add(ResourceLoader.getBufferedImage("people/armor/" + type + "/punch_1.png"));
+			armor.get(i).get(5).add(ResourceLoader.getBufferedImage("people/armor/" + type + "/punch_3.png"));
+			armor.get(i).add(new ArrayList<BufferedImage>()); // 6 left punch
+			armor.get(i).get(6).add(ResourceLoader.getBufferedImage("people/armor/" + type + "/punch_2.png"));
+			armor.get(i).get(6).add(ResourceLoader.getBufferedImage("people/armor/" + type + "/punch_3.png"));
+
+			armor.get(i).add(new ArrayList<BufferedImage>()); // 7 fly
+			armor.get(i).get(7).add(ResourceLoader.getBufferedImage("people/armor/" + type + "/fly.png"));
+			armor.get(i).get(7).add(ResourceLoader.getBufferedImage("people/armor/" + type + "/fly.png"));
+			armor.get(i).get(7).add(ResourceLoader.getBufferedImage("people/armor/" + type + "/fly.png"));
+			armor.get(i).get(7).add(ResourceLoader.getBufferedImage("people/armor/" + type + "/fly.png"));
+			// fly-hover and hover
+			armor.get(i).add(new ArrayList<BufferedImage>()); // 8 fly-hover
+			armor.get(i).get(8).add(ResourceLoader.getBufferedImage("people/armor/" + type + "/fly_hover_transition.png"));
+			armor.get(i).add(new ArrayList<BufferedImage>()); // 9 hover
+			armor.get(i).get(9).add(ResourceLoader.getBufferedImage("people/armor/" + type + "/hover_1.png"));
+			// flight punch w/ arm held back
+			armor.get(i).add(new ArrayList<BufferedImage>());
+			armor.get(i).get(10).add(ResourceLoader.getBufferedImage("people/armor/" + type + "/fly_punch_3.png"));
+			armor.get(i).get(10).add(ResourceLoader.getBufferedImage("people/armor/" + type + "/fly_punch_3.png"));
+			armor.get(i).get(10).add(ResourceLoader.getBufferedImage("people/armor/" + type + "/fly_punch_3.png"));
+			// 10 11 12 flight punch w/ arms
+
+			armor.get(i).add(new ArrayList<BufferedImage>());
+			armor.get(i).get(11).add(ResourceLoader.getBufferedImage("people/armor/" + type + "/fly_punch_1.png"));
+			armor.get(i).add(new ArrayList<BufferedImage>());
+			armor.get(i).get(12).add(ResourceLoader.getBufferedImage("people/armor/" + type + "/fly_punch_2.png"));
+
+			// dead
+			armor.get(i).add(new ArrayList<BufferedImage>()); // dead = 13
+			armor.get(i).get(13).add(ResourceLoader.getBufferedImage("people/armor/" + type + "/dead_0.png"));
+		}
+
 		// Icons
 		for (int i = 0; i < Ability.descriptions.size(); i++)
 		{
@@ -473,6 +535,9 @@ public class Resources
 			switch (name) // all non-default cases are for abilities with extra elements drawn on them
 			{
 			case "Sense Element":
+			case "Elemental Armor I":
+			case "Elemental Armor II":
+			case "Elemental Armor III":
 			case "Elemental Resistance":
 			case "Elemental Fists":
 			case "Strike":
@@ -493,14 +558,16 @@ public class Resources
 						for (int k = 0; k < Elemental_Fists_E.applicable.length; k++)
 							if (Elemental_Fists_E.applicable[k].equals(EP.elementList[j]))
 								applicable = true;
+					if (name.startsWith("Elemental Armor"))
+						applicable = true;
 					if (!applicable)
 						continue;
-					BufferedImage senseImage = new BufferedImage(60, 60, BufferedImage.TYPE_INT_ARGB);
-					Graphics2D buffy = senseImage.createGraphics();
+					BufferedImage img = new BufferedImage(60, 60, BufferedImage.TYPE_INT_ARGB);
+					Graphics2D buffy = img.createGraphics();
 					buffy.drawImage(ability, 0, 0, null);
 					buffy.drawImage(ResourceLoader.getBufferedImage("icons/elements/" + EP.elementList[j] + ".png"), 0, 0, null);
 					buffy.dispose();
-					icons.put(name + " <" + EP.elementList[j] + ">", senseImage);
+					icons.put(name + " <" + EP.elementList[j] + ">", img);
 				}
 				break;
 			default: // will add unecessary empty icons for stuff that must include an element. That stuff gets its icons somewhere else in the code (above this part I think)
@@ -517,9 +584,9 @@ public class Resources
 
 		// Perk icons:
 		List<String> perkNames = Arrays.asList("Increased damage", "Increased pushback", "Faster flight", "Longer teleport", "Telefrag", "Longer force fields", "Thicker force fields",
-				"Stable force fields", "Armored force fields", "Faster projectile", "Bigger projectile", "Longer beam", "Bigger beam", "Extra durable", "Bigger explosion",
-				"Improved armor", "Reduced cost", "Reduced continuous cost", "Reduced cooldown", "Increased duration", "Increased range", "Increased charge rate", "Increased absorption", "Empowered",
-				"Better summons", "Durable summons", "More summons", "Better summon");
+				"Stable force fields", "Armored force fields", "Faster projectile", "Bigger projectile", "Longer beam", "Bigger beam", "Extra durable", "Bigger explosion", "Improved armor",
+				"Reduced cost", "Reduced continuous cost", "Reduced cooldown", "Increased duration", "Increased range", "Increased charge rate", "Increased absorption", "Empowered", "Better summons",
+				"Durable summons", "More summons", "Better summon");
 		// sure it happens
 		for (String s : perkNames)
 			icons.put(s, ResourceLoader.getBufferedImage("icons/perks/" + s + ".png"));

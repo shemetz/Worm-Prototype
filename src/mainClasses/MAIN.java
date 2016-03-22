@@ -1683,6 +1683,8 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		camera = new Point3D((int) player.x, (int) player.y, (int) player.z + 25);
 		player.rename();
 
+			player.armor = new Armor(5, EP.elementList[(int) (Math.random() * 12)]);
+
 		Person shmulik = new NPC(96 * 12, 96 * 18, Strategy.AGGRESSIVE);
 		shmulik.abilities.add(Ability.ability("Beam <Energy>", 6));
 		shmulik.abilities.add(Ability.ability("Flight II", 5));
@@ -2508,7 +2510,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		}
 
 		// draw costs of selected (aimed) power
-		if (hotkeySelected != -1)
+		if (hotkeySelected != -1 && player.hotkeys[hotkeySelected] != -1)
 		{
 			buffer.setColor(new Color(30, 90, 255));
 			buffer.fillRect((int) (20 * UIzoomLevel), (int) (62 * UIzoomLevel), (int) (player.mana * 20 * UIzoomLevel), (int) (12 * UIzoomLevel));

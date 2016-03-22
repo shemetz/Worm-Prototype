@@ -9,103 +9,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-import abilities.Ball_E;
-import abilities.Beam_E;
-import abilities.Blink;
-import abilities.Body_Regeneration;
-import abilities.Bubble_Target;
-import abilities.Charge;
-import abilities.Charged_Regeneration;
-import abilities.Chronobiology;
-import abilities.Clairvoyance;
-import abilities.Clone_I;
-import abilities.Clone_II;
-import abilities.Clone_III;
-import abilities.Danger_Sense;
-import abilities.Elastic;
-import abilities.Elemental_Combat_II_E;
-import abilities.Elemental_Combat_I_E;
-import abilities.Elemental_Fists_E;
-import abilities.Elemental_Resistance_E;
-import abilities.Elemental_Void;
-import abilities.Energy_Regeneration_I;
-import abilities.Energy_Regeneration_II;
-import abilities.Evasion_I;
-import abilities.Evasion_II;
-import abilities.Evasion_III;
-import abilities.Explosion_Resistance;
-import abilities.Explosive_Fists;
-import abilities.Flight_I;
-import abilities.Flight_II;
-import abilities.Force_Shield;
-import abilities.Ghost_Mode_I;
-import abilities.Ghost_Mode_II;
-import abilities.Heal_I;
-import abilities.Heal_II;
-import abilities.Leg_Muscles;
-import abilities.Muscle_Charge;
-import abilities.Nullification_Aura_I;
-import abilities.Nullification_Aura_II;
-import abilities.Pool_E;
-import abilities.Portals;
-import abilities.Possess;
-import abilities.Precision_I;
-import abilities.Precision_II;
-import abilities.Precision_III;
-import abilities.Protective_Bubble_I;
-import abilities.Protective_Bubble_II;
-import abilities.Punch;
-import abilities.Pushy_Fists;
-import abilities.Ranged_Explosion;
-import abilities.Reactive_Explosions;
-import abilities.Repeat_I;
-import abilities.Repeat_II;
-import abilities.Repeat_III;
-import abilities.Retrace_I;
-import abilities.Retrace_II;
-import abilities.Retrace_III;
-import abilities.Sapping_Fists;
-import abilities.Self_Bomb;
-import abilities.Sense_Element_E;
-import abilities.Sense_Life;
-import abilities.Sense_Mana_and_Stamina;
-import abilities.Sense_Movement;
-import abilities.Sense_Parahumans;
-import abilities.Sense_Powers;
-import abilities.Sense_Structure;
-import abilities.Sensibility;
-import abilities.Shattering_Fists;
-import abilities.Shield_E;
-import abilities.Slow_Target;
-import abilities.Speedrun;
-import abilities.Spontaneous_Explosions;
-import abilities.Spray_E;
-import abilities.Sprint;
-import abilities.Steal_Power;
-import abilities.Strength_I;
-import abilities.Strength_II;
-import abilities.Strength_III;
-import abilities.Strike_E;
-import abilities.Strong_Force_Field;
-import abilities.Telekinetic_Flight;
-import abilities.Teleport_I;
-import abilities.Teleport_II;
-import abilities.Teleport_III;
-import abilities.Time_Freeze_Target_I;
-import abilities.Toughness_I;
-import abilities.Toughness_II;
-import abilities.Toughness_III;
-import abilities.Trail_E;
-import abilities.Twitch;
-import abilities.Undo_I;
-import abilities.Undo_II;
-import abilities.Undo_III;
-import abilities.Vampiric_Fists;
-import abilities.Wall_E;
-import abilities.Wide_Force_Field;
-import abilities.Wild_Power;
-import abilities.Wound_Regeneration_I;
-import abilities.Wound_Regeneration_II;
+import abilities.*;
 import mainResourcesPackage.SoundEffect;
 
 public class Ability implements Cloneable
@@ -118,14 +22,15 @@ public class Ability implements Cloneable
 			"Retrace III", "Undo I", "Undo II", "Undo III", "Repeat I", "Repeat II", "Repeat III", "Time Freeze Target I", "Nullification Aura I", "Nullification Aura II", "Wild Power", "Clone I",
 			"Clone II", "Clone III", "Twitch", "Steal Power", "Danger Sense", "Sapping Fists", "Pushy Fists", "Explosive Fists", "Vampiric Fists", "Shattering Fists", "Elemental Fists",
 			"Explosion Resistance", "Ranged Explosion", "Self-Bomb", "Reactive Explosions", "Spontaneous Explosions", "Leg Muscles", "Speedrun", "Charge", "Elastic", "Trail", "Bubble Target",
-			"Possess", "Wound Regeneration I", "Wound Regeneration II", "Energy Regeneration I", "Energy Regeneration II", "Body Regeneration", "Muscle Charge", "Charged Regeneration");
+			"Possess", "Wound Regeneration I", "Wound Regeneration II", "Energy Regeneration I", "Energy Regeneration II", "Body Regeneration", "Muscle Charge", "Charged Regeneration",
+			"Elemental Armor I", "Elemental Armor II", "Elemental Armor III");
 	protected static List<String> descriptions = new ArrayList<String>();
 	protected static boolean[][] elementalAttacksPossible = new boolean[12][7]; // [element][ability]
 	protected static int[][] elementalAttackNumbers = new int[12][3];
 	protected static String[] elementalAttacks = new String[]
 	{ "Ball", "Beam", "Shield", "Wall", "Spray", "Strike", "Pool" };
 	final static List<String> elementalPowers = Arrays.asList("Elemental Combat I", "Elemental Combat II", "Ball", "Beam", "Shield", "Wall", "Spray", "Strike", "Pool", "Sense Element",
-			"Elemental Resistance", "Elemental Fists", "Trail");
+			"Elemental Resistance", "Elemental Fists", "Trail", "Elemental Armor I", "Elemental Armor II", "Elemental Armor III");
 	final static String[] elementalPowersWithTheirOwnImages = new String[]
 	{ "Elemental Combat I", "Elemental Combat II", "Trail" };
 
@@ -696,6 +601,15 @@ public class Ability implements Cloneable
 		}
 		switch (trimmedAbilityName)
 		{
+		case "Elemental Armor I":
+			ab = new Elemental_Armor_I(element, pnts);
+			break;
+		case "Elemental Armor II":
+			ab = new Elemental_Armor_II(element, pnts);
+			break;
+		case "Elemental Armor III":
+			ab = new Elemental_Armor_III(element, pnts);
+			break;
 		case "Evasion I":
 			ab = new Evasion_I(pnts);
 			break;

@@ -108,7 +108,7 @@ public class Wild_Power extends Ability
 					if (rand == 1) // Nullify for Level seconds
 						p.affect(new Nullified(LEVEL, true, this), true);
 					if (rand == 2) // Damage random armor part
-						p.damageArmorPart(p.armorParts[(int) (Math.random() * p.armorParts.length)], 10 * LEVEL, -1, 1);
+						p.damageArmorPart(p.armor, 10 * LEVEL, -1, 1);
 				}
 			}
 			// BALL

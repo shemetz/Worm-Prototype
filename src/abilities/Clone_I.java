@@ -25,7 +25,7 @@ public class Clone_I extends _SummoningAbility
 		range = 300;
 		life = 15 * LEVEL;
 		maxNumOfClones = 1;
-		statMultiplier = 2/3;
+		statMultiplier = 2.0 / 3.0;
 	}
 
 	public void use(Environment env, Person user, Point target)
@@ -45,6 +45,7 @@ public class Clone_I extends _SummoningAbility
 			clone.chest = 0;
 			clone.initAnimation();
 			env.people.add(clone);
+			clonesMade++;
 			if (clonesMade == maxNumOfClones)
 				on = true;
 		}

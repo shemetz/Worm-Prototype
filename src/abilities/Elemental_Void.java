@@ -46,40 +46,41 @@ public class Elemental_Void extends Ability
 		timer += deltaTime;
 		damage = (int) (50000000 * deltaTime);
 		if (timer > 0.25) // every quarter second
-		{
-			timer -= 0.25;
-			int minX = Math.max(0, (int) ((user.x - range) / squareSize));
-			int maxX = Math.min(env.width - 1, (int) ((user.x + range) / squareSize));
-			int minY = Math.max(0, (int) ((user.y - range) / squareSize));
-			int maxY = Math.min(env.width - 1, (int) ((user.y + range) / squareSize));
-			for (int x = minX; x <= maxX; x++)
-				for (int y = minY; y <= maxY; y++)
-				{
-					int centerX = (int) ((x + Math.random()) * squareSize);
-					int centerY = (int) ((y + Math.random()) * squareSize);
-					double distancePow2 = Methods.DistancePow2(centerX, centerY, user.x, user.y);
-					if (distancePow2 <= range * range)
+			if (user.z <= verticalRange)
+			{
+				timer -= 0.25;
+				int minX = Math.max(0, (int) ((user.x - range) / squareSize));
+				int maxX = Math.min(env.width - 1, (int) ((user.x + range) / squareSize));
+				int minY = Math.max(0, (int) ((user.y - range) / squareSize));
+				int maxY = Math.min(env.width - 1, (int) ((user.y + range) / squareSize));
+				for (int x = minX; x <= maxX; x++)
+					for (int y = minY; y <= maxY; y++)
 					{
-						double speed = 20 * damage / distancePow2; // speed of debris
-						if (env.wallTypes[x][y] != -2) // not map edge walls
-							if (env.wallHealths[x][y] > 0)
-							{
-								env.wallHealths[x][y] -= damage / distancePow2;
-								env.debris.add(new Debris(centerX, centerY, 1, Math.atan2(user.y - centerY, user.x - centerX) + Math.PI / 2, env.getWallDebrisType(env.wallTypes[x][y]), speed));
-								if (env.wallHealths[x][y] <= 0)
-									env.destroyWall(x, y);
-								env.connectWall(x, y);
-							}
-						if (env.poolHealths[x][y] > 0)
+						int centerX = (int) ((x + Math.random()) * squareSize);
+						int centerY = (int) ((y + Math.random()) * squareSize);
+						double distancePow2 = Methods.DistancePow2(centerX, centerY, user.x, user.y);
+						if (distancePow2 <= range * range)
 						{
-							env.poolHealths[x][y] -= damage / distancePow2;
-							env.debris.add(new Debris(centerX, centerY, 1, Math.atan2(user.y - centerY, user.x - centerX) + Math.PI / 2, env.getPoolDebrisType(env.poolTypes[x][y]), speed));
-							if (env.poolHealths[x][y] <= 0)
-								env.destroyPool(x, y);
+							double speed = 20 * damage / distancePow2; // speed of debris
+							if (env.wallTypes[x][y] != -2) // not map edge walls
+								if (env.wallHealths[x][y] > 0)
+								{
+									env.wallHealths[x][y] -= damage / distancePow2;
+									env.debris.add(new Debris(centerX, centerY, 1, Math.atan2(user.y - centerY, user.x - centerX) + Math.PI / 2, env.getWallDebrisType(env.wallTypes[x][y]), speed));
+									if (env.wallHealths[x][y] <= 0)
+										env.destroyWall(x, y);
+									env.connectWall(x, y);
+								}
+							if (env.poolHealths[x][y] > 0)
+							{
+								env.poolHealths[x][y] -= damage / distancePow2;
+								env.debris.add(new Debris(centerX, centerY, 1, Math.atan2(user.y - centerY, user.x - centerX) + Math.PI / 2, env.getPoolDebrisType(env.poolTypes[x][y]), speed));
+								if (env.poolHealths[x][y] <= 0)
+									env.destroyPool(x, y);
+							}
 						}
 					}
-				}
-		}
+			}
 	}
 
 	public void disable(Environment env, Person user)

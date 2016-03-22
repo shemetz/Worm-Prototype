@@ -129,13 +129,14 @@ public class Person extends RndPhysObj implements Mover
 
 	// Inventory and stuff?
 	public List<Item> inventory;
-	public Armor[] body; // head, chest, arms, legs
-	public Armor[] armorParts; // head, chest, arms, legs
+	public Armor body;
+	public Armor armor;
 
 	// Animation
 	public List<List<BufferedImage>> animationBottom;
 	public List<List<BufferedImage>> animationTop;
 	public List<List<BufferedImage>> animationVine;
+	public List<List<List<BufferedImage>>> animationArmor;
 
 	// Look
 	public int legs, chest, head, hair, nakedLegs, nakedChest;
@@ -193,15 +194,9 @@ public class Person extends RndPhysObj implements Mover
 		target = new Point(-1, -1);
 		imgW = 96;
 		imgH = 96;
-		body = new Armor[4];
-		body[0] = (new Armor(1, "Skin"));
-		body[1] = (new Armor(1, "Skin"));
-		body[2] = (new Armor(1, "Skin"));
-		body[3] = (new Armor(1, "Skin"));
+		body = (new Armor(1, "Skin"));
 		// Default armor is no armor
-		armorParts = new Armor[4];
-		for (int i = 0; i < body.length; i++)
-			armorParts[i] = body[i];
+		armor = body;
 
 		inventory = new ArrayList<Item>();
 
@@ -544,9 +539,13 @@ public class Person extends RndPhysObj implements Mover
 		animationTop = new ArrayList<List<BufferedImage>>();
 
 		animationVine = new ArrayList<List<BufferedImage>>();
+		animationArmor = new ArrayList<List<List<BufferedImage>>>();
+		for (int i = 0; i < Resources.armor.size(); i++)
+			animationArmor.add(new ArrayList<List<BufferedImage>>());
 
 		increaseAnimationListSize(); // stand
 		insertFullBodyAnimation(0, 0, n);
+		insertFullBodyAnimation(0, 1, n);
 
 		increaseAnimationListSize(); // walk
 		insertFullBodyAnimation(1, 1, n);
@@ -615,6 +614,8 @@ public class Person extends RndPhysObj implements Mover
 		animationBottom.add(new ArrayList<BufferedImage>());
 		animationTop.add(new ArrayList<BufferedImage>());
 		animationVine.add(new ArrayList<BufferedImage>());
+		for (int i = 0; i < animationArmor.size(); i++)
+			animationArmor.get(i).add(new ArrayList<BufferedImage>());
 	}
 
 	public void insertFullBodyAnimation(int stateNum, int frameNum, List<Integer> n)
@@ -666,6 +667,14 @@ public class Person extends RndPhysObj implements Mover
 		g2d.dispose();
 
 		animationVine.get(stateNum).add(img);
+		for (int i = 0; i < animationArmor.size(); i++)
+		{
+			img = new BufferedImage(imgW, imgH, BufferedImage.TYPE_INT_ARGB);
+			g2d = img.createGraphics();
+			g2d.drawImage(Resources.armor.get(i).get(stateNum).get(frameNum), 0, 0, null);
+			animationArmor.get(i).get(stateNum).add(img);
+			g2d.dispose();
+		}
 	}
 
 	public void nextFrame(int frameNum)
@@ -673,6 +682,10 @@ public class Person extends RndPhysObj implements Mover
 		switch (animState)
 		{
 		/// <number of frames per second> <animation name>
+		case 0: // standing
+			if (frameNum % 20 == 0)
+				animFrame++;
+			break;
 		case 1: // ~7 running
 			for (Ability a : abilities)
 				if (a instanceof Sprint && a.on)
@@ -684,7 +697,6 @@ public class Person extends RndPhysObj implements Mover
 			if (frameNum % 7 == 0)
 				animFrame++;
 			break;
-		case 0: // ~7 standing
 		case 2: // ~7 holding shield
 		case 3: // ~7 slipping
 			if (frameNum % 7 == 0)
@@ -922,6 +934,14 @@ public class Person extends RndPhysObj implements Mover
 				vines = true;
 		if (vines)
 			buffy.drawImage(animationVine.get(animState).get(animFrame), 0, 0, null);
+		// Armor
+		if (armor != body)
+		{
+			int index = EP.toInt(armor.name);
+			buffy.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) (armor.armorRating / armor.maxArmorRating)));
+			buffy.drawImage(animationArmor.get(index).get(animState).get(animFrame), 0, 0, null);
+			buffy.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
+		}
 
 		// Punch drawings
 		if (animState == 5 || animState == 6 || animState == 10 || animState == 11 || animState == 12)
@@ -1107,6 +1127,12 @@ public class Person extends RndPhysObj implements Mover
 			life += lifeRegen * 3 * deltaTime;
 			mana += manaRegen * 1.5 * realDeltaTime; // mana regen is unaffected by time shenanigans
 			stamina += staminaRegen * 1.5 * deltaTime;
+		}
+
+		if (armor.armorRating < armor.maxArmorRating * 0.1)
+		{
+			// LOSE ARMOR
+			armor = body;
 		}
 
 		// boundary checking:
@@ -1566,8 +1592,9 @@ public class Person extends RndPhysObj implements Mover
 			MAIN.errorMessage("Ph'nglui mglw'nafh Cthulhu R'lyeh wgah'nagl fhtagn");
 			break;
 		}
-		Armor a = armorParts[n];
-		return damageArmorPart(a, damage, damageType, percentageOfTheDamage);
+		// TODO do something with n
+		n = n + 0; // filler
+		return damageArmorPart(armor, damage, damageType, percentageOfTheDamage);
 	}
 
 	public double damageArmorPart(Armor a, double damage, int damageType, double percentageOfTheDamage)
@@ -1577,14 +1604,15 @@ public class Person extends RndPhysObj implements Mover
 		{
 			// 10% chance of armor degrade
 			if (MAIN.random.nextDouble() < 0.1)
-				a.reduce(a.maxArmorRating * 0.03 * effectiveness);
+				a.reduce(a.maxArmorRating * 0.03);
 			return 0;
 		}
-		else // armor reduces damage
+		else if (effectiveness != 0) // armor reduces damage, or is vulnerable
 		{
 			damage -= a.armorRating * effectiveness;
-			a.reduce(a.maxArmorRating * 0.03 * effectiveness);
+			a.reduce(a.maxArmorRating * 0.03);
 		}
+		// NOTE: if armor is specifically weak to the damage type, damage WILL increase to the person and the armor both.
 		return damage;
 	}
 
@@ -1732,5 +1760,12 @@ public class Person extends RndPhysObj implements Mover
 		this.legs = other.legs;
 		this.nakedLegs = other.nakedLegs;
 		this.initAnimation();
+	}
+
+	public void putArmor(Armor armor2)
+	{
+		armor.equipped = false;
+		armor = armor2;
+		armor.equipped = true;
 	}
 }

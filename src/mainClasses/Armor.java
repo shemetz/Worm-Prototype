@@ -2,10 +2,11 @@ package mainClasses;
 
 public class Armor extends Item
 {
-	double	maxArmorRating;
-	double	armorRating; //Does not depend on the size of the armor - only "density of protection" or some shit like that
-	String	name;
-	boolean	isSkin; //Skin (=Natural Armor) does not get weaker by attacks that bypass it.
+	public double maxArmorRating;
+	public double armorRating; // Does not depend on the size of the armor - only "density of protection" or some shit like that
+	public String name;
+	public boolean isSkin; // Skin (=Natural Armor) does not get weaker by attacks that bypass it.
+	public boolean equipped;
 
 	public Armor(double AR, String n1)
 	{
@@ -13,6 +14,7 @@ public class Armor extends Item
 		armorRating = AR;
 		name = n1;
 		isSkin = n1.contains("Skin");
+		equipped = false;
 	}
 
 	public double effectiveness(int damageType)
@@ -21,6 +23,23 @@ public class Armor extends Item
 		{
 		case 1: // piercing
 			return 0.5;
+		case 2: // burn
+			if (name.equals("Plant"))
+				return -1;
+			if (name.equals("Lava") || name.equals("Fire"))
+				return 2;
+			return 1;
+		case 3: // acid
+			if (name.equals("Plant") || name.equals("Flesh"))
+				return -1;
+			if (name.equals("Acid"))
+				return 2;
+			return 1;
+		case 4: // shock
+			if (name.equals("Energy") || name.equals("Electricity"))
+				return 2;
+			return 1;
+		case -1: // spectral? ethereal? phantom?
 		case 9: // spectral? ethereal? phantom?
 			return 0;
 		default:

@@ -2316,6 +2316,8 @@ public class Environment
 			for (Evasion e : b.theAbility.evasions)
 				if (e.id == p.id)
 					continue peopleLoop;
+			if (p.equals(b.creator) && !b.isChild)
+				continue peopleLoop;
 			if (p.z <= b.z + b.height / 2 && p.highestPoint() > b.z - b.height / 2) // height check
 			{
 				Point2D intersectionP = Methods.getClosestPointOnSegment(b.start.x, b.start.y, b.end.x, b.end.y, p.x, p.y);
@@ -3334,7 +3336,7 @@ public class Environment
 		if (Math.random() <= p.evasion) // EVASION
 		{
 			if (showDamageNumbers)
-				if (p.uitexts.isEmpty() || p.uitexts.get(p.uitexts.size() - 1).transparency > 0.85)
+				if (p.uitexts.isEmpty() || p.uitexts.get(p.uitexts.size() - 1).transparency < 0.85 * 256)
 				{
 					p.uitexts.add(new UIText(-10, 0 - p.radius / 2 - 10, "Evaded!", 6));
 				}
