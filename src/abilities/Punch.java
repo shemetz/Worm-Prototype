@@ -46,7 +46,7 @@ public class Punch extends Ability
 		cooldown = 0.55; // is actually 0.55 - Math.min(0.02*FITNESS, 0.15);
 		cost = 0.7;
 		range = 6174; // will be recalculated the moment this ability is added in Person.something()
-		
+
 	}
 
 	public void use(Environment env, Person user, Point target)
@@ -351,35 +351,36 @@ public class Punch extends Ability
 								if (!p.equals(user))
 									if (p.x - p.radius < user.target.x && p.y - p.radius < user.target.y && p.x + p.radius > user.target.x && p.y + p.radius > user.target.y)
 									{
-										env.hitPerson(p, damage, pushback, user.rotation, punchElement); // This is such an elegant line of code :3
-
-										for (Ability a : user.punchAffectingAbilities)
+										if (!env.checkForEvasion(p))
 										{
-											if (a instanceof Sapping_Fists)
-												if (Math.random() < 0.1 * a.LEVEL) // 10% * level
+											env.hitPerson(p, damage, pushback, user.rotation, punchElement); // This is such an elegant line of code :3
+											for (Ability a : user.punchAffectingAbilities)
+											{
+												if (a instanceof Sapping_Fists)
+													if (Math.random() < 0.1 * a.LEVEL) // 10% * level
+													{
+														p.affect(new Nullified(1, true, a), true);
+														a.sounds.get(0).play();
+													}
+												if (a instanceof Elemental_Fists_E)
+													env.hitPerson(p, a.damage / timeEffect, a.pushback / timeEffect, user.rotation, a.elementNum);
+												if (a instanceof Strike_E)
 												{
-													p.affect(new Nullified(1, true, a), true);
+													// apply effect
+													double[] dmgpush = env.trySpecialEffectReturnDamageAndPushback(p, a.elementNum, a.damage, a.pushback, 1); // 1 = certain
+													double damage2 = dmgpush[0];
+													double pushback2 = dmgpush[1];
+													// might apply effect twice in some cases - I don't want to try to solve this, I'm lazy
+													env.hitPerson(p, damage2 / timeEffect, pushback2 / timeEffect, user.rotation, a.elementNum);
+												}
+												if (a instanceof Vampiric_Fists)
+												{
+													user.heal(a.steal * damage);
 													a.sounds.get(0).play();
 												}
-											if (a instanceof Elemental_Fists_E)
-												env.hitPerson(p, a.damage / timeEffect, a.pushback / timeEffect, user.rotation, a.elementNum);
-											if (a instanceof Strike_E)
-											{
-												// apply effect
-												double[] dmgpush = env.trySpecialEffectReturnDamageAndPushback(p, a.elementNum, a.damage, a.pushback, 1); // 1 = certain
-												double damage2 = dmgpush[0];
-												double pushback2 = dmgpush[1];
-												// might apply effect twice in some cases - I don't want to try to solve this, I'm lazy
-												env.hitPerson(p, damage2 / timeEffect, pushback2 / timeEffect, user.rotation, a.elementNum);
 											}
-											if (a instanceof Vampiric_Fists)
-											{
-												user.heal(a.steal * damage);
-												a.sounds.get(0).play();
-											}
+											user.punchedSomething = true;
 										}
-
-										user.punchedSomething = true;
 										break collisionCheck;
 									}
 				}

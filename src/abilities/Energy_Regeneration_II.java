@@ -5,14 +5,14 @@ import java.awt.Point;
 import mainClasses.Environment;
 import mainClasses.Person;
 
-public class Wound_Regeneration_I extends _PassiveAbility
+public class Energy_Regeneration_II extends _PassiveAbility
 {
 
-	public Wound_Regeneration_I(int p)
+	public Energy_Regeneration_II(int p)
 	{
-		super("Wound Regeneration I", p);
+		super("Energy Regeneration II", p);
 	}
-	
+
 	public void updateStats()
 	{
 		amount = 1 * LEVEL;
@@ -21,7 +21,8 @@ public class Wound_Regeneration_I extends _PassiveAbility
 	public void use(Environment env, Person user, Point target)
 	{
 		int val = on ? -1 : 1;
-		user.lifeRegen += val * amount;
+		user.manaRegen += val * amount;
+		user.staminaRegen += val * amount;
 		on = !on;
 	}
 }

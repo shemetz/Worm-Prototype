@@ -3324,14 +3324,20 @@ public class Environment
 		hitPerson(p, damage, pushback, angle, elementNum, 1);
 	}
 
+	/**
+	 * 
+	 * @param p
+	 * @return true if p evaded successfully
+	 */
 	public boolean checkForEvasion(Person p)
 	{
 		if (Math.random() <= p.evasion) // EVASION
 		{
 			if (showDamageNumbers)
-			{
-				p.uitexts.add(new UIText(-10, 0 - p.radius / 2 - 10, "Evaded!", 6));
-			}
+				if (p.uitexts.isEmpty() || p.uitexts.get(p.uitexts.size() - 1).transparency > 0.85)
+				{
+					p.uitexts.add(new UIText(-10, 0 - p.radius / 2 - 10, "Evaded!", 6));
+				}
 			p.timeBetweenDamageTexts = 0;
 			return true;
 		}

@@ -55,6 +55,7 @@ public class Perk
 			break;
 		case "Bigger projectile":
 			((_ProjectileAbility) a).size *= Math.pow(1.2, k);
+			((_ProjectileAbility) a).radius *= Math.pow(1.2, k);
 			break;
 		case "Longer beam":
 			((_BeamAbility) a).range *= Math.pow(1.5, k);

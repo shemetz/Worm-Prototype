@@ -12,6 +12,7 @@ import java.util.List;
 import abilities.Ball_E;
 import abilities.Beam_E;
 import abilities.Blink;
+import abilities.Body_Regeneration;
 import abilities.Bubble_Target;
 import abilities.Charge;
 import abilities.Charged_Regeneration;
@@ -27,6 +28,11 @@ import abilities.Elemental_Combat_I_E;
 import abilities.Elemental_Fists_E;
 import abilities.Elemental_Resistance_E;
 import abilities.Elemental_Void;
+import abilities.Energy_Regeneration_I;
+import abilities.Energy_Regeneration_II;
+import abilities.Evasion_I;
+import abilities.Evasion_II;
+import abilities.Evasion_III;
 import abilities.Explosion_Resistance;
 import abilities.Explosive_Fists;
 import abilities.Flight_I;
@@ -67,6 +73,7 @@ import abilities.Sense_Movement;
 import abilities.Sense_Parahumans;
 import abilities.Sense_Powers;
 import abilities.Sense_Structure;
+import abilities.Sensibility;
 import abilities.Shattering_Fists;
 import abilities.Shield_E;
 import abilities.Slow_Target;
@@ -97,6 +104,8 @@ import abilities.Vampiric_Fists;
 import abilities.Wall_E;
 import abilities.Wide_Force_Field;
 import abilities.Wild_Power;
+import abilities.Wound_Regeneration_I;
+import abilities.Wound_Regeneration_II;
 import mainResourcesPackage.SoundEffect;
 
 public class Ability implements Cloneable
@@ -104,11 +113,12 @@ public class Ability implements Cloneable
 	final static List<String> implementedAbilities = Arrays.asList("Elemental Combat I", "Elemental Combat II", "Beam", "Ball", "Shield", "Pool", "Wall", "Spray", "Sense Element",
 			"Elemental Resistance", "Strike", "Portals", "Elemental Void", "Precision I", "Precision II", "Precision III", "Protective Bubble I", "Protective Bubble II", "Sprint", "Strength I",
 			"Strength II", "Strength III", "Punch", "Heal I", "Heal II", "Force Shield", "Strong Force Field", "Wide Force Field", "Flight I", "Flight II", "Telekinetic Flight", "Blink", "Teleport I",
-			"Teleport II", "Teleport III", "Ghost Mode I", "Ghost Mode II", "Toughness I", "Toughness II", "Toughness III", "Sense Life", "Sense Mana and Stamina", "Sense Powers", "Sense Structure",
-			"Sense Parahumans", "Sense Movement", "Clairvoyance", "Slow Target", "Chronobiology", "Retrace I", "Retrace II", "Retrace III", "Undo I", "Undo II", "Undo III", "Repeat I", "Repeat II",
-			"Repeat III", "Time Freeze Target I", "Nullification Aura I", "Nullification Aura II", "Wild Power", "Clone I", "Clone II", "Clone III", "Twitch", "Steal Power", "Danger Sense",
-			"Sapping Fists", "Pushy Fists", "Explosive Fists", "Vampiric Fists", "Shattering Fists", "Elemental Fists", "Explosion Resistance", "Ranged Explosion", "Self-Bomb", "Reactive Explosions",
-			"Spontaneous Explosions", "Leg Muscles", "Speedrun", "Charge", "Elastic", "Trail", "Bubble Target", "Possess", "Muscle Charge", "Charged Regeneration");
+			"Teleport II", "Teleport III", "Ghost Mode I", "Ghost Mode II", "Toughness I", "Toughness II", "Toughness III", "Evasion I", "Evasion II", "Evasion III", "Sense Life",
+			"Sense Mana and Stamina", "Sense Powers", "Sense Structure", "Sense Parahumans", "Sense Movement", "Clairvoyance", "Sensibility", "Slow Target", "Chronobiology", "Retrace I", "Retrace II",
+			"Retrace III", "Undo I", "Undo II", "Undo III", "Repeat I", "Repeat II", "Repeat III", "Time Freeze Target I", "Nullification Aura I", "Nullification Aura II", "Wild Power", "Clone I",
+			"Clone II", "Clone III", "Twitch", "Steal Power", "Danger Sense", "Sapping Fists", "Pushy Fists", "Explosive Fists", "Vampiric Fists", "Shattering Fists", "Elemental Fists",
+			"Explosion Resistance", "Ranged Explosion", "Self-Bomb", "Reactive Explosions", "Spontaneous Explosions", "Leg Muscles", "Speedrun", "Charge", "Elastic", "Trail", "Bubble Target",
+			"Possess", "Wound Regeneration I", "Wound Regeneration II", "Energy Regeneration I", "Energy Regeneration II", "Body Regeneration", "Muscle Charge", "Charged Regeneration");
 	protected static List<String> descriptions = new ArrayList<String>();
 	protected static boolean[][] elementalAttacksPossible = new boolean[12][7]; // [element][ability]
 	protected static int[][] elementalAttackNumbers = new int[12][3];
@@ -282,7 +292,7 @@ public class Ability implements Cloneable
 		amount = -1;
 		chargeRate = -1;
 
-		verticalRange = 4; //default value.
+		verticalRange = 4; // default value.
 
 		cooldownLeft = 0;
 		instant = false;
@@ -472,7 +482,7 @@ public class Ability implements Cloneable
 			else if (realName.contains("Spray"))
 				element = "bones";
 			else if (realName.contains("Sense"))
-				text = "Sense Element (Passive) <Flesh>\nSense blood pools, bone walls, meat shields, and people with Flesh powers.\ntags\nSee silhouettes of capes with your elemental power, walls/pools of your element or creatures under your element’s effect, and know how hurt they are. The range is 3^Level. Sense Element <Earth> allows you to also have Sense Structure! Yup!";
+				text = "Sense Element (Passive) <Flesh>\npassive sense range\nSense blood pools, bone walls, meat shields, and people with Flesh powers.\nSee silhouettes of capes with your elemental power, walls/pools of your element or creatures under your element’s effect, and know how hurt they are. The range is 3^Level. Sense Element <Earth> allows you to also have Sense Structure! Yup!";
 			else if (realName.contains("Strike"))
 				element = "skeletally-enhanced";
 			else if (realName.contains("Fists"))
@@ -686,6 +696,33 @@ public class Ability implements Cloneable
 		}
 		switch (trimmedAbilityName)
 		{
+		case "Evasion I":
+			ab = new Evasion_I(pnts);
+			break;
+		case "Evasion II":
+			ab = new Evasion_II(pnts);
+			break;
+		case "Evasion III":
+			ab = new Evasion_III(pnts);
+			break;
+		case "Wound Regeneration I":
+			ab = new Wound_Regeneration_I(pnts);
+			break;
+		case "Wound Regeneration II":
+			ab = new Wound_Regeneration_II(pnts);
+			break;
+		case "Energy Regeneration I":
+			ab = new Energy_Regeneration_I(pnts);
+			break;
+		case "Energy Regeneration II":
+			ab = new Energy_Regeneration_II(pnts);
+			break;
+		case "Body Regeneration":
+			ab = new Body_Regeneration(pnts);
+			break;
+		case "Sensibility":
+			ab = new Sensibility(pnts);
+			break;
 		case "Charged Regeneration":
 			ab = new Charged_Regeneration(pnts);
 			break;
