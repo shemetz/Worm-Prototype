@@ -74,7 +74,7 @@ public class Spray_E extends Ability
 		if (cooldownLeft == 0)
 			if (user.mana >= costPerSecond * deltaTime)
 			{
-				sounds.get(0).cont();
+				sounds.get(0).loop();
 				double velocity = range * 1.4;
 				double z = (user.z + 0.35) * (Math.random() * 0.95 + 0.05); // anywhere between 100% and 5% range
 				double randomAngle = (Math.random() - 0.5) * arc + angle; // random angle within spray arc

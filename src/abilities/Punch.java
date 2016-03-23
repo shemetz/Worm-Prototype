@@ -52,7 +52,6 @@ public class Punch extends Ability
 	public void use(Environment env, Person user, Point target)
 	{
 		range = (int) (2.3 * user.radius);
-
 		/*
 		 * Punch
 		 */
@@ -137,7 +136,7 @@ public class Punch extends Ability
 
 	public void maintain(Environment env, Person user, Point target, double deltaTime)
 	{
-
+		;
 	}
 
 	public void disable(Environment env, Person user)
@@ -155,7 +154,7 @@ public class Punch extends Ability
 		range = (int) (2.3 * user.radius);
 		if (user.flySpeed != -1)
 			range = range + 65; // eh
-		damage = user.STRENGTH * 1;
+		damage = user.STRENGTH * 0.7; // it's fine
 		pushback = user.STRENGTH * 1.5;
 		pushback += Math.sqrt(user.xVel * user.xVel + user.yVel * user.yVel) * 100 / 3000; // TODO uhhh
 		double originalPushback = 0 + pushback;
@@ -175,7 +174,7 @@ public class Punch extends Ability
 		damage /= timeEffect;
 		pushback /= timeEffect;
 
-		int punchElement = -1; // TODO other punch types that aren't blunt?
+		int punchElement = -1;
 		int punchDamageType = 0;
 		int timesTested = 2; // number of checks; number of parts the range is divided into.
 		double extraVerticalHeight = 0.4;

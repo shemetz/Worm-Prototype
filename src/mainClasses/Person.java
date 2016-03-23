@@ -1769,4 +1769,32 @@ public class Person extends RndPhysObj implements Mover
 		armor = armor2;
 		armor.equipped = true;
 	}
+
+	public void changeStat(int statNum, int change)
+	{
+		switch (statNum)
+		{
+		case 0:
+			STRENGTH += change;
+			return;
+		case 1:
+			FITNESS += change;
+			return;
+		case 2:
+			DEXTERITY += change;
+			return;
+		case 3:
+			WITS += change;
+			return;
+		case 4:
+			KNOWLEDGE += change;
+			return;
+		case 5:
+			SOCIAL += change;
+			return;
+		default:
+			MAIN.errorMessage("Hey mister. Somebody told me you wanna check out my scene?");
+			return;
+		}
+	}
 }

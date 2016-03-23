@@ -3174,7 +3174,6 @@ public class Environment
 			// pushback takes into account pushback resistance
 			pushback -= pushback * p.pushbackResistance;
 
-			// TODO all damage-related powers
 			damage = p.damageAfterHittingArmor(damage, elementNum, percentageOfTheDamage);
 			if (p.ghostMode && elementNum != -1) // ghost wall-clipping
 				if (EP.damageType(elementNum) == 2 || EP.damageType(elementNum) == 4)

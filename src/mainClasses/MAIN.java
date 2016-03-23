@@ -1734,6 +1734,14 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			env.people.add(person);
 		}
 
+		// Randomize stats a bit
+		for (Person p : env.people)
+		{
+			p.changeStat((int) (Math.random() * 6), (int) (Math.random() * 3 - 1)); // -1 or 0 or +1
+			p.changeStat((int) (Math.random() * 6), (int) (Math.random() * 3 - 1)); // -1 or 0 or +1
+			p.changeStat((int) (Math.random() * 6), (int) (Math.random() * 3 - 1)); // -1 or 0 or +1
+		}
+
 		// Fix walls spawning on people
 		for (Person p : env.people)
 			env.removeAroundPerson(p);
