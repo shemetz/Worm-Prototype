@@ -35,7 +35,10 @@ public class _ArmorAbility extends Ability
 			on = true;
 		}
 		else
+		{
 			armor.armorRating = 0;
+			// on = false; //not necessary, will do it anyways in maintain(...)
+		}
 	}
 
 	public void maintain(Environment env, Person user, Point target, double deltaTime)

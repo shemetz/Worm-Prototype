@@ -1132,6 +1132,7 @@ public class Person extends RndPhysObj implements Mover
 		if (armor.armorRating < armor.maxArmorRating * 0.1)
 		{
 			// LOSE ARMOR
+			armor.equipped = false;
 			armor = body;
 		}
 

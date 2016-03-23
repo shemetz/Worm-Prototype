@@ -1683,8 +1683,6 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		camera = new Point3D((int) player.x, (int) player.y, (int) player.z + 25);
 		player.rename();
 
-			player.armor = new Armor(5, EP.elementList[(int) (Math.random() * 12)]);
-
 		Person shmulik = new NPC(96 * 12, 96 * 18, Strategy.AGGRESSIVE);
 		shmulik.abilities.add(Ability.ability("Beam <Energy>", 6));
 		shmulik.abilities.add(Ability.ability("Flight II", 5));
