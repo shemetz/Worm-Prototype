@@ -74,7 +74,7 @@ public class Ball extends RndPhysObj
 			radius = 45;
 			break;
 		case 9: // flesh
-			radius = 30;
+			radius = 35;
 			angularVelocity = 4;
 			break;
 		case 10: // earth

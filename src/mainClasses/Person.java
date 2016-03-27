@@ -194,12 +194,9 @@ public class Person extends RndPhysObj implements Mover
 		target = new Point(-1, -1);
 		imgW = 96;
 		imgH = 96;
-		body = (new Armor(1, "Skin"));
-		// Default armor is no armor
-		armor = body;
 
 		inventory = new ArrayList<Item>();
-
+		armor = new Armor(0, "temp");
 		selfFrame(0);
 		pastCopies = new ArrayList<PersonCopy>();
 		pastCopyTimer = 0;
@@ -228,6 +225,9 @@ public class Person extends RndPhysObj implements Mover
 		nakedLegs = MAIN.random.nextInt(1);
 		nakedChest = MAIN.random.nextInt(1);
 		initAnimation();
+		body = (new Armor(naturalArmor, "Skin"));
+		// Default armor is no armor
+		putArmor(body);
 	}
 
 	public void copyState(PersonCopy other)
@@ -935,14 +935,13 @@ public class Person extends RndPhysObj implements Mover
 		if (vines)
 			buffy.drawImage(animationVine.get(animState).get(animFrame), 0, 0, null);
 		// Armor
-		if (armor != body)
+		if (armor != body && armor.isElemental())
 		{
 			int index = EP.toInt(armor.name);
 			buffy.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) (armor.armorRating / armor.maxArmorRating)));
 			buffy.drawImage(animationArmor.get(index).get(animState).get(animFrame), 0, 0, null);
 			buffy.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
 		}
-
 		// Punch drawings
 		if (animState == 5 || animState == 6 || animState == 10 || animState == 11 || animState == 12)
 		{
@@ -1132,8 +1131,7 @@ public class Person extends RndPhysObj implements Mover
 		if (armor.armorRating < armor.maxArmorRating * 0.1)
 		{
 			// LOSE ARMOR
-			armor.equipped = false;
-			armor = body;
+			putArmor(body);
 		}
 
 		// boundary checking:

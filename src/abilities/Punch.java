@@ -179,7 +179,7 @@ public class Punch extends Ability
 		int timesTested = 2; // number of checks; number of parts the range is divided into.
 		double extraVerticalHeight = 0.4;
 		final double extraAimingAngle = user.flySpeed == -1 ? 0.3 : 0.8; // If the user is flying the arc of Punch-testing is larger, because it's more difficult to aim with the keyboard and while moving.
-		for (int l = 0; l < timesTested; l++)
+		severalPunchAttempts: for (int l = 0; l < timesTested; l++)
 		{
 			range = (int) (user.radius * 2.3 * (1 - (double) l / timesTested));
 			collisionCheck: if (true)
@@ -380,7 +380,7 @@ public class Punch extends Ability
 											}
 											user.punchedSomething = true;
 										}
-										break collisionCheck;
+										break severalPunchAttempts;
 									}
 				}
 			}
@@ -389,11 +389,11 @@ public class Punch extends Ability
 		range = (int) (2.3 * user.radius);
 		if (user.punchedSomething)
 		{
-			// backwards pushback
-			env.hitPerson(user, 0, originalPushback * 0.6, user.rotation + Math.PI, -1);
 			// Sound effect of hit
 			sounds.get((int) (Math.random() * 3)).play();
-
+			// backwards pushback
+			env.hitPerson(user, 0, originalPushback * 0.6, user.rotation + Math.PI, -1);
+			
 			for (Ability a : user.punchAffectingAbilities)
 			{
 				if (a instanceof Explosive_Fists)

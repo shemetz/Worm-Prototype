@@ -43,7 +43,7 @@ public class _ArmorAbility extends Ability
 
 	public void maintain(Environment env, Person user, Point target, double deltaTime)
 	{
-		armor.reduce(decayRate * AR);
+		armor.reduce(decayRate * deltaTime * AR);
 		touchDamageTimer += deltaTime;
 		if (touchDamageTimer >= 1)
 			for (Person p : env.people)

@@ -21,6 +21,8 @@ public class Armor extends Item
 	{
 		switch (damageType)
 		{
+		case 0: //blunt
+			return 1;
 		case 1: // piercing
 			return 0.5;
 		case 2: // burn
@@ -51,5 +53,27 @@ public class Armor extends Item
 	{
 		if (!isSkin)
 			armorRating -= amount;
+	}
+
+	public boolean isElemental()
+	{
+		switch (name)
+		{
+		case "Fire":
+		case "Water":
+		case "Wind":
+		case "Electricity":
+		case "Metal":
+		case "Energy":
+		case "Ice":
+		case "Acid":
+		case "Lava":
+		case "Flesh":
+		case "Earth":
+		case "Plant":
+			return true;
+		default:
+			return false;
+		}
 	}
 }

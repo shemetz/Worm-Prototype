@@ -1385,7 +1385,7 @@ public class Environment
 
 	boolean collideWithWall(Person p, int x, int y) // x and y in grid
 	{
-		int wallElement = wallTypes[x][y];
+		int wallElement = getWallElement(wallTypes[x][y]);
 		// returns whether or not this collision changes the person's speed
 		double bounceEfficiency = 0.4; // should depend on element? TODO ?
 		Rectangle intersectRect = new Rectangle(x * squareSize, y * squareSize, squareSize, squareSize)
@@ -1454,7 +1454,7 @@ public class Environment
 				p.xVel -= p.xVel * friction;
 			}
 
-			hitPerson(p, damageToPerson, 0, p.angle() + TAU / 2, -1); // blunt damage
+			hitPerson(p, damageToPerson, 0, p.angle() + TAU / 2, wallElement); // damage depends on wall element
 
 			return true;
 		}
@@ -2743,7 +2743,7 @@ public class Environment
 		if (wallTypes[i][j] == -2)
 			return;
 		// fire can't hurt lava, acid can't hurt acid, electricity can't hurt energy, etc.
-		if (damageType > 1 && EP.damageType(wallTypes[i][j]) == damageType)
+		if (damageType > 1 && EP.damageType(getWallElement(wallTypes[i][j])) == damageType)
 			return;
 		// TODO elemental bonuses against some walls.
 		// note: because there are so many walls, destroying the wall occurs here and not in a frame check like other objects.
@@ -2850,7 +2850,7 @@ public class Environment
 	{
 		if (wallTypes[i][j] == -2)
 			return;
-		if (damageType > 1 && EP.damageType(wallTypes[i][j]) == damageType)
+		if (damageType > 1 && EP.damageType(getWallElement(wallTypes[i][j])) == damageType)
 			return;
 		final int wallArmor = 10;
 		if (damage - wallArmor < 1)
