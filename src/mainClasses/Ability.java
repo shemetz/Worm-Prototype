@@ -96,36 +96,74 @@ public class Ability implements Cloneable
 
 	public List<SoundEffect> sounds = new ArrayList<SoundEffect>();
 
-	@SuppressWarnings("unused")
+	/**
+	 * Uses the ability. For activated and on/off abilities this is called <b>once</b> when the ability key is released (after aiming), or when it is pressed (if it is {@link #instant}. For maintained abilities, it is called once when the key is
+	 * pressed and once more when it is released. For passive abilities, it is called every frame (in {@link Person#selfFrame(double)} unless the ability is {@link #on} or {@link #disabled}.
+	 * 
+	 * @param env
+	 *            the environment in which the ability is used
+	 * @param user
+	 *            the person who uses this ability
+	 * @param target
+	 *            the targeted point
+	 */
 	public void use(Environment env, Person user, Point target)
 	{
 		// to be written in child classes
 		MAIN.errorMessage("DANGER WARNING LEVEL - DEMON. NO USE METHOD FOUND FOR THIS ABILITY: " + name);
 	}
 
-	@SuppressWarnings("unused")
+	/**
+	 * Maintains the ability. This is generally called every frame if the ability is {@link #on}.
+	 * 
+	 * @param env
+	 * @param user
+	 * @param target
+	 * @param deltaTime
+	 */
 	public void maintain(Environment env, Person user, Point target, double deltaTime)
 	{
 		// to be written in child classes
 		MAIN.errorMessage("A man, a plan, a canal, Panama. no maintain for this ability. " + name);
 	}
 
-	@SuppressWarnings("unused")
+	/**
+	 * Updates the position and type of the player's target point. Should only be used for aesthetic purposes (like it is in {@link _TeleportAbility}) but we all know that I probably messed up and made it crucial for updating some fields of the
+	 * Ability. Anyways, this method is called only for players, and only while the ability is being aimed / maintained (I think).
+	 * 
+	 * @param env
+	 * @param player
+	 * @param target
+	 * @param deltaTime
+	 */
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
 	{
 		// to be written in child classes
 		MAIN.errorMessage("Time Wroth Lime Broth Crime Froth Grime Sloth.. no updatePlayerTargeting for this ability. " + name);
 	}
 
-	@SuppressWarnings("unused")
+	/**
+	 * Disables the ability. Will always (hopefully) set {@link #disabled} to <code>false</code> and turn the ability off, reverting any changes it has made to the user (or sometimes, to the environment). Stat boosts will be reverted, elemental armor
+	 * will disappear, special modes will be toggled off, maintained abilities will be interrupted, etc.
+	 * 
+	 * @param env
+	 * @param user
+	 */
 	public void disable(Environment env, Person user)
 	{
 		// to be written in child classes
 		MAIN.errorMessage("vjhvsfasetjblckvzyuf no disable() for this method. " + name);
 	}
 
-	@SuppressWarnings("unused")
-	public boolean checkCharge(Environment env, Person p, double deltaTime)
+	/**
+	 * Checks if the ability is being charged right now. This method should only be used (and implemented) in Charge-using abilities (e.g. Muscle_Charge).
+	 * 
+	 * @param env
+	 * @param user
+	 * @param deltaTime
+	 * @return true if the ability is being Charged, false if not.
+	 */
+	public boolean checkCharge(Environment env, Person user, double deltaTime)
 	{
 		// to be written in child classes
 		MAIN.errorMessage("very best and reasonable no checkCharge() for this method. " + name);
@@ -134,6 +172,14 @@ public class Ability implements Cloneable
 
 	public double maxDistFromTargetedPoint = 100; // for players only
 
+	/**
+	 * Returns the viable human target closest to the targetPoint. Viability is checked via {@link #viableTarget(Person, Person)}.
+	 * 
+	 * @param env
+	 * @param user
+	 * @param targetPoint
+	 * @return the closest Person to targetPoint that is within {@link #maxDistFromTargetedPoint} units. If none exists, returns null.
+	 */
 	public Person getTarget(Environment env, Person user, Point targetPoint)
 	{
 		// Should be overridden if needed
@@ -153,35 +199,49 @@ public class Ability implements Cloneable
 	}
 
 	/**
-	 * Returns true unless p is dead.
+	 * Returns whether or not the person is a viable target for the user. This default implementation returns true unless the person is dead, or the vertical distance between the user and the person is more than {@link #verticalRange}.
 	 * 
-	 * @param p
+	 * @param person
+	 *            the target, the possible victim
 	 * @param user
-	 * @return
+	 *            the user, the one who activated the ability
+	 * @return true if person is a viable target, false otherwise.
 	 */
-	public boolean viableTarget(Person p, Person user)
+	public boolean viableTarget(Person person, Person user)
 	{
 		// Should be overridden if needed, or super-ed
-		if (p.dead)
+		if (person.dead)
 			return false;
-		if (p.highestPoint() < user.z - verticalRange || user.highestPoint() < p.z - verticalRange)
+		if (person.highestPoint() < user.z - verticalRange || user.highestPoint() < person.z - verticalRange)
 			return false;
 		return true;
 	}
 
+	/**
+	 * Returns a mostly perfect copy of this Ability. Right now only used for the Clone III ability.
+	 */
 	public Ability clone()
 	{
 		Ability clone = Ability.ability(this.name, this.LEVEL);
 		if (this.hasTag("on-off"))
 			clone.on = this.on;
+		for (Perk p : this.perks)
+			clone.addPerk(p.name);
+		clone.updateStats();
 
 		return clone;
 	}
 
-	public Ability(String n, int p)
+	/**
+	 * Constructor. Sets most values to their default value, which would be -1 for most numbers, false for most booleans and NONE for the various Type-s. Also, sets the tags and elementNum according to the name.
+	 * 
+	 * @param name_
+	 * @param level
+	 */
+	public Ability(String name_, int level)
 	{
-		name = n;
-		LEVEL = p;
+		name = name_;
+		LEVEL = level;
 
 		// default values.
 		range = -1;
@@ -213,72 +273,76 @@ public class Ability implements Cloneable
 		prepareToEnable = false;
 		natural = false;
 
-		addTags();
+		updateTags();
 		perks = new ArrayList<Perk>();
 		elementNum = getElementNum();
 	}
 
+	/**
+	 * Used for a small number of Abilities that need to be toggled without any other input. IS overridden when needed, naturally.
+	 */
 	public void toggle()
 	{
 		MAIN.errorMessage("Toggleable ability was toggled, but the toggle method that toggled was not overridden. toggle.  (ability is " + name + ")");
 	}
 
-	protected void addTags()
+	/**
+	 * Sets the {@link #tags} list, depending on the {@link #name} field.
+	 */
+	protected void updateTags()
 	{
-		// tags
-		tagloop:
-		{
-			for (String s : Ability.descriptions)
-				if (s.startsWith(justName()) && s.charAt(justName().length()) == ' ')
-				{
-					String text = getDescription(name);
-					if (text.indexOf("\n") == -1)
-						MAIN.errorMessage("ability class go to this line and solve this. name was " + name + " and text was: " + text);
-					text = text.substring(text.indexOf("\n") + 1, text.indexOf("\n", text.indexOf("\n") + 1)); // skip first line, delete fluff and description
-					tag(text);
-					break tagloop;
-				}
-			MAIN.errorMessage("[Ablt] There has been no tag found for the ability:   " + name);
-		}
-	}
-
-	private void tag(String tagList)
-	{
-		// taglist is a string like "dangerous fire symbolic" which is parsed and will create a tag array of {"dangerous", "fire", "symbolic"}
-		// make sure not to include double spaces!
-		if (tagList.length() < 1)
-		{
-			tags = new String[0];
-			return;
-		}
-		List<String> tags2 = new ArrayList<String>();
-		String currTag = "";
-		for (int i = 0; i < tagList.length(); i++)
-		{
-			if (tagList.charAt(i) != ' ')
-				currTag += tagList.charAt(i);
-			else
+		for (String s : Ability.descriptions)
+			if (s.startsWith(justName()) && s.charAt(justName().length()) == ' ')
 			{
+				String tagList = getDescription(name);
+				if (tagList.indexOf("\n") == -1)
+					MAIN.errorMessage("ability class go to this line and solve this. name was " + name + " and text was: " + tagList);
+				tagList = tagList.substring(tagList.indexOf("\n") + 1, tagList.indexOf("\n", tagList.indexOf("\n") + 1)); // skip first line, delete fluff and description
+				// tagList is a string like "dangerous fire symbolic" which is parsed and will create a tag array of {"dangerous", "fire", "symbolic"}
+				// make sure not to include double spaces!
+				if (tagList.length() < 1)
+				{
+					tags = new String[0];
+					return;
+				}
+				List<String> tags2 = new ArrayList<String>();
+				String currTag = "";
+				for (int i = 0; i < tagList.length(); i++)
+				{
+					if (tagList.charAt(i) != ' ')
+						currTag += tagList.charAt(i);
+					else
+					{
+						tags2.add(currTag);
+						currTag = "";
+					}
+				}
 				tags2.add(currTag);
-				currTag = "";
+				tags = new String[tags2.size()];
+				for (int i = 0; i < tags2.size(); i++)
+					tags[i] = tags2.get(i);
+				return;
 			}
-		}
-		tags2.add(currTag);
-		tags = new String[tags2.size()];
-		for (int i = 0; i < tags2.size(); i++)
-			tags[i] = tags2.get(i);
+		MAIN.errorMessage("[Ablt] There has been no tag found for the ability:   " + name);
 	}
 
+	/**
+	 * 
+	 * @param tag
+	 * @return true if any of the {@link #tags} match the given tag string.
+	 */
 	public boolean hasTag(String tag)
 	{
-		if (tags.length == 0)
-			return false;
 		for (int i = 0; i < tags.length; i++)
 			if (tags[i].equals(tag))
 				return true;
 		return false;
 	}
 
+	/**
+	 * 
+	 * @return a string of all tags, separated with spaces
+	 */
 	public String getTags()
 	{
 		String s = "";
@@ -287,12 +351,22 @@ public class Ability implements Cloneable
 		return s.substring(1);
 	}
 
+	/**
+	 * uses the {@link SoundEffect#stop()} function on all {@link #sounds}.
+	 */
 	public void stopAllSounds()
 	{
 		for (int i = 0; i < sounds.size(); i++)
 			sounds.get(i).stop();
 	}
 
+	/**
+	 * Description is assumed to be standard (see abilities.txt).
+	 * 
+	 * @param text
+	 *            the complete description block of the ability
+	 * @return the name of the ability.
+	 */
 	public static String getName(String text)
 	{
 		// no element, no description or fluff
@@ -302,6 +376,10 @@ public class Ability implements Cloneable
 		// Will give an error message if there is no "(" in the ability's name (or text), so when that happens insert a printing function here to see where you forgot a newline or something
 	}
 
+	/**
+	 * 
+	 * @return element name of the ability, or "NONE" if there is none.
+	 */
 	public String getElement()
 	{
 		if (name.contains("<"))
@@ -309,6 +387,10 @@ public class Ability implements Cloneable
 		return "NONE";
 	}
 
+	/**
+	 * 
+	 * @return element number of the ability, or -1 if there is none.
+	 */
 	private int getElementNum()
 	{
 		if (name.contains("<"))
@@ -316,6 +398,9 @@ public class Ability implements Cloneable
 		return -1;
 	}
 
+	/**
+	 * 
+	 */
 	public String justName()
 	{
 		if (name.contains("<"))
@@ -323,6 +408,10 @@ public class Ability implements Cloneable
 		return name;
 	}
 
+	/**
+	 * @param name
+	 * @return the name, without any Element if there is any.
+	 */
 	public static String justName(String name)
 	{
 		if (name.contains("<"))
@@ -330,6 +419,11 @@ public class Ability implements Cloneable
 		return name;
 	}
 
+	/**
+	 * 
+	 * @param name
+	 * @return the complete description block of the abilities, using {@link Ability#descriptions}. If there is none, returns "String not found in abilities: " + name
+	 */
 	public static String getDescription(String name)
 	{
 		// name must not contain any numbers or elements
@@ -348,18 +442,37 @@ public class Ability implements Cloneable
 
 	}
 
+	/**
+	 * 
+	 * @param name
+	 * @return a nice version of the name, if this is an elemental ability. For example, turns "Ball &ltFire>" into "Fire Ball".
+	 */
 	public static String niceName(String name)
-	{ // turns "Ball <Fire>" into "Fire Ball"
+	{
 		if (name.contains("<"))
 			return name.substring(name.indexOf("<") + 1, name.indexOf(">")) + " " + name.substring(0, name.indexOf("<") - 1);
 		return name;
 	}
 
+	/**
+	 * calls the static {@link Ability#getFluff(String)} with {@link #name}.
+	 * 
+	 * @return the fluff of this ability.
+	 */
 	public String getFluff()
 	{
 		return Ability.getFluff(name);
 	}
 
+	/**
+	 * Returns the fluff of an ability: a short sentence that describes it. For example, the fluff of Elemental Armor I is:
+	 * 
+	 * <i>Create &ltan e> armor surrounding most of your body and protecting you from attacks.</i>
+	 * 
+	 * Note that the "&lte>" and "&ltan e>" parts will be replaces by the appropriate element, e.g. "Fire" and "a Fire"
+	 * 
+	 * @return the "fluff" part of an ability's description.
+	 */
 	public static String getFluff(String ability)
 	{
 		String realName = ability;
@@ -441,12 +554,21 @@ public class Ability implements Cloneable
 		return text;
 	}
 
+	/**
+	 * Sets all SoundEffect objects that belong to this ability to the given point's position.
+	 * 
+	 * @param point
+	 *            the position for the sounds of this ability.
+	 */
 	public void setSounds(Point point)
 	{
 		for (SoundEffect s : sounds)
 			s.setPosition(point);
 	}
 
+	/**
+	 * Copies all description blocks from the abilities.txt file, and puts them in {@link Ability#descriptions}.
+	 */
 	public static void initializeDescriptions()
 	{
 		try
@@ -519,11 +641,17 @@ public class Ability implements Cloneable
 		}
 	}
 
+	/**
+	 * Returns "name, [level]".
+	 */
 	public String toString()
 	{
 		return name + " [" + LEVEL + "]";
 	}
 
+	/**
+	 * A Comparator needed to sort Ability lists. Compares by points, and in case of a tie compares by name.
+	 */
 	static Comparator<Ability> pointsThenAlphabetical = new Comparator<Ability>()
 	{
 		public int compare(Ability a1, Ability a2)
@@ -535,21 +663,29 @@ public class Ability implements Cloneable
 		}
 	};
 
+	/**
+	 * Calls {@link #updateStats()} and {@link #fixStats()}.
+	 */
 	void readjust()
 	{
 		updateStats();
 		fixStats();
 	}
 
+	/**
+	 * Should ALWAYS be overridden. Updates the values for the stats and substats of this ability (sets them to their default values, depending usually only on the level).
+	 */
 	public void updateStats()
 	{
-		// Override this, and call fixStats()
+		// Override this, and call fixStats() afterwards
 		MAIN.errorMessage("no updateStats() method for " + name);
 	}
 
+	/**
+	 * Makes sure no stat is below 0 unless it is exactly -1 (by calling {@link #fixValue} for them all). Also, makes sure {@link #LEVEL} is between 1 and 10 (inclusive).
+	 */
 	public void fixStats()
 	{
-		// make sure all values are OK
 		LEVEL = Math.min(LEVEL, 10);
 		LEVEL = Math.max(1, LEVEL);
 
@@ -569,11 +705,22 @@ public class Ability implements Cloneable
 		arc = fixValue(arc);
 	}
 
+	/**
+	 * calls {@link #fixValue(double)} but for an int.
+	 * 
+	 * @param value
+	 * @return ...
+	 */
 	int fixValue(int value)
 	{
 		return (int) fixValue((double) value);
 	}
 
+	/**
+	 * 
+	 * @param value
+	 * @return -1 if value is -1, 0 if the value is negative and not -1, and value otherwise.
+	 */
 	double fixValue(double value)
 	{
 		if (value == -1)
@@ -583,6 +730,15 @@ public class Ability implements Cloneable
 		return value;
 	}
 
+	/**
+	 * Returns a new Ability, using that ability's class' constructor, and also calling {@link #readjust()}. This method should be used whenever creating a new ability.
+	 * 
+	 * @param abilityName
+	 *            the name of the ability to be created (should be like "Retrace II" or "Beam &ltPlant>")
+	 * @param pnts
+	 *            the level of the ability to be created (should be 1-10)
+	 * @return the new ability that was created. Should be a class that extends Ability. Will return null if no ability with that name exists.
+	 */
 	public static Ability ability(String abilityName, int pnts)
 	{
 		Ability ab = null;
@@ -594,7 +750,7 @@ public class Ability implements Cloneable
 			element = abilityName.substring(abilityName.indexOf("<") + 1, abilityName.indexOf(">"));
 			trimmedAbilityName = abilityName.substring(0, abilityName.indexOf("<") - 1);
 		}
-		if (!implementedAbilities.contains(trimmedAbilityName))
+		if (!implementedAbilities.contains(trimmedAbilityName)) // TODO remove this part when all abilities are implemented
 		{
 			MAIN.errorMessage();
 			return null;
@@ -913,6 +1069,10 @@ public class Ability implements Cloneable
 		return ab;
 	}
 
+	/**
+	 * 
+	 * @return a list of all possible perk names that could fit, according to the {@link #tags} list.
+	 */
 	public List<String> possiblePerks()
 	{
 		List<String> possibilities = new ArrayList<String>();
@@ -1007,6 +1167,12 @@ public class Ability implements Cloneable
 		return possibilities;
 	}
 
+	/**
+	 * Adds a new Perk, with the given name, and applies its effects.
+	 * 
+	 * @param string
+	 *            name of the Perk to be added
+	 */
 	public void addPerk(String string)
 	{
 		Perk perk = new Perk(string);

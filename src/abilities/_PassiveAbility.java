@@ -8,6 +8,12 @@ import mainClasses.MAIN;
 import mainClasses.Person;
 import mainClasses.Player;
 
+/**
+ * A passive ability. Activated once (in {@link Person#selfFrame(double)}, and modifies that person (e.g. increasing STRENGTH) or waits until a method checks if it exists (e.g. Reactive Explosions).
+ * 
+ * @author Itamar
+ *
+ */
 public class _PassiveAbility extends Ability
 {
 
@@ -16,6 +22,9 @@ public class _PassiveAbility extends Ability
 		super(s, p);
 	}
 
+	/**
+	 * Should be overridden.
+	 */
 	public void use(Environment env, Person user, Point target)
 	{
 		// int val = on ? -1 : 1;
@@ -29,6 +38,9 @@ public class _PassiveAbility extends Ability
 		;
 	}
 
+	/**
+	 * Activates the ability again, turning it off.
+	 */
 	public void disable(Environment env, Person user)
 	{
 		disabled = true;

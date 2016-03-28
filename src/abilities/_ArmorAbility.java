@@ -26,21 +26,28 @@ public class _ArmorAbility extends Ability
 		rangeType = RangeType.NONE;
 	}
 
+	/**
+	 * Puts an armor on the user if off, sets the armor's armorRating to 0 if on.
+	 */
 	public void use(Environment env, Person user, Point target)
 	{
-		if (!on)
+		if (!on && cost >= user.mana)
 		{
 			armor = new Armor(AR, armorType);
 			user.putArmor(armor);
+			user.mana -= cost;
 			on = true;
 		}
-		else
+		else if (on)
 		{
 			armor.armorRating = 0;
 			// on = false; //not necessary, will do it anyways in maintain(...)
 		}
 	}
 
+	/**
+	 * uses {@link Armor#reduce(double)} on {@link #armor} with decayRate*deltaTime*AR, and hits people near the user if touchDamageTimer >= 1 (and resets it to 0)
+	 */
 	public void maintain(Environment env, Person user, Point target, double deltaTime)
 	{
 		armor.reduce(decayRate * deltaTime * AR);
@@ -58,6 +65,9 @@ public class _ArmorAbility extends Ability
 			on = false;
 	}
 
+	/**
+	 * Removes armor (by setting its AR to 0).
+	 */
 	public void disable(Environment env, Person user)
 	{
 		disabled = true;

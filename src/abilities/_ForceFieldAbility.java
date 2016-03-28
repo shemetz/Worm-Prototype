@@ -8,6 +8,12 @@ import mainClasses.ForceField;
 import mainClasses.Person;
 import mainClasses.Player;
 
+/**
+ * An activated ability that creates a force field in front of you.
+ * 
+ * @author Itamar
+ *
+ */
 public class _ForceFieldAbility extends Ability
 {
 	public int length, width, height, life, armor;
@@ -17,7 +23,7 @@ public class _ForceFieldAbility extends Ability
 	{
 		super(n, p);
 		costType = CostType.MANA;
-		
+
 		height = 1;
 		length = 0;
 		width = 0;
@@ -25,6 +31,9 @@ public class _ForceFieldAbility extends Ability
 		armor = 0;
 	}
 
+	/**
+	 * Creates a force field in front of the user (depending on angle to target).
+	 */
 	public void use(Environment env, Person user, Point target)
 	{
 		double angle = Math.atan2(target.y - user.y, target.x - user.x);
@@ -44,6 +53,9 @@ public class _ForceFieldAbility extends Ability
 		disabled = true;
 	}
 
+	/**
+	 * Also rotates the player towards target.
+	 */
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
 	{
 		double angle = Math.atan2(target.y - player.y, target.x - player.x);

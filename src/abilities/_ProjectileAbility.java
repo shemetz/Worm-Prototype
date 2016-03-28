@@ -7,6 +7,12 @@ import mainClasses.Environment;
 import mainClasses.Person;
 import mainClasses.Player;
 
+/**
+ * An ability that shoots a projectile.
+ * 
+ * @author Itamar
+ *
+ */
 public class _ProjectileAbility extends Ability
 {
 	double startingDistance;
@@ -25,6 +31,9 @@ public class _ProjectileAbility extends Ability
 		disabled = true;
 	}
 
+	/**
+	 * Rotates the player towards the target.
+	 */
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
 	{
 		double angle = Math.atan2(target.y - player.y, target.x - player.x);

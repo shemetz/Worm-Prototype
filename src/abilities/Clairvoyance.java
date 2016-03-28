@@ -14,7 +14,7 @@ public class Clairvoyance extends Sense_Powers
 	{
 		super(p);
 		name = "Clairvoyance";
-		addTags();
+		updateTags();
 
 		costType = CostType.MANA;
 		rangeType = RangeType.CIRCLE_AREA;

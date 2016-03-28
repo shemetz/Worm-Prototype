@@ -11,6 +11,12 @@ import mainClasses.Player;
 import mainClasses.VisualEffect;
 import mainResourcesPackage.SoundEffect;
 
+/**
+ * An ability that teleports the user to a targeted location or direction.
+ * 
+ * @author Itamar
+ *
+ */
 public class _TeleportAbility extends Ability
 {
 	final int squareSize = 96;
@@ -38,6 +44,9 @@ public class _TeleportAbility extends Ability
 		sounds.add(new SoundEffect("Blink_fail.wav"));
 	}
 
+	/**
+	 * Teleports the user to the position of the target (or direction, if type is FIXED_DISTANCE). It is not possible to teleport into walls, and it is not possible to teleport into humans unless {@link #telefragging} is true.
+	 */
 	public void use(Environment env, Person user, Point target)
 	{
 		if (cooldownLeft > 0 || cost > user.mana)
@@ -131,17 +140,39 @@ public class _TeleportAbility extends Ability
 		}
 	}
 
+	/**
+	 * Should be overridden
+	 * 
+	 * @param distance
+	 * @return cost to teleport that distance
+	 */
 	double getCost(double distance)
 	{
 		MAIN.errorMessage("No getCost method was created that overrides the real one! Ability name is " + name);
 		return -1 * distance;
 	}
 
+	/**
+	 * Deal damage to a victim. Damage is currently 15 points, and pushback is 10.
+	 * 
+	 * @param env
+	 * @param victim
+	 */
 	void telefrag(Environment env, Person victim)
 	{
 		env.hitPerson(victim, 15, 10, Math.random() * Math.PI * 2, -1);
 	}
 
+	/**
+	 * Says whether or not the targeted point is available for teleportation.
+	 * 
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @param env
+	 * @param user
+	 * @return if the spot is valid.
+	 */
 	public boolean checkIfAvailable(double x, double y, double z, Environment env, Person user)
 	{
 		// test walls
@@ -161,6 +192,9 @@ public class _TeleportAbility extends Ability
 		return true;
 	}
 
+	/**
+	 * Updates target for some cool animating triangles
+	 */
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
 	{
 		if (type == Type.FIXED_DISTANCE)
@@ -168,7 +202,7 @@ public class _TeleportAbility extends Ability
 			double angle = Math.atan2(target.y - player.y, target.x - player.x);
 			player.target = new Point((int) (player.x + range * Math.cos(angle)), (int) (player.y + range * Math.sin(angle)));
 		}
-		else if (type == Type.FIXED_DISTANCE)
+		else if (type == Type.TARGET_POINT)
 			player.target = target;
 
 		target = player.target;

@@ -34,6 +34,12 @@ import effects.Tangled;
 import mainResourcesPackage.SoundEffect;
 import pathfinding.Mover;
 
+/**
+ * A Human being that can move, do various actions, have powers, etc. The child classes - Player and NPC - are the ones that are always used.
+ * 
+ * @author Itamar
+ *
+ */
 public class Person extends RndPhysObj implements Mover
 {
 	public int id;
@@ -109,7 +115,7 @@ public class Person extends RndPhysObj implements Mover
 	public double lastSpeed = 0; // used for ease of calculation sometimes.
 	public boolean holdingVine = false; // true if the person is using a Plant Beam (vine) and grabbling an enemy.
 	public double flySpeed = -1;
-	public double timeSincePortal = 0;
+	public double timeUntilPortalConfusionIsOver = 0;
 	public List<Ability> punchAffectingAbilities;
 	public boolean isAvatar = false;
 	public boolean hasChargeAbility = false;
@@ -124,7 +130,6 @@ public class Person extends RndPhysObj implements Mover
 	// stuff
 	String voiceType; // Male, Female. TODO add more
 	public Map<Environment, Area> visibleArea;
-	public Map<Environment, Area> rememberArea;
 	public Map<Environment, int[][]> seenBefore;
 
 	// Inventory and stuff?
@@ -159,11 +164,18 @@ public class Person extends RndPhysObj implements Mover
 	public boolean possessionVessel = false;
 	public boolean onlyNaturalAbilities = false;
 
+	/**
+	 * Constructor
+	 * 
+	 * @param x1
+	 *            x position of person
+	 * @param y1
+	 *            y position of person
+	 */
 	public Person(double x1, double y1)
 	{
 		super(x1, y1, 0, 0);
 		visibleArea = new HashMap<Environment, Area>();
-		rememberArea = new HashMap<Environment, Area>();
 		seenBefore = new HashMap<Environment, int[][]>();
 		mass = 70; // TODO
 		radius = 24;
@@ -230,6 +242,20 @@ public class Person extends RndPhysObj implements Mover
 		putArmor(body);
 	}
 
+	/**
+	 * Sets all "state" related fields of this Person to <code>other</code>'s fields. List of fields that are changed: {@link #runAccel}, {@link #runSpeed}, {@link #lifeRegen}, {@link #manaRegen}, {@link #staminaRegen}, {@link #animState},
+	 * {@link #animFrame}, {@link #punchAffectingAbilities}, {@link #drawLife(Graphics2D)}, {@link #stamina}, {@link #ghostMode}, {@link #panic}, {@link #prone}, {@link #dead}, {@link #slippedTimeLeft}, {@link #directionOfAttemptedMovement},
+	 * {@link #strengthOfAttemptedMovement}, {@link #timeEffect}, {@link #startStopPossession}, {@link #possessedTimeLeft}, {@link #possessionTargetID}, {@link #abilities}'s {@link Ability#on} field and {@link #effects} (creating new instances of
+	 * them).
+	 * 
+	 * <br>
+	 * <br>
+	 * 
+	 * Important fields that are NOT copied: {@link #mana}, {@link #charge}.
+	 * 
+	 * @param other
+	 *            the PersonCopy that represents the other state. Assumed to be a past version of this Person
+	 */
 	public void copyState(PersonCopy other)
 	{
 		// This method is for the Loop abilities that undo/rewind a person's state and/or position
@@ -256,7 +282,6 @@ public class Person extends RndPhysObj implements Mover
 		this.directionOfAttemptedMovement = other.directionOfAttemptedMovement;
 		this.strengthOfAttemptedMovement = other.strengthOfAttemptedMovement;
 		this.timeEffect = other.timeEffect;
-		this.timeEffect = other.timeEffect;
 		this.startStopPossession = other.possessing;
 		this.possessedTimeLeft = other.possessedTimeLeft;
 		this.possessingControllerID = other.possessingControllerID;
@@ -275,6 +300,12 @@ public class Person extends RndPhysObj implements Mover
 			this.affect(e, true);
 	}
 
+	/**
+	 * Sets all "position" related fields of this Person to <code>other</code>'s fields. Position, rotation, velocity. List of fields that are changed: x, y, z, xVel, yVel, zVel, rotation.
+	 * 
+	 * @param other
+	 *            the PersonCopy that represents the other state. Assumed to be a past version of this Person
+	 */
 	public void copyPosition(PersonCopy other)
 	{
 		// This method is for the Loop abilities that undo/rewind a person's state and/or position
@@ -289,6 +320,15 @@ public class Person extends RndPhysObj implements Mover
 		this.zVel = other.zVel;
 	}
 
+	/**
+	 * Adds or removes an {@link Effect} to this Person. Will not add an effect if there is already an existing effect with that name and the effect is not stackable (will remove the weaker one of the two, more or less). Will remove an Effect if it
+	 * matches the given effect's name and creatorAbility (or only the name, if the creator ability is null).
+	 * 
+	 * @param e
+	 *            the Effect to be added/removed
+	 * @param add
+	 *            whether or not this effect is added (true) or removed (false).
+	 */
 	public void affect(Effect e, boolean add)
 	{
 
@@ -304,8 +344,10 @@ public class Person extends RndPhysObj implements Mover
 					if (add)
 					{
 						// set old effect to strength of new effect, and refresh it
+						e2.unapply(this);
 						e2.strength = Math.max(e.strength, e2.strength);
 						e2.timeLeft = e.duration;
+						e2.apply(this);
 						return;
 					}
 					else
@@ -355,6 +397,12 @@ public class Person extends RndPhysObj implements Mover
 		}
 	}
 
+	/**
+	 * Removes a number of effects (by order of age) from this person.
+	 * 
+	 * @param amount
+	 *            number of effects to be removed
+	 */
 	public void removeEffects(int amount)
 	{
 		amount = Math.min(amount, effects.size());
@@ -370,6 +418,13 @@ public class Person extends RndPhysObj implements Mover
 
 	}
 
+	/**
+	 * Deals damage to this person (reduces {@link #life} by an amount). Does not take into account damage type, armor, etc. Will activate any abilities/variables if needed.
+	 * 
+	 * Also, if this person was damaged while in the air and flying, there is a chance of (damage / maxLife * 10) that they will fall and slip.
+	 * 
+	 * @param damage
+	 */
 	public void damage(double damage)
 	{
 		life -= damage;
@@ -411,6 +466,11 @@ public class Person extends RndPhysObj implements Mover
 		}
 	}
 
+	/**
+	 * Sets all stats and substats to their default values, and gives the natural abilities: {@link Punch} and {@link Sprint}.
+	 * 
+	 * Right now the default stat values are 3 per stat.
+	 */
 	public void initStats()
 	{
 		// all of this is TEMP
@@ -437,16 +497,43 @@ public class Person extends RndPhysObj implements Mover
 		abilities.add(Ability.ability("Sprint", 0));
 	}
 
+	/**
+	 * Sets stats to some values. Will not change a stat if the parameter is -1.
+	 * 
+	 * @param str
+	 *            {@link #STRENGTH}
+	 * @param dex
+	 *            {@link #DEXTERITY}
+	 * @param fit
+	 *            {@link #FITNESS}
+	 * @param wit
+	 *            {@link #WITS}
+	 * @param know
+	 *            {@link #KNOWLEDGE}
+	 * @param soc
+	 *            {@link #SOCIAL}
+	 */
 	public void setStats(int str, int dex, int fit, int wit, int know, int soc)
 	{
-		STRENGTH = str;
-		DEXTERITY = dex;
-		FITNESS = fit;
-		WITS = wit;
-		KNOWLEDGE = know;
-		SOCIAL = soc;
+		if (str != -1)
+			STRENGTH = str;
+		if (dex != -1)
+			DEXTERITY = dex;
+		if (fit != -1)
+			FITNESS = fit;
+		if (wit != -1)
+			WITS = wit;
+		if (know != -1)
+			KNOWLEDGE = know;
+		if (soc != -1)
+			SOCIAL = soc;
 	}
 
+	/**
+	 * Multiplies all stats by an amount.
+	 * 
+	 * @param statMultiplier
+	 */
 	public void multiplyStats(double statMultiplier)
 	{
 		STRENGTH = (int) (statMultiplier * STRENGTH);
@@ -457,11 +544,21 @@ public class Person extends RndPhysObj implements Mover
 		SOCIAL = (int) (statMultiplier * SOCIAL);
 	}
 
+	/**
+	 * Should always be overridden. Is called at the end of the constructor
+	 */
 	public void updateSubStats()
 	{
 		// should always be overridden.
 	}
 
+	/**
+	 * Sets all sub-stats to their default values (depending only on the stats). Should only be called once, when this Person is created, in the constructor.
+	 * 
+	 * <p>
+	 * maxStamina = 4 + 2 * FITNESS. naturalArmor = 0.7*STRENGTH + 0.3*FITNESS. lifeRegen = 1. manaRegen = 0.5. staminaRegen = 0.2 + 0.1*FITNESS. flightVisionDistance = 100*WITS. accuracy = 1 - 0.6 / (DEXTERITY+1). runningStaminaCost = 0.45.
+	 * sprintingStaminaCost = 1.8. evasion = 1-0.99431695501 ^ (DEXTERITY*WITS). criticalChance = same calculation as evasion. pushbackResistance = 0. Also, calls updateAccuracy().
+	 */
 	public void basicUpdateSubStats()
 	{
 		maxStamina = 4 + 2 * FITNESS;
@@ -482,11 +579,17 @@ public class Person extends RndPhysObj implements Mover
 		pushbackResistance = 0;
 	}
 
+	/**
+	 * updates the {@link #missAngle} field according to {@link #accuracy}.
+	 */
 	public void updateAccuracy()
 	{
 		missAngle = (1 - accuracy) * Math.PI / 3; // DEX 0 = 60 degree miss, DEX 3 = 15.
 	}
 
+	/**
+	 * This kills the person.
+	 */
 	public void die()
 	{
 		switchAnimation(13); // TODO death animation
@@ -499,16 +602,24 @@ public class Person extends RndPhysObj implements Mover
 		// Abilities can't be activated any more (pressAbilityKey() will not work on dead people)
 	}
 
+	/**
+	 * Returns z + height. If this person is prone, height is multiplied by 0.8. If this person is dead, height is multiplied by 0.1.
+	 * 
+	 * @return highest point of this person (in the Z dimension)
+	 */
 	public double highestPoint()
 	{
-		double value = z + height;
+		double functionalHeight = height;
 		if (prone)
-			value -= 0.2;
+			functionalHeight *= 0.8;
 		if (dead)
-			value -= 0.9;
-		return value;
+			functionalHeight *= 0.1;
+		return z + functionalHeight;
 	}
 
+	/**
+	 * Adds sounds to the {@link #sounds} list, from the files.
+	 */
 	public void initSounds()
 	{
 		sounds.add(new SoundEffect("Scorched.wav")); // 0 - when a beam hits you
@@ -518,12 +629,19 @@ public class Person extends RndPhysObj implements Mover
 			sounds.add(new SoundEffect(voiceType + "_Grunt_" + i + ".wav")); // 2-6 - pain/grunt
 	}
 
+	/**
+	 * Calls {@link SoundEffect#stop()} on all sounds in {@link #sounds}.
+	 */
 	public void stopAllSounds()
 	{
 		for (int i = 0; i < sounds.size(); i++)
 			sounds.get(i).stop();
 	}
 
+	/**
+	 * Sets the {@link #animationBottom}, {@link #animationTop}, {@link #animationVine}, {@link #animationArmor} lists. They depend on the body variables: {@link #legs}, {@link #chest}, {@link #head}, {@link #hair}, {@link #nakedLegs},
+	 * {@link #nakedChest}.
+	 */
 	public void initAnimation()
 	{
 		List<Integer> n = new ArrayList<Integer>();
@@ -609,6 +727,9 @@ public class Person extends RndPhysObj implements Mover
 		changeImage();
 	}
 
+	/**
+	 * Adds a new BufferedImage List to animationBottom, animationTop, animationVine, and all animationArmor lists.
+	 */
 	void increaseAnimationListSize()
 	{
 		animationBottom.add(new ArrayList<BufferedImage>());
@@ -618,46 +739,56 @@ public class Person extends RndPhysObj implements Mover
 			animationArmor.get(i).add(new ArrayList<BufferedImage>());
 	}
 
-	public void insertFullBodyAnimation(int stateNum, int frameNum, List<Integer> n)
+	/**
+	 * Inserts the appropriate frame to the appropriate place in the animation lists.
+	 * 
+	 * @param stateNum
+	 *            state (e.g. running, flying, punching, slipping...)
+	 * @param frameNum
+	 *            frame number (e.g. 0, 1, 2, 3...)
+	 * @param bodyParts
+	 *            list of body part types.
+	 */
+	void insertFullBodyAnimation(int stateNum, int frameNum, List<Integer> bodyParts)
 	{
 		if (stateNum < 4)
 		{
 			BufferedImage img = new BufferedImage(imgW, imgH, BufferedImage.TYPE_INT_ARGB);
 			Graphics2D g2d = img.createGraphics();
-			g2d.drawImage(Resources.bodyPart.get(5).get(n.get(5)).get(stateNum).get(frameNum), 0, 0, null); // naked legs
-			if (n.get(0) != 0)
-				g2d.drawImage(Resources.bodyPart.get(0).get(n.get(0)).get(stateNum).get(frameNum), 0, 0, null); // legs
-			g2d.drawImage(Resources.bodyPart.get(6).get(n.get(6)).get(stateNum).get(frameNum), 0, 0, null); // naked chest
-			if (n.get(1) != 0)
-				g2d.drawImage(Resources.bodyPart.get(1).get(n.get(1)).get(stateNum).get(frameNum), 0, 0, null); // chest
+			g2d.drawImage(Resources.bodyPart.get(5).get(bodyParts.get(5)).get(stateNum).get(frameNum), 0, 0, null); // naked legs
+			if (bodyParts.get(0) != 0)
+				g2d.drawImage(Resources.bodyPart.get(0).get(bodyParts.get(0)).get(stateNum).get(frameNum), 0, 0, null); // legs
+			g2d.drawImage(Resources.bodyPart.get(6).get(bodyParts.get(6)).get(stateNum).get(frameNum), 0, 0, null); // naked chest
+			if (bodyParts.get(1) != 0)
+				g2d.drawImage(Resources.bodyPart.get(1).get(bodyParts.get(1)).get(stateNum).get(frameNum), 0, 0, null); // chest
 
 			animationBottom.get(stateNum).add(img);
 			g2d.dispose();
 			img = new BufferedImage(imgW, imgH, BufferedImage.TYPE_INT_ARGB);
 			g2d = img.createGraphics();
 			// head and hair don't change in these frames, hence the .get(0):
-			g2d.drawImage(Resources.bodyPart.get(2).get(n.get(2)).get(stateNum).get(0), 0, 0, null); // head
-			if (n.get(3) != 0)
-				g2d.drawImage(Resources.bodyPart.get(3).get(n.get(3)).get(stateNum).get(0), 0, 0, null); // hair
+			g2d.drawImage(Resources.bodyPart.get(2).get(bodyParts.get(2)).get(stateNum).get(0), 0, 0, null); // head
+			if (bodyParts.get(3) != 0)
+				g2d.drawImage(Resources.bodyPart.get(3).get(bodyParts.get(3)).get(stateNum).get(0), 0, 0, null); // hair
 			animationTop.get(stateNum).add(img);
 		}
 		else
 		{
 			BufferedImage img = new BufferedImage(imgW, imgH, BufferedImage.TYPE_INT_ARGB);
 			Graphics2D g2d = img.createGraphics();
-			g2d.drawImage(Resources.bodyPart.get(5).get(n.get(5)).get(stateNum).get(frameNum), 0, 0, null); // naked legs
-			if (n.get(0) != 0)
-				g2d.drawImage(Resources.bodyPart.get(0).get(n.get(0)).get(stateNum).get(frameNum), 0, 0, null); // legs
-			g2d.drawImage(Resources.bodyPart.get(6).get(n.get(6)).get(stateNum).get(frameNum), 0, 0, null); // naked chest
-			if (n.get(1) != 0)
-				g2d.drawImage(Resources.bodyPart.get(1).get(n.get(1)).get(stateNum).get(frameNum), 0, 0, null); // chest
+			g2d.drawImage(Resources.bodyPart.get(5).get(bodyParts.get(5)).get(stateNum).get(frameNum), 0, 0, null); // naked legs
+			if (bodyParts.get(0) != 0)
+				g2d.drawImage(Resources.bodyPart.get(0).get(bodyParts.get(0)).get(stateNum).get(frameNum), 0, 0, null); // legs
+			g2d.drawImage(Resources.bodyPart.get(6).get(bodyParts.get(6)).get(stateNum).get(frameNum), 0, 0, null); // naked chest
+			if (bodyParts.get(1) != 0)
+				g2d.drawImage(Resources.bodyPart.get(1).get(bodyParts.get(1)).get(stateNum).get(frameNum), 0, 0, null); // chest
 			animationBottom.get(stateNum).add(img);
 			g2d.dispose();
 			img = new BufferedImage(imgW, imgH, BufferedImage.TYPE_INT_ARGB);
 			g2d = img.createGraphics();
-			g2d.drawImage(Resources.bodyPart.get(2).get(n.get(2)).get(stateNum).get(frameNum), 0, 0, null); // head
-			if (n.get(3) != 0)
-				g2d.drawImage(Resources.bodyPart.get(3).get(n.get(3)).get(stateNum).get(frameNum), 0, 0, null); // hair
+			g2d.drawImage(Resources.bodyPart.get(2).get(bodyParts.get(2)).get(stateNum).get(frameNum), 0, 0, null); // head
+			if (bodyParts.get(3) != 0)
+				g2d.drawImage(Resources.bodyPart.get(3).get(bodyParts.get(3)).get(stateNum).get(frameNum), 0, 0, null); // hair
 			animationTop.get(stateNum).add(img);
 		}
 
@@ -677,6 +808,12 @@ public class Person extends RndPhysObj implements Mover
 		}
 	}
 
+	/**
+	 * Increases {@link #animFrame} by 1, if frameNum is divisible by something depending on the animation state, and sets it to 0 if the cycle is done. Is called every frame.
+	 * 
+	 * @param frameNum
+	 *            the variable to be tested. Expected to grow by 1 every frame.
+	 */
 	public void nextFrame(int frameNum)
 	{
 		switch (animState)
@@ -749,6 +886,11 @@ public class Person extends RndPhysObj implements Mover
 			animFrame = 0;
 	}
 
+	/**
+	 * Switches the animation state to a new one, if the switch is valid.
+	 * 
+	 * @param newAnimState
+	 */
 	public void switchAnimation(int newAnimState)
 	{
 		switch (newAnimState) // (hahaha switch pun)
@@ -920,6 +1062,9 @@ public class Person extends RndPhysObj implements Mover
 		changeImage();
 	}
 
+	/**
+	 * Changes the {@link Drawable#image} variable. Is called whenever this Person's image changes. Also draws additional stuff, like vines or armor, in the image.
+	 */
 	public void changeImage()
 	{
 		BufferedImage bf = new BufferedImage(imgW, imgH, BufferedImage.TYPE_INT_ARGB);
@@ -981,16 +1126,25 @@ public class Person extends RndPhysObj implements Mover
 		changeImage(bf);
 	}
 
+	/**
+	 * Randomizes DNA by calling {@link EPgenerator#generateEPs()}.
+	 */
 	public void randomizeDNA()
 	{
 		DNA = EPgenerator.generateEPs();
 	}
 
+	/**
+	 * Activates DNA by calling {@link PowerGenerator#generateAbilities(List)} on {@link #DNA}. <b>Will only ADD all of these abilities.</b>
+	 */
 	public void activateDNA()
 	{
 		abilities.addAll(PowerGenerator.generateAbilities(DNA));
 	}
 
+	/**
+	 * Calls {@link #randomizeDNA()} and {@link #activateDNA()} and, if this is an NPC, {@link #rename()}.
+	 */
 	public void trigger()
 	{
 		// TEMP. In the future triggers will be based on the danger/trauma of the person.
@@ -1000,6 +1154,11 @@ public class Person extends RndPhysObj implements Mover
 			rename();
 	}
 
+	/**
+	 * Temporary trigger function; gives a large number of abilities to this player. Should be removed when all abilities are implemented.
+	 * <p>
+	 * Gives 6 abilities in levels 1-10, from the {@link Ability#implementedAbilities} pool.
+	 */
 	public void tempTrigger()
 	{
 		// like trigger(), but only with currently implemented abilities, and also entirely random :/
@@ -1064,11 +1223,22 @@ public class Person extends RndPhysObj implements Mover
 		}
 	}
 
+	/**
+	 * Sets {@link #name} to {@link NameGenerator#generate(List)} according to {@link #DNA}.
+	 */
 	public void rename()
 	{
 		name = NameGenerator.generate(this.DNA);
 	}
 
+	/**
+	 * Important function! Is called every frame, and does all the things that should happen every frame, pretty much. This includes setting sound positions, increasing the value of all timers, regenerating life/mana/stamina by the appropriate
+	 * values, clamping life/mana/stamina to the possible range of values, dying if life is 0 or less, reducing times for abilities and effects, turning passive abilities on if possible, and saving the current state and position every second in
+	 * {@link #pastCopies}.
+	 * 
+	 * @param deltaTime
+	 *            the time delta. <u>Is multiplied by timeEffect!</u>
+	 */
 	public void selfFrame(double deltaTime)
 	{
 		// this method is activated 1/deltaTime times per second
@@ -1084,8 +1254,8 @@ public class Person extends RndPhysObj implements Mover
 			inCombat = false;
 		if (timeBetweenDamageTexts < 60)
 			timeBetweenDamageTexts += deltaTime;
-		if (timeSincePortal > 0)
-			timeSincePortal -= deltaTime;
+		if (timeUntilPortalConfusionIsOver > 0)
+			timeUntilPortalConfusionIsOver -= deltaTime;
 		if (notMovingTimer > 0)
 			notMovingTimer -= deltaTime;
 
@@ -1145,7 +1315,7 @@ public class Person extends RndPhysObj implements Mover
 			charge = 100;
 
 		// DIE
-		if (life < 0)
+		if (life <= 0)
 		{
 			die();
 		}
@@ -1217,6 +1387,17 @@ public class Person extends RndPhysObj implements Mover
 		}
 	}
 
+	/**
+	 * Loops thisk zv person's state and/or position a number of seconds back in time.
+	 * 
+	 * @param secondsBackwards
+	 *            number of seconds to go back
+	 * @param state
+	 *            whether to loop state or not
+	 * @param position
+	 *            whether to loop position or not
+	 * @see {@link #copyState(PersonCopy)}, {@link #copyPosition(PersonCopy)}
+	 */
 	public void loop(int secondsBackwards, boolean state, boolean position)
 	{
 		int index = pastCopies.size() - 1 - Math.min(secondsBackwards, pastCopies.size() - 1);
@@ -1228,6 +1409,12 @@ public class Person extends RndPhysObj implements Mover
 			copyPosition(pastCopies.get(index));
 	}
 
+	/**
+	 * Makes this person slip, or un-slip. While slipping a person is {@link #prone}, and their evasion is reduced, and usually they can't control their movement anymore. Effects stop when {@link #slippedTimeLeft} reaches 0, after 3 seconds.
+	 * 
+	 * @param yes
+	 *            true = start slipping (unless already slipping), false = stop slipping
+	 */
 	public void slip(boolean yes)
 	{
 		if (yes)
@@ -1247,6 +1434,9 @@ public class Person extends RndPhysObj implements Mover
 		}
 	}
 
+	/**
+	 * Draws the shadow of this person.
+	 */
 	public void trueDrawShadow(Graphics2D buffer, double shadowX, double shadowY)
 	{
 		if (z > 0)
@@ -1257,6 +1447,9 @@ public class Person extends RndPhysObj implements Mover
 		}
 	}
 
+	/**
+	 * Draws this person. Includes special cool effects, yes!
+	 */
 	public void trueDraw(Graphics2D buffer, double cameraZed)
 	{
 		BufferedImage img = new BufferedImage(image.getWidth(), image.getHeight(), image.getType());
@@ -1400,11 +1593,22 @@ public class Person extends RndPhysObj implements Mover
 
 	}
 
+	/**
+	 * 
+	 * @return velocity squared of this person.
+	 */
 	public double velocityPow2()
 	{
 		return Math.pow(xVel, 2) + Math.pow(yVel, 2);
 	}
 
+	/**
+	 * Draws this person's name, in the given color. Rotates the Graphics2D object back in order to always draw in the right orientation no matter the camera rotation.
+	 * 
+	 * @param buffer
+	 * @param nameColor
+	 * @param cameraRotation
+	 */
 	public void drawName(Graphics2D buffer, Color nameColor, double cameraRotation)
 	{
 		buffer.rotate(cameraRotation, x, y);
@@ -1427,6 +1631,15 @@ public class Person extends RndPhysObj implements Mover
 		buffer.rotate(-cameraRotation, x, y);
 	}
 
+	/**
+	 * Draws life, mana and stamina, depending on what booleans are given. Rotates the Graphics2D object back in order to always draw in the right orientation no matter the camera rotation. Will not draw if {@link #dead} == true.
+	 * 
+	 * @param buffer
+	 * @param drawLife
+	 * @param drawMana
+	 * @param drawStamina
+	 * @param cameraRotation
+	 */
 	public void drawData(Graphics2D buffer, boolean drawLife, boolean drawMana, boolean drawStamina, double cameraRotation)
 	{
 		buffer.rotate(cameraRotation, x, y);
@@ -1444,6 +1657,11 @@ public class Person extends RndPhysObj implements Mover
 		buffer.rotate(-cameraRotation, x, y);
 	}
 
+	/**
+	 * Draws life bar.
+	 * 
+	 * @param buffer
+	 */
 	public void drawLife(Graphics2D buffer)
 	{
 		buffer.setStroke(new BasicStroke(2));
@@ -1453,6 +1671,11 @@ public class Person extends RndPhysObj implements Mover
 		buffer.drawRect((int) x - 50, (int) y - radius / 2 - 36, 100, 8);
 	}
 
+	/**
+	 * Draws mana bar.
+	 * 
+	 * @param buffer
+	 */
 	public void drawMana(Graphics2D buffer)
 	{
 		buffer.setStroke(new BasicStroke(2));
@@ -1462,6 +1685,11 @@ public class Person extends RndPhysObj implements Mover
 		buffer.drawRect((int) x - 50, (int) y - radius / 2 - 28, 100, 8);
 	}
 
+	/**
+	 * Draws stamina bar.
+	 * 
+	 * @param buffer
+	 */
 	public void drawStamina(Graphics2D buffer)
 	{
 		buffer.setStroke(new BasicStroke(2));
@@ -1471,6 +1699,13 @@ public class Person extends RndPhysObj implements Mover
 		buffer.drawRect((int) x - 50, (int) y - radius / 2 - 20, 100, 8);
 	}
 
+	/**
+	 * Draws UITexts (like damage ealt to this person recently, or the "EVASION!" text that appears when dodging attacks. Will only draw if z <= cameraZed.
+	 * 
+	 * @param buffer
+	 * @param cameraZed
+	 * @param cameraRotation
+	 */
 	public void drawUITexts(Graphics2D buffer, double cameraZed, double cameraRotation)
 	{
 		if (z <= cameraZed)
@@ -1489,6 +1724,11 @@ public class Person extends RndPhysObj implements Mover
 
 	}
 
+	/**
+	 * I don't know what the fuck this is meant to be. I think it's like...a randomly colored shadow, except instead of being random it's some bizarre calculation with life and mana and stamina?
+	 * 
+	 * @param buffer
+	 */
 	public void drawWhiteShadow(Graphics2D buffer)
 	{
 		// TODO figure out what the fuck this is meant to be.
@@ -1512,6 +1752,14 @@ public class Person extends RndPhysObj implements Mover
 		buffer.rotate(-rotation + 0.5 * Math.PI, (int) (x), (int) (y));
 	}
 
+	/**
+	 * Draws a colored shadow in the person's position. Shadow size is logarithmically dependent on the size variable given, and is in the chosed color.
+	 * 
+	 * @param buffer
+	 * @param size
+	 *            The scale is 0.6 * Math.log(size).
+	 * @param color
+	 */
 	public void drawColoredShadow(Graphics2D buffer, double size, Color color)
 	{
 		BufferedImage img = new BufferedImage(96, 96, BufferedImage.TYPE_INT_ARGB);
@@ -1533,6 +1781,15 @@ public class Person extends RndPhysObj implements Mover
 		buffer.translate(-x, -y);
 	}
 
+	/**
+	 * 
+	 * Rotates this person towards the rotationAngle, using lerping. Rotation will be slower if the {@link #slowRotation} variable is true, and will also depend on timeEffect.
+	 * 
+	 * @param rotationAngle
+	 *            target angle
+	 * @param deltaTime
+	 *            "amount" of rotation, usually equal to the amount of time since the last frame
+	 */
 	public void rotate(double rotationAngle, double deltaTime)
 	{
 		if (Double.isNaN(rotationAngle))
@@ -1551,6 +1808,16 @@ public class Person extends RndPhysObj implements Mover
 		this.rotation += amount * lerp_constant * deltaTime;
 	}
 
+	/**
+	 * calls {@link #damageArmorPart(Armor, double, int, double)}, pretty much. Used to do stuff with limbs.
+	 * 
+	 * @param damage
+	 * @param damageType
+	 *            (see {@link EP#damageType}
+	 * @param percentageOfTheDamage
+	 *            (0-1)
+	 * @return damage after taking armor into account
+	 */
 	public double damageAfterHittingArmor(double damage, int damageType, double percentageOfTheDamage)
 	{
 		// Only a single randomly selected part of the armor parts gets hit by an attack. For example, a thrown spear, fireball or bullet will only either hit the chest, or the head, or the legs, or the arms of a person.
@@ -1596,6 +1863,18 @@ public class Person extends RndPhysObj implements Mover
 		return damageArmorPart(armor, damage, damageType, percentageOfTheDamage);
 	}
 
+	/**
+	 * Returns damage after being reduced (or possibly increased) by the armor part. Damage is reduced by the armor's AR times the percentage of damage times the "effectiveness". Effectiveness depends on how the armor's strong/weak against the damage
+	 * type.
+	 * 
+	 * @param a
+	 *            the armor that's used
+	 * @param damage
+	 * @param damageType
+	 * @param percentageOfTheDamage
+	 * @return damage after the calculations. Never less than 0.
+	 * @see Armor#effectiveness(int)
+	 */
 	public double damageArmorPart(Armor a, double damage, int damageType, double percentageOfTheDamage)
 	{
 		double effectiveness = a.effectiveness(damageType) * percentageOfTheDamage;
@@ -1617,6 +1896,11 @@ public class Person extends RndPhysObj implements Mover
 
 	private static int lastIDgiven = 0;
 
+	/**
+	 * Returns a unique ID number, and increases {@link #lastIDgiven} by 1.
+	 * 
+	 * @return a unique ID number
+	 */
 	public static int giveID()
 	{
 		if (lastIDgiven >= Integer.MAX_VALUE)
@@ -1627,26 +1911,46 @@ public class Person extends RndPhysObj implements Mover
 		return lastIDgiven++;
 	}
 
+	/**
+	 * Decreases {@link #lastIDgiven} by 1.
+	 */
 	public static void cancelID()
 	{
 		lastIDgiven--;
 	}
 
+	/**
+	 * Sets {@link #lastIDgiven} to 0.
+	 */
 	public static void resetIDs()
 	{
 		lastIDgiven = 0;
 	}
 
+	/**
+	 * Returns a Point object representing this person's location (center of their body) on the XY plane. Since this is a Point object, values are integers. Units are pixels, by the way.
+	 */
 	public Point Point()
 	{
 		return new Point((int) x, (int) y);
 	}
 
+	/**
+	 * 
+	 * @return true if DNA is not empty.
+	 */
 	public boolean isParahuman()
 	{
 		return !DNA.isEmpty();
 	}
 
+	/**
+	 * Returns whether or not this person would be sensed by a specific Sense Element element (ignoring distance). Is true if there is any Ability in {@link #abilities} with that element, or if any Effect in {@link #effects} is caused by the
+	 * element's damage type (relevant to Burning, Tangled, Frozen, Stunned).
+	 * 
+	 * @param elementNum
+	 * @return
+	 */
 	public boolean elementSensed(int elementNum)
 	{
 		// check if this person has any powers of that element
@@ -1682,6 +1986,9 @@ public class Person extends RndPhysObj implements Mover
 		return false;
 	}
 
+	/**
+	 * Returns true only if the other object is a Person with the same ID as this.
+	 */
 	public boolean equals(Object other)
 	{
 		if (other instanceof Person)
@@ -1689,14 +1996,23 @@ public class Person extends RndPhysObj implements Mover
 		return false;
 	}
 
-	public void heal(double d)
+	/**
+	 * Increases {@link #life} by an amount
+	 * 
+	 * @param healAmount
+	 */
+	public void heal(double healAmount)
 	{
-		// TODO make sure it's alright
-		d = Math.min(d, maxLife - life);
-		life += d;
-		uitexts.add(new UIText(0, -60, "" + (int) d, 2));
+		healAmount = Math.min(healAmount, maxLife - life);
+		life += healAmount;
+		uitexts.add(new UIText(0, -60, "" + (int) healAmount, 2)); // should probably not be here
 	}
 
+	/**
+	 * Copies almost all fields from another Person. There are so many fields that are copied, plus, you need to make sure you didn't accidentally forget to add a field here after adding it to Person. So, uh, try to remember this method.
+	 * 
+	 * @param other
+	 */
 	public void copy(Person other)
 	{
 		this.onlyNaturalAbilities = other.onlyNaturalAbilities;
@@ -1761,6 +2077,11 @@ public class Person extends RndPhysObj implements Mover
 		this.initAnimation();
 	}
 
+	/**
+	 * Unequips armor and equips armor2.
+	 * 
+	 * @param armor2
+	 */
 	public void putArmor(Armor armor2)
 	{
 		armor.equipped = false;
@@ -1768,6 +2089,15 @@ public class Person extends RndPhysObj implements Mover
 		armor.equipped = true;
 	}
 
+	/**
+	 * Changes a stat according to an index.
+	 * <p>
+	 * 0 = STR, 1 = FIT, 2 = DEX, 3 = WIT, 4 = KNOW, 5 = SOC
+	 * 
+	 * @param statNum
+	 * @param change
+	 *            amount to be added to the stat
+	 */
 	public void changeStat(int statNum, int change)
 	{
 		switch (statNum)

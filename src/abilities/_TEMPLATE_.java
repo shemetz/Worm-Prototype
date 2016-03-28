@@ -7,6 +7,7 @@ import mainClasses.Environment;
 import mainClasses.Person;
 import mainClasses.Player;
 
+
 public class _TEMPLATE_ extends Ability
 {
 

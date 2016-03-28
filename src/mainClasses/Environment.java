@@ -1270,7 +1270,7 @@ public class Environment
 			endedAbovePortal = (intersectedPortal.end.x - intersectedPortal.start.x) * (p.y - intersectedPortal.start.y) > (intersectedPortal.end.y - intersectedPortal.start.y)
 					* (p.x - intersectedPortal.start.x);
 		if (startedAbovePortal != endedAbovePortal && intersectedPortal.partner != null)
-			if (p.timeSincePortal <= 0)
+			if (p.timeUntilPortalConfusionIsOver <= 0)
 			{
 				// Portal teleport!
 				double angleChange = intersectedPortal.partner.angle - intersectedPortal.angle;
@@ -1299,7 +1299,7 @@ public class Environment
 				p.xVel = velocity * Math.cos(newAngle);
 				p.yVel = velocity * Math.sin(newAngle);
 				intersectedPortal.playPortalSound();
-				p.timeSincePortal = 0.1; // For a period of time after portaling, you can't move through more portals.
+				p.timeUntilPortalConfusionIsOver = 0.1; // For a period of time after portaling, you can't move through more portals.
 				if (p instanceof Player)
 				{
 					((Player) p).portalMovementRotation += angleChange; // player's keys will keep pushing character relative to previous rotation

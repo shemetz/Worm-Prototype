@@ -2,6 +2,12 @@ package abilities;
 
 import mainClasses.Ability;
 
+/**
+ * An ability that summons one or multiple clones.
+ * 
+ * @author Itamar
+ *
+ */
 public class _SummoningAbility extends Ability
 {
 	public int clonesMade;

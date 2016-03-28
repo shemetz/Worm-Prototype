@@ -2091,10 +2091,9 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				drawExtraEnvironmentInfo(buffer, e);
 
 				// visibility
-				if (!player.rememberArea.containsKey(e))
+				if (!player.seenBefore.containsKey(e))
 				{
 					player.seenBefore.put(e, new int[e.width][e.height]);
-					player.rememberArea.put(e, new Area());
 				}
 				if (player.visibleArea.get(e) == null || frameNum % 2 == 0)
 				{
@@ -2103,20 +2102,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 					Ellipse2D viewRange = new Ellipse2D.Double(player.x - viewRangeDistance, player.y - viewRangeDistance, 2 * viewRangeDistance, 2 * viewRangeDistance);
 					visibleArea.intersect(new Area(viewRange));
 					player.visibleArea.put(e, visibleArea);
-					if (playerRememberPreviouslySeenPlaces)
-					{
-						// ~4 ms
-						player.rememberArea.get(e).add(player.visibleArea.get(e));
-						player.visibleRememberArea.put(e, new Area());
-						// ~4 ms
-						player.visibleRememberArea.get(e).add(player.rememberArea.get(e));
-						// ~5 ms
-						player.visibleRememberArea.get(e).intersect(new Area(viewRange));
-					}
-					else
-					{
 						player.visibleRememberArea.put(e, visibleArea);
-					}
 				}
 				// Draws everything within the player's view range that is inside the rememberArea.
 				if (playerRememberPreviouslySeenPlaces)
@@ -3195,7 +3181,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			vertAccel++;
 		if (player.rightPressed)
 			horiAccel++;
-		if (player.timeSincePortal > 0.05)
+		if (player.timeUntilPortalConfusionIsOver > 0.05)
 		{
 			player.wasdPortalArray[0] = player.upPressed;
 			player.wasdPortalArray[1] = player.leftPressed;

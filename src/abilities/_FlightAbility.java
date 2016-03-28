@@ -7,6 +7,12 @@ import mainClasses.Environment;
 import mainClasses.Person;
 import mainClasses.Player;
 
+/**
+ * An ability that when activated makes you fly.
+ * 
+ * @author Itamar
+ *
+ */
 public class _FlightAbility extends Ability
 {
 
@@ -20,6 +26,9 @@ public class _FlightAbility extends Ability
 		flySpeed = -1;
 	}
 
+	/**
+	 * Starts flying: sets user's Z to 0.1 if it was 0, fly speed to whatever, and turns ability on. If already flying, stop flying.
+	 */
 	public void use(Environment env, Person user, Point target)
 	{
 		if (!on && !user.prone && cooldownLeft == 0)
@@ -38,11 +47,17 @@ public class _FlightAbility extends Ability
 		}
 	}
 
+	/**
+	 * Take stamina from the user (cost per second).
+	 */
 	public void maintain(Environment env, Person user, Point target, double deltaTime)
 	{
 		user.stamina -= deltaTime * costPerSecond;
 	}
 
+	/**
+	 * Stop flying.
+	 */
 	public void disable(Environment env, Person user)
 	{
 		disabled = true;
@@ -54,6 +69,6 @@ public class _FlightAbility extends Ability
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
 	{
 		player.aimType = Player.AimType.NONE;
-		player.target = new Point(-1, -1);
+		player.target = player.Point();
 	}
 }

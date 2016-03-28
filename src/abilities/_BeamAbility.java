@@ -5,6 +5,12 @@ import java.util.List;
 import mainClasses.Ability;
 import mainClasses.Evasion;
 
+/**
+ * An ability that shoots a beam.
+ * 
+ * @author Itamar
+ *
+ */
 public class _BeamAbility extends Ability
 {
 	public double size;

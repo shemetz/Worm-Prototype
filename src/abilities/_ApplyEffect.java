@@ -14,33 +14,68 @@ import mainClasses.Person;
 import mainClasses.Player;
 import mainClasses.VisualEffect;
 
+/**
+ * An Ability that applies some kind of effect on either the user itself, a targeted person, or a group of people in an area.
+ * 
+ * @author Itamar
+ *
+ */
 public class _ApplyEffect extends Ability
 {
 	double beamAnimationTimer;
 
-	public enum targetTypes
+	/**
+	 * SELF - only works on self.
+	 * 
+	 * OTHER - works on the closest person in range that isn't yourself. If there is none, works on self instead.
+	 * 
+	 * AREA - works on every person in range, including yourself.
+	 * 
+	 * TARGETED - works on the person closest to target point, if they're within range.
+	 *
+	 */
+	public enum TargetType
 	{
 		SELF, OTHER, AREA, TARGETED
 	};
 
-	// SELF - only works on self.
-	// OTHER - works on the closest person in range that isn't yourself. IF there is none, works on self instead.
-	// AREA - works on every person in range, including yourself.
-	// TARGETED - works on the person closest to target point, if they're within range.
+	/**
+	 * People under the effects of the ability.
+	 */
 	List<Person> targets;
-	targetTypes targetingType;
+	TargetType targetingType;
 	VisualEffect.Type type;
 	BufferedImage beamImage;
 
-	public _ApplyEffect(String name, int p, targetTypes targetType1, VisualEffect.Type type1)
+	/**
+	 * Constructor.
+	 * 
+	 * @param name
+	 *            the name of this ability
+	 * @param level
+	 *            the level of this ability
+	 * @param targetType1
+	 *            the TargetType (SELF, OTHER, AREA, TARGETED)
+	 * @param type1
+	 *            the VisualEffect Type
+	 */
+	public _ApplyEffect(String name, int level, TargetType targetType1, VisualEffect.Type type1)
 	{
-		super(name, p);
+		super(name, level);
 		targetingType = targetType1;
 		type = type1;
 		beamAnimationTimer = 0;
 		targets = new ArrayList<Person>();
 	}
 
+	/**
+	 * Adds targets to the {@link #targets} list, according to {@link #targetingType}.
+	 * 
+	 * @param env
+	 *            the Environment
+	 * @param user
+	 *            the Ability user
+	 */
 	public void addNewTargets(Environment env, Person user)
 	{
 		switch (targetingType)
@@ -106,6 +141,14 @@ public class _ApplyEffect extends Ability
 		}
 	}
 
+	/**
+	 * Adds a {@link VisualEffect} to the environment, if effectTarget is not user. The effect will be created between the user and the target. It is usually a beam-like animation.
+	 * 
+	 * @param env
+	 * @param deltaTime
+	 * @param user
+	 * @param effectTarget
+	 */
 	public void addVisualEffect(Environment env, double deltaTime, Person user, Person effectTarget)
 	{
 		if (effectTarget != user)
@@ -203,6 +246,10 @@ public class _ApplyEffect extends Ability
 		}
 	}
 
+	/**
+	 * 
+	 * @return the Effect that this method applies on the targets
+	 */
 	public Effect effect()
 	{
 		MAIN.errorMessage("This needs to be a special effect....this is not supposed to be an ApplyEffect");
@@ -211,7 +258,7 @@ public class _ApplyEffect extends Ability
 
 	public void updatePlayerTargeting(Environment env, Player player, Point target, double deltaTime)
 	{
-		if (targetingType == targetTypes.TARGETED)
+		if (targetingType == TargetType.TARGETED)
 		{
 			player.aimType = Player.AimType.TARGET_IN_RANGE;
 		}

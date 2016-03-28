@@ -11,6 +11,12 @@ import mainClasses.Methods;
 import mainClasses.Person;
 import mainClasses.Player;
 
+/**
+ * An ability that loops back one or several targets in time, in state and/or position.
+ * 
+ * @author Itamar
+ *
+ */
 public class _LoopAbility extends Ability
 {
 	public boolean state;
@@ -29,6 +35,14 @@ public class _LoopAbility extends Ability
 		targeting = targeting1;
 	}
 
+	/**
+	 * Like getTarget but with possibly many targets, and depends on {@link #targeting}
+	 * 
+	 * @param env
+	 * @param user
+	 * @param target
+	 * @return List of possible targets
+	 */
 	public List<Person> getTargets(Environment env, Person user, Point target)
 	{
 		List<Person> targets = new ArrayList<Person>();
@@ -67,6 +81,9 @@ public class _LoopAbility extends Ability
 		return targets;
 	}
 
+	/**
+	 * Applies the loop on every target.
+	 */
 	public void use(Environment env, Person user, Point target)
 	{
 		List<Person> targets = getTargets(env, user, target);

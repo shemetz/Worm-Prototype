@@ -9,7 +9,7 @@ public class Slow_Target extends _ApplyEffect
 {
 	public Slow_Target(int p)
 	{
-		super("Slow Target", p, _ApplyEffect.targetTypes.TARGETED, VisualEffect.Type.NO);
+		super("Slow Target", p, _ApplyEffect.TargetType.TARGETED, VisualEffect.Type.NO);
 		costType = CostType.MANA;
 		rangeType = RangeType.CIRCLE_AREA;
 		stopsMovement = false;

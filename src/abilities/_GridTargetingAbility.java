@@ -10,13 +10,19 @@ import mainClasses.MAIN;
 import mainClasses.Person;
 import mainClasses.Player;
 
+/**
+ * An ability that targets a square and attempts to build on it (most likely).
+ * 
+ * @author Itamar
+ *
+ */
 public class _GridTargetingAbility extends Ability
 {
 
-	final int		squareSize	= 96;
-	public int		targetGridX, targetGridY;
-	public boolean	canBuildInTarget;
-	public Area		rangeArea;
+	final int squareSize = 96;
+	public int targetGridX, targetGridY;
+	public boolean canBuildInTarget;
+	public Area rangeArea;
 
 	public _GridTargetingAbility(String n, int p)
 	{
@@ -38,9 +44,14 @@ public class _GridTargetingAbility extends Ability
 		cooldown = Math.max(3 - 0.3 * LEVEL, 0.3); // is used for creating the wall
 		costPerSecond = 1;
 		range = 600;
-		
 	}
 
+	/**
+	 * Updates rangeArea; includes squares in range that aren't occupied by people.
+	 * 
+	 * @param env
+	 * @param player
+	 */
 	public void UPT(Environment env, Person player)
 	{
 		rangeArea = new Area();
@@ -57,11 +68,12 @@ public class _GridTargetingAbility extends Ability
 
 		// stop creating thing if it collides with someone
 		for (Person p : env.people)
-		{
-			for (int i = (int) (p.x - 0.5 * p.radius); i <= (p.x + 0.5 * p.radius); i += p.radius)
-				for (int j = (int) (p.y - 0.5 * p.radius); j <= (p.y + 0.5 * p.radius); j += p.radius)
-					rangeArea.subtract(new Area(new Rectangle2D.Double(i / squareSize * squareSize, j / squareSize * squareSize, squareSize, squareSize)));
-		}
+			if (p.z < 1)
+			{
+				for (int i = (int) (p.x - 0.5 * p.radius); i <= (p.x + 0.5 * p.radius); i += p.radius)
+					for (int j = (int) (p.y - 0.5 * p.radius); j <= (p.y + 0.5 * p.radius); j += p.radius)
+						rangeArea.subtract(new Area(new Rectangle2D.Double(i / squareSize * squareSize, j / squareSize * squareSize, squareSize, squareSize)));
+			}
 		canBuildInTarget = rangeArea.contains(player.target);
 		player.target = new Point((int) targetGridX * squareSize + squareSize / 2, (int) targetGridY * squareSize + squareSize / 2);
 	}

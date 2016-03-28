@@ -18,7 +18,7 @@ public class Heal_I extends _ApplyEffect
 
 	public Heal_I(int p)
 	{
-		super("Heal I", p, _ApplyEffect.targetTypes.OTHER, VisualEffect.Type.CONNECTING_BEAM);
+		super("Heal I", p, _ApplyEffect.TargetType.OTHER, VisualEffect.Type.CONNECTING_BEAM);
 		costType = CostType.MANA;
 		rangeType = RangeType.CIRCLE_AREA;
 		stopsMovement = false;
