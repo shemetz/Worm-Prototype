@@ -15,13 +15,22 @@ import java.awt.image.BufferedImage;
 import java.awt.image.ConvolveOp;
 import java.awt.image.Kernel;
 
+/**
+ * Handy methods for lots of stuff!
+ * 
+ * @author Itamar
+ *
+ */
 public class Methods
 {
 	// Handy rotation method
 	static GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-	static GraphicsDevice gs = ge.getDefaultScreenDevice();
-	static GraphicsConfiguration tgc = gs.getDefaultConfiguration();
+	static GraphicsDevice gd = ge.getDefaultScreenDevice();
+	static GraphicsConfiguration gc = gd.getDefaultConfiguration();
 
+	/**
+	 * Returns rotated BufferedImage. Unused, because {@link Graphics2D#rotate(double, double, double)} is as useful if not more in 99% of the cases.
+	 */
 	public static BufferedImage rotate(BufferedImage image, double angle)
 	{
 		if (image == null)
@@ -30,7 +39,7 @@ public class Methods
 		int w = image.getWidth(), h = image.getHeight();
 		int neww = (int) Math.floor(w * cos + h * sin), newh = (int) Math.floor(h * cos + w * sin);
 
-		BufferedImage result = tgc.createCompatibleImage(neww, newh, Transparency.TRANSLUCENT);
+		BufferedImage result = gc.createCompatibleImage(neww, newh, Transparency.TRANSLUCENT);
 		Graphics2D g = result.createGraphics();
 		g.translate((neww - w) / 2, (newh - h) / 2);
 		g.rotate(angle, w / 2, h / 2);
@@ -39,51 +48,112 @@ public class Methods
 		return result;
 	}
 
-	// Distance between point and line
-	// Compute the dot product AB . BC
-	static double DotProduct(Point a, Point b, Point c)
+	/**
+	 * Compute the dot product AB . BC
+	 * <p>
+	 * = Distance between point and line
+	 * 
+	 * @param A
+	 * @param B
+	 * @param C
+	 * @return AB . BC
+	 */
+	static double DotProduct(Point A, Point B, Point C)
 	{
-		return (b.x - a.x) * (c.x - b.x) + (b.y - a.y) * (c.y - b.y);
+		return (B.x - A.x) * (C.x - B.x) + (B.y - A.y) * (C.y - B.y);
 	}
 
-	// Compute the cross product AB x AC
-	static double CrossProduct(Point a, Point b, Point c)
+	/**
+	 * Compute the cross product AB . BC
+	 * 
+	 * @param A
+	 * @param B
+	 * @param C
+	 * @return AB X BC
+	 */
+	static double CrossProduct(Point A, Point B, Point C)
 	{
-		return (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
+		return (B.x - A.x) * (C.y - A.y) - (B.y - A.y) * (C.x - A.x);
 	}
 
-	// Compute the squared distance from A to B
-	public static double DistancePow2(Point a, Point b)
+	/**
+	 * Compute the squared distance from A to B
+	 * 
+	 * @param A
+	 * @param B
+	 * @return |AB|^2 + |BC|^2
+	 */
+	public static double DistancePow2(Point A, Point B)
 	{
-		return (a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y);
+		return (A.x - B.x) * (A.x - B.x) + (A.y - B.y) * (A.y - B.y);
 	}
 
-	// Compute the squared distance from A to B
-	public static double DistancePow2(Point2D a, Point2D b)
+	/**
+	 * Compute the squared distance from A to B
+	 * 
+	 * @param A
+	 * @param B
+	 * @return |AB|^2 + |BC|^2
+	 */
+	public static double DistancePow2(Point2D A, Point2D B)
 	{
-		return (a.getX() - b.getX()) * (a.getX() - b.getX()) + (a.getY() - b.getY()) * (a.getY() - b.getY());
+		return (A.getX() - B.getX()) * (A.getX() - B.getX()) + (A.getY() - B.getY()) * (A.getY() - B.getY());
 	}
 
+	/**
+	 * Compute the squared distance from A to B
+	 * 
+	 * @param ax
+	 * @param ay
+	 * @param bx
+	 * @param by
+	 * @return (bx-ax)^2 + (by-ay)^2
+	 */
 	public static double DistancePow2(double ax, double ay, double bx, double by)
 	{
 		return (ax - bx) * (ax - bx) + (ay - by) * (ay - by);
 	}
 
-	// Compute the SQUARED distance from AB to C
-	public static double LineToPointDistancePow2(Point3D start, Point3D end, Point point)
+	/**
+	 * Computes squared distance between a segment and a point
+	 * 
+	 * @param start
+	 * @param end
+	 * @param point
+	 * @return
+	 */
+	public static double SegmentToPointDistancePow2(Point3D start, Point3D end, Point point)
 	{
-		return LineToPointDistancePow2(new Point(start.x, start.y), new Point(end.x, end.y), point);
+		return SegmentToPointDistancePow2(new Point(start.x, start.y), new Point(end.x, end.y), point);
 	}
 
 	/**
-	 * CASTS TO INTS
+	 * /** Computes squared distance between a segment and a point
+	 * <p>
+	 * Casts to integers!
+	 * 
+	 * @param x1
+	 * @param y1
+	 * @param x2
+	 * @param y2
+	 * @param px
+	 * @param py
+	 * @return
 	 */
-	public static double LineToPointDistancePow2(double x1, double y1, double x2, double y2, double px, double py)
+	public static double SegmentToPointDistancePow2(double x1, double y1, double x2, double y2, double px, double py)
 	{
-		return LineToPointDistancePow2(new Point((int) (x1), (int) (y1)), new Point((int) (x2), (int) (y2)), new Point((int) (px), (int) (py)));
+		return SegmentToPointDistancePow2(new Point((int) (x1), (int) (y1)), new Point((int) (x2), (int) (y2)), new Point((int) (px), (int) (py)));
 	}
 
-	public static double LineToPointDistancePow2(Point start, Point end, Point point)
+	/**
+	 * Computes squared distance between a segment and a point
+	 * 
+	 * @param start
+	 * @param end
+	 * @param point
+	 * @return
+	 */
+	public static double SegmentToPointDistancePow2(Point start, Point end, Point point)
 	{
 
 		// testing for ends of the line
@@ -98,13 +168,33 @@ public class Methods
 		return distPow2;
 	}
 
+	/**
+	 * Finds closest point on segment to a point
+	 * <p>
+	 * converts to Integer values
+	 * 
+	 * @param start
+	 * @param end
+	 * @param point
+	 * @return closest point
+	 */
 	public static Point getClosestRoundedPointOnSegment(Point start, Point end, Point point)
 	{
 		Point2D p = getClosestPointOnSegment(start.x, start.y, end.x, end.y, point.x, point.y);
 		return new Point((int) (p.getX()), (int) (p.getY()));
 	}
 
-	// returns closest point on AB to the point X
+	/**
+	 * Computes closest point to a point on a line segment
+	 * 
+	 * @param sx1
+	 * @param sy1
+	 * @param sx2
+	 * @param sy2
+	 * @param px
+	 * @param py
+	 * @return
+	 */
 	public static Point2D getClosestPointOnSegment(double sx1, double sy1, double sx2, double sy2, double px, double py)
 	{
 		double xDelta = sx2 - sx1;
@@ -135,34 +225,17 @@ public class Methods
 		return closestPoint;
 	}
 
-	// Returns distance to closest point
-	public static double getSegmentPointDistancePow2(double sx1, double sy1, double sx2, double sy2, double px, double py)
-	{
-		double xDelta = sx2 - sx1;
-		double yDelta = sy2 - sy1;
-
-		if ((xDelta == 0) && (yDelta == 0))
-		{
-			// It's a bug. It's a bug?
-			return Methods.DistancePow2(sx1, sy1, px, py);
-		}
-
-		double u = ((px - sx1) * xDelta + (py - sy1) * yDelta) / (xDelta * xDelta + yDelta * yDelta);
-		if (u < 0)
-		{
-			return Methods.DistancePow2(sx1, sy1, px, py);
-		}
-		else if (u > 1)
-		{
-			return Methods.DistancePow2(sx2, sy2, px, py);
-		}
-		else
-		{
-			return Methods.DistancePow2(sx1 + u * xDelta, sy1 + u * yDelta, px, py);
-		}
-	}
-
-	// returns closest point on AB to the point X
+	/**
+	 * Returns closest point on infinite line, defined by two points, and a point.
+	 * 
+	 * @param sx1
+	 * @param sy1
+	 * @param sx2
+	 * @param sy2
+	 * @param px
+	 * @param py
+	 * @return
+	 */
 	public static Point2D getClosestPointOnLine(double sx1, double sy1, double sx2, double sy2, double px, double py)
 	{
 		double xDelta = sx2 - sx1;
@@ -179,15 +252,11 @@ public class Methods
 		return new Point2D.Double(sx1 + u * xDelta, sy1 + u * yDelta);
 	}
 
-	// Compute the dot product AB . AC
-	public static double realDotProduct(Point a, Point b, Point c)
-	{
-		return (b.x - a.x) * (c.x - a.x) + (b.y - a.y) * (c.y - a.y);
-	}
-
-	static GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
-	static GraphicsConfiguration gc = gd.getDefaultConfiguration();
-
+	/**
+	 * 
+	 * @param img
+	 * @return same image, but with {@link Transparency#TRANSLUCENT}
+	 */
 	public static BufferedImage optimizeImage(BufferedImage img)
 	{
 		BufferedImage img2 = gc.createCompatibleImage(img.getWidth(), img.getHeight(), Transparency.TRANSLUCENT);
@@ -198,6 +267,13 @@ public class Methods
 		return img2;
 	}
 
+	/**
+	 * I dunno
+	 * 
+	 * @param radius
+	 * @param horizontal
+	 * @return
+	 */
 	public static ConvolveOp getGaussianBlurFilter(int radius, boolean horizontal)
 	{
 		if (radius < 1)
@@ -238,6 +314,13 @@ public class Methods
 		return new ConvolveOp(kernel, ConvolveOp.EDGE_NO_OP, null);
 	}
 
+	/**
+	 * returns point of intersection between two infinite lines, or null if there is none
+	 * 
+	 * @param l1
+	 * @param l2
+	 * @return
+	 */
 	public static Point2D getLineLineIntersection(Line2D l1, Line2D l2)
 	{
 		Point2D point = getLineLineIntersection(l1.getX1(), l1.getY1(), l1.getX2(), l1.getY2(), l2.getX1(), l2.getY1(), l2.getX2(), l2.getY2());
@@ -277,6 +360,13 @@ public class Methods
 		return null; // No intersection
 	}
 
+	/**
+	 * Returns point of intersection between two infinite lines, or null if there is none or many
+	 * 
+	 * @param l1
+	 * @param l2
+	 * @return
+	 */
 	public static Point2D getLineLineIntersection(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4)
 	{
 		double det1And2 = det(x1, y1, x2, y2);
@@ -296,27 +386,66 @@ public class Methods
 		return new Point2D.Double(x, y);
 	}
 
+	/**
+	 * Determinant, I think? Can't remember.
+	 * 
+	 * @param a
+	 * @param b
+	 * @param c
+	 * @param d
+	 * @return a * d - b * c
+	 */
 	public static double det(double a, double b, double c, double d)
 	{
 		return a * d - b * c;
 	}
 
+	/**
+	 * Distance squared...you know
+	 * 
+	 * @param a
+	 * @param b
+	 * @return
+	 */
 	public static double DistancePow2(Point3D a, Point2D b)
 	{
 		return DistancePow2((int) a.x, (int) a.y, (int) b.getX(), (int) b.getY());
 	}
 
+	/**
+	 * Returns distance squared. Why are you even reading this?
+	 * 
+	 * @param a
+	 * @param b
+	 * @return
+	 */
 	public static double DistancePow2(Point3D a, Point3D b)
 	{
 		return DistancePow2((int) a.x, (int) a.y, (int) b.x, (int) b.y);
 	}
 
+	/**
+	 * Returns an angle that's between angle and target, close to angle but leaning towards target depending on amount.
+	 * 
+	 * @param angle
+	 *            in radians
+	 * @param target
+	 *            in radians
+	 * @param amount
+	 * @return lerped angle in radians
+	 */
 	public static double lerpAngle(double angle, double target, double amount)
 	{
 		// TODO um. Does it accept all angles, or only ones between 0 and tau, or only ones between -pi and +pi?
 		return angle + (((((target - angle) % (Math.PI * 2)) + (Math.PI * 3)) % (Math.PI * 2)) - Math.PI) * amount;
 	}
 
+	/**
+	 * 
+	 * @param angle1
+	 * @param angle2
+	 * @return angle between the two angles. If they are opposed, returns NaN
+	 */
 	public static double meanAngle(double angle1, double angle2)
 	{
 		// solution also works on more than 2 angles)
@@ -328,6 +457,13 @@ public class Methods
 			return Math.atan2(ySum / 2, xSum / 2);
 	}
 
+	/**
+	 * Tints an image with a color (tints a new copy of the image and returns it)
+	 * 
+	 * @param original
+	 * @param color
+	 * @return
+	 */
 	public BufferedImage tint(BufferedImage original, Color color)
 	{
 		BufferedImage result = new BufferedImage(original.getWidth(), original.getHeight(), BufferedImage.TYPE_INT_ARGB);
@@ -340,6 +476,13 @@ public class Methods
 		return result;
 	}
 
+	/**
+	 * Returns the closest intersection point of a line and a rectangle. If there is none, returns null.
+	 * 
+	 * @param line
+	 * @param rectangle
+	 * @return
+	 */
 	public static Point2D getClosestIntersectionPoint(Line2D line, Rectangle2D rectangle)
 	{
 		// if (Methods.LineToPointDistancePow2(line.getX1(), line.getY1(), line.getX2(), line.getY2(), rectangle.getCenterX(), rectangle.getCenterY()) > rectangle.getWidth() * rectangle.getHeight() / 4)

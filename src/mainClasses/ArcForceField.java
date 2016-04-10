@@ -3,6 +3,19 @@ package mainClasses;
 import java.awt.Graphics2D;
 import java.awt.Point;
 
+import abilities.Protective_Bubble_I;
+import abilities.Shield_E;
+
+/**
+ * A force field in the shape of an arc or a full circle. Is either a force field (like {@link Protective_Bubble_I}) or a shield (like {@link Shield_E}).
+ * 
+ * <p>
+ * 
+ * Also known as AFF.
+ * 
+ * @author Itamar
+ *
+ */
 public class ArcForceField extends Drawable
 {
 	static double Width = 20;
@@ -56,6 +69,11 @@ public class ArcForceField extends Drawable
 		updateImage();
 	}
 
+	/**
+	 * Just, you know, regular update method. Timers, life decay, possibly follow a target.
+	 * 
+	 * @param deltaTime
+	 */
 	public void update(double deltaTime)
 	{
 		if (timeBetweenDamageTexts < 60)
@@ -80,6 +98,9 @@ public class ArcForceField extends Drawable
 		}
 	}
 
+	/**
+	 * Update image, according to current life.
+	 */
 	public void updateImage()
 	{
 		// Currently force fields change images after lower than (e.g.) 75 health, not 75% health!
@@ -109,6 +130,10 @@ public class ArcForceField extends Drawable
 		changeImage(Resources.arcForceFields[elementNum][frame]);
 	}
 
+	/**
+	 * 
+	 * @return damage type associated with this AFF.
+	 */
 	public int damageType()
 	{
 		if (elementNum < 12)
@@ -117,6 +142,10 @@ public class ArcForceField extends Drawable
 			return EP.damageType("Energy");
 	}
 
+	/**
+	 * 
+	 * @return position (Integer precision).
+	 */
 	public Point Point()
 	{
 		return new Point((int) x, (int) y);

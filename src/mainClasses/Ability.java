@@ -12,6 +12,12 @@ import java.util.List;
 import abilities.*;
 import mainResourcesPackage.SoundEffect;
 
+/**
+ * An Ability. Has lots of variables. Every person has their own Ability instance, because it includes stuff like cooldown left and erks and targets.
+ * 
+ * @author Itamar
+ *
+ */
 public class Ability implements Cloneable
 {
 	final static List<String> implementedAbilities = Arrays.asList("Elemental Combat I", "Elemental Combat II", "Beam", "Ball", "Shield", "Pool", "Wall", "Spray", "Sense Element",

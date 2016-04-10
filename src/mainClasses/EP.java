@@ -2,35 +2,70 @@ package mainClasses;
 
 import java.awt.Color;
 
+/**
+ * EP = Element Points. Every EP is the equivalent of "6 Fire Points" or something like that. The sum of all EPs of a person is 10. If they have powers.
+ * 
+ * @author Itamar
+ *
+ */
 public class EP
 {
 	public int elementNum;
 	public int points;
 
+	/**
+	 * 
+	 * @param e
+	 *            element index, e.g. 10 for Earth
+	 * @param p
+	 *            number of points / level
+	 */
 	public EP(int e, int p)
 	{
 		elementNum = e;
 		points = p;
 	}
 
+	/**
+	 * 
+	 * @param e
+	 *            element name, e.g. "Strong"
+	 * @param p
+	 *            number of points / level
+	 */
 	public EP(String e, int p)
 	{
 		elementNum = toInt(e);
 		points = p;
 	}
 
+	/**
+	 * This other version of toString is in uppercase if it's a main element, and lowercase if it's minor. Easier to read that way, for me.
+	 * 
+	 * @return string describing this EP: NAME points or name points
+	 */
 	public String toString2()
-	{ // This other version of toString is in uppercase if it's a main element, and lowercase if it's minor. Easier to read that way, for me.
+	{
 		if (points < 4)
 			return "" + elementList[elementNum].toLowerCase() + " " + points;
 		return "" + elementList[elementNum].toUpperCase() + " " + points;
 	}
 
+	/**
+	 * 
+	 * @return string describing this EP: Name points
+	 */
 	public String toString()
 	{
 		return "" + elementList[elementNum] + " " + points;
 	}
 
+	/**
+	 * 
+	 * @param element
+	 *            name of the element
+	 * @return damage type of element
+	 */
 	public static int damageType(String element)
 	{
 		switch (element)
@@ -59,6 +94,39 @@ public class EP
 		}
 	}
 
+	/**
+	 * 
+	 * @param damageType
+	 * @return name of damage type
+	 */
+	public static String nameOfDamageType(int damageTypeNum)
+	{
+		switch (damageTypeNum)
+		{
+		case 0:
+			return "Impact";
+		case 1:
+			return "Stab";
+		case 2:
+			return "Burn";
+		case 3:
+			return "Acid";
+		case 4:
+			return "Shock";
+		case 9:
+			return "Phantom";
+		default:
+			MAIN.errorMessage("GuillotineTit: Unknown damage type! " + damageTypeNum);
+			return "WTF";
+		}
+	}
+
+	/**
+	 * 
+	 * @param eNum
+	 *            number of element. -1 = blunt. 12 = force field.
+	 * @return damage type that this element does
+	 */
 	public static int damageType(int eNum)
 	{
 		switch (eNum)
@@ -90,39 +158,28 @@ public class EP
 		}
 	}
 
-	public static String nameOfDamageType(int damageTypeNum)
-	{
-		switch (damageTypeNum)
-		{
-		case 0:
-			return "Impact";
-		case 1:
-			return "Stab";
-		case 2:
-			return "Burn";
-		case 3:
-			return "Acid";
-		case 4:
-			return "Shock";
-		case 9:
-			return "Phantom";
-		default:
-			MAIN.errorMessage("GuillotineTit: Unknown damage type! " + damageTypeNum);
-			return "WTF";
-		}
-	}
-
-	public static int toInt(String e)
+	/**
+	 * 
+	 * @param elementName
+	 * @return index of that element in the element list; elementNum
+	 */
+	public static int toInt(String elementName)
 	{
 		for (int i = 0; i < elementList.length; i++)
-			if (elementList[i].equals(e))
+			if (elementList[i].equals(elementName))
 				return i;
 		return -1;
 	}
 
+	/**
+	 * List of all of the 32 elements. Note that "element" does not only include the first 12 elements (fire, water....plant), which are the "elemental elements".
+	 */
 	public static String[] elementList =
 	{ "Fire", "Water", "Wind", "Electricity", "Metal", "Ice", "Energy", "Acid", "Lava", "Flesh", "Earth", "Plant", "Sense", "Strong", "Regenerate", "Flight", "Dexterity", "Armor", "Movement",
 			"Teleport", "Ghost", "Force Field", "Time", "Loop", "Power", "Steal", "Audiovisual", "Summon", "Explosion", "Control", "Buff", "Charge" };
+	/**
+	 * Colors that identify each element. Note that the Ghost element has some transparency to it.
+	 */
 	public static Color[] elementColors = new Color[]
 	{ Color.decode("#FF6A00"), Color.decode("#0094FF"), Color.decode("#CDE8FF"), Color.decode("#FFD800"), Color.decode("#999999"), Color.decode("#84FFFF"), Color.decode("#E751FF"),
 			Color.decode("#A8A30D"), Color.decode("#D32B00"), Color.decode("#FF75AE"), Color.decode("#8C2F14"), Color.decode("#5DAE00"), Color.decode("#91C6FF"), Color.decode("#4F2472"),

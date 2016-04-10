@@ -1602,13 +1602,13 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			{
 				if (p1.Line2D().intersectsLine(p2.Line2D()))
 					drawPortalProblem(buffer, p2);
-				else if (Methods.getSegmentPointDistancePow2(p2.start.x, p2.start.y, p2.end.x, p2.end.y, p1.start.x, p1.start.y) < Portals.minimumDistanceBetweenPortalsPow2)
+				else if (Methods.SegmentToPointDistancePow2(p2.start.x, p2.start.y, p2.end.x, p2.end.y, p1.start.x, p1.start.y) < Portals.minimumDistanceBetweenPortalsPow2)
 					drawPortalProblem(buffer, p2);
-				else if (Methods.getSegmentPointDistancePow2(p2.start.x, p2.start.y, p2.end.x, p2.end.y, p1.end.x, p1.end.y) < Portals.minimumDistanceBetweenPortalsPow2)
+				else if (Methods.SegmentToPointDistancePow2(p2.start.x, p2.start.y, p2.end.x, p2.end.y, p1.end.x, p1.end.y) < Portals.minimumDistanceBetweenPortalsPow2)
 					drawPortalProblem(buffer, p2);
-				else if (Methods.getSegmentPointDistancePow2(p1.start.x, p1.start.y, p1.end.x, p1.end.y, p2.start.x, p2.start.y) < Portals.minimumDistanceBetweenPortalsPow2)
+				else if (Methods.SegmentToPointDistancePow2(p1.start.x, p1.start.y, p1.end.x, p1.end.y, p2.start.x, p2.start.y) < Portals.minimumDistanceBetweenPortalsPow2)
 					drawPortalProblem(buffer, p2);
-				else if (Methods.getSegmentPointDistancePow2(p1.start.x, p1.start.y, p1.end.x, p1.end.y, p2.end.x, p2.end.y) < Portals.minimumDistanceBetweenPortalsPow2)
+				else if (Methods.SegmentToPointDistancePow2(p1.start.x, p1.start.y, p1.end.x, p1.end.y, p2.end.x, p2.end.y) < Portals.minimumDistanceBetweenPortalsPow2)
 					drawPortalProblem(buffer, p2);
 			}
 	}
@@ -1641,7 +1641,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		frameTimer.stop();
 		System.setProperty("sun.java2d.opengl", "True");
 
-		EPgenerator.initializeFHRE();
+		EPgenerator.initializeElementWeightedList();
 		PowerGenerator.initializeTables();
 		Ability.initializeDescriptions();
 		Resources.initialize();
@@ -1674,7 +1674,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		// sub.parent = env;
 
 		player = new Player(96 * 15, 96 * 15);
-		player.tempTrigger();
+		player.trigger();
 		// player.abilities.add(Ability.ability("Force Shield", 5));
 		// player.abilities.add(Ability.ability("Beam <Energy>", 5));
 		player.defaultHotkeys();

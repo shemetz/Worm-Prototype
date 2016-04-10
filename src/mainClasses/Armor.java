@@ -1,5 +1,11 @@
 package mainClasses;
 
+/**
+ * Armor. has armor rating, which is how much damage it blocks when hit every time, more or less.
+ * 
+ * @author Itamar
+ *
+ */
 public class Armor extends Item
 {
 	public double maxArmorRating;
@@ -17,11 +23,18 @@ public class Armor extends Item
 		equipped = false;
 	}
 
+	/**
+	 * Returns effectiveness of this armor; 1 is complete effectiveness (normal) and 0 is ineffectiveness. Blunt damage is 1, piercing is 0.5, shock is 2, special is 0, and burn/acid are either 2 if this armor is the same element, -1 if it's a
+	 * vulnerable element, and 1 if it's neither.
+	 * 
+	 * @param damageType
+	 * @return effectiveness of this armor
+	 */
 	public double effectiveness(int damageType)
 	{
 		switch (damageType)
 		{
-		case 0: //blunt
+		case 0: // blunt
 			return 1;
 		case 1: // piercing
 			return 0.5;
@@ -49,12 +62,18 @@ public class Armor extends Item
 		}
 	}
 
+	/**
+	 * If this is not skin, reduce armorRating by the amount.
+	 */
 	public void reduce(double amount)
 	{
 		if (!isSkin)
 			armorRating -= amount;
 	}
 
+	/**
+	 * @return true if this is an elemental armor (which fades when it's damaged).
+	 */
 	public boolean isElemental()
 	{
 		switch (name)

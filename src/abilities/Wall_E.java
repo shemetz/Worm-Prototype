@@ -28,6 +28,14 @@ public class Wall_E extends _GridTargetingAbility
 		 * Create a wall. Destroys any pools in that area.
 		 */
 		int gridX = target.x / squareSize, gridY = target.y / squareSize;
+		if (gridX < 0)
+			gridX = 0;
+		if (gridX >= env.width)
+			gridX = env.width - 1;
+		if (gridY < 0)
+			gridY = 0;
+		if (gridY >= env.height)
+			gridY = env.height - 1;
 		boolean repairingWall = env.wallTypes[gridX][gridY] == elementNum && env.wallHealths[gridX][gridY] < 100 && 0.3 <= user.mana;
 		if (!on && !user.maintaining && (cost <= user.mana || repairingWall))
 		{

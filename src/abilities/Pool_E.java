@@ -32,6 +32,14 @@ public class Pool_E extends _GridTargetingAbility
 		 * Create a pool. The cost of creating a pool is reduced if there's an adjacent pool.
 		 */
 		int gridX = target.x / squareSize, gridY = target.y / squareSize;
+		if (gridX < 0)
+			gridX = 0;
+		if (gridX >= env.width)
+			gridX = env.width - 1;
+		if (gridY < 0)
+			gridY = 0;
+		if (gridY >= env.height)
+			gridY = env.height - 1;
 		// test for lesser cost
 		boolean lesserCost = false;
 		for (int i = gridX - 1; i <= gridX + 1; i++)

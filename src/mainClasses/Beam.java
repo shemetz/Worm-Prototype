@@ -8,6 +8,12 @@ import java.awt.image.BufferedImage;
 
 import abilities.Beam_E;
 
+/**
+ * A beam. Extends from one point to the other, and exists only for a split second.
+ * 
+ * @author Itamar
+ *
+ */
 public class Beam extends Drawable
 {
 	public Person creator;
@@ -26,6 +32,18 @@ public class Beam extends Drawable
 	public Beam_E theAbility;
 	public boolean critical = false;
 
+	/**
+	 * Big constructor
+	 * 
+	 * @param creator
+	 * @param theAbility
+	 * @param start
+	 * @param end
+	 * @param elementNum
+	 * @param damage1
+	 * @param pushback1
+	 * @param range
+	 */
 	public Beam(Person creator, Beam_E theAbility, Point3D start, Point3D end, int elementNum, double damage1, double pushback1, double range)
 	{
 		this.theAbility = theAbility;
@@ -66,6 +84,10 @@ public class Beam extends Drawable
 		end.y = (int) (creator.y + 10000 * Math.sin(rotation));
 	}
 
+	/**
+	 * 
+	 * @return angle of this beam, from start to end
+	 */
 	public double angle()
 	{
 		return Math.atan2(end.y - start.y, end.x - start.x);
@@ -86,7 +108,7 @@ public class Beam extends Drawable
 		// PORTAL INTERSECTION
 		Portal p = intersectedPortal;
 
-		Point point = (Methods.LineToPointDistancePow2(p.start, p.end, new Point(start.x, start.y)) > Methods.LineToPointDistancePow2(p.start, p.end, new Point(end.x, end.y)))
+		Point point = (Methods.SegmentToPointDistancePow2(p.start, p.end, new Point(start.x, start.y)) > Methods.SegmentToPointDistancePow2(p.start, p.end, new Point(end.x, end.y)))
 				? new Point(5 * end.x / 6 + start.x / 6, 5 * end.y / 6 + start.y / 6) : new Point(end.x / 6 + 5 * start.x / 6, end.y / 6 + 5 * start.y / 6);
 		double k = (p.end.x - p.start.x) * (point.y - p.start.y) - (p.end.y - p.start.y) * (point.x - p.start.x);
 		// k is >0 if this is below p, <0 if this is above p, or 0 if this is in the middle of p
@@ -106,6 +128,15 @@ public class Beam extends Drawable
 		buffer.setClip(originalClip);
 	}
 
+	/**
+	 * Returns a clip needed for portal drawing graphics stuff
+	 * 
+	 * @param p
+	 *            the portal
+	 * @param direction
+	 *            end or start of the beam, I think?
+	 * @return polygon for the clip for the drawing
+	 */
 	public Polygon getClipOfPortal(Portal p, boolean direction)
 	{
 

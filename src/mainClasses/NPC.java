@@ -404,7 +404,7 @@ public class NPC extends Person
 					loop: for (int xx = minX; xx <= maxX; xx++)
 						for (int yy = minY; yy <= maxY; yy++)
 							if (envMap.getCost(this, A.x, A.y, xx, yy) > 1)
-								if (Methods.LineToPointDistancePow2(A, C, new Point(xx, yy)) < minDistancePow2)
+								if (Methods.SegmentToPointDistancePow2(A, C, new Point(xx, yy)) < minDistancePow2)
 								{
 									OKToMerge = false;
 									break loop;
@@ -477,7 +477,7 @@ public class NPC extends Person
 					// find relevant portal
 					Portal portal = null;
 					for (Portal p : env.portals)
-						if (Methods.LineToPointDistancePow2(p.start, p.end, waypoint) < 96 * 96 * 2)
+						if (Methods.SegmentToPointDistancePow2(p.start, p.end, waypoint) < 96 * 96 * 2)
 							if (Methods.DistancePow2(p.x, p.y, waypoint.x, waypoint.y) < p.length * p.length)
 								portal = p;
 					if (portal == null)

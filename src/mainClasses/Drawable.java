@@ -8,6 +8,12 @@ import java.awt.Shape;
 import java.awt.image.BufferedImage;
 import java.awt.image.ConvolveOp;
 
+/**
+ * An object that can be drawn. HAs a position, a rotation, a size, an image (and a shadow), and a portal that intersects it.
+ * 
+ * @author Itamar
+ *
+ */
 public class Drawable
 {
 	public double x, y, z; // x and y are of the center of the image (and object). z is in "meters". //TODO make z be "centimeters" / "pixels" (multiply or divide lots of things by 100)
@@ -21,13 +27,28 @@ public class Drawable
 	{
 	}
 
+	/**
+	 * Draws the shadow of this object.
+	 * 
+	 * @param buffer
+	 *            the Graphics2D that draws this.
+	 * @param shadowX
+	 *            the X offset of the shadow.
+	 * @param shadowY
+	 *            the Y offset of the shadow.
+	 */
 	public void trueDrawShadow(Graphics2D buffer, double shadowX, double shadowY)
 	{
 		buffer.setColor(Color.darkGray);
 		buffer.fillRect((int) (x - 10 + z * shadowX), (int) (y - 10 + z * shadowY), 20, 20);
 	}
 
-	@SuppressWarnings("unused")
+	/**
+	 * Draws this object's image.
+	 * 
+	 * @param buffer
+	 * @param cameraZed
+	 */
 	public void trueDraw(Graphics2D buffer, double cameraZed)
 	{
 		buffer.setColor(Color.red);
@@ -38,7 +59,12 @@ public class Drawable
 	static float shadowOpacity = 0.6f; // between 0f (transparent shadow) and 1f (opaque shadow)
 	static ConvolveOp trueFilter = Methods.getGaussianBlurFilter(shadowFuzziness, true);
 	static ConvolveOp falseFilter = Methods.getGaussianBlurFilter(shadowFuzziness, false);
-	
+
+	/**
+	 * Sets the image to image1, and sets the shadow to what it needs to be, including calculations
+	 * 
+	 * @param image1
+	 */
 	public void changeImage(BufferedImage image1)
 	{
 		// changes image to image1, and also creates a shadow effect of image1 in "shadow"
@@ -55,6 +81,12 @@ public class Drawable
 		shadow = Methods.optimizeImage(shadow);
 	}
 
+	/**
+	 * Returns a shadow of the image
+	 * 
+	 * @param image1
+	 * @return the shadow
+	 */
 	public static BufferedImage createShadow(BufferedImage image1)
 	{
 		// changes image to image1, and also creates a shadow effect of image1 in "shadow"
@@ -71,6 +103,12 @@ public class Drawable
 		return shadow;
 	}
 
+	/**
+	 * Calls {@link #trueDraw(Graphics2D, double)}, unless a portal intersects this, in which case it calls {@link #trueDraw(Graphics2D, double)} twice with appropriate locations and clips and rotations.
+	 * 
+	 * @param buffer
+	 * @param cameraZed
+	 */
 	public void draw(Graphics2D buffer, double cameraZed)
 	{
 		// This method should be overridden by any Drawable that does not interact with portals
@@ -102,6 +140,13 @@ public class Drawable
 		// If you change this method, change drawShadow too
 	}
 
+	/**
+	 * like draw with the portal exception, but for the shadow
+	 * 
+	 * @param buffer
+	 * @param shadowX
+	 * @param shadowY
+	 */
 	public void drawShadow(Graphics2D buffer, double shadowX, double shadowY)
 	{
 		// (Copy-paste of the draw() method above. IF it changes, change this)
@@ -133,6 +178,10 @@ public class Drawable
 		buffer.setClip(originalClip);
 	}
 
+	/**
+	 * 
+	 * @return highest point of object in the Z axis.
+	 */
 	public double highestPoint()
 	{
 		return z + height;

@@ -8,6 +8,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * Valuable class! Generates a name for a parahuman according to their DNA (which almost always reflects their powers).
+ * 
+ * @author Itamar
+ *
+ */
 public class NameGenerator
 {
 	public static List<String> nouns, verbs, adjs, males, females, pretitles, posttitles;
@@ -16,6 +22,25 @@ public class NameGenerator
 	public static List<List<String>> elementRelatedAdjs = new ArrayList<List<String>>(); // 0 - 31 elements, 32 general
 	public static Random random = new Random();
 
+	/**
+	 * If the DNA is empty, will return a "muggle" name, using {@link #firstName()}. Else - will find a mainElement (element with most points) and a secondaryElement (one with second most points). Then, will use them and the {@link #noun(String)},
+	 * {@link #verb(String)}, {@link #adj(String)}, {@link #posttitles}, {@link #pretitles} lists to generate a random name using the following templates:
+	 * <ul>
+	 * <li>Noun Noun (double chance) = Night Hag</li>
+	 * <li>Nounnoun (double chance) = Laserdream</li>
+	 * <li>(The) Noun (50% of having the "The ") = The Custodian / Rune</li>
+	 * <li>Title Noun = Miss Militia</li>
+	 * <li>Noun Title = Glory Girl</li>
+	 * <li>Verber = Screamer</li>
+	 * <li>Verbnoun = Shatterbird</li>
+	 * <li>Adjective Noun = Gentle Giant</li>
+	 * <li>Adjective Title = Gray Boy</li>
+	 * <li>Noun the Adjective = Crane the Harmonious</li>
+	 * </ul>
+	 * 
+	 * @param DNA
+	 * @return
+	 */
 	public static String generate(List<EP> DNA)
 	{
 		String name = null;
@@ -54,8 +79,8 @@ public class NameGenerator
 			case 3:// Title Noun
 				name = pretitles.get(random.nextInt(pretitles.size())) + " " + noun(mainElement); // TODO check gender
 				break;
-			case 4:// The Noun Title
-				name = "The " + noun(mainElement) + " " + posttitles.get(random.nextInt(pretitles.size()));
+			case 4:// Noun Title
+				name = noun(mainElement) + " " + posttitles.get(random.nextInt(posttitles.size()));
 				break;
 			case 7:// Verber
 				name = add_er(verb(mainElement));
@@ -71,10 +96,8 @@ public class NameGenerator
 			case 9: // Adjective Noun
 				name = adj(secondaryElement) + " " + noun(mainElement);
 				break;
-			case 10: // Adjective / Adjective Title
-				name = adj(mainElement);
-				if (random.nextBoolean())
-					name += " " + posttitles.get(random.nextInt(posttitles.size()));
+			case 10: // Adjective
+				name = adj(mainElement) + " " + posttitles.get(random.nextInt(posttitles.size()));
 				break;
 			case 11: // Noun the Adjective
 				name = noun(mainElement) + " the " + adj(secondaryElement);

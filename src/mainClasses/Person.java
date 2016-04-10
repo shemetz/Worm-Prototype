@@ -209,6 +209,7 @@ public class Person extends RndPhysObj implements Mover
 
 		inventory = new ArrayList<Item>();
 		armor = new Armor(0, "temp");
+		initStats();
 		selfFrame(0);
 		pastCopies = new ArrayList<PersonCopy>();
 		pastCopyTimer = 0;
@@ -227,7 +228,6 @@ public class Person extends RndPhysObj implements Mover
 		}
 
 		initSounds();
-		initStats();
 
 		// randomize look
 		legs = 1 + MAIN.random.nextInt(2);

@@ -1,7 +1,7 @@
 package mainClasses;
 
-/*
- * Items that can exist in inventories
+/**
+ * Items that can exist in inventories. TODO
  */
 public class Item
 {

@@ -58,16 +58,16 @@ public class EnvMap implements TileBasedMap
 					for (int y = (int) (ff.y - ff.length / 2) / SQUARE; y <= (int) (ff.y + ff.length / 2) / SQUARE; y++)
 						if (x >= 0 && y >= 0 && x < width && y < height)
 						{
-							if (Methods.getSegmentPointDistancePow2(ff.p[0].x, ff.p[0].y, ff.p[1].x, ff.p[1].y, x * SQUARE + SQUARE / 2, y * SQUARE + SQUARE / 2) < Math
+							if (Methods.SegmentToPointDistancePow2(ff.p[0].x, ff.p[0].y, ff.p[1].x, ff.p[1].y, x * SQUARE + SQUARE / 2, y * SQUARE + SQUARE / 2) < Math
 									.pow(squareroot2by2 + ff.width / 2, 2))
 								FFs[x][y] = true; // TODO make it real
-							else if (Methods.getSegmentPointDistancePow2(ff.p[1].x, ff.p[1].y, ff.p[2].x, ff.p[2].y, x * SQUARE + SQUARE / 2, y * SQUARE + SQUARE / 2) < Math
+							else if (Methods.SegmentToPointDistancePow2(ff.p[1].x, ff.p[1].y, ff.p[2].x, ff.p[2].y, x * SQUARE + SQUARE / 2, y * SQUARE + SQUARE / 2) < Math
 									.pow(squareroot2by2 + ff.width / 2, 2))
 								FFs[x][y] = true; // TODO make it real
-							else if (Methods.getSegmentPointDistancePow2(ff.p[2].x, ff.p[2].y, ff.p[3].x, ff.p[3].y, x * SQUARE + SQUARE / 2, y * SQUARE + SQUARE / 2) < Math
+							else if (Methods.SegmentToPointDistancePow2(ff.p[2].x, ff.p[2].y, ff.p[3].x, ff.p[3].y, x * SQUARE + SQUARE / 2, y * SQUARE + SQUARE / 2) < Math
 									.pow(squareroot2by2 + ff.width / 2, 2))
 								FFs[x][y] = true; // TODO make it real
-							else if (Methods.getSegmentPointDistancePow2(ff.p[3].x, ff.p[3].y, ff.p[0].x, ff.p[0].y, x * SQUARE + SQUARE / 2, y * SQUARE + SQUARE / 2) < Math
+							else if (Methods.SegmentToPointDistancePow2(ff.p[3].x, ff.p[3].y, ff.p[0].x, ff.p[0].y, x * SQUARE + SQUARE / 2, y * SQUARE + SQUARE / 2) < Math
 									.pow(squareroot2by2 + ff.width / 2, 2))
 								FFs[x][y] = true; // TODO make it real
 
@@ -81,7 +81,7 @@ public class EnvMap implements TileBasedMap
 						for (int x = (int) (p.x - p.length / 2) / SQUARE; x <= (int) (p.x + p.length / 2) / SQUARE; x++)
 							for (int y = (int) (p.y - p.length / 2) / SQUARE; y <= (int) (p.y + p.length / 2) / SQUARE; y++)
 								if (x >= 0 && y >= 0 && x < width && y < height)
-									if (Methods.getSegmentPointDistancePow2(p.start.x, p.start.y, p.end.x, p.end.y, x * SQUARE + SQUARE / 2, y * SQUARE + SQUARE / 2) < SQUARE / 2 * SQUARE / 2)
+									if (Methods.SegmentToPointDistancePow2(p.start.x, p.start.y, p.end.x, p.end.y, x * SQUARE + SQUARE / 2, y * SQUARE + SQUARE / 2) < SQUARE / 2 * SQUARE / 2)
 									{
 										if (Methods.DistancePow2(p.start.x, p.start.y, x * SQUARE + SQUARE / 2, y * SQUARE + SQUARE / 2) < SQUARE / 2 * SQUARE / 2)
 										{

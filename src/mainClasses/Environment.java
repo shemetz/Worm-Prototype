@@ -270,18 +270,18 @@ public class Environment
 						double ballRadiusPow2 = Math.pow(b.radius, 2);
 						Point[] fPoints = f.getPoints();
 						boolean collision = false;
-						if (0 <= Methods.realDotProduct(fPoints[0], ballCenter, fPoints[1]) && Methods.realDotProduct(fPoints[0], ballCenter, fPoints[1]) <= f.h * f.h && 0 <= Methods.realDotProduct(fPoints[0], ballCenter, fPoints[3]) && Methods.realDotProduct(fPoints[0], ballCenter, fPoints[3]) <= f.w * f.w)
+						if (0 <= Methods.DotProduct(fPoints[0], ballCenter, fPoints[1]) && Methods.DotProduct(fPoints[0], ballCenter, fPoints[1]) <= f.h * f.h && 0 <= Methods.DotProduct(fPoints[0], ballCenter, fPoints[3]) && Methods.DotProduct(fPoints[0], ballCenter, fPoints[3]) <= f.w * f.w)
 							// circle center is within furniture
 							collision = true;
 						else
 						{
-						if (Methods.LineToPointDistancePow2(fPoints[0], fPoints[1], ballCenter) < ballRadiusPow2)
+						if (Methods.SegmentToPointDistancePow2(fPoints[0], fPoints[1], ballCenter) < ballRadiusPow2)
 						collision = true;
-						else if (Methods.LineToPointDistancePow2(fPoints[2], fPoints[3], ballCenter) < ballRadiusPow2)
+						else if (Methods.SegmentToPointDistancePow2(fPoints[2], fPoints[3], ballCenter) < ballRadiusPow2)
 						collision = true;
-						if (Methods.LineToPointDistancePow2(fPoints[1], fPoints[2], ballCenter) < ballRadiusPow2)
+						if (Methods.SegmentToPointDistancePow2(fPoints[1], fPoints[2], ballCenter) < ballRadiusPow2)
 						collision = true;
-						else if (Methods.LineToPointDistancePow2(fPoints[3], fPoints[0], ballCenter) < ballRadiusPow2)
+						else if (Methods.SegmentToPointDistancePow2(fPoints[3], fPoints[0], ballCenter) < ballRadiusPow2)
 						collision = true;
 						}
 						if (collision)
@@ -455,7 +455,7 @@ public class Environment
 					 * four cases because four vertices, and each has its own visual effect In cases 01 and 23, the bounce angle is -Math.PI. but in cases 12 and 30 it's -0. Because rectangle. I can split them to two if-else-ifs because a circle
 					 * can't collide with more than 2 of the vertices at once, obviously
 					 */
-					if (0 <= Methods.realDotProduct(ff.p[0], ballCenter, ff.p[1]) && Methods.realDotProduct(ff.p[0], ballCenter, ff.p[1]) <= ff.width * ff.width && 0 <= Methods.realDotProduct(ff.p[0], ballCenter, ff.p[3]) && Methods.realDotProduct(ff.p[0], ballCenter, ff.p[3]) <= ff.length * ff.length)
+					if (0 <= Methods.DotProduct(ff.p[0], ballCenter, ff.p[1]) && Methods.DotProduct(ff.p[0], ballCenter, ff.p[1]) <= ff.width * ff.width && 0 <= Methods.DotProduct(ff.p[0], ballCenter, ff.p[3]) && Methods.DotProduct(ff.p[0], ballCenter, ff.p[3]) <= ff.length * ff.length)
 					// circle center is within FF. This basically never ever should happen.
 					{
 					damageForceField(ff, b.getDamage() + b.getPushback(), ballCenter);
@@ -467,7 +467,7 @@ public class Environment
 					}
 					else
 					{
-					if (Methods.LineToPointDistancePow2(ff.p[0], ff.p[1], ballCenter) < ballRadiusPow2)
+					if (Methods.SegmentToPointDistancePow2(ff.p[0], ff.p[1], ballCenter) < ballRadiusPow2)
 					{
 					// TODO cool sparks
 					if (bounce)
@@ -485,7 +485,7 @@ public class Environment
 					b.y += moveQuantumY;
 					}
 					}
-					else if (Methods.LineToPointDistancePow2(ff.p[2], ff.p[3], ballCenter) < ballRadiusPow2)
+					else if (Methods.SegmentToPointDistancePow2(ff.p[2], ff.p[3], ballCenter) < ballRadiusPow2)
 					{
 					// TODO cool sparks
 					if (bounce)
@@ -503,7 +503,7 @@ public class Environment
 					b.y += moveQuantumY;
 					}
 					}
-					if (Methods.LineToPointDistancePow2(ff.p[1], ff.p[2], ballCenter) < ballRadiusPow2)
+					if (Methods.SegmentToPointDistancePow2(ff.p[1], ff.p[2], ballCenter) < ballRadiusPow2)
 					{
 					// TODO cool sparks
 					if (bounce)
@@ -521,7 +521,7 @@ public class Environment
 					b.y += moveQuantumY;
 					}
 					}
-					else if (Methods.LineToPointDistancePow2(ff.p[3], ff.p[0], ballCenter) < ballRadiusPow2)
+					else if (Methods.SegmentToPointDistancePow2(ff.p[3], ff.p[0], ballCenter) < ballRadiusPow2)
 					{
 					// TODO cool sparks
 					if (bounce)
@@ -682,18 +682,18 @@ public class Environment
 					double ballRadiusPow2 = Math.pow(sd.radius, 2);
 					Point[] fPoints = f.getPoints();
 					boolean collision = false;
-					if (0 <= Methods.realDotProduct(fPoints[0], ballCenter, fPoints[1]) && Methods.realDotProduct(fPoints[0], ballCenter, fPoints[1]) <= f.h * f.h && 0 <= Methods.realDotProduct(fPoints[0], ballCenter, fPoints[3]) && Methods.realDotProduct(fPoints[0], ballCenter, fPoints[3]) <= f.w * f.w)
+					if (0 <= Methods.DotProduct(fPoints[0], ballCenter, fPoints[1]) && Methods.DotProduct(fPoints[0], ballCenter, fPoints[1]) <= f.h * f.h && 0 <= Methods.DotProduct(fPoints[0], ballCenter, fPoints[3]) && Methods.DotProduct(fPoints[0], ballCenter, fPoints[3]) <= f.w * f.w)
 						// circle center is within furniture
 						collision = true;
 					else
 					{
-					if (Methods.LineToPointDistancePow2(fPoints[0], fPoints[1], ballCenter) < ballRadiusPow2)
+					if (Methods.SegmentToPointDistancePow2(fPoints[0], fPoints[1], ballCenter) < ballRadiusPow2)
 					collision = true;
-					else if (Methods.LineToPointDistancePow2(fPoints[2], fPoints[3], ballCenter) < ballRadiusPow2)
+					else if (Methods.SegmentToPointDistancePow2(fPoints[2], fPoints[3], ballCenter) < ballRadiusPow2)
 					collision = true;
-					if (Methods.LineToPointDistancePow2(fPoints[1], fPoints[2], ballCenter) < ballRadiusPow2)
+					if (Methods.SegmentToPointDistancePow2(fPoints[1], fPoints[2], ballCenter) < ballRadiusPow2)
 					collision = true;
-					else if (Methods.LineToPointDistancePow2(fPoints[3], fPoints[0], ballCenter) < ballRadiusPow2)
+					else if (Methods.SegmentToPointDistancePow2(fPoints[3], fPoints[0], ballCenter) < ballRadiusPow2)
 					collision = true;
 					}
 					if (collision)
@@ -798,7 +798,7 @@ public class Environment
 				// pow2 to avoid using Math.sqrt(), which is supposedly computationally expensive.
 				double ballRadiusPow2 = Math.pow(sd.radius, 2);
 				// TODO instead, test if center is within the forcefield's rectangle!!!!!!!!!!!!!!!!!!!!!!!!!
-				if (0 <= Methods.realDotProduct(ff.p[0], dropCenter, ff.p[1]) && Methods.realDotProduct(ff.p[0], dropCenter, ff.p[1]) <= ff.width * ff.width && 0 <= Methods.realDotProduct(ff.p[0], dropCenter, ff.p[3]) && Methods.realDotProduct(ff.p[0], dropCenter, ff.p[3]) <= ff.length * ff.length)
+				if (0 <= Methods.DotProduct(ff.p[0], dropCenter, ff.p[1]) && Methods.DotProduct(ff.p[0], dropCenter, ff.p[1]) <= ff.width * ff.width && 0 <= Methods.DotProduct(ff.p[0], dropCenter, ff.p[3]) && Methods.DotProduct(ff.p[0], dropCenter, ff.p[3]) <= ff.length * ff.length)
 				// circle center is within FF?
 				{
 				damageForceField(ff, sd.getDamage() + sd.getPushback(), dropCenter);
@@ -809,13 +809,13 @@ public class Environment
 				else
 				{
 				boolean yes = false;
-				if (Methods.LineToPointDistancePow2(ff.p[0], ff.p[1], dropCenter) < ballRadiusPow2)
+				if (Methods.SegmentToPointDistancePow2(ff.p[0], ff.p[1], dropCenter) < ballRadiusPow2)
 				yes = true;
-				else if (Methods.LineToPointDistancePow2(ff.p[2], ff.p[3], dropCenter) < ballRadiusPow2)
+				else if (Methods.SegmentToPointDistancePow2(ff.p[2], ff.p[3], dropCenter) < ballRadiusPow2)
 				yes = true;
-				if (Methods.LineToPointDistancePow2(ff.p[1], ff.p[2], dropCenter) < ballRadiusPow2)
+				if (Methods.SegmentToPointDistancePow2(ff.p[1], ff.p[2], dropCenter) < ballRadiusPow2)
 				yes = true;
-				else if (Methods.LineToPointDistancePow2(ff.p[3], ff.p[0], dropCenter) < ballRadiusPow2)
+				else if (Methods.SegmentToPointDistancePow2(ff.p[3], ff.p[0], dropCenter) < ballRadiusPow2)
 				yes = true;
 				if (yes)
 				{
@@ -1859,7 +1859,7 @@ public class Environment
 
 				// collision with the body (length) of the vine
 				if (v.state != 1 && !v.creator.equals(v.grabbledThing))
-					if (Methods.LineToPointDistancePow2(v.start.Point(), v.end.Point(), p.Point()) <= p.radius * p.radius / 4)
+					if (Methods.SegmentToPointDistancePow2(v.start.Point(), v.end.Point(), p.Point()) <= p.radius * p.radius / 4)
 					{
 						Point closestPoint = Methods.getClosestRoundedPointOnSegment(v.start.Point(), v.end.Point(), p.Point());
 						double distancePow2 = Methods.DistancePow2(p.Point(), closestPoint);
@@ -1888,7 +1888,7 @@ public class Environment
 
 			// collision with the body (length) of the vine
 			if (v.state != 1)
-				if (Methods.LineToPointDistancePow2(v.start.Point(), v.end.Point(), b.Point()) <= b.radius * b.radius)
+				if (Methods.SegmentToPointDistancePow2(v.start.Point(), v.end.Point(), b.Point()) <= b.radius * b.radius)
 				{
 					Point closestPoint = Methods.getClosestRoundedPointOnSegment(v.start.Point(), v.end.Point(), b.Point());
 					double distancePow2 = Methods.DistancePow2(b.Point(), closestPoint);
@@ -2249,7 +2249,7 @@ public class Environment
 							points.add(Methods.getSegmentIntersection(l2, beamLine));
 						}
 						else // much easier
-						if (Methods.LineToPointDistancePow2(b.start.Point(), b.end.Point(), aff.Point()) < aff.maxRadius * aff.maxRadius)
+						if (Methods.SegmentToPointDistancePow2(b.start.Point(), b.end.Point(), aff.Point()) < aff.maxRadius * aff.maxRadius)
 						{
 							Point2D closestPointToSegment = Methods.getClosestPointOnSegment(beamLine.getX1(), beamLine.getY1(), beamLine.getX2(), beamLine.getY2(), aff.x, aff.y);
 
@@ -2342,7 +2342,7 @@ public class Environment
 		{
 			if (b.z + b.height / 2 > ball.z - b.height / 2 && b.z - b.height / 2 < ball.z + b.height / 2)
 			{
-				double distancePow2 = Methods.LineToPointDistancePow2(new Point(b.start.x, b.start.y), new Point(b.end.x, b.end.y), new Point((int) ball.x, (int) ball.y));
+				double distancePow2 = Methods.SegmentToPointDistancePow2(new Point(b.start.x, b.start.y), new Point(b.end.x, b.end.y), new Point((int) ball.x, (int) ball.y));
 				if (distancePow2 < Math.pow(ball.radius + b.size * b.radius, 2))
 				{
 					Point2D intersectionP = null;
@@ -2652,6 +2652,7 @@ public class Environment
 	public void ballDebris(Ball b, String type, double angle)
 	{
 		double velocityModifier = 1;
+		int amount = 1;
 		switch (b.elementNum)
 		{
 		case 1: // water
@@ -2660,6 +2661,7 @@ public class Environment
 		case 8: // lava
 		case 3: // electricity
 			velocityModifier = 0;
+			amount = 2;
 			break;
 		case 0: // fire
 		case 2: // wind
@@ -2679,7 +2681,7 @@ public class Environment
 		switch (type)
 		{
 		case "wall":
-			for (int k = 0; k < 3; k++)
+			for (int k = 0; k < 3 * amount; k++)
 			{
 				randomAngle = Math.random() * TAU;
 				randomDistance = distanceModifier * Math.random() * (1 - velocityModifier);
@@ -2692,7 +2694,7 @@ public class Environment
 			playSound(EP.elementList[b.elementNum] + " Smash.wav", b.Point());
 			break;
 		case "shatter":
-			for (int i = 0; i < 7; i++)
+			for (int i = 0; i < 7 * amount; i++)
 			{
 				randomAngle = Math.random() * TAU;
 				randomDistance = distanceModifier * Math.random() * (1 - velocityModifier);
@@ -2703,7 +2705,7 @@ public class Environment
 			playSound(EP.elementList[b.elementNum] + " Smash.wav", b.Point());
 			break;
 		case "arc force field":
-			for (int i = 0; i < 3; i++)
+			for (int i = 0; i < 3 * amount; i++)
 			{
 				randomAngle = Math.random() * TAU;
 				randomDistance = distanceModifier * Math.random() * (1 - velocityModifier);
@@ -2717,7 +2719,7 @@ public class Environment
 			break;
 		case "punch":
 			// effects
-			for (int k = 0; k < 7; k++) // epicness
+			for (int k = 0; k < 7 * amount; k++) // epicness
 			{
 				randomAngle = Math.random() * TAU;
 				randomDistance = distanceModifier * Math.random() * (1 - velocityModifier);
@@ -4836,7 +4838,7 @@ public class Environment
 			for (int x = minX; x <= maxX; x++)
 				for (int y = minY; y <= maxY; y++)
 					if (wallTypes[x][y] != -1)
-						if (Methods.getSegmentPointDistancePow2(p1.start.x, p1.start.y, p1.end.x, p1.end.y, x * squareSize + squareSize / 2, y * squareSize + squareSize / 2) < squareSize / 2
+						if (Methods.SegmentToPointDistancePow2(p1.start.x, p1.start.y, p1.end.x, p1.end.y, x * squareSize + squareSize / 2, y * squareSize + squareSize / 2) < squareSize / 2
 								* squareSize / 2)
 							return false;
 		}
@@ -4846,13 +4848,13 @@ public class Environment
 			{
 				if (p1.Line2D().intersectsLine(p2.Line2D()))
 					return false;
-				if (Methods.getSegmentPointDistancePow2(p2.start.x, p2.start.y, p2.end.x, p2.end.y, p1.start.x, p1.start.y) < Portals.minimumDistanceBetweenPortalsPow2)
+				if (Methods.SegmentToPointDistancePow2(p2.start.x, p2.start.y, p2.end.x, p2.end.y, p1.start.x, p1.start.y) < Portals.minimumDistanceBetweenPortalsPow2)
 					return false;
-				if (Methods.getSegmentPointDistancePow2(p2.start.x, p2.start.y, p2.end.x, p2.end.y, p1.end.x, p1.end.y) < Portals.minimumDistanceBetweenPortalsPow2)
+				if (Methods.SegmentToPointDistancePow2(p2.start.x, p2.start.y, p2.end.x, p2.end.y, p1.end.x, p1.end.y) < Portals.minimumDistanceBetweenPortalsPow2)
 					return false;
-				if (Methods.getSegmentPointDistancePow2(p1.start.x, p1.start.y, p1.end.x, p1.end.y, p2.start.x, p2.start.y) < Portals.minimumDistanceBetweenPortalsPow2)
+				if (Methods.SegmentToPointDistancePow2(p1.start.x, p1.start.y, p1.end.x, p1.end.y, p2.start.x, p2.start.y) < Portals.minimumDistanceBetweenPortalsPow2)
 					return false;
-				if (Methods.getSegmentPointDistancePow2(p1.start.x, p1.start.y, p1.end.x, p1.end.y, p2.end.x, p2.end.y) < Portals.minimumDistanceBetweenPortalsPow2)
+				if (Methods.SegmentToPointDistancePow2(p1.start.x, p1.start.y, p1.end.x, p1.end.y, p2.end.x, p2.end.y) < Portals.minimumDistanceBetweenPortalsPow2)
 					return false;
 			}
 		return true;
