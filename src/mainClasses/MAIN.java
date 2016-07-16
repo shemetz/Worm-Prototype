@@ -1674,7 +1674,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 		// sub.parent = env;
 
 		player = new Player(96 * 15, 96 * 15);
-		player.trigger();
+		player.tempTrigger();
 		// player.abilities.add(Ability.ability("Force Shield", 5));
 		// player.abilities.add(Ability.ability("Beam <Energy>", 5));
 		player.defaultHotkeys();
@@ -2102,7 +2102,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 					Ellipse2D viewRange = new Ellipse2D.Double(player.x - viewRangeDistance, player.y - viewRangeDistance, 2 * viewRangeDistance, 2 * viewRangeDistance);
 					visibleArea.intersect(new Area(viewRange));
 					player.visibleArea.put(e, visibleArea);
-						player.visibleRememberArea.put(e, visibleArea);
+					player.visibleRememberArea.put(e, visibleArea);
 				}
 				// Draws everything within the player's view range that is inside the rememberArea.
 				if (playerRememberPreviouslySeenPlaces)
@@ -2127,7 +2127,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			{
 				e.drawFloor(buffer, bounds);
 				drawBottomEffects(buffer, e);
-				e.draw(buffer, (int) camera.z, bounds, cameraRotation);
+				e.draw(buffer, (int) camera.z, bounds, cameraRotation); //TODO is camera.z *supposed* to be an INTEGER? CHECK THIS!
 				drawTopEffects(buffer, e);
 			}
 			buffer.translate(-(e.globalX - env.globalX), -(e.globalY - env.globalY));
@@ -2159,6 +2159,9 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			player.x -= e.globalX - env.globalX;
 			player.y -= e.globalY - env.globalY;
 			drawExtraPeopleInfo(buffer, e);
+			if (env.showDamageNumbers)
+			for (Person p : env.people)
+				p.drawUITexts(buffer, camera.z, cameraRotation);
 			buffer.translate(-(e.globalX - env.globalX), -(e.globalY - env.globalY));
 			player.x += e.globalX - env.globalX;
 			player.y += e.globalY - env.globalY;

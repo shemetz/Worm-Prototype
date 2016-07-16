@@ -1880,7 +1880,7 @@ public class Person extends RndPhysObj implements Mover
 		double effectiveness = a.effectiveness(damageType) * percentageOfTheDamage;
 		if (damage < a.armorRating * effectiveness) // armor blocks damage
 		{
-			// 10% chance of armor degrade
+			// 10% chance of armor degrading
 			if (MAIN.random.nextDouble() < 0.1)
 				a.reduce(a.maxArmorRating * 0.03);
 			return 0;

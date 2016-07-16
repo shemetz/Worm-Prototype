@@ -31,7 +31,7 @@ public class _ArmorAbility extends Ability
 	 */
 	public void use(Environment env, Person user, Point target)
 	{
-		if (!on && cost >= user.mana)
+		if (!on && cost <= user.mana)
 		{
 			armor = new Armor(AR, armorType);
 			user.putArmor(armor);

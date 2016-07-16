@@ -3175,23 +3175,26 @@ public class Environment
 
 			// pushback takes into account pushback resistance
 			pushback -= pushback * p.pushbackResistance;
+			
+			int damageType = EP.damageType(elementNum);
 
-			damage = p.damageAfterHittingArmor(damage, elementNum, percentageOfTheDamage);
-			if (p.ghostMode && elementNum != -1) // ghost wall-clipping
-				if (EP.damageType(elementNum) == 2 || EP.damageType(elementNum) == 4)
+			damage = p.damageAfterHittingArmor(damage, damageType, percentageOfTheDamage);
+			if (p.ghostMode && damageType != -2) // ghost wall-clipping? 
+				if (damageType == 2 || damageType == 4)
 				{
-					damage = 0;
+					// burn or shock damage deal more while ethereal
+					damage *= 3;
 					pushback = 0;
 				}
-				else // burn or shock damage deal more while ethereal
+				else
 				{
-					damage *= 3;
+					damage = 0;
 					pushback = 0;
 				}
 			// Elemental resistance
 			for (Effect e : p.effects)
 				if (e instanceof E_Resistant)
-					if (EP.damageType(((E_Resistant) e).element) == EP.damageType(elementNum))
+					if (EP.damageType(((E_Resistant) e).element) == damageType)
 					{
 						if (e.strength >= 5)
 							damage = 0;
@@ -3299,6 +3302,8 @@ public class Environment
 					pushback *= 1.5;
 			break;
 		case -1: // blunt/"normal" damage
+			break;
+		case -2: // "spectral" damage
 			break;
 		default:
 			MAIN.errorMessage("It's elementary! " + elementNum + "...?");
@@ -3661,12 +3666,6 @@ public class Environment
 				// important drawings:
 				d.drawShadow(buffer, shadowX, shadowY);
 				d.draw(buffer, cameraZed);
-				if (d instanceof Person || d.getClass().getSuperclass().equals(Person.class))
-				{
-					Person p = (Person) d;
-					if (showDamageNumbers)
-						p.drawUITexts(buffer, cameraZed, cameraRotation);
-				}
 				if (d instanceof Beam)
 				{
 					Beam b = (Beam) d;

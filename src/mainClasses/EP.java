@@ -132,26 +132,26 @@ public class EP
 		switch (eNum)
 		{
 		case -2: // outer bound walls
-			return -2;
-		case -1: // blunt
+			return -2; // spectral
+		case -1: 
 		case 1:
 		case 2:
 		case 4:
 		case 10:
 		case 11:
-			return 0; // blunt
+			return 0; // impact
 		case 5:
 		case 9:
-			return 1;
+			return 1; //stab
 		case 0:
 		case 8:
-			return 2;
+			return 2; //burn
 		case 7:
-			return 3;
+			return 3; //acid
 		case 3:
 		case 6:
 		case 12: // force field - applies to bubbles
-			return 4;
+			return 4; // shock
 		default:
 			MAIN.errorMessage("2112: Unknown damage type! " + eNum);
 			return -1;

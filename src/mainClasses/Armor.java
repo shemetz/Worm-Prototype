@@ -54,7 +54,7 @@ public class Armor extends Item
 			if (name.equals("Energy") || name.equals("Electricity"))
 				return 2;
 			return 1;
-		case -1: // spectral? ethereal? phantom?
+		case -2: // spectral? ethereal? phantom?
 		case 9: // spectral? ethereal? phantom?
 			return 0;
 		default:
