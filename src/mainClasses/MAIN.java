@@ -2111,7 +2111,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 					buffer.setClip(player.visibleArea.get(e));
 				e.drawFloor(buffer, bounds);
 				drawBottomEffects(buffer, e);
-				e.draw(buffer, (int) camera.z, bounds, cameraRotation);
+				e.draw(buffer, (int) camera.z, bounds);
 				drawTopEffects(buffer, e);
 				buffer.setClip(null);
 				// Draw this environment's boundaries
@@ -2127,7 +2127,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			{
 				e.drawFloor(buffer, bounds);
 				drawBottomEffects(buffer, e);
-				e.draw(buffer, (int) camera.z, bounds, cameraRotation); //TODO is camera.z *supposed* to be an INTEGER? CHECK THIS!
+				e.draw(buffer, (int) camera.z, bounds); //TODO is camera.z *supposed* to be an INTEGER? CHECK THIS!
 				drawTopEffects(buffer, e);
 			}
 			buffer.translate(-(e.globalX - env.globalX), -(e.globalY - env.globalY));
@@ -2159,12 +2159,15 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			player.x -= e.globalX - env.globalX;
 			player.y -= e.globalY - env.globalY;
 			drawExtraPeopleInfo(buffer, e);
-			if (env.showDamageNumbers)
-			for (Person p : env.people)
-				p.drawUITexts(buffer, camera.z, cameraRotation);
 			buffer.translate(-(e.globalX - env.globalX), -(e.globalY - env.globalY));
 			player.x += e.globalX - env.globalX;
 			player.y += e.globalY - env.globalY;
+			
+			if (env.showDamageNumbers)
+			for (Person p : env.people)
+				p.drawUITexts(buffer, camera.z, cameraRotation);
+			for (UIText ui : env.uitexts) // TODO add height to environment UITexts
+				ui.draw(buffer, 0, 0);
 		}
 
 		// Move camera back

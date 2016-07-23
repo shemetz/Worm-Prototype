@@ -1,5 +1,5 @@
 -,Sense Element <E>,Elemental Fists <E>,Absorb Element <E>,Chemtrail <E>,Elemental Fists <E>,#Elemental Armor I-III <E>,Trail <E>,Teletrail <E>,-,-,-,-,Elemental Resistance <E>,Elemental Theft <E>,-,Elemental Summoning <E>,Elemental Explosions <E>,Control Specialty <E>+Elemental Resistance <E>,Resist Element <E>,#Charged Elemental Combat <E>+Elemental Combat I-II <E>
-Sense Element <E>,-,#Critical Thinking,-,-,Critical Thinking,-,T-Rex Sense,-,Sense Structure,-,-,-,Sense Powers,-,-,-,-,-,Sense Life,#Clairvoyance Charge+Sensibility
+Sense Element <E>,-,#Critical Thinking,-,-,Critical Thinking,-,Sense Movement,-,Sense Structure,-,-,-,Sense Powers,-,-,-,-,-,Sense Life,#Clairvoyance Charge+Sensibility
 -,-,-,-,-,-,-,-,-,-,Strong Force Field,-,-,-,-,Force Shout,Strong Summoning,-,-,-,#Muscle Charge
 Absorb Element <E>,-,-,-,-,-,Armor Regeneration,-,-,#Extradimensional Body,Force Field Kinesis,-,-,-,-,-,Absorb Summons,-,-,#Restoration Blast,#Charged Regeneration
 -,-,-,-,-,-,-,Pushy Fists,-,Elemental Combat I <Wind>,Mobile Force Field,-,-,-,-,-,-,-,-,-,#Divebomb
@@ -15,7 +15,7 @@ Elemental Void,Sense Powers,Sapping Fists,-,-,-,-,-,-,-,-,-,-,-,#Steal Power,-,-
 Absorb Element <E>,-,Vampiric Fists,-,-,-,#Absorb Armor,-,-,-,-,-,-,#Steal Power,-,-,Absorb Summons,-,-,-,#Charge Too Much+Sense Powers
 -,-,-,-,Elemental Combat I <Energy>,-,-,-,-,-,Elemental Combat I <Energy>,-,-,-,-,-,-,-,Traitor Illusion,-,#Escalating Scream
 -,-,-,-,-,-,-,-,#Teleclone,-,-,-,-,-,-,-,-,-,-,-,#Clone Party
-Exploding Ball <E>,-,#Exploding Fists,-,Chemtrail <Fire>,-,#Reactive Explosions,Trail <Fire>,Teletrail <Fire>,-,-,-,#Recurring Explosion,-,-,#Flashbang,-,-,-,#Restoration Blast,#Charged Explosion
+Exploding Ball <E>,-,#Explosive Fists,-,Chemtrail <Fire>,-,#Reactive Explosions,Trail <Fire>,Teletrail <Fire>,-,-,-,#Recurring Explosion,-,-,#Flashbang,-,-,-,#Restoration Blast,#Charged Explosion
 -,-,-,-,-,-,-,-,-,-,-,-,-,-,-,Traitor Illusion,-,-,-,-,#Stun Blast
-Friendly Fire <E>,-,Buff Strength,#Heal II,-,-,Buff Armor,Buff Evasion,-,-,Bubble,-,-,Buff Power,-,-,Strong Summoning,Bubble,Divert Attention,-,#Muscle Charge
-#Charged Elemental Combat <E>+Elemental Combat I-II <E>,Clairvoyance Charge,#Muscle Charge,#Charged Regeneration,#Divebomb,Dexterity Charge,#Charged Armor,#Kinetic Charge,#Slash Dash,#Ghost Mode Charge,#Charged Force Field+Force Shield,#Time Freeze Blast,#Deja Vu,#Null Blast,#Charge Too Much+Sense Powers,#Escalating Scream,#Clone Party,#Charged Explosion,#Stun Blast,#Muscle Charge,-
+Friendly Fire <E>,-,Buff Strength,#Heal II,-,-,Buff Armor,Buff Evasion,-,-,Bubble Target,-,-,Buff Power,-,-,Strong Summoning,Bubble Target,Divert Attention,-,#Muscle Charge
+#Charged Elemental Combat <E>+Elemental Combat I-II <E>,Clairvoyance Charge,#Muscle Charge,#Charged Regeneration,#Divebomb,Dexterity Charge,#Charged Armor,#Kinetic Charge,#Slash Dash,#Ghost Mode Charge,#Charged Force Field+Force Shield,#Time Freeze Blast,#Deja Vu,#Null Blast,#Charge Too Much+Sense Powers,#Escalating Scream,#Clone Party,#Explosion Charge,#Stun Blast,#Muscle Charge,-

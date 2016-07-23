@@ -3481,7 +3481,7 @@ public class Environment
 		sound.play();
 	}
 
-	public void draw(Graphics2D buffer, int cameraZed, final Rectangle bounds, double cameraRotation)
+	public void draw(Graphics2D buffer, int cameraZed, final Rectangle bounds)
 	{
 		List<Drawable> drawableThings = new ArrayList<Drawable>();
 		drawableThings.addAll(people);
@@ -3530,24 +3530,13 @@ public class Environment
 		Collections.sort(drawableThings, sortDrawablesbyHeight);
 
 		// Clouds, people, balls, force fields, debris, arc force fields, beams, vines, drops
-		drawDrawables(buffer, cameraZed, cameraRotation, drawableThings, -1, 1);
+		drawDrawables(buffer, cameraZed, drawableThings, -1, 1);
 
 		// Walls and wall corners
 		drawWalls(buffer, bounds);
 
 		// Clouds, people, balls, force fields, debris, arc force fields, beams, vines, drops
-		drawDrawables(buffer, cameraZed, cameraRotation, drawableThings, 1, Integer.MAX_VALUE);
-
-		// Combat UI
-		if (showDamageNumbers)
-		{
-			for (UIText ui : uitexts) // TODO add height to environment UITexts
-			{
-				ui.draw(buffer, 0, 0);
-			}
-			for (Person p : people)
-				p.drawUITexts(buffer, cameraZed, cameraRotation);
-		}
+		drawDrawables(buffer, cameraZed, drawableThings, 1, Integer.MAX_VALUE);
 	}
 
 	public void drawFloor(Graphics2D buffer, final Rectangle bounds)
@@ -3622,7 +3611,7 @@ public class Environment
 					}
 	}
 
-	public void drawDrawables(Graphics2D buffer, int cameraZed, double cameraRotation, List<Drawable> drawableThings, double minZ, double maxZ)
+	public void drawDrawables(Graphics2D buffer, int cameraZed, List<Drawable> drawableThings, double minZ, double maxZ)
 	{
 		for (Drawable d : drawableThings)
 		{

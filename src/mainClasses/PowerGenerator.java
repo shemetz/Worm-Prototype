@@ -156,7 +156,7 @@ public class PowerGenerator
 				s = "Protective Bubble II";
 				break;
 			case 4:
-				s = "Bubble";
+				s = "Bubble Target";
 				break;
 			default:
 				MAIN.errorMessage("A random number generator is doing wacky things!");
@@ -184,7 +184,7 @@ public class PowerGenerator
 				s = "Pause";
 				break;
 			case 1:
-				s = "Time-Freeze Target I";
+				s = "Time Freeze Target I";
 				break;
 			case 2:
 				s = "Chronobiology";
@@ -198,7 +198,7 @@ public class PowerGenerator
 			switch (random.nextInt(2))
 			{
 			case 0:
-				s = "Time-Freeze Target II";
+				s = "Time Freeze Target II";
 				break;
 			case 1:
 				s = "Slow-Motion";
