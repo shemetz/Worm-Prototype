@@ -121,6 +121,15 @@ public class Steal_Power extends Ability
 		stolenPower = null;
 		on = false;
 	}
+	
+	public boolean viableTarget(Person person, Person user)
+	{
+		if (person.id == user.id)
+			return false;
+		if (person.highestPoint() < user.z - verticalRange || user.highestPoint() < person.z - verticalRange)
+			return false;
+		return true;
+	}
 
 	public void disable(Environment env, Person user)
 	{

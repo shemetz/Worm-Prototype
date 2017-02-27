@@ -62,7 +62,7 @@ public class Drawable
 
 	/**
 	 * Sets the image to image1, and sets the shadow to what it needs to be, including calculations
-	 * 
+	 * This method is slow for some reason (the shadow filters?). TODO Make it faster
 	 * @param image1
 	 */
 	public void changeImage(BufferedImage image1)

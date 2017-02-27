@@ -2,6 +2,9 @@ package pathfinding;
 
 import java.awt.Point;
 
+import effects.E_Resistant;
+import mainClasses.EP;
+import mainClasses.Effect;
 import mainClasses.Environment;
 import mainClasses.ForceField;
 import mainClasses.Furniture;
@@ -157,6 +160,12 @@ public class EnvMap implements TileBasedMap
 			break;
 		case 7: // acid
 		case 8: // lava
+			//If the person has resistance to the element, ignore
+			if (mover instanceof Person)
+				for (Effect e : ((Person)mover).effects)
+					if (e instanceof E_Resistant)
+						if (EP.damageType(((E_Resistant)e).element) == EP.damageType(poolTypes[tx][ty]))
+							break;
 			cost += 30;
 			break;
 		case 9: // flesh/blood

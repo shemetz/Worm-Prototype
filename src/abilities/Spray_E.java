@@ -31,6 +31,8 @@ public class Spray_E extends Ability
 		costPerSecond = 2;
 		range = 500; // TODO make range depend on points
 		arc = Math.PI * 1 / 2; // not really
+		damage = LEVEL * 0.25 * Ability.elementalAttackNumbers[elementNum][2] * Ability.elementalAttackNumbers[elementNum][0];
+		pushback = LEVEL * 0.25 * Ability.elementalAttackNumbers[elementNum][2] * Ability.elementalAttackNumbers[elementNum][1];
 	}
 
 	public void disable(Environment env, Person user)

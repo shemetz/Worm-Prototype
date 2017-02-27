@@ -119,7 +119,9 @@ public class NameGenerator
 		for (int i = 0; i < cs.length; i++)
 			if (random.nextInt(100) == 0)
 			{
-				if (cs[i] == 'c' && (i + 1 >= cs.length || cs[i + 1] != 'h'))
+				// 1 in 100 chance per letter of that letter becoming cooler: C -> K, I -> EE.
+				// For example, "Majestik" or "Peenk Panda"
+				if (cs[i] == 'c' && (i + 1 >= cs.length || cs[i + 1] != 'h' || cs[i + 1] != 'e')) // letter is c and not followed by H or E
 					cs[i] = 'k'; // c -> k
 				if (cs[i] == 'i' && i + 1 < cs.length)
 				{
@@ -133,17 +135,19 @@ public class NameGenerator
 
 	public static String add_er(String str)
 	{
+		List<Character> vowels = Arrays.asList('a', 'e', 'i', 'o', 'u');
 		int lng = str.length();
 		switch (str.charAt(lng - 1))
 		{
 		case 'y':
-			return str.substring(0, lng - 1) + "ier";
+			if (!vowels.contains(str.charAt(lng - 2)))
+				return str.substring(0, lng - 1) + "ier";
+			break;
 		case 'e':
 			return str + "r";
 		default:
 			break;
 		}
-		List<Character> vowels = Arrays.asList('a', 'e', 'i', 'o', 'u');
 		if (str.charAt(lng - 2) != 'w' && str.charAt(lng - 2) != 'r' && vowels.contains(str.charAt(lng - 2)) && !vowels.contains(str.charAt(lng - 1)) && !vowels.contains(str.charAt(lng - 3))) // covers most cases
 			return str + str.charAt(lng - 1) + "er";
 		return str + "er";
@@ -152,36 +156,36 @@ public class NameGenerator
 	public static String noun(String element)
 	{
 		int num = -1;
-		if (random.nextInt(8) == 0)
-			num = 32;
 		if (element.equals("general"))
 			num = 32;
 		else
 			num = EP.toInt(element);
+		if (random.nextInt(8) == 0)
+			num = 32;
 		return elementRelatedNouns.get(num).get(random.nextInt(elementRelatedNouns.get(num).size()));
 	}
 
 	public static String verb(String element)
 	{
 		int num = -1;
-		if (random.nextInt(8) == 0)
-			num = 32;
 		if (element.equals("general"))
 			num = 32;
 		else
 			num = EP.toInt(element);
+		if (random.nextInt(8) == 0)
+			num = 32;
 		return elementRelatedVerbs.get(num).get(random.nextInt(elementRelatedVerbs.get(num).size()));
 	}
 
 	public static String adj(String element)
 	{
 		int num = -1;
-		if (random.nextInt(3) == 0) // 33% of any adjective being a general one - because they're simply too good and plentiful
-			num = 32;
 		if (element.equals("general"))
 			num = 32;
 		else
 			num = EP.toInt(element);
+		if (random.nextInt(3) == 0) // 33% of any adjective being a general one - because they're simply too good and plentiful
+			num = 32;
 		return elementRelatedAdjs.get(num).get(random.nextInt(elementRelatedAdjs.get(num).size()));
 	}
 

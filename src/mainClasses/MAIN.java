@@ -83,7 +83,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 	final double TAU = 2 * Math.PI;
 
 	// CONSTANTS
-	boolean playerRememberPreviouslySeenPlaces = false;
+	boolean playerRememberPreviouslySeenPlaces = true;
 	final boolean movementVariation = true; // if true = player is slower when walking sideways and backwards
 	boolean portalCameraRotation = false;
 	int frameWidth = 1280, frameHeight = 800;
@@ -178,104 +178,8 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 	// METHODS
 	void frame()
 	{
-
-		// TODO move this!!!
-		/////////////
-		Environment newEnv = env;
-		if (player.portalToOtherEnvironment == -1)
-		{
-			if (env.parent == null) // which means it's a World environment
-			{
-				if (player.x >= env.widthPixels - 1)
-					if (worldCoordsX < world.length - 1)
-					{
-						worldCoordsX++;
-					}
-				if (player.x <= 0)
-					if (worldCoordsX > 0)
-					{
-						worldCoordsX--;
-					}
-				if (player.y >= env.heightPixels - 1)
-					if (worldCoordsY < world[worldCoordsX].length - 1)
-					{
-						worldCoordsY++;
-					}
-				if (player.y <= 0)
-					if (worldCoordsY > 0)
-					{
-						worldCoordsY--;
-					}
-				newEnv = world[worldCoordsX][worldCoordsY];
-			}
-			if (env.parent != null) // which means it's an inner environment. Checks if exited
-			{
-				if (player.x >= env.widthPixels - 1)
-				{
-					newEnv = env.parent;
-				}
-				if (player.x <= 0)
-				{
-					newEnv = env.parent;
-				}
-				if (player.y >= env.heightPixels - 1)
-				{
-					newEnv = env.parent;
-				}
-				if (player.y <= 0)
-				{
-					newEnv = env.parent;
-				}
-			}
-			for (Environment innerEnv : env.subEnvironments)
-			{
-				if (player.x >= innerEnv.globalX - env.globalX)
-					if (player.x <= innerEnv.globalX - env.globalX + innerEnv.widthPixels - 1)
-						if (player.y >= innerEnv.globalY - env.globalY)
-							if (player.y <= innerEnv.globalY - env.globalY + innerEnv.heightPixels - 1)
-								newEnv = innerEnv;
-			}
-			if (newEnv == null || newEnv.id != env.id)
-			{
-				if (newEnv == null)
-				{
-					world[worldCoordsX][worldCoordsY] = new Environment(worldCoordsX * 48 * squareSize, worldCoordsY * 48 * squareSize, 48, 48);
-					environmentList.add(world[worldCoordsX][worldCoordsY]);
-					newEnv = world[worldCoordsX][worldCoordsY];
-					newEnv.tempBuild();
-				}
-
-				double xChange = 0, yChange = 0;
-
-				xChange += env.globalX;
-				yChange += env.globalY;
-
-				doSomethingToAllSounds("pause");
-				env.people.remove(player);
-				env = newEnv;
-				doSomethingToAllSounds("unpause");
-				env.people.add(player);
-
-				xChange -= env.globalX;
-				yChange -= env.globalY;
-
-				player.x += xChange;
-				player.y += yChange;
-				camera.x += xChange;
-				camera.y += yChange;
-				env.removeAroundPerson(player);
-
-				// avoiding a bug/exploit in a patchworky way because I'm lazy
-				for (PersonCopy pc : player.pastCopies)
-				{
-					pc.x = player.x;
-					pc.y = player.y;
-				}
-			}
-		}
-
-		/////////////
-
+		checkEnvironmentSwitch();
+		
 		double deltaTime = globalDeltaTime;
 		// Remember: 20 milliseconds between frames, 50 frames per second
 
@@ -622,7 +526,7 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			// Portals to other environments
 			if (p.portalToOtherEnvironment != -1)
 			{
-				newEnv = environmentList.get(p.portalToOtherEnvironment);
+				Environment newEnv = environmentList.get(p.portalToOtherEnvironment);
 
 				if (p instanceof Player)
 				{
@@ -1068,6 +972,103 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 			lastScreenshot = null;
 
 		keyPressFixingMethod(-1, true);
+	}
+
+	private void checkEnvironmentSwitch()
+	{
+
+		Environment newEnv = env;
+		if (player.portalToOtherEnvironment == -1)
+		{
+			if (env.parent == null) // which means it's a World environment
+			{
+				if (player.x >= env.widthPixels - 1)
+					if (worldCoordsX < world.length - 1)
+					{
+						worldCoordsX++;
+					}
+				if (player.x <= 0)
+					if (worldCoordsX > 0)
+					{
+						worldCoordsX--;
+					}
+				if (player.y >= env.heightPixels - 1)
+					if (worldCoordsY < world[worldCoordsX].length - 1)
+					{
+						worldCoordsY++;
+					}
+				if (player.y <= 0)
+					if (worldCoordsY > 0)
+					{
+						worldCoordsY--;
+					}
+				newEnv = world[worldCoordsX][worldCoordsY];
+			}
+			if (env.parent != null) // which means it's an inner environment. Checks if exited
+			{
+				if (player.x >= env.widthPixels - 1)
+				{
+					newEnv = env.parent;
+				}
+				if (player.x <= 0)
+				{
+					newEnv = env.parent;
+				}
+				if (player.y >= env.heightPixels - 1)
+				{
+					newEnv = env.parent;
+				}
+				if (player.y <= 0)
+				{
+					newEnv = env.parent;
+				}
+			}
+			for (Environment innerEnv : env.subEnvironments)
+			{
+				if (player.x >= innerEnv.globalX - env.globalX)
+					if (player.x <= innerEnv.globalX - env.globalX + innerEnv.widthPixels - 1)
+						if (player.y >= innerEnv.globalY - env.globalY)
+							if (player.y <= innerEnv.globalY - env.globalY + innerEnv.heightPixels - 1)
+								newEnv = innerEnv;
+			}
+			if (newEnv == null || newEnv.id != env.id)
+			{
+				if (newEnv == null)
+				{
+					world[worldCoordsX][worldCoordsY] = new Environment(worldCoordsX * 48 * squareSize, worldCoordsY * 48 * squareSize, 48, 48);
+					environmentList.add(world[worldCoordsX][worldCoordsY]);
+					newEnv = world[worldCoordsX][worldCoordsY];
+					newEnv.tempBuild();
+				}
+
+				double xChange = 0, yChange = 0;
+
+				xChange += env.globalX;
+				yChange += env.globalY;
+
+				doSomethingToAllSounds("pause");
+				env.people.remove(player);
+				env = newEnv;
+				doSomethingToAllSounds("unpause");
+				env.people.add(player);
+
+				xChange -= env.globalX;
+				yChange -= env.globalY;
+
+				player.x += xChange;
+				player.y += yChange;
+				camera.x += xChange;
+				camera.y += yChange;
+				env.removeAroundPerson(player);
+
+				// avoiding a bug/exploit in a patchworky way because I'm lazy
+				for (PersonCopy pc : player.pastCopies)
+				{
+					pc.x = player.x;
+					pc.y = player.y;
+				}
+			}
+		}
 	}
 
 	void pauseFrame()
