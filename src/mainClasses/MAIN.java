@@ -453,8 +453,8 @@ public class MAIN extends JFrame implements KeyListener, MouseListener, MouseMot
 				int type = env.poolTypes[gridX][gridY];
 				if (type != -1)
 				{
-					// also damage the pool the person is standing on. Standing on a full-health pool deals it 10 damage per second (out of 100)
-					if (frameNum % 5 == 0) // ten times per second, deal 1 damage
+					// also damage the pool the person is standing on.
+					if (frameNum % 12 == 0)
 						env.poolHealths[gridX][gridY] -= 1;
 					switch (type)
 					{

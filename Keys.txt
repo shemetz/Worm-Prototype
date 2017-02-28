@@ -23,7 +23,6 @@ Ctrl/O/Alt + Mid-click - return zoom/rotation/UI to default
 DEV TOOLS
 
 F1 - enable dev-mode vision (See hitboxes, etc.)
-F3 = nothing
 F4 = change how the player rotates when movign through portals
 F5 = show FPS
 K - randomize all peoples' looks and names
